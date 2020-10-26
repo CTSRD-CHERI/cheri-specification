@@ -1,17 +1,17 @@
 %%%% University of Cambridge tech-report formatting; enable when producing
 %%%% tech-report versions of these documents; otherwise, disable.
-\documentclass[12pt,twoside,openright,a4paper]{report}
-\setlength{\oddsidemargin}{-0.4mm} % 25 mm left margin
-\setlength{\evensidemargin}{\oddsidemargin}
-\setlength{\textwidth}{160mm}      % 25 mm right margin
-\setlength{\topmargin}{-5.4mm}     % 20 mm top margin
-\setlength{\headheight}{5mm}
-\setlength{\headsep}{5mm}
-\setlength{\footskip}{10mm}
-\setlength{\textheight}{237mm}     % 20 mm bottom margin
+%\documentclass[12pt,twoside,openright,a4paper]{report}
+%\setlength{\oddsidemargin}{-0.4mm} % 25 mm left margin
+%\setlength{\evensidemargin}{\oddsidemargin}
+%\setlength{\textwidth}{160mm}      % 25 mm right margin
+%\setlength{\topmargin}{-5.4mm}     % 20 mm top margin
+%\setlength{\headheight}{5mm}
+%\setlength{\headsep}{5mm}
+%\setlength{\footskip}{10mm}
+%\setlength{\textheight}{237mm}     % 20 mm bottom margin
 %%%% .. or regular document
-%\documentclass[12pt,letterpaper,twoside,openright,fleqn]{report}
-%\usepackage{etex}
+\documentclass[12pt,letterpaper,twoside,openright,fleqn]{report}
+\usepackage{etex}
 %%%% End of tech-report vs. regular
 %%%%
 
@@ -20,7 +20,7 @@
 \begin{document}
 \title{Capability Hardware Enhanced RISC Instructions: \\
   \smallskip CHERI Instruction-Set Architecture \\
-  {\large Version 8}}
+  {\large Version 9 - DRAFT}}
 \author{
   \parbox{\linewidth}{\centering%
     Robert~N.~M.~Watson,
@@ -56,46 +56,46 @@
 }
 
 %% CL tech-report format provides its own cover page
-%\begin{minipage}[h]{\textwidth}
-%  %\vspace{-.2cm}
-%  \maketitle
-%
-%  %\vspace{-0.2cm}
-%  {\footnotesize
-%    Approved for public release; distribution is unlimited.
-%    Sponsored by the Defense Advanced Research Projects Agency (DARPA) and the
-%    Air Force Research Laboratory (AFRL), under contract FA8750-10-C-0237
-%    (``CTSRD''), with additional support from FA8750-11-C-0249 (``MRC2''),
-%    HR0011-18-C-0016 (``ECATS''), and FA8650-18-C-7809 (``CIFV'') as part of
-%    the DARPA CRASH, MRC, and SSITH research programs.
-%    The views, opinions, and/or findings contained in this report are those of
-%    the authors and should not be interpreted as representing the official
-%    views or policies, either expressed or implied, of the Department of
-%    Defense or the U.S. Government.
-%
-%    \smallskip
-%    This work was supported in part by the Innovate UK project Digital
-%    Security by Design (DSbD) Technology Platform Prototype, 105694.
-%
-%    \smallskip
-%    Additional support was received from St John's College Cambridge,
-%    the Google SOAAP Focused Research Award, a Google Chrome University
-%    Research Program Award, the RCUK's Horizon Digital Economy Research Hub
-%    Grant (EP/G065802/1), the EPSRC REMS Programme Grant (EP/K008528/1), the
-%    EPSRC Impact Acceleration Account (EP/K503757/1), the EPSRC IOSEC grant
-%    (EP/EP/R012458/1), the ERC Advanced Grant ELVER (789108), the Isaac Newton
-%    Trust, the UK Higher Education Innovation Fund (HEIF), Thales E-Security,
-%    Microsoft Research Cambridge, Arm Limited, Google DeepMind, HP Enterprise,
-%    and a Gates Cambridge Scholarship.
-%
-%}
-%\end{minipage}
+\begin{minipage}[h]{\textwidth}
+  %\vspace{-.2cm}
+  \maketitle
+
+  %\vspace{-0.2cm}
+  {\footnotesize
+    Approved for public release; distribution is unlimited.
+    Sponsored by the Defense Advanced Research Projects Agency (DARPA) and the
+    Air Force Research Laboratory (AFRL), under contract FA8750-10-C-0237
+    (``CTSRD''), with additional support from FA8750-11-C-0249 (``MRC2''),
+    HR0011-18-C-0016 (``ECATS''), and FA8650-18-C-7809 (``CIFV'') as part of
+    the DARPA CRASH, MRC, and SSITH research programs.
+    The views, opinions, and/or findings contained in this report are those of
+    the authors and should not be interpreted as representing the official
+    views or policies, either expressed or implied, of the Department of
+    Defense or the U.S. Government.
+
+    \smallskip
+    This work was supported in part by the Innovate UK project Digital
+    Security by Design (DSbD) Technology Platform Prototype, 105694.
+
+    \smallskip
+    Additional support was received from St John's College Cambridge,
+    the Google SOAAP Focused Research Award, a Google Chrome University
+    Research Program Award, the RCUK's Horizon Digital Economy Research Hub
+    Grant (EP/G065802/1), the EPSRC REMS Programme Grant (EP/K008528/1), the
+    EPSRC Impact Acceleration Account (EP/K503757/1), the EPSRC IOSEC grant
+    (EP/EP/R012458/1), the ERC Advanced Grant ELVER (789108), the Isaac Newton
+    Trust, the UK Higher Education Innovation Fund (HEIF), Thales E-Security,
+    Microsoft Research Cambridge, Arm Limited, Google DeepMind, HP Enterprise,
+    and a Gates Cambridge Scholarship.
+
+}
+\end{minipage}
 %%
 
 \normalsize
 
 %% CL tech-report format requires page numbering to start at 3
-\setcounter{page}{3}
+%\setcounter{page}{3}
 %%
 
 %% For revisions sent for editing, prefer double spacing.
