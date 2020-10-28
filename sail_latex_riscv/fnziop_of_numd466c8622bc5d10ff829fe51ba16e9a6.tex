@@ -1,0 +1,8 @@
+function iop_of_num arg# = match arg# {
+  0 => RISCV_ADDI,
+  1 => RISCV_SLTI,
+  2 => RISCV_SLTIU,
+  3 => RISCV_XORI,
+  4 => RISCV_ORI,
+  _ => RISCV_ANDI
+}

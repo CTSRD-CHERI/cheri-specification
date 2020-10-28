@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzsetCapOffsetOrNull]{setCapOffsetOrNull}# (cap, offset) : (Capability, CapAddrBits) -> Capability =
+    let (representable, newCap) = #\hyperref[sailRISCVzsetCapOffset]{setCapOffset}#(cap, offset) in
+    if representable & #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cap)) then newCap else #\hyperref[sailRISCVzinvalidateCap]{invalidateCap}#(newCap)

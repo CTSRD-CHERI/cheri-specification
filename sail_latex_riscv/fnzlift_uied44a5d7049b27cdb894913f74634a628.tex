@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzliftzyuie]{lift\_uie}#(o : Sinterrupts, d : Sinterrupts, u : Uinterrupts) -> Sinterrupts = {
+  let s : Sinterrupts = o;
+  let s = if d.#\hyperref[sailRISCVzUEI]{UEI}#() == 0b1 then #\hyperref[sailRISCVzupdatezyUEI]{update\_UEI}#(s, u.#\hyperref[sailRISCVzUEI]{UEI}#()) else s;
+  let s = if d.#\hyperref[sailRISCVzUTI]{UTI}#() == 0b1 then #\hyperref[sailRISCVzupdatezyUTI]{update\_UTI}#(s, u.#\hyperref[sailRISCVzUTI]{UTI}#()) else s;
+  let s = if d.#\hyperref[sailRISCVzUSI]{USI}#() == 0b1 then #\hyperref[sailRISCVzupdatezyUSI]{update\_USI}#(s, u.#\hyperref[sailRISCVzUSI]{USI}#()) else s;
+  s
+}

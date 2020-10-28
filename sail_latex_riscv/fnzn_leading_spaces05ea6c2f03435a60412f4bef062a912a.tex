@@ -1,0 +1,8 @@
+function n_leading_spaces s =
+  match s {
+    "" => 0,
+    _ => match #\hyperref[sailRISCVzstringzytake]{string\_take}#(s, 1) {
+      " " => 1 + #\hyperref[sailRISCVznzyleadingzyspaces]{n\_leading\_spaces}#(#\hyperref[sailRISCVzstringzydrop]{string\_drop}#(s, 1)),
+      _ => 0
+    }
+  }

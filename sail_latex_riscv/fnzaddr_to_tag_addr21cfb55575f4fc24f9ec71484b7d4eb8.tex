@@ -1,0 +1,1 @@
+function #\hyperref[sailRISCVzaddrzytozytagzyaddr]{addr\_to\_tag\_addr}#(addr : xlenbits) -> tagaddrbits = #\hyperref[sailRISCVztruncateLSB]{truncateLSB}#(addr, sizeof(xlen) - log2_cap_size)

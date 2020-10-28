@@ -1,0 +1,70 @@
+function #\hyperref[sailRISCVztranslate39]{translate39}#(asid, ptb, vAddr, ac, priv, mxr, do_sum, level, ext_ptw) = {
+  match #\hyperref[sailRISCVzlookupzyTLB39]{lookup\_TLB39}#(asid, vAddr) {
+    #\hyperref[sailRISCVzSome]{Some}#(idx, ent) => {
+/*    #\hyperref[sailRISCVzprint]{print}#("translate39: TLB39 hit for " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(vAddr)); */
+      let  pte = #\hyperref[sailRISCVzMkzySV39zyPTE]{Mk\_SV39\_PTE}#(ent.pte);
+      let  ext_pte = pte.#\hyperref[sailRISCVzExt]{Ext}#();
+      let  pteBits = #\hyperref[sailRISCVzMkzyPTEzyBits]{Mk\_PTE\_Bits}#(pte.#\hyperref[sailRISCVzBITS]{BITS}#());
+      match #\hyperref[sailRISCVzcheckPTEPermission]{checkPTEPermission}#(ac, priv, mxr, do_sum, pteBits, ext_pte, ext_ptw) {
+        #\hyperref[sailRISCVzPTEzyCheckzyFailure]{PTE\_Check\_Failure}#(ext_ptw, ext_ptw_fail) => { #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzextzygetzyptwzyerror]{ext\_get\_ptw\_error}#(ext_ptw_fail), ext_ptw) },
+        #\hyperref[sailRISCVzPTEzyCheckzySuccess]{PTE\_Check\_Success}#(ext_ptw) => {
+          match #\hyperref[sailRISCVzupdatezyPTEzyBits]{update\_PTE\_Bits}#(pteBits, ac, ext_pte) {
+            #\hyperref[sailRISCVzNone]{None}#()           => #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(ent.pAddr | #\hyperref[sailRISCVzEXTZ]{EXTZ}#(vAddr & ent.vAddrMask), ext_ptw),
+            #\hyperref[sailRISCVzSome]{Some}#(pbits, ext) => {
+              if ~ (#\hyperref[sailRISCVzplatzyenablezydirtyzyupdate]{plat\_enable\_dirty\_update}# ())
+              then {
+                /* pte needs dirty/accessed update but that is not enabled */
+                #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzPTWzyPTEzyUpdate]{PTW\_PTE\_Update}#(), ext_ptw)
+              } else {
+                /* update PTE entry and TLB */
+                n_pte = #\hyperref[sailRISCVzupdatezyBITS]{update\_BITS}#(pte, pbits.#\hyperref[sailRISCVzbits]{bits}#());
+                n_pte = #\hyperref[sailRISCVzupdatezyExt]{update\_Ext}#(n_pte, ext);
+                n_ent : TLB39_Entry = ent;
+                n_ent.pte = n_pte.#\hyperref[sailRISCVzbits]{bits}#();
+                #\hyperref[sailRISCVzwritezyTLB39]{write\_TLB39}#(idx, n_ent);
+                /* update page table */
+                match #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(ent.pteAddr), 8, n_pte.#\hyperref[sailRISCVzbits]{bits}#(), false, false, false) {
+                  #\hyperref[sailRISCVzMemValue]{MemValue}#(_)     => (),
+                  #\hyperref[sailRISCVzMemException]{MemException}#(e) => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("invalid physical address in TLB")
+                };
+                #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(ent.pAddr | #\hyperref[sailRISCVzEXTZ]{EXTZ}#(vAddr & ent.vAddrMask), ext_ptw)
+              }
+            }
+          }
+        }
+      }
+    },
+    #\hyperref[sailRISCVzNone]{None}#() => {
+      match #\hyperref[sailRISCVzwalk39]{walk39}#(vAddr, ac, priv, mxr, do_sum, ptb, level, false, ext_ptw) {
+        #\hyperref[sailRISCVzPTWzyFailure]{PTW\_Failure}#(f, ext_ptw) => #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(f, ext_ptw),
+        #\hyperref[sailRISCVzPTWzySuccess]{PTW\_Success}#(pAddr, pte, pteAddr, level, global, ext_ptw) => {
+          match #\hyperref[sailRISCVzupdatezyPTEzyBits]{update\_PTE\_Bits}#(#\hyperref[sailRISCVzMkzyPTEzyBits]{Mk\_PTE\_Bits}#(pte.#\hyperref[sailRISCVzBITS]{BITS}#()), ac, pte.#\hyperref[sailRISCVzExt]{Ext}#()) {
+            #\hyperref[sailRISCVzNone]{None}#() => {
+              #\hyperref[sailRISCVzaddzytozyTLB39]{add\_to\_TLB39}#(asid, vAddr, pAddr, pte, pteAddr, level, global);
+              #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(pAddr, ext_ptw)
+            },
+            #\hyperref[sailRISCVzSome]{Some}#(pbits, ext) =>
+              if ~ (#\hyperref[sailRISCVzplatzyenablezydirtyzyupdate]{plat\_enable\_dirty\_update}# ())
+              then {
+                /* pte needs dirty/accessed update but that is not enabled */
+                #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzPTWzyPTEzyUpdate]{PTW\_PTE\_Update}#(), ext_ptw)
+              } else {
+                w_pte : SV39_PTE = #\hyperref[sailRISCVzupdatezyBITS]{update\_BITS}#(pte, pbits.#\hyperref[sailRISCVzbits]{bits}#());
+		w_pte : SV39_PTE = #\hyperref[sailRISCVzupdatezyExt]{update\_Ext}#(w_pte, ext);
+                match #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(pteAddr), 8, w_pte.#\hyperref[sailRISCVzbits]{bits}#(), false, false, false) {
+                  #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
+                    #\hyperref[sailRISCVzaddzytozyTLB39]{add\_to\_TLB39}#(asid, vAddr, pAddr, w_pte, pteAddr, level, global);
+                    #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(pAddr, ext_ptw)
+                  },
+                  #\hyperref[sailRISCVzMemException]{MemException}#(e) => {
+                    /* pte is not in valid memory */
+                    #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzPTWzyAccess]{PTW\_Access}#(), ext_ptw)
+                  }
+                }
+              }
+          }
+        }
+      }
+    }
+  }
+}

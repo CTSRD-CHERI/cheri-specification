@@ -1,0 +1,17 @@
+match (pred, succ) {
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzyrwzyrw]{Barrier\_RISCV\_rw\_rw}#()),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzyrzyrw]{Barrier\_RISCV\_r\_rw}#()),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzyrzyr]{Barrier\_RISCV\_r\_r}#()),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzyrwzyw]{Barrier\_RISCV\_rw\_w}#()),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzywzyw]{Barrier\_RISCV\_w\_w}#()),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzywzyrw]{Barrier\_RISCV\_w\_rw}#()),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzyrwzyr]{Barrier\_RISCV\_rw\_r}#()),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzyrzyw]{Barrier\_RISCV\_r\_w}#()),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzywzyr]{Barrier\_RISCV\_w\_r}#()),
+
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00) => (),
+
+  _ => { #\hyperref[sailRISCVzprint]{print}#("FIXME: unsupported fence");
+         () }
+};
+RETIRE_SUCCESS

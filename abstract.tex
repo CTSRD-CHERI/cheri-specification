@@ -1,0 +1,63 @@
+\section*{Abstract}
+
+This technical report describes CHERI ISAv8, the eighth version of the
+CHERI architecture
+being developed by SRI International and the University of Cambridge.
+This design captures ten years of research, development, experimentation,
+refinement, formal analysis, and validation through hardware and software
+implementation.
+
+CHERI introduces an architecture-neutral capability-based protection
+model, which has been instantiated in various commodity base architectures
+to give CHERI-MIPS,
+CHERI-RISC-V, Arm's prototype Morello architecture, and (sketched)
+CHERI-x86-64.
+It enables software
+to efficiently implement fine-grained memory protection and scalable software
+compartmentalization, by providing strong, non-probabilistic, efficient
+mechanisms to support the principles of least privilege and intentional use
+in the execution of software at multiple levels of abstraction, preventing and
+mitigating vulnerabilities.
+Design goals include incremental adoptability from current ISAs and
+software stacks, low performance overhead for memory protection, significant
+performance improvements for software compartmentalization, formal grounding,
+and programmer-friendly underpinnings.
+
+CHERI blends traditional paged virtual memory with an
+in-address-space capability model that includes capability values in registers,
+capability instructions, and tagged memory to enforce capability integrity.
+This hybrid approach, inspired by the Capsicum security model, addresses the performance and robustness issues that arise
+when trying to express more secure programming models, minimising
+privilege, above conventional architectures that provide only
+MMU-based protection.
+CHERI builds on the C-language fat-pointer literature: its capabilities can
+describe fine-grained regions of memory, and can be substituted for data or
+code pointers in generated code, protecting data and improving
+control-flow robustness.
+Strong capability integrity and monotonicity properties allow CHERI
+to express a variety of protection idioms, from enforcing valid C-language
+pointer provenance and bounds checking to implementing the isolation and
+controlled communication structures required for software
+compartmentalization.
+
+CHERI's hybrid approach allows incremental adoption of capability-oriented design:
+critical components can be ported and recompiled to use capabilities throughout,
+providing fine-grain memory protection, or be largely unmodified but encapsulated in ways that permit
+only controlled interaction. 
+Potential early deployment scenarios include low-level software Trusted Computing
+Bases (TCBs) such as separation kernels, hypervisors, and operating-system
+kernels,  userspace TCBs such as language runtimes and web browsers, 
+and particularly high-risk
+software libraries such as data compression, protocol parsing, and image
+processing (which are concentrations of both complex and historically
+vulnerability-prone code exposed to untrustworthy data sources).
+
+CHERI ISAv8 is a substantial enhancement to prior ISA versions.
+Capability compression is now part of the abstract model.
+Both 32-bit and 64-bit architectural address sizes are supported.
+Various previously experimental features, such as sentry capabilities and
+CHERI-RISC-V, are now considered mature.
+We have defined a number of new temporal memory-safety acceleration features
+including MMU assistance for a load-side-barrier revocation model.
+We have added a chapter on practical CHERI microarchitecture.
+CHERI ISAv8 is synchronized with Arm Morello.

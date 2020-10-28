@@ -1,0 +1,26 @@
+function #\hyperref[sailRISCVztranslationException]{translationException}#(a : #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), f : PTW_Error) -> ExceptionType = {
+  let e : ExceptionType =
+  match (a, f) {
+    /* Tag-asserting stores can raise CHERI page faults. */
+    (#\hyperref[sailRISCVzWrite]{Write}#(Cap), #\hyperref[sailRISCVzPTWzyExtzyError]{PTW\_Ext\_Error}#(AT_CAP_ERR))        => #\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(EXC_SAMO_CAP_PAGE_FAULT),
+    (#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Cap, _), #\hyperref[sailRISCVzPTWzyExtzyError]{PTW\_Ext\_Error}#(AT_CAP_ERR)) => #\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(EXC_SAMO_CAP_PAGE_FAULT),
+    (#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, Cap), #\hyperref[sailRISCVzPTWzyExtzyError]{PTW\_Ext\_Error}#(AT_CAP_ERR)) => #\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(EXC_SAMO_CAP_PAGE_FAULT),
+
+    /* No other operations should raise CHERI-specific page faults */
+    (_, #\hyperref[sailRISCVzPTWzyExtzyError]{PTW\_Ext\_Error}#(_))                          => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Unexpected PTW Extension Error"),
+
+    /* For other exceptions, Cap and Data accesses fault in the same way. */
+    (#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _), #\hyperref[sailRISCVzPTWzyAccess]{PTW\_Access}#())                => #\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#(),
+    (#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _), _)                           => #\hyperref[sailRISCVzEzySAMOzyPagezyFault]{E\_SAMO\_Page\_Fault}#(),
+    (#\hyperref[sailRISCVzRead]{Read}#(_), #\hyperref[sailRISCVzPTWzyAccess]{PTW\_Access}#())                        => #\hyperref[sailRISCVzEzyLoadzyAccesszyFault]{E\_Load\_Access\_Fault}#(),
+    (#\hyperref[sailRISCVzRead]{Read}#(_), _)                                   => #\hyperref[sailRISCVzEzyLoadzyPagezyFault]{E\_Load\_Page\_Fault}#(),
+    (#\hyperref[sailRISCVzWrite]{Write}#(_), #\hyperref[sailRISCVzPTWzyAccess]{PTW\_Access}#())                       => #\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#(),
+    (#\hyperref[sailRISCVzWrite]{Write}#(_), _)                                  => #\hyperref[sailRISCVzEzySAMOzyPagezyFault]{E\_SAMO\_Page\_Fault}#(),
+
+    (#\hyperref[sailRISCVzExecute]{Execute}#(), #\hyperref[sailRISCVzPTWzyAccess]{PTW\_Access}#())                      => #\hyperref[sailRISCVzEzyFetchzyAccesszyFault]{E\_Fetch\_Access\_Fault}#(),
+    (#\hyperref[sailRISCVzExecute]{Execute}#(), _)                                 => #\hyperref[sailRISCVzEzyFetchzyPagezyFault]{E\_Fetch\_Page\_Fault}#()
+  } in {
+/*  #\hyperref[sailRISCVzprintzymem]{print\_mem}#("#\hyperref[sailRISCVztranslationException]{translationException}#(" ^ a ^ ", " ^ f ^ ") -> " ^ e); */
+    e
+  }
+}

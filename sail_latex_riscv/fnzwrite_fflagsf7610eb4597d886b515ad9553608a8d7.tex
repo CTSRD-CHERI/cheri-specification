@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzwritezyfflags]{write\_fflags}#(fflags) = {
+  if   fcsr.#\hyperref[sailRISCVzFFLAGS]{FFLAGS}#() != fflags
+  then #\hyperref[sailRISCVzdirtyzyfdzycontext]{dirty\_fd\_context}#();
+  fcsr->#\hyperref[sailRISCVzFFLAGS]{FFLAGS}#() = fflags;
+}

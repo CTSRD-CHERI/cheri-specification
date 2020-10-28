@@ -1,0 +1,25 @@
+/* For the sequential model, the memory-model definition doesn't work directly
+ * if rs1 = rd.  We would effectively have to keep a regfile for reads and another for
+ * writes, and swap on instruction completion.  This could perhaps be optimized in
+ * some manner, but for now, we just keep a reordered definition to improve simulator
+ * performance.
+ */
+let t : xlenbits = #\hyperref[sailRISCVzX]{X}#(rs1) + #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
+/* Extensions get the first checks on the prospective target address. */
+match #\hyperref[sailRISCVzextzycontrolzycheckzyaddr]{ext\_control\_check\_addr}#(t) {
+  #\hyperref[sailRISCVzExtzyControlAddrzyError]{Ext\_ControlAddr\_Error}#(e) => {
+    #\hyperref[sailRISCVzextzyhandlezycontrolzycheckzyerror]{ext\_handle\_control\_check\_error}#(e);
+    RETIRE_FAIL
+  },
+  #\hyperref[sailRISCVzExtzyControlAddrzyOK]{Ext\_ControlAddr\_OK}#(addr) => {
+    let target = [addr with 0 = bitzero];  /* clear addr[0] */
+    if #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(target[1]) & ~(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()) then {
+      #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(target, #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#());
+      RETIRE_FAIL
+    } else {
+      #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzgetzynextzypc]{get\_next\_pc}#();
+      #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(target);
+      RETIRE_SUCCESS
+    }
+  }
+}

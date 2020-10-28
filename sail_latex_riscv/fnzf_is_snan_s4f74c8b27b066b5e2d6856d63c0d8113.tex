@@ -1,0 +1,6 @@
+function f_is_SNaN_S   x32 = {
+  let (sign, exp, mant) = #\hyperref[sailRISCVzfsplitzyS]{fsplit\_S}# (x32);
+  (  (exp == #\hyperref[sailRISCVzones]{ones}#())
+   & (mant [22] == bitzero)
+   & (mant != #\hyperref[sailRISCVzzzeros]{zeros}#()))
+}

@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzsetCapAddr]{setCapAddr}#(c, addr) =
+    let newCap = { c with address = addr } in
+    let representable = #\hyperref[sailRISCVzcapBoundsEqual]{capBoundsEqual}#(c, newCap) in
+    (representable, newCap)

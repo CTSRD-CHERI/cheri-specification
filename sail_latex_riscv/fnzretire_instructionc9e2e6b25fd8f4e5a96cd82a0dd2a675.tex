@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzretirezyinstruction]{retire\_instruction}#() -> unit = {
+  if   minstret_written == true
+  then minstret_written = false
+  else minstret = minstret + 1
+}

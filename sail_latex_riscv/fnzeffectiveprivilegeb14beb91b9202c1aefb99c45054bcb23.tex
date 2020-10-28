@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzeffectivePrivilege]{effectivePrivilege}#(t : #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), m : Mstatus, priv : Privilege) -> Privilege =
+  if   t != #\hyperref[sailRISCVzExecute]{Execute}#() & m.#\hyperref[sailRISCVzMPRV]{MPRV}#() == 0b1
+  then #\hyperref[sailRISCVzprivLevelzyofzybits]{privLevel\_of\_bits}#(mstatus.#\hyperref[sailRISCVzMPP]{MPP}#())
+  else cur_privilege

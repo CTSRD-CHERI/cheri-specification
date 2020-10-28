@@ -1,0 +1,79 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CReadHwr}
+\insnmipslabel{creadhwr}
+\subsection*{CReadHwr: Read a Special-Purpose Capability Register}
+
+\subsubsection*{Format}
+
+CReadHwr cd, selector
+
+\begin{center}
+\cheritwoop[header]{0xd}{cd}{selector}
+\end{center}
+
+\subsubsection*{Description}
+
+Load the value of special-purpose capability register \emph{selector}
+into capability register \emph{cd}.
+See \autoref{tab:creadhwr-permissions} for the possible values of
+\emph{selector} and the permissions required in order to read the register.
+
+% TODO: move this to the preamble?
+\newcommand{\KernelAndAccessSysRegs}{
+\begin{tabular}[c]{@{}l@{}}Supervisor Mode and\\
+\PCC{}.\cperms{}.\emph{Access\_System\_Registers}
+\end{tabular}
+}
+
+\begin{table}[h]
+\centering
+\caption{Access permission required to read special-purpose capability registers}
+\label{tab:creadhwr-permissions}
+\begin{tabular}{cll@{}}
+\toprule
+& \textbf{Register}& \textbf{Required for read access} \\
+\midrule
+
+\textbf{0}  & Default data capability (\DDC) & $\emptyset$  \\
+\textbf{1} & User TLS  (\CULR{}) & $\emptyset$ \\
+%\textbf{2} & \ajnote{\PCC - make this CGetPCC} & $\emptyset$ \\[1.5em]
+
+% \textbf{7}  & Program counter capability (\PCC)   & $\emptyset$ \\[1.5em]
+
+
+\textbf{8}  & Privileged TLS (\CPLR{}) & \PCC{}.\cperms{}.\emph{Access\_System\_Registers} \\
+
+\textbf{22} & Kernel scratch register 1 (\KRC)  & \KernelAndAccessSysRegs \\
+\textbf{23} & Kernel scratch register 2 (\KQC)  & \KernelAndAccessSysRegs \\
+
+\textbf{28} & Error exception program counter (\ErrorEPCC)  &  \KernelAndAccessSysRegs \\
+\textbf{29} & Kernel code capability (\KCC)     &  \KernelAndAccessSysRegs \\
+\textbf{30} & Kernel data capability (\KDC)    & \KernelAndAccessSysRegs \\
+\textbf{31} & Exception program counter (\EPCC) & \KernelAndAccessSysRegs \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\note{rmn30}{currently this table is the same for read and write but need not be (e.g. rdhwr on MIPS has a register that can be written by kernel but only read by user)}
+
+\subsubsection*{Semantics}
+\sailMIPScode{CReadHwr}
+
+\subsubsection*{Exceptions}
+
+
+A reserved Instruction exception is raised for unknown or
+unimplemented values of \emph{selector}.
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item the permission checks as specified in \autoref{tab:creadhwr-permissions} above were not met for \emph{selector}
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item In the future we may decide to make \PCC{} accessible via this instruction. This would save opcode space since we would no longer required a dedicated \insnmipsref{CGetPCC} instruction.
+\end{itemize}

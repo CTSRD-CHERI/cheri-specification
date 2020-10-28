@@ -1,0 +1,8 @@
+function #\hyperref[sailRISCVzlegalizzezysatp64]{legalize\_satp64}#(a : Architecture, o : #\hyperref[sailRISCVzbits]{bits}#(64), v : #\hyperref[sailRISCVzbits]{bits}#(64)) -> #\hyperref[sailRISCVzbits]{bits}#(64) = {
+  let s = #\hyperref[sailRISCVzMkzySatp64]{Mk\_Satp64}#(v);
+  match #\hyperref[sailRISCVzsatp64Modezyofzybits]{satp64Mode\_of\_bits}#(a, s.#\hyperref[sailRISCVzMode]{Mode}#()) {
+    #\hyperref[sailRISCVzNone]{None}#()     => o,
+    #\hyperref[sailRISCVzSome]{Some}#(Sv32) => o,  /* Sv32 is unsupported for now */
+    #\hyperref[sailRISCVzSome]{Some}#(_)    => s.#\hyperref[sailRISCVzbits]{bits}#()
+  }
+}

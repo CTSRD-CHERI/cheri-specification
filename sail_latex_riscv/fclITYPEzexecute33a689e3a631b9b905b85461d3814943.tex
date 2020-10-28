@@ -1,0 +1,12 @@
+let rs1_val = #\hyperref[sailRISCVzX]{X}#(rs1);
+let immext : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
+let result : xlenbits = match op {
+  RISCV_ADDI  => rs1_val + immext,
+  RISCV_SLTI  => #\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(rs1_val <_s immext)),
+  RISCV_SLTIU => #\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(rs1_val <_u immext)),
+  RISCV_ANDI  => rs1_val & immext,
+  RISCV_ORI   => rs1_val | immext,
+  RISCV_XORI  => rs1_val ^ immext
+};
+#\hyperref[sailRISCVzX]{X}#(rd) = result;
+RETIRE_SUCCESS

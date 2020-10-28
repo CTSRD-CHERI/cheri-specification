@@ -1,0 +1,39 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CCheckTag}
+\insnmipslabel{cchecktag}
+\subsection*{CCheckTag: Raise Exception if Tag is Unset}
+
+\subsubsection*{Format}
+
+CCheckTag cs
+
+\begin{center}
+\cherioneop{0x6}{cs}
+\end{center}
+
+\subsubsection*{Description}
+
+An exception is raised (and the capability cause register set to ``tag
+violation'') if \emph{cs}.\ctag{} is not set.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CCheckTag}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cs}.\ctag{} is not set.
+\end{itemize}
+
+\subsubsection{Notes}
+
+\begin{itemize}
+\item
+This instruction is intended to support debugging modes for compilers where
+an untagged capability may result from an attempted non-monotonic operation,
+rather than an exception.
+\end{itemize}

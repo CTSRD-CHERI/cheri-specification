@@ -1,0 +1,803 @@
+\chapter{Historical Context and Related Work}
+\label{chap:historical}
+
+\nwfnote{There's a great deal more to say here.  Suggestions include
+Cambridge's CAP (esp. S-CAP), MIT's M-Machine, Intel iAPX 432, Rekursiv, IBM
+System/38, Plessey System 250, RSRE Malvern Flex machine.  Possibly CMU's C.mmp
+(and Hydra), and Multics' descriptors as well.}
+
+% Intro prose <<<
+
+As with many aspects of contemporary computer and operating-system design,
+many of the origins
+of operating-system security can be found at the world's leading research
+universities --
+especially the Massachusetts Institute of Technology (MIT), the University of Cambridge,
+and Carnegie Mellon University.
+MIT's Project MAC, which began with MIT's Compatible Time
+Sharing System (CTSS)~\cite{corbato:timesharing},
+and continued over the next decade with MIT's Multics
+project (joint with Honeywell, and originally Bell Labs),
+described many central tenets of computer security~\cite{corbato:multics,Graham68}.
+Dennis and Van Horn's 1965 {\em Programming Semantics for Multiprogrammed
+Computations}~\cite{dennis:semantics} laid out principled hardware
+and software approaches
+to concurrency, object naming, and security for multi-programmed computer systems --
+or, as they are known today, multi-tasking and multi-user computer systems.
+Multics implemented a coherent, unified architecture for processes, virtual memory, and protection,
+integrating new ideas such as {\em capabilities}, unforgeable tokens of authority, and
+{\em principals}, the end users with whom authentication takes place and to whom resources
+are accounted~\cite{Saltzer74}.
+
+In 1975, Saltzer and Schroeder surveyed the rapidly expanding vocabulary of computer
+security in {\em The Protection of Information in Computer Systems}~\cite{SaltzerSchroeder75}.
+They enumerated design principles such as the {\em principle of least privilege}
+(which demands that computations run with only the privileges they require) and
+the core security goals of
+protecting {\em confidentiality}, {\em integrity}, and {\em availability}.
+The tension between fault tolerance and security (a recurring debate in
+systems literature) saw its initial analysis in Lampson's 1974
+{\em Redundancy and Robustness in Memory Protection}~\cite{LampsonRedund}, which
+considered ways in which hardware memory protection addressed accidental and
+intentional types of failure: e.g., if it is not reliable, it will not be secure,
+and if it is not secure, it will not be reliable!  Intriguingly, recent work
+by Nancy Leveson and William Young has unified security and human safety
+as overarching emergent system properties~\cite{LevesonYoung14}, and allows
+the threat model to fall out of the top-down analysis, rather than driving
+it.  This work in some sense
+unifies a long thread of work that considers trustworthiness as a property 
+encompassing security, integrity, reliability, survivability, human safety, 
+and so on (e.g.,~\cite{Neumann06holistic,PSOS}, among others).
+
+The Security Research community also blossomed outside of MIT:
+Wulf's HYDRA operating system at Carnegie Mellon University (CMU)~\cite{wulf:hydra,CohenJefferson75},
+Needham and Wilkes' CAP Computer at
+Cambridge~\cite{WilkesNeedham79}, SRI's Provably Secure Operating
+System (PSOS)~\cite{PSOSreport,PSOS} hardware-software co-design that included
+strongly typed object capabilities,
+Rushby's security kernels supported by formal
+methods at Newcastle~\cite{Rushby81}, and Lampson's work on
+formal models of security
+protection at the Berkeley Computer
+Corporation all explored the structure of operating-system access control, and
+especially the application of capabilities to the protection
+problem~\cite{lampson:dynamicprotection,lampson:protection}.
+Another critical offshoot from the Multics project was Ritchie and Thompson's UNIX
+operating system at Bell Labs, which simplified concepts
+from Multics, and became the basis for countless directly and indirectly derived
+products such as today's Solaris, FreeBSD, Mac OS X, and Linux operating
+systems~\cite{ritchie:unix}.
+
+The creation of secure software went hand in hand with analysis of security flaws:
+Anderson's 1972 US Air Force {\em Computer Security Technology Planning
+Study} not
+only defined new security structures, such as the {\em reference monitor}, but
+also analyzed potential attack methodologies such as Trojan horses and
+inference attacks~\cite{anderson72}.
+Karger and Schell's 1974 report on a security analysis of the Multics system
+similarly demonstrated a variety of attacks that bypass hardware and OS
+protection~\cite{KargerSchell74}.
+In 1978, Bisbey and Hollingworth's {\em Protection Analysis: Project final report} at ISI
+identified common patterns of security vulnerability in operating
+system design, such as race conditions and incorrectly validated arguments at security
+boundaries~\cite{Bisbey78}.
+Adversarial analysis of system security remains as critical to the success of security
+research as principled engineering and formal methods.
+
+Almost fifty years of research have explored these and other
+concepts in great detail, bringing new contributions in hardware, software, language
+design, and formal methods, as well as networking and cryptography technologies that
+transform the context of operating system security.
+However, the themes identified in those early years remain topical and highly influential,
+structuring current thinking about systems design.
+
+Over the next few sections, we consider three closely related ideas that directly influence
+our thinking for CTSRD: capability security, microkernel OS design, and
+language-based constraints.
+These apparently disparate areas of research are linked by a duality,
+observed by Jim Morris
+in 1973, between the enforcement of data types and safety goals in programming languages on one hand, 
+and the hardware and software protection techniques explored in operating
+systems~\cite{morris:protectionprogramming} on the other hand.
+Each of these approaches blends a combination of limits defined by static analysis
+(perhaps at compile-time), limits on expression on the execution substrate (such as what
+programming constructs can even be represented), and dynamically enforced policy that generates
+runtime exceptions (often driven by the need for configurable policy and labeling not known
+until the moment of access).
+Different systems make different uses of these techniques, affecting expressibility,
+performance, and assurance.
+
+% >>>
+\section{Capability Systems} % <<<
+
+Throughout the 1970s and 1980s, high-assurance systems were expected
+to employ a capability-oriented design that would map program
+structure and security policy into hardware enforcement; for example,
+Lampson's BCC design exploited this linkage to approximate least
+privilege~\cite{lampson:dynamicprotection,lampson:protection}.
+
+Systems such as the CAP Computer at Cambridge~\cite{WilkesNeedham79} and
+
+Ackerman's DEC PDP-1 architecture at MIT~\cite{ackerman:multiprocessing}
+attempted to realize this vision through embedding notions of capabilities in
+the memory management unit of the CPU, an approach described by Dennis and Van
+Horn~\cite{dennis:semantics}.  Levy provides a detailed exploration of segment-
+and capability-oriented computer system design through the mid-1980s in {\em
+Capability-Based Computer Systems}~\cite{levy:capabilities}.
+
+\subsection{Objects of Authorization}
+
+Dennis and Van Horn's seminal text on capability
+systems~\cite{dennis:semantics} defines a capability as a structure that
+locates by means of [a unique code or effective name] some computing object,
+and indicates the actions that the computation may perform with respect to that
+object.'' One may then ask what exactly constitutes a ``computing object,''
+and one should not be surprised to learn that there have been several answers
+to that question.
+
+\paragraph{Memory Capability Systems}
+
+One answer, and perhaps the simplest, identifies a ``computing object'' with a
+mere span of memory.  Such systems closely resemble traditional segmented memory
+architectures.
+
+% In their simplest form, there is no direct support for encapsulation
+% of private state
+
+\paragraph{Software Object Capability Systems}
+
+In so-called ``object capability'' (``ocap'') systems, ``computing objects''
+are identified with pairs of code and private data, as in ``object-oriented
+programming.''  These systems may treat objects as entirely opaque, exposing
+only one or a series of ``entry'' capabilities, corresponding to object
+methods, or may, additionally, optionally offer more direct access to object
+data.
+
+Perhaps the most common object capability systems are those built
+\emph{without} dedicated hardware support.  Therein, existing abstractions,
+such as a privileged supervisory program, are repurposed to provide the
+capability substrate.
+
+Entry capability invocation ranges from fully synchronous, in which threads of
+control more or less directly transition from within one object to another,
+gaining and losing rights as required, to fully asynchronous, in which all
+invocations are done my means of message passing between other threads.  In
+practice, systems tend to support both options, though they may take one or the
+other as their sole ``primitive'' operation.
+
+Ackerman's architecture~\cite{ackerman:multiprocessing} seems to have been
+the first to realize the importance of allowing subsystems to construct
+multiple, differentiated entry capabilities, to correspond to different
+permitted requests (e.g., invoking different methods on different logical
+targets within the same subsystem).  A six-bit field, the ``transmitted
+word,'' was provided within the entry capability, immune from influence of
+the bearer but made available to the subsystem itself on entry.  Similar
+facilities have been found in almost all subsequent object capability
+systems.%
+%
+\footnote{CHERI lacks such a field within its capabilities; however, the
+\insnref{CInvoke} mechanism can be used to similar effect (recall
+Section~\ref{sec:model-sealed-capability-invocation}).}
+
+\paragraph{Hardware Object Capability Systems}
+
+Some systems, including the ill-fated Intel iAPX 432 lineage (including
+the BiiN family of systems and the Intel i960MX), have attempted to move
+core aspects of the software object capability model into hardware.  Exactly
+which features and object types are manifest in hardware depends on the
+particular system, but generally one should expect to see a rich notion of
+``context'' or ``domain'' of execution and primitives for secure transition
+from one to another.
+
+% \paragraph{Hybrid Schemes} iAPX 432 / BiiN. CHERI.
+
+% \subsection{Interpretation of Capabilities}
+
+% >>>
+\section{Bounds Checking and Fat Pointers} % <<<
+
+In contrast to prior capability systems, a key design goal for CHERI was to support mapping C-language pointers into capabilities.
+In earlier prototypes, we did this solely through base and bounds fields within capabilities, which worked well but required substantial changes to existing C software that often contained programming idioms that violated monotonic rights decrease for pointers.
+In later versions of the ISA, we adopt ideas from the C fat-pointer literature, which differentiate the idea of a delegated region from a current pointer: while the base and bounds are subject to guarded manipulation rules, we allow the offset to float within and beyond the delegated region.
+Only on dereference are protections enforced, allowing a variety of imaginative pointer operations to be supported.
+Many of these ideas originate with the type-safe C dialect Cyclone~\cite{trevor:cyclone}, and see increasing adaptation to off-the-shelf C programs with work such as Softbound~\cite{Nagarakatte:2009:SHC:1542476.1542504}, Hardbound~\cite{Devietti:2008:HAS:1353536.1346295}, and CCured~\cite{Necula:2002:CTR:503272.503286}.
+This flexibility permits a much broader range of common C idiom to be mapped into the capability-based memory-protection model.
+
+% >>>
+\section{Realizing Capability Systems} % <<<
+
+When a capability systems is encoded, as software or in hardware or with a
+mixture of the two, several decisions must be made about how the abstract
+objects and actions are to be made manifest.  We highlight two of the major
+decisions which must be made.
+
+\subsection{Memory Layout} % <<<
+
+A reified capability system must have some mechanism to distinguish
+capabilities from non-capability data or, equivalently, for determining the
+semantic type assigned to bits being accessed by the instruction stream.
+Broadly speaking, two approaches have emerged: making the type distinction
+\emph{intrinsically associated} with the bits in question or associating the
+type with the \emph{access path} taken to those bits.
+
+Systems choosing the former option are generally said to be ``tagged
+architectures'' or to have ``tagged memory:'' at least one bit is associated
+with a granule of memory no larger than a capability, which indicates
+whether the associated granule contains capability-typed bits or data-typed
+bits.  CHERI is such a design, with one bit per capability-sized and
+suitably-aligned piece of memory.  The IBM System/38 uses four bits per
+capability-sized piece of memory and requires that they all be set when
+attempting to decode a suitably-aligned bit pattern as a capability.
+
+The second variety of systems seem to lack a similarly punchy moniker, but we
+may, at the risk of further overloading an already burdened term, call them
+``segmented architectures.''  In these systems, it is usually the
+(memory-referencing) capabilities themselves that describe the type of the bits
+to be found therein; integrity of the capability representations is ensured by
+software's careful avoidance of overlapping capabilities.  In simplest
+manifestation, a capability to memory designates, in addition to bounds and
+permissions, the type of all bits found therein.  Such capabilities are often
+described with terms such as ``C-type'' or ``D-type'' (as in the Cambridge CAP
+family~\cite{WilkesNeedham79}), emphasising the homogeneous nature of the
+segment of memory referenced.  Some other segmented architectures (notably
+including the HYDRA microkernel~\cite{CohenJefferson75,Wulf81}) have bifurcated
+segments, wherein each contiguous memory segment is effectively two: one
+containing capabilities and one containing data; in these systems, capabilities
+typically point at the boundary between the two regions and specify length of
+each.  Naturally, such segments could carry exclusively capabilities or
+exclusively data.
+
+One occasionally sees designs that straddle the distinction between segmented
+and tagged architectures.  Therein, capabilities may authorize access to both
+data and other capabilities, but there is no requirement that data and
+capabilities be separated and contiguous within the authorized memory segment.
+For example, in the Coyotos microkernel~\cite{shapiro:2004}, capabilities are
+stored in pages of memory accessible only to the capability kernel, but these
+``cap pages'' are freely miscible with data pages (either accessible by the
+user program or solely by the kernel).  This compromise allows Coyotos to run
+on commodity hardware and without a specialized language runtime, but requires
+indirection to capabilities in memory: data structures contain pointers to
+addresses that will fault if dereferenced in the user program, but these
+pointers may be passed to the capability kernel during system calls.
+
+% >>>
+\subsection{Indirection of Reference to Capabilities} % <<<
+
+Capability systems also differ in how they name and manipulate capabilities.
+In a traditional von Neumann architecture, the primitive indirection mechanism
+is the interpretation of an integer as an index into memory.  Virtualization of
+this architecture is most often accomplished by inserting a mapping function
+from integer ``virtual addresses'' to integer ``physical addresses'' before the
+latter are given to the hardware's memory subsystem.  Dennis and Van Horn built
+upon this primitive in their initial design of capability
+systems~\cite{dennis:semantics}, and so many implementations of capability
+systems refer to capabilities by \emph{integers}: the capabilities available to
+the current process are, at least logically, enumerated in a translation table
+(the ``C-list'' of the process) and the process uses integers to index into
+this table.  Data fetch operations through capabilities in such systems specify
+the integer \emph{index} (within this table) of the authorizing capability and
+the integer \emph{offset} within that capability of the data desired, and the
+result is placed into an (integer) register.  Capability fetch, on the other
+hand, takes a source index, an offset, and a \emph{target index}: the loaded
+capability is placed at the target index within the translation table.  Dually,
+while data stores transfer integers from registers to memory, capability stores
+transfer a capability from the translation table to memory.
+
+This style of manipulation is especially popular in software capability
+systems, as integers abound and a plethora of key-value mapping data structures
+are well-understood.  Adding another domain of interpretation to integers is
+even something of a time-honored tradition; the manipulation of ``file
+descriptors'' may be so habitual to UNIX programmers, for example, that pausing
+to reflect that they arise from \emph{design decisions} may be seen as unusual.
+Software capability kernels can readily implement this design on behalf of
+their (user) programs, even on commodity hardware, by moving all capability
+interpretation into the kernel.  As discussed earlier, Coyotos repurposes
+virtual addresses (with backing pages beyond the reach of user programs) as
+references to capabilities, conflating its capability translation with the
+translation structures used for address virtualization.  One often sees small
+extensions added in the interest of amortizing the cost of transitions to and
+from the supervisor; for example, capability fetch and store operations may be
+willing to traverse \emph{paths} (represented by \emph{sequences} of integers),
+or multiple capability manipulations may be packaged together, possibly with
+other operations, into ``channel programs'' in domain-specific languages
+interpreted by the capability kernel.
+
+Even in hardware, such designs are attractive, as they can be ``drop-in
+compatible'' with existing MMU-style translation systems, requiring no changes
+to the design of the CPU core.  Indeed, the CAP family of
+computers~\cite{WilkesNeedham79} divides addresses, as generated by the CPU,
+into capability index and offset fields, much as other systems divide (virtual)
+addresses into virtual page number and intra-page offset.  In systems where
+safe table manipulation operations are directly exposed to the user program,
+manipulation of the capability address space can be cheaper than in traditional
+MMU-style designs, where the MMU mapping structures are highly guarded and
+manipulated solely by the supervisor.
+%
+\nwfnote{Check, but I think the iAPX432 does as well, yes?}
+
+However, such indirection comes with costs.  While the process as a whole may
+satisfy the principle of least authority, the use of integer indices still
+presents a challenge to the principle of intensional use.  In the CAP systems,
+for example, indexing past the end of a maximally-sized segment, or, indeed,
+sufficiently past the end of any segment, will not result in a processor trap,
+but will, instead, be interpreted as an access within \emph{a different
+capability}.  Even when indices and offsets are maintained separately, there is
+nothing, architecturally, that ensures the \emph{provenance} of the index as
+such: to confuse a program into acting using an unintended subset of its
+authority, it would suffice to corrupt the bits of an integer used as an index.
+
+The use of integer indexes interpreted within a process may also complicate
+sharing between processes.  When sending capabilities to another process, the
+sender must marshal those capabilities into a (to be) shared segment, as the
+indices by which the sender refers to these capabilities are useless to the
+recipient.  (The situation is analogous to the passing of integer virtual
+addresses in shared memory segments: because the segments may be mapped at
+different offsets by participating processes, even if the addresses reference
+within the segment in one process, they may be meaningless to another.)
+
+CHERI takes a subtly different approach, in which capabilities are loaded into
+CPU registers.  The instruction stream combines in-register capabilities with
+offsets to make memory accesses.  As with the systems employing separated index
+and offset fields, it is impossible for an out-of-bounds offset to shift the
+capability against which the offset is interpreted.  Moreover, CHERI ensures
+the architectural validity of the derivation of the capability being used to
+authorize the access.%
+%
+\footnote{That is not to say that it is impossible for a CHERI program to have
+bugs or to otherwise give an attacker control over which capability is used in
+a given access.  It does, however, rule out a large class of historically
+powerful attack vectors in which adversarial data is \emph{directly}
+interpreted as an integer address.}
+
+% >>>
+% >>>
+\section{Capabilities In Hardware} % <<<
+
+\subsection{Tagged-Memory Architectures} % <<<
+
+Perhaps the most well-known tagged machine design these days is that of the
+Burroughs Large systems, starting with the B5000, designed in 1961.  Both
+contemporaneous \cite{Creech69,Burroughs-B6700,Organick73} and retrospective
+\cite{Mayer82,Barton87} material about this family of machines is available
+for the curious reader, as is an interesting report of a concerted
+penetration test against Burroughs' operating system \cite{Wilkinson}.  For
+present purposes, however, we focus on its memory model and, in particular,
+its use of tags and descriptors.  In the B5000, each word was equipped with
+a bit distinguishing its intended use as either data or instructions.  The
+later B6500 moved to a three-bit tag; we may (very) roughly summarize this
+latter taxonomy as differentiating between data words, program instructions,
+and pointers of various sorts.  In several cases, the tags were used to
+convey \emph{type} information to the CPU, so that, for example, the unique
+addition instruction would operate on single-precision words or
+double-precision word pairs depending on the data tag of its operands
+\cite[p. 97]{Organick73}, or the processor's ``step and branch'' instruction
+can manipulate a ``step index word'' containing all of the current value,
+increment, and limit of iteration \cite[p. 7-5]{Burroughs-B6700}.  More
+naturally (to a CHERI-minded reader, at least), loads and stores and
+indirect transfers of control required their operands to be properly tagged,
+and subroutine entry generates tagged return addresses on the stack
+\cite[ch. 7]{Burroughs-B6700}.
+
+While concerned mostly with detection of software bugs, rather than any
+consideration of system security, Gumpertz's \emph{Error Detection with
+Memory Tags} \cite{Gumpertz81} deserves mention.  The tags in this work are
+not used to determine operations (as they might have been in the Burroughs
+B5000) but rather as additional checks on tag-independent operations.
+Gumpertz's design focuses on light-weight checks, performed in parallel with
+CPU operations and makes it ``possible to check an arbitrary number of
+assertions using only a small tag of fixed size'' \cite[p.  i]{Gumpertz81},
+which is similar to CHERI's imbuing of an arbitrary number of bits (i.e.,
+the width of a capability) with architectural semantics using a single,
+external tag bit.
+
+% >>>
+\subsection{Segmented Architectures} % <<<
+
+\subsubsection{Cambridge CAP Computer} % <<<
+
+The family of Cambridge CAP computer designs%
+%
+\footnote{The CAP experiment seems to have produced one physical, heavily
+microprogrammed CPU design and at least three different microcode programs.}
+%
+\cite{WilkesNeedham79}
+%
+are, at their core, capability-based refinements of earlier,
+base-and-length memory segmentation schemes.  In these earlier schemes, the
+CPU computes offsets within a segment and then dereferences memory as a pair
+of an offset and an \emph{index} into a segment table; on dereference, the
+offset is checked to be in bounds, and the indirection between segment and
+memory---usually just an addition operation---is performed to yield the
+``linear'' (or ``physical'') address used to communicate with the memory
+subsystem.  Programs running on the CAP computer similarly have a virtual
+address space consisting of pairs of indices into a \emph{capability table}
+and offsets within those capabilities.  While the exact interpretation and
+mechanisms of the capabilities of each CAP design differed, there are
+commonalities across the family.
+
+The CAP computers interpreted virtual addresses, held in arithmetic
+registers, as pairs of a capability specifier and a 16-bit index to a word
+within that capability.  On the CAP computers, capabilities are interpreted
+only after a virtual address has been dispatched from the CPU.  This
+separation of construction and interpretation violates our principle of
+intensional use and enables certain kinds of confusion.  To wit, overflowing
+the offset results in a potentially in-bound offset \emph{within a different
+capability}.  This is in stark contrast to a pure-capability CHERI design,
+wherein capabilities \emph{supplant} virtual addresses and are directly
+manipulated while in registers, making it impossible for operations on a
+capability's offset to change to \emph{which} capability the offset is
+relative.%
+%
+\footnote{Though CHERI does have its IDC mechanism for compatibility with
+non-capability programs.  Similar confusion is possible in hybrid
+applications if an offset intended to be relative to one capability is
+instead used with another, for example, due to improper management of IDC.
+Historically, similar confusion can arise in the more common segmentation
+models, as seen in, for example, Intel's X86 CPUs, in which segment table
+indices (``segment selectors'') are held in dedicated registers and only
+combined with offsets (held in arithmetic registers) by the instruction
+stream.}
+
+% \subsubsection{CAP-1}
+
+% \subsubsection{CAP-3}
+
+% >>>
+% >>>
+% >>>
+\section{Microkernels} % <<<
+
+Denning has argued that the failures of capability hardware projects were classic failures of
+large systems projects, an underestimation of the complexity and cost of reworking an entire system
+design, rather than fundamental failures of the capability model~\cite{denning:faulttolerance}.
+However, the benefit of hindsight suggests that the earlier demise of hardware capability systems
+was a result of three related developments in systems research: microkernel OS design, a
+related interest from the security research community in security kernel design, and
+Patterson and Sequin's Reduced Instruction-Set Computers (RISC)~\cite{patterson:risc}.
+
+With a transition from complex instruction set computers (CISC) to reduced instruction
+set computers (RISC), and a shift away from microcode toward operating system implementation
+of complex CPU functionality, the attention of security researchers turned to microkernels.
+
+Carnegie Mellon's HYDRA~\cite{CohenJefferson75,Wulf81} embodied this approach, in which microkernel
+message passing between separate tasks stood in for hardware-assisted security domain crossings
+at capability invocation.
+HYDRA developed a number of ideas, including the relationship between
+capabilities and object references, refined the {\em object-capability} paradigm, 
+and
+further pursued the separation of policy and mechanism.\footnote{Miller has expanded on the
+object-capability philosophy in considerable depth in his 2006 PhD dissertation,
+{\em Robust composition: towards a unified approach to access control and concurrency
+control}~\cite{miller:robustcomposition}}
+Jones and Wulf argue through the HYDRA design that the capability model allows the
+representation of a broad range of
+system policies as a result of integration with the OS object model, which in turn facilitates
+interposition as a means of imposing policies on object access~\cite{Jones74}.
+
+Successors to HYDRA at CMU include Accent and Mach~\cite{Accent,accetta:mach},
+both microkernel systems intended to
+explore the decomposition of a large and decidedly un-robust operating system kernel.
+In microkernel designs, traditional OS services, such as the file system, are
+migrated out of ring 0 and into user processes, improving debuggability and
+independence of failure modes.
+They are also based on mapping of capabilities as object references into IPC pipes
+({\em ports}), in which messages on ports represent methods on objects.
+This shift in operating system design went hand in hand with a related analysis in the
+security community: Lampson's model for capability security was, in fact, based on pure
+message passing between isolated processes~\cite{lampson:protection}.
+This further aligned with proposals by Andrews~\cite{andrews:partitions} and
+Rushby~\cite{Rushby81} for a {\em security kernel}, whose responsibility lies
+solely in maintaining isolation, rather than the provision of higher-level services such as file
+systems.
+Unfortunately, the shift to message passing also invalidated Fabry's semantic argument for
+capability systems, namely, that by offering a single namespace shared by all protection domains,
+the distributed system programming problem could be avoided~\cite{fabry:caseforcapabilities}.
+
+A panel at the 1974 National Computer Conference and Exposition (AFIPS) chaired by Lipner
+brought the design goals and choices for microkernels and security kernels clearly into
+focus: microkernel developers sought to provide flexible platforms for OS research with an
+eye towards protection, while security kernel developers aimed for a high assurance platform
+for separation, supported by hardware, software, and formal
+methods~\cite{lipner:securitykernels}.
+
+The notion that the microkernel, rather than the hardware, is responsible for implementing
+the protection semantics of capabilities also aligned well with the simultaneous research (and
+successful technology transfer) of RISC designs, which eschewed microcode by shifting complexity
+to the compiler and operating system.
+Without microcode, the complex C-list peregrinations of CAP's capability unit, and protection domain
+transitions found in other capability-based systems,
+become less feasible in hardware.
+Virtual memory designs based on fixed-size pages and simple semantics
+have since been standardized throughout the industry.
+
+Security kernel designs, which combine a minimal kernel focused entirely on correctly
+implementing protection, and rigorous application of formal methods, formed the foundation
+for several secure OS projects during the 1970s.
+Schiller's security kernel for the PDP-11/45~\cite{Schiller75} and Neumann's Provably
+Secure Operating System~\cite{PSOS} design study were ground-up operating system designs
+based soundly in formal methodology.\footnote{PSOS's ground-up design included ground-up hardware,
+whereas Schiller's design revised only the software stack.}
+In contrast, Schroeder's MLS kernel design for Multics~\cite{schroeder:multicssecuritykernel},
+the DoD Kernelized Secure Operating System (KSOS)~\cite{McCauley}, and Bruce Walker's UCLA UNIX
+Security Kernel ~\cite{walker:uclasecureunix} attempted to slide MLS kernels underneath existing
+Multics and UNIX system designs.
+Steve Walker's 1980 survey of the state of the art in trusted operating systems provides a summary
+of the goals and designs of these high-assurance security kernel
+designs~\cite{walker:adventtrusted}.
+
+The advent of CMU's Mach microkernel triggered a wave of new research into security kernels.
+TIS's Trusted Mach (TMach) project extended Mach to include mandatory access
+control, relying on enforcement in the microkernel and a small number of
+security-related servers to implement the TCB to accomplish sufficient
+assurance for a TCSEC B3 evaluation~\cite{BranstadLandauer89}.
+Secure Computing Corporation (SCC) and the National Security Agency (NSA) adapted PSOS's
+type enforcement from LoCK (LOgical Coprocessor Kernel)
+for use in a new Distributed
+Trusted Mach (DTMach) prototype, which built on the TMach approach while adding
+new flexibility~\cite{sebes:dtmach}.
+DTMach, adopting ideas from HYDRA, separates mechanism (in the microkernel) from
+policy (implemented in a userspace security server) via a new reference monitor
+framework, FLASK~\cite{spencer:flask}.
+A significant focus of the FLASK work was performance: an access vector cache is
+responsible for caching access control decisions throughout
+the OS to avoid costly up-calls and message passing (with associated context switches) to the
+security server.
+NSA and SCC eventually migrated FLASK to the FLUX microkernel developed by the University of
+Utah in the search for improved performance.
+Invigorated by the rise of
+microkernels and their congruence with security kernels, 
+this flurry of operating system security research also faced the limitations
+(and eventual rejection) of the microkernel approach by the computer industry --
+which perceived the performance overheads as too great.
+
+Microkernels and mandatory access control have seen another experimental
+composition in the form of Decentralized Information Flow Control (DIFC).
+This model, proposed by Myers, allows applications to assign information flow labels
+to OS-provided objects, such as communication channels, which are propagated and
+enforced by a blend of static analysis and runtime OS enforcement, implementing
+policies such as taint tracking~\cite{myers:difc} -- effectively, a composition of mandatory
+access control and capabilities in service to application security.
+This approach is embodied by Efstathopoulos et al.'s Asbestos~\cite{efstathopoulos:asbestos}
+and Zeldovich et al.'s Histar~\cite{zeldovich:histar} research operating systems.
+
+Despite the decline of both hardware-oriented and microkernel
+capability system design, capability models continue to interest both
+research and industry.  Inspired by the proprietary KeyKOS
+system~\cite{hardy:keykos}, Shapiro's EROS~\cite{shapiro:eros} (now
+CapROS) and Coyotos~\cite{shapiro:2004} continued the investigation of higher-assurance software
+capability designs, and
+seL4~\cite{klein:sel4}, a formally verified, capability-oriented
+microkernel, has also continued along this avenue.
+General-purpose systems also have adopted elements of the microkernel capability design
+philosophy, such as Apple's Mac OS X~\cite{apple:macosx}
+(which uses Mach interprocess communication (IPC)
+objects as capabilities) and 
+Cambridge's Capsicum~\cite{Watson10} research project 
+(which attempts to blend capability-oriented design with UNIX).
+
+More influentially, Morris's suggestion of capabilities at the programming language
+level has seen widespread deployment.
+Gosling and Gong's Java security model blends language-level type safety with a capability-based
+virtual machine~\cite{gosling:javalanguage,Gong+97}.
+Java maps language-level constructs (such as object member and method protections) into
+execution constraints enforced by a combination of a pre-execution bytecode verification
+and expression constraints in the bytecode itself.
+Java has seen extensive deployment in containing potentially (and actually) malicious
+code in the web browser environment.
+Miller's development of a capability-oriented E language~\cite{miller:robustcomposition},
+Wagner's Joe-E capability-safe
+subset of Java~\cite{mettler:joee}, and Miller's Caja capability-safe subset of JavaScript continue a
+language-level exploration of capability security~\cite{miller:caja}.
+
+% >>>
+\section{Language and Runtime Approaches} % <<<
+
+Direct reliance on hardware for enforcement (which is central to both historic 
+and current systems) is not the only approach to isolation enforcement.
+The notion that limits on expressibility in a programming language can be used to
+enforce security properties is frequently deployed in contemporary systems to
+supplement coarse and high-overhead operating-system process models.
+Two techniques are widely used: virtual-machine instruction sets (or perhaps physical
+machine instruction subsets) with limited expressibility, and more expressive languages
+or instruction sets combined with type systems and formal verification techniques.
+
+The Berkeley Packet Filter (BPF) is one of the most frequently cited
+examples of the virtual machine approach: user processes upload pattern matching programs
+to the kernel to avoid data copying and context switching when sniffing network packet
+data~\cite{mccanne:bpf}.
+These programs are expressed in a limited packet-filtering virtual-machine instruction
+set capable of expressing common constructs, such as accumulators, conditional forward
+jumps, and comparisons, but are incapable of expressing arbitrary pointer arithmetic that
+could allow escape from confinement, or control structures such as loops that might lead
+to unbounded execution time.
+Similar approaches have been used via the type-safe Modula 3 programming language in
+SPIN~\cite{bershad:spin}, and the DTrace instrumentation tool that, like BPF, uses a narrow
+virtual instruction set to implement the D language~\cite{cantrill:dtrace}.
+
+Google's Native Client (NaCl) model edges towards a verification-oriented approach, in which
+programs must be implemented using a `safe' (and easily verified) subset of the x86 or ARM
+instruction sets, which would allow confinement properties to be validated~\cite{yee:nativeclient}.
+NaCl is closely related to Software Fault Isolation (SFI)~\cite{wahbe:sfi}, in which safety
+properties of machine code are enforced through instrumentation to ensure no unsafe access,
+and Proof-Carrying Code (PCC), in which the safe properties of code are demonstrated through
+attached and easily verifiable proofs~\cite{necula:pcc}.
+As mentioned in the previous section, the 
+Java Virtual Machine (JVM) model is similar; 
+it combines runtime execution constraints of a
+restricted, capability-oriented bytecode with a static verifier run over
+Java classes before they can be loaded into the execution environment; this
+ ensures that only safe accesses have been expressed.
+C subsets, such as Cyclone~\cite{trevor:cyclone}, and type-safe languages such as
+Ruby~\cite{ruby}, offer similar safety guarantees, which can be leveraged to provide
+security confinement of potentially malicious code without hardware support.
+
+These techniques offer a variety of trade-offs relative to CPU enforcement 
+of the process model.  For example, some (BPF, D) limit expressibility that 
+may prevent potentially useful constructs from being used, such as loops
+bounded by invariants rather than instruction limits; in doing so, 
+this can typically impose potentially significant performance overhead. 
+Systems such as FreeBSD often support just-in-time compilers (JITs) that 
+convert less efficient virtual-machine bytecode into native code subject to 
+similar constraints, addressing performance but not expressibility 
+concerns~\cite{mckusick:freebsd}.
+
+Systems like PCC that rely on proof techniques have had limited impact in
+industry, and often align poorly with widely deployed programming languages (such as C)
+that make formal reasoning difficult.
+Type-safe languages have gained significant ground over the last decade, with widespread use
+of JavaScript and increasing use of functional languages such as OCaML~\cite{remy:ocaml}; they offer
+many of the performance benefits with improved expressibility, yet have had little impact on
+operating system implementations.
+However, an interesting twist on this view is described by Wong in Gazelle, in
+which the observation is made that a web browser is effectively an operating system by virtue of
+hosting significant applications and enforcing confinement between different
+applications~\cite{wang:gazelle}.
+Web browsers frequently incorporate many of these techniques including Java Virtual Machines and
+a JavaScript interpreter.
+
+% >>>
+\section{Influences of Our Own Past Projects} % <<<
+
+Our CHERI capability hardware design responds to all these design trends -- and their problems.
+Reliance on traditional paged virtual memory for strong address-space separation, as used in Mach,
+EROS, and UNIX, comes at significant cost: attempts to compartmentalize system software and
+applications sacrifice the programmability benefits of a language-based capability design (a point made
+convincingly by Fabry~\cite{fabry:caseforcapabilities}), and introduce significant performance
+overhead to cross-domain security boundaries.
+However, running these existing software designs is critical to improve the odds of technology
+transfer, and to allow us to incrementally apply ideas in CHERI to large-scale contemporary applications
+such as office suites.
+CHERI's hybrid approach allows a gradual transition from virtual address separation to capability-based
+separation within a single address space, 
+thus 
+restoring programmability and performance so as to facilitate
+fine-grained compartmentalization throughout the system and its applications.
+
+We consider some of our own past system designs in greater detail,
+especially as they relate to CTSRD:
+
+\paragraph{Multics} % <<<
+The Multics system incorporated many new concepts in hardware, software,
+and programming~\cite{Organick,DaleyNeumann}.
+The Multics hardware provided independent virtual
+memory segments, paging, interprocess and intra-process separation,
+and cleanly separated address spaces.
+The Multics software provided
+symbolically named files that were dynamically linked for efficient
+execution, rings of protection providing layers of security and system
+integrity, hierarchical directories, and access-control lists.
+Input-output was also symbolically named and dynamically linked, with
+separation of policy and mechanism, and separation of device
+independence and device dependence.
+A subsequent redevelopment of the two
+inner-most rings enabled Multics to support multilevel security in the
+commercial product~\cite{schroeder:multicssecuritykernel}.
+Multics was implemented in a stark subset (EPL) of
+PL/I that considerably diminished the likelihood of many common
+programming errors.
+In addition, the stack discipline inherently
+avoided buffer overflows.
+
+% >>>
+\paragraph{PSOS} % <<<
+SRI's Provably Secure Operating System hardware-software design was formally
+specified in a single language (SPECIAL), 
+with encapsulated modular abstraction, interlayer state mappings,
+and abstract programs relating each layer to those on which it
+depended~\cite{PSOS,NeumannFeiertag03}.
+The hardware design provided tagged, typed, unforgeable
+capabilities required for every operation, with identifiers that were unique
+for the lifetime of the system.  In addition to a
+few primitive types, application-specific object types could be defined and
+their properties enforced with the hardware assistance provided by the
+capability-based access controls.  The design allowed application layers to
+efficiently execute instructions, with object-oriented 
+capability-based addressing directly to the hardware -- despite appearing at
+a much higher layer of abstraction in the design specifications.
+
+%{\em Newcastle Distributed Secure System}~\cite{Rushby+Randell83c}
+%
+%{\em Separation Kernels}~\cite{Rushby81,Rushby82,Rushby04:separation}
+
+% >>>
+\paragraph{MAC Framework} % <<<
+The MAC Framework is an OS reference-monitor framework used in FreeBSD, also
+adopted in Mac OS X and iOS, as well as other FreeBSD-descended operating
+systems such as Juniper Junos and McAfee Sidewinder~\cite{watson13}.
+Developed in the DARPA CHATS program, the MAC Framework allows static and
+dynamic extension of the kernel's access-control model, supporting
+implementation of {\em security localization} --
+that is,  
+ %%% IS THIS CORRECT?  IT WAS UNGRAMMATICAL AND AMBIGUOUS
+the adaptation of the OS
+security to product and deployment-specific requirements.
+The MAC Framework (although originally targeted at classical mandatory access
+control models) found significant use in application sandboxing, especially in
+Junos, Mac OS X, and iOS.
+One key lesson from this work is the importance of longer-term thinking about
+security-interface design, 
+including
+interface stability and
+support for multiple policy models; these are especially important in
+instruction-set design.
+Another important lesson is the increasing criticality of extensibility of not
+just the access-control model, but also the means by which remote principals
+are identified and execute within local systems: 
+not only is consideration of classical UNIX users inadequate, 
+but also there is a need to allow widely varying policies and
+notions of remote users executing local code across systems.
+These lessons are taken to heart in capability systems, which carefully
+separate policy and enforcement, but also support extensible policy through
+executable code.
+
+% >>>
+\paragraph{Capsicum} % <<<
+Capsicum is a lightweight OS capability and sandbox framework included in
+FreeBSD 9.x and later~\cite{Watson10,Watson10a}.
+Capsicum extends (rather than replaces) UNIX APIs, and
+provides new kernel primitives
+(sandboxed capability mode and capabilities) and a userspace sandbox
+API.
+These tools support compartmentalization of monolithic UNIX applications
+into logical applications, an increasingly common goal supported poorly by
+discretionary and mandatory access controls.
+This approach was demonstrated by adapting core FreeBSD utilities and
+Google's Chromium web browser to use Capsicum primitives; it showed
+significant simplicity and robustness benefits to Capsicum over other
+confinement techniques.
+Capsicum provides both inspiration and motivation for CHERI: its hybrid
+capability-system model is transposed into the ISA to provide
+compatibility with current software designs, and its demand for finer-grained
+compartmentalization motivates CHERI's exploration of more scalable
+approaches.
+
+% >>>
+% >>>
+\section{A Fresh Opportunity for Capabilities} % <<<
+
+Despite an extensive research literature exploring the potential of
+capability-system approaches, and limited transition to date, we believe
+that the current decade has been the time to revisit these
+ideas, albeit through the lens of contemporary problems and with insight gained through decades of research into security and systems design.
+As described in Chapter~\ref{chap:introduction}, a transformed threat
+environment deriving from ubiquitous computing and networking, and the
+practical reality of  widespread exploitation of software vulnerabilities, 
+both
+provide a strong motivation to investigate improved processor foundations for
+software security.
+This change in environment has coincided with improved 
+and more rapid
+hardware prototyping
+techniques and higher-level hardware-definition languages that facilitate
+academic hardware-software system research at larger scales; without them we
+would have been unable to explore the CHERI approach in such detail.
+Simultaneously, our understanding of operating-system and programming-language
+security has been vastly enhanced by several decades of research; 
+in particular, recent
+development of the hybrid capability-system Capsicum model suggests a strong alignment between
+capability-based techniques and successful mitigation approaches that can be
+translated into processor design choices.
+
+% >>>
+
+% vim: foldmethod=marker:foldmarker=<<<,>>>

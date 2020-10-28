@@ -1,0 +1,4 @@
+let rs1_val_X            = #\hyperref[sailRISCVzX]{X}#(rs1);
+let rd_val_S             = rs1_val_X [31..0];
+#\hyperref[sailRISCVzF]{F}#(rd) = #\hyperref[sailRISCVznanzybox]{nan\_box}# (rd_val_S);
+RETIRE_SUCCESS

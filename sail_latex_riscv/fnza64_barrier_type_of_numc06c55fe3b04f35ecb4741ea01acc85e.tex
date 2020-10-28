@@ -1,0 +1,5 @@
+function a64_barrier_type_of_num arg# = match arg# {
+  0 => A64_barrier_all,
+  1 => A64_barrier_LD,
+  _ => A64_barrier_ST
+}

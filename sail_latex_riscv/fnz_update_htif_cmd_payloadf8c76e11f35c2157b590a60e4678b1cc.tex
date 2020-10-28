@@ -1,0 +1,2 @@
+function _update_htif_cmd_payload (v, x) = let v = { v with htif_cmd_chunk_0 = update_subrange_bits(v.htif_cmd_chunk_0, 47, 0, subrange_bits(x, 47, 0)) } in
+  v

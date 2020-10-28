@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzsetzyutvec]{set\_utvec}#(value : xlenbits) -> xlenbits = {
+  let utv = #\hyperref[sailRISCVzlegalizzezytvec]{legalize\_tvec}#(#\hyperref[sailRISCVzMkzyMtvec]{Mk\_Mtvec}#(#\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(UTCC)), value);
+  UTCC = #\hyperref[sailRISCVzsetCapOffsetOrNull]{setCapOffsetOrNull}#(UTCC, utv.#\hyperref[sailRISCVzbits]{bits}#());
+  utv.#\hyperref[sailRISCVzbits]{bits}#()
+}

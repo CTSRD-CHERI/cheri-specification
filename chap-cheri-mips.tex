@@ -1,0 +1,847 @@
+\chapter{The CHERI-MIPS Instruction-Set Architecture}
+\label{chap:cheri-mips}
+
+Having considered the software-facing semantics and architecture-neutral
+aspects of the CHERI protection model in previous chapters, we now turn to
+elaborating CHERI capabilities within a specific RISC architecture: 64-bit
+MIPS.
+Wherever possible, CHERI-MIPS implements the architecture-neutral concepts
+described in Chapter~\ref{chap:architecture}.
+In addition to the mechanics of defining specific instructions and choices
+about whether a new register file is used (vs. extending the existing integer
+register file), MIPS differs substantially from other RISC ISAs in several
+key areas -- especially in its use of a software-managed Translation Look-aside
+Buffer (TLB), and in the details of its exception mechanism.
+In those cases, we necessarily take a MIPS-oriented perspective.
+This chapter specifies the following aspects of CHERI-MIPS:
+
+\begin{itemize}
+\item Coprocessor 2 instructions
+\item Architectural capabilities
+\item Special capability registers
+\item The capability register file
+\item Capability-aware instructions
+\item Capability state on CPU reset
+\item Exception handling and capability-related exceptions
+\item Changes to MIPS ISA processing
+\item Changes to the Translation Look-aside Buffer (TLB)
+\item Protection-domain transition with \insnmipsref{CInvoke}
+\item Capability register conventions and the Application Binary Interface (ABI)
+\end{itemize}
+
+\noindent
+The chapter finishes with a discussion of potential future directions for
+the CHERI-MIPS ISA.
+Detailed descriptions of specific capability-aware instructions can be found
+in Chapter~\ref{chap:isaref-mips}.
+
+\section{The CHERI-MIPS ISA Extension}
+
+CHERI-MIPS extends 64-bit MIPS with a new \textit{tagged capability register
+file} able to hold both valid capabilities and data, and \textit{tagged
+  memory}
+to distinguish and protect capabilities.  It
+adds new \textit{capability instructions} that inspect, manipulate, and
+use \textit{capability registers}.
+CHERI-MIPS also modifies certain existing MIPS architectural behaviors, such
+as relating to existing MIPS memory accesses, the program counter, exception
+delivery, and the software-managed TLB.
+New instructions are added using the coprocessor-2 portion of the MIPS opcode
+space, which is intended for local vendor extensions.
+Despite this MIPS-originated nomenclature, microarchitectural implementations
+of CHERI will be tightly integrated with the main pipeline, rather than as a
+separate ``coprocessor''.
+Wherever possible, CHERI-MIPS inherits its behavior from the
+architecture-neutral specification found in Chapter~\ref{chap:architecture};
+however, in some cases must extend it -- e.g., by defining MIPS-specific aspects of
+architectural privilege.
+
+\section{Architectural Capabilities}
+
+In CHERI-MIPS, capabilities may be held in a dedicated capability register
+file, where they can be manipulated or dereferenced using capability
+coprocessor instructions, in a set of special capability registers, and in
+tagged memory.
+Capabilities in the capability register file may be used as operands to
+capability instructions that retrieve or modify capability contents, namely,
+load and store instructions, and control-flow instructions.
+Capability addresses used for load, store, and instruction fetch are always
+interpreted as virtual addresses.
+Special capability registers are accessed via new read- and write-register
+instructions.
+Guarded manipulation and tagged memory enforce capability unforgeability,
+capability monotonicity, provenance validity, and capability integrity.
+
+\subsection{Capability Permissions}
+
+Architecture-neutral capability permission bits are described in
+Section~\ref{sect:capability-permission-bits}; the following permissions
+have CHERI-MIPS-specific interpretations:
+
+\begin{description}
+\item[\cappermASR{}] Allow access to \EPCC{}, \ErrorEPCC{}, \KDC{}, \KCC{},
+\KRC{}, \KQC{} and \capcausereg{} when this permission is set in \PCC{}.
+Also authorize access to kernel features such as the TLB, CP0 registers, and
+system-call return (see Section~\ref{changes-to-MIPS-ISA}).
+\end{description}
+
+\subsection{Capability Flags}
+
+In CHERI-MIPS, the \cflags{} field has size 0.
+
+\section{Capability Registers}
+
+CHERI supplements the 32 general-purpose per-hardware-thread integer registers
+provided by the MIPS ISA with 32 additional general-purpose capability
+registers.
+Where general-purpose integer registers describe data values operated on by a
+software thread, capability registers describe its instantaneous rights within
+an address space.
+A thread's capabilities potentially imply a larger set of rights (loadable via
+held capabilities) which may notionally be considered as the protection domain
+of a thread.
+
+Unlike general-purpose integer registers, capability registers are structured,
+consisting of a 1-bit tag and a 128-bit set of architectural fields
+with defined semantics and constrained values.
+Capability instructions retrieve and set these fields by moving values in and
+out of general-purpose integer registers, enforcing constraints on field manipulation.
+
+\section{Special Capability Registers}
+
+There are also several special capability registers associated with each
+architectural thread, including a memory capability that corresponds to the
+instruction pointer, and capabilities used during exception handling.
+This is structurally congruent to implied registers and system control
+coprocessor (CP0) registers found in the base MIPS ISA.
+Special instructions are used to move special capabilities in and out of
+general-purpose capability registers.
+
+\section{The Capability Register File}
+
+\rwnote{This section, lifted from an earlier ISA chapter, has some material
+  that is redundant with respect to the prior section, and requires merging.}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{lp{11cm}}
+\toprule
+Register(s) & Description \\
+\midrule
+  \creg{NULL} (\creg{0}) & A capability register that returns the NULL value when
+read. Writes to \creg{NULL} are ignored. \\
+  \creg{1}...\creg{25} & General-purpose capability registers referenced
+  explicitly by capability-aware instructions\\
+  \IDC{} (\creg{26}) & Invoked data capability: the capability that was unsealed
+  at the last protected procedure call \nwfnote{Can we think of boot as a
+  primordial CInvoke?}\ajnote{given that we moved everything else to special
+  registers, I was wondering whether moving this as well would make sense, or
+  if one CReadHwr on protection domain entry is not a good idea. It's a bit
+  awkward to have this random register in the middle be overwritten on
+  ccall...}\\
+  \creg{27}...\creg{31} & General-purpose capability registers referenced
+  explicitly by capability-aware instructions\\
+\bottomrule
+\toprule
+  Special Register(s) & Description \\
+\midrule
+  \PCC{} & Program counter capability (\PCC): the capability through which \PC{}
+  is indirected by the processor when fetching instructions.\\
+  \DDC{} & Capability register through which all non-capability load and store
+  instructions are indirected. This allows legacy MIPS code to be controlled
+  using the capability coprocessor. \\
+  \KRC{} & A capability reserved for use during kernel exception
+  handling. \\
+  \KQC{} & A capability reserved for use during kernel exception
+  handling. \\
+  \KCC{} & Kernel code capability: the code capability moved to \PCC{} when
+  entering the kernel for exception handling.\\
+  \KDC{} & Kernel data capability: the data capability containing the security
+  domain for the kernel exception handler.  \\
+  \EPCC{} & Capability register associated with the exception program counter
+  (\EPC{}) required by exception handlers to save, interpret, and store the
+  value of \PCC{} at the time the exception fired.\\
+  \ErrorEPCC{} & Capability register associated with the error exception program counter
+  (\ErrorEPC{}) that is used on exception return if CP0.Status.ERL is set. The CHERI prototype
+  does not actually support any exception types (e.g. cache error) that require \ErrorEPC{} but
+  it is supported for consistency with MIPS. \\
+\bottomrule
+\end{tabular}
+\end{center}
+\label{table:capability-registers}
+\caption{Capability registers defined by the capability coprocessor. See
+\insnmipsref{CReadHwr}~(\ref{\insnmipslabelname{creadhwr}}) and
+\insnmipsref{CWriteHwr}~(\ref{\insnmipslabelname{cwritehwr}}) for details
+on special capability registers.}
+\end{table}
+
+In CHERI-MIPS, the general-purpose capability register file is distinct from
+the general-purpose integer register file.
+Table~\ref{table:capability-registers} illustrates capability registers
+defined by the capability coprocessor.
+CHERI-MIPS defines 31 general-purpose capability registers, which may be named using
+most capability register instructions.
+These registers are intended to hold the working set of rights required by in-execution
+code, intermediate values used in constructing new capabilities, and copies of capabilities
+retrieved from \EPCC{} and \PCC{} as part of the normal flow of code execution, which is congruent with current MIPS-ISA exception handling via coprocessor 0.
+In addition to the 31 general-purpose capability registers, \creg{0} is a constant NULL capability\footnote{For some instructions, specifying a register operand of 0 will utilize \DDC{} rather than \creg{0}. This can reduce the instruction count for certain sequences such as capability loads and stores in a hybrid compiler mode.}.
+The special capability registers (other than \PCC) can be read using the \insnmipsref{CReadHwr} instruction and set using the \insnmipsref{CWriteHwr} instruction, subject to suitable permission.
+
+Each capability register also has an associated tag indicating whether it
+currently contains a valid capability.  Any load, store, or instruction
+fetch via an invalid capability will trap.
+
+\section{Capability-Aware Instructions}
+
+Per Section~\ref{sec:capability-aware-instructions}, CHERI-MIPS introduces a
+number of new capability-related instructions.
+Many are ``portable'' CHERI instructions, but others are MIPS-specific either
+in terms of augmenting the existing instruction set (congruent
+capability-based jump, load, and store instructions), or to address
+MIPS-specific interactions with CHERI (e.g., as relates to exception
+handling).
+CHERI-MIPS introduces the following control-flow and memory-access instruction
+classes:
+
+\begin{description}
+\item[Load or store via a capability]
+These instructions access memory indirected via an explicitly named capability
+register, and include a full range of access sizes (byte, half word, word,
+double word, capability), optional sign extension for loads, and
+load-linked/store-conditional variations to implement atomic operations:
+\insnmipsref[clbhwd]{CL[BHWD][U]}, \insnmipsref{CLC},
+\insnmipsref[csbhwd]{CS[BHWD]}, \insnmipsref{CSC},
+\insnmipsref[cllbhwd]{CLL[BHWDC][U]}, \insnmipsref{CLLC},
+\insnmipsref[cscbhwd]{CSC[BHWD]}, and \insnmipsref{CSCC}.
+
+\item[Capability jumps]
+These instructions jump to an explicitly named capability register, setting
+the program-counter capability to the value of the capability operand:
+\insnmipsref{CJR} and \insnmipsref{CJALR}.
+These correspond in semantics to the MIPS \insnnoref{JR} jump, used for
+function returns, and \insnnoref{JALR}, used for function calls, but
+constrained by the properties of the named capability including permissions,
+bounds, validity, and so on.
+\end{description}
+
+\noindent
+CHERI-MIPS introduces the following capability-aware instructions to
+cater to architecture-specific aspects of the MIPS ISA:
+
+\begin{description}
+\item[Conditional move]
+The \insnmipsref{CMovN} and \insnmipsref{CMovZ} instructions conditionally
+move a capability from one register to another, permitting conditional
+behavior without the use of branches.
+These support efficient hybrid code, in which use of integer pointers and
+capabilities are intermixed.
+
+\item[Retrieve program-counter capability]
+These instructions retrieve the architectural program-counter capability,
+and optionally modify its offset for the purposes of \PCC{}-relative
+addressing: \insnmipsref{CGetPCC}, \insnmipsref{CGetPCCSetAddr}, \insnmipsref{CGetPCCIncOffset} and \insnmipsref{CGetPCCSetOffset}.
+
+\item[Exception handling]
+The \insnmipsref{CGetCause} and \insnmipsref{CSetCause} instructions get and
+set capability-related exception state, such as the cause of the current
+exception.
+
+\item[Get and set special capability registers]
+The \insnmipsref{CReadHWR} and \insnmipsref{CWriteHWR} instructions get and set
+special capability registers such as \DDC{}, \EPCC{}, \KDC{}, and \KCC{}.
+\end{description}
+
+\section{Capability State on CPU Reset}
+
+Section~\ref{sec:capability-state-on-cpu-reset} requires that capability root
+registers be initialized to offer full capability rights; all other registers
+are initialized to NULL.
+The capability roots in CHERI-MIPS are \PCC{}, \KCC{}, \EPCC{}, \ErrorEPCC{}.
+These values allow capability-unaware code to load and store data with respect
+to the full virtual address space, and for exception handling to operate with
+full rights.
+All other general-purpose and special capability registers should contain the
+NULL value.
+
+In our CHERI-MIPS hardware prototype, all tags in physical memory are
+initialized to 0, ensuring that there are no valid capabilities in memory on
+reset.
+This is not strictly required: the firmware, hypervisor, or operating system
+can in principle ensure that tags are cleared on memory before it is exposed
+to untrustworthy software, in much the same way that they will normally ensure
+that memory is cleared to prevent data leaks before memory reuse.
+
+\section{Exception Handling}
+
+As described in Section~\ref{sec:traps_interrupts_exception_handling}, CHERI
+adopts and extends the existing exception model of its host architecture.
+CHERI-MIPS retains the same general model found in MIPS, with modest
+extensions to provide exception handlers with both code and data capabilities,
+as well as allow the interrupted capability-extended context to be saved and
+restored.
+
+\subsection{Exception-Related Capabilities}
+
+MIPS exception handling saves interrupted state, transfers control to an
+exception vector, and also grants supervision privilege in the ring model.
+CHERI-MIPS extends this model so that the exception handler also gains access
+to additional code and data capabilities (\KCC{} and \KDC{}) to authorize its
+execution.
+
+In order to preserve the full interrupted \PCC{}, \EPC{} has been extended
+from a special integer register to a special capability register, \EPCC{}.
+Accessing the existing MIPS CP0 \EPC{} special register in effect accesses the
+\coffset{} field of \EPCC{}.
+
+When an exception occurs, the victim \PCC{} is copied to \EPCC{} so that the
+exception may return to the correct address, and \KCC{}, leaving aside its
+\coffset{} field, which will be set to the appropriate MIPS exception-vector
+address, is moved to \PCC{} to grant execution rights for kernel code.
+
+Access to \KDC{}, the Kernel Data Capability, is authorized by
+System\_Access\_Registers, and can be used to reach exception-handler data.
+\KCC{} will normally be configured to grant this access, if \KDC{} is used.
+Exception handlers making use of legacy loads and stores will most likely
+install \KDC{} in \DDC{}.
+\DDC{}, as with other special registers, will need to be saved and restored to
+implement full context switching.
+
+When an exception handler returns with \insnnoref{ERET}, \EPCC{} (or \ErrorEPCC{} if CP0.Status.ERL is set), possibly after
+having been updated by the software exception handler, is moved into \PCC{}.
+
+\subsection{Exception Temporary Special Registers}
+
+In the MIPS ABI, two general-purpose integer registers are reserved for use
+by exception handlers: \regname{k0} and \regname{k1}.
+In earlier CHERI-MIPS revisions, we made a similar design choice for the
+capability register file, reserving two general-purpose capability registers for exception-handling
+use.
+In  more recent revisions, we have defined two special capability
+registers, \KRC{} and \KQC{}, which are accessible only when
+Access\_System\_Registers is present on \PCC{}, and can be used to hold values
+during exception handling -- for example, to temporarily save the value of a
+general-purpose capability register so that it can be used to hold \KDC{}
+during context save.
+
+\subsection{Capability-Related Exceptions and the Capability Cause Register}
+
+CHERI-MIPS implements a \capcausereg{} register that gives additional
+information about the causes of capability-related exceptions.
+The register is formatted as shown in Figure~\ref{fig:cap-cause}.
+The \emph{ExcCode} field holds the capability exception code
+as described in Section~\ref{sec:capability_exception_causes}.
+If the last instruction to throw an exception did not throw a capability
+exception, then the \emph{ExcCode} field of \capcausereg{} will be \emph{None}.
+\emph{ExcCode} values from 128 to 255 are reserved for use by application
+programs.
+\jhbnote{Do we still want to reserve 128 to 255 in this way?  Or
+  should we deprecate that along with CSetCause now that CCall 0 is gone?}
+
+\begin{figure}
+\begin{center}
+	\begin{bytefield}{16}
+		\bitheader[endianness=big]{0,7,8,15}\\
+		\bitbox{8}{ExcCode}
+		\bitbox{8}{RegNum}
+	\end{bytefield}
+\end{center}
+\caption{Capability Cause Register}
+\label{fig:cap-cause}
+\end{figure}
+
+The \emph{RegNum} field of \capcausereg{} will hold the number of the capability
+register whose permission was violated in the last exception, if this
+register was not the unnumbered register \PCC{}. If the capability exception
+was raised because \PCC{} did not grant access to a numbered reserved register,
+then \capcausereg{} will contain the number of the reserved register to which
+access was denied. If the exception was raised because \PCC{} did not
+grant some other permission (e.g., permission to read \capcausereg{} was
+required, but not granted) then \emph{RegNum} will hold 0xff.
+
+The \insnmipsref{CGetCause} instruction can be used by an exception handler to
+read the \capcausereg{} register.
+Software can use \insnmipsref{CSetCause} to set \emph{ExcCode} to either an
+architectural or software-defined value.
+\insnmipsref{CGetCause} and \insnmipsref{CSetCause} will raise an exception
+if \PCC{}.\cperms{}.\emph{Access\_System\_Registers} is not set, allowing
+control over whether unprivileged code can access \capcausereg{}.
+
+When an attempted operation, prohibited by the capability mechanism, triggers
+an exception, the \textit{ExcCode} field within the \causereg{}
+register of coprocessor 0 are set to 18 (\textit{C2E}, coprocessor 2
+exception), and the \textit{ExcCode} field within the \capcausereg{} will be set to a constant from
+Table~\ref{table:capability-cause}.
+The \emph{RegNum} field of \capcausereg{} is set to the register which caused
+the reported exception.
+
+If an instruction throws more than one capability exception with the
+same priority (e.g., both the source and destination register are
+reserved registers), then the register that is furthest to the left in
+the assembly language opcode has priority for setting the \emph{RegNum} field.
+
+\subsection{Exceptions and Indirect Addressing}
+
+If an exception is caused by the combination of the values of a capability
+register and a general-purpose integer register (e.g., if an expression such as
+\texttt{clb t1, t0(c0)} raises an exception because the offset \texttt{t0} is
+trying to read beyond \texttt{c0}'s length), the number of the capability register
+(not of the general-purpose integer register) will be stored in \capcausereg{}.\emph{RegNum}.
+
+\subsection{Capability-Related Exception Priority}
+
+In CHERI-MIPS, capability exceptions have a lower priority than Reset, Soft
+Reset, and Non-Maskable Interrupt (NMI) but higher priority than all other
+exception types.
+In particular, they have a priority higher than address errors (e.g.,
+alignment exceptions, reported by \texttt{AdEL} and \texttt{AdES}) and TLB
+exceptions, as capability processing for addresses occurs logically ``before''
+dereference of a virtual address.
+With respect to the capability cause register provided via \capcausereg{},
+CHERI-MIPS implements the exception priority scheme described in
+Section~\ref{sec:capability_exception_priority}.
+
+\subsection{Implications for Pipelining}
+
+MIPS is unusual as an architecture in that the privileged supervisor mode can
+explicitly see the effects of pipeline hazards.
+System software must issue suitable NOPs and barriers to ensure that
+potentially confusing (and even insecure) implications of pipelining are not
+visible to application software.
+For example, MIPS normally requires a specific number of NOP instructions
+follow any writes to TLB-related registers before the effects of those writes
+are visible to software.
+In general, CHERI does not change this behavior: general-purpose capability
+registers experience no visible pipelining effects in normal use; and where
+existing pipelining effects exist, such as in accessing \EPC{}, similar
+assumptions should be made about capability-extended registers, such as
+\EPCC{}.
+
+\section{Changes to MIPS ISA Processing}
+\label{changes-to-MIPS-ISA}
+
+\rwnote{There is a blend of MIPS-specific and architecture-neutral content
+  here.}
+
+The following changes are made to the behavior of instructions from the
+standard MIPS ISA when a capability coprocessor is present:
+
+\paragraph{Instruction fetch}
+The MIPS-ISA program counter (\PC{}) is extended to a full program-counter
+capability (\PCC{}), which incorporates the historic \PC{} as
+\PCC{}.\coffset{}.
+Instruction fetch is controlled by the \emph{Permit\_Execute} permission, as
+well as bounds checks, tag checks, and a requirement that the capability not
+be sealed.
+Failures will cause a coprocessor 2 exception (\textit{C2E}) to be thrown.
+In general, instructions that set \PCC{} (such as \insnmipsref{CJR}) prohibit
+setting invalid values with the notable exception of \insnnoref{ERET}.
+This is because \insnnoref{ERET} will typically be used in the kernel's
+exception return routine where triggering an exception could be difficult
+to recover from.
+If an \insnnoref{ERET} occurs with an invalid \EPCC{} the relevant exception is raised
+on the following instruction fetch, just as returning to an invalid \PC{} would
+trigger a TLB fault on the next instruction fetch in MIPS.
+Note that \EPCC{} for the resulting exception will not have changed. This is particularly
+important if \EPCC{} was sealed.
+
+If an address exception occurs during instruction fetch (e.g., AdEL, or a TLB miss)
+then \emph{BadVAddr} is set equal to \PCC{}.\cbase{} + \PCC{}.\coffset{},
+providing the absolute virtual address rather than a \PCC{}-relative virtual
+address to the supervisor, avoiding the need for capability awareness in TLB
+fault handling.
+
+\paragraph{Load and Store instructions}
+Standard MIPS load and store instructions are interposed on by the {\em
+default data capability}, \DDC{}.
+Addresses provided for load and store will be transformed and bounds checked by
+\DDC{}.\cbase{}, \DDC{}.\coffset{}, and \DDC{}.\clength{}.
+\DDC{} must have the appropriate permission (\textit{Permit\_Store} or
+\textit{Permit\_Load}) set, the full range of addresses covered by the load or
+store must be in range, \DDC{}.\ctag{} must be set, and \DDC{} must not be sealed
+(i.e., \DDC{}.\cotype{} must be $2^{64}-1$).
+Failures will cause a coprocessor 2 exception (\textit{C2E}) to be thrown.
+As with instruction fetch, \emph{BadVAddr} values provided to the supervisor
+will be absolute virtual addresses, avoiding the need for capability awareness
+in TLB fault handling.
+
+Standard MIPS load and store instructions will raise an exception if the
+value loaded or stored is larger than a byte, and the virtual address is
+not appropriately aligned. With the capability coprocessor present, this
+alignment check is performed after adding \DDC{}.\cbase{}. (\DDC{}.\cbase{}
+will typically be aligned, so the order in which the check is performed will
+often not be visible. In addition, CHERI1 can be built with an option to
+allow unaligned loads or stores as long as they do not cross a cache line
+boundary).
+
+\paragraph{Floating-point Load and Store instructions}
+If the CPU is configured with a floating-point unit, all loads and stores
+between the floating-point unit and memory are also relative to
+\DDC{}.\cbase{} and \DDC{}.\coffset{}, and are checked against the
+permissions, bounds, tag, and sealed state of \DDC{}.
+
+\paragraph{Jump and branch instructions}
+If the target is out-of-bounds in relation to \emph{\PCC{}}, a coprocessor 2
+exception (\textit{C2E}) will be thrown.
+The \emph{RegNum} field of \capcausereg{} will indicate a \PCC{} exception, and
+\emph{ExcCode} will indicate a Length Violation.
+\EPC{} and \EPCC{} will point to the branch instruction and not the branch
+target (as in previous CHERI revisions). This is better for debugging
+and removes the need for a special case for handling the situation where EPCC
+is not representable due to capability compression. \note{rmn30}{TODO check we are consistent about this everywhere.}
+
+\paragraph{Jump and link register}
+After a \insnnoref{JALR} instruction, the return address is relative
+to \emph{\PCC{}.\cbase}.
+
+\paragraph{Exceptions}
+The MIPS exception program counter (\EPC{}) is extended to a full exception
+program-counter capability (\EPCC{}), which incorporates the historic \EPC{}
+as \EPCC{}.\coffset{}.
+If an exception occurs while CP0.Status.EXL is false, \PCC{} will be
+saved in \EPCC{} and the program counter will be saved in \EPCC{}.\coffset{}
+(also visible as \EPC{}). If CP0.Status.EXL is true, then \EPCC{} and \EPC{} are unchanged.
+(In the MIPS ISA, exceptions leave \EPC{} unchanged if CP0.Status.EXL is true).
+After saving the old \PCC{} the contents of the {\em kernel code
+capability} (\KCC{}), excluding \KCC{}.\coffset{}, are moved into \PCC{}.
+\PC{} (and \PCC.\coffset{}) will be set so that \PCC{}.\cbase{} $+$
+\PC{} is the exception vector address normally used by MIPS.
+This allows the exception handler to run with the permissions granted by
+\KCC{}, which may be greater than the permissions granted by \PCC{} before
+the exception occurred.
+
+On return from an exception (\insnnoref{ERET{}}), \PCC{} is restored from
+\EPCC{} (or \ErrorEPCC{} if Status.ERL is set in CP0).
+The program counter is restored
+from the \coffset{} field.
+This allows exception handlers that are not aware of capabilities to continue
+to work on a CPU with the CHERI-MIPS extensions.
+If \EPCC{} is not appropriate for execution, the target will
+throw the relevant exception in response to an unusable \PCC{}.
+Similarly, the result of an exception or interrupt is \textbf{UNDEFINED} if
+\KCC{}.\ctag{} is not set, \KCC{} is sealed, or \KCC{} does not have the
+execute permission.
+
+The legacy MIPS instructions \insnnoref{DMFC0} and
+\insnnoref{DMTC0} can
+be used to read or write the \coffset{} of \EPCC{} and \ErrorEPCC{}
+as \EPC{} and \ErrorEPC{} respectively. Note
+that we must prohibit modification of sealed capabilities and, if
+capability compression is being used (see Section~\ref{compression}), cope
+with the possibility of an unrepresentable result.
+An attempt to modify a sealed \EPCC{} or \ErrorEPCC{} using
+\insnnoref{DMTC0}
+results in the tag being cleared.
+If \EPC{} is set so far outside the bounds of \EPCC{} that the bounds would no longer
+be representable, then the tag is cleared and other fields are set as per \insnmipsref{CSetOffset}.
+An unrepresentable \EPCC{} cannot occur as a result of an exception because the \PC{}
+should always be within the bounds of \PCC{} or nearly in bounds:
+branches outside \PCC{} bounds should throw an exception on the branch instruction,
+and if execution runs off the end of
+\PCC{} then the resulting \EPCC{} will have an offset just 4 more than
+the top of \PCC{} so is guaranteed to be representable.
+
+\paragraph{CP0, TLB, CACHE, and ERET privileges}
+The set of MIPS privileges normally reserved for use only in kernel mode,
+including the ability to read and write CP0 control registers (using
+\insnnoref{MFC0}, \insnnoref{MTC0}, \insnnoref{DMFC0}, and
+\insnnoref{DMTC0}), manage the TLB (using \insnnoref{TLBR},
+\insnnoref{TLBWI}, \insnnoref{TLBWR}, and \insnnoref{TLBP}), perform
+\insnnoref{CACHE} operations that could lead to data loss or rollback of
+stores, and use the \insnnoref{ERET} exception-return instruction, is
+available only if \PCC{} contains the Access\_System\_Registers permission AND
+the CPU is running in kernel mode.  This permits capability sandboxes to be used
+in kernel mode by preventing them from being subverted using the TLB.
+
+\paragraph{Other KSU-controlled mechanisms}
+Despite the Access\_System\_Registers permission controlling use of privileged
+ISA features, absence of the bit does not change the behavior of the MIPS ISA
+with respect to other KSU/EXL-related mechanisms.
+For example, the value present in the bit does not affect any of the
+following: selection of the
+TLB miss handler to use; the KSU bits used to select the kernel, supervisor,
+or user virtual address space used in TLB lookup; the KSU bits reported in the
+\textit{XContext} register; or the automatic setting and clearing of the EXL
+flag on exception entry and return.
+Memory capabilities are used to constrain the use of memory within kernel or
+supervisor compartments, rather than the ring-based MIPS segmentation
+mechanism, which is unaffected by the Access\_System\_Registers permission.
+
+\paragraph{Prefetch}
+\label{sec:mips-prefetch}
+
+The MIPS-IV prefetch instruction (\insnnoref{PREF}) checks the prefetched
+address against \DDC. If the prefetched address is outside the bounds of
+\DDC{}, the prefetch fails silently, without raising an exception but also
+without prefetching the data into the cache. If \DDC{} does not grant
+Load permission, then the prefetch will also silently fail.
+
+\section{Changes to the Translation Look-aside Buffer (TLB)}
+
+CHERI-MIPS implements CHERI adaptations to virtual-memory support following
+the model described in Section~\ref{sec:virtual_memory}.
+As MIPS provides a software-managed TLB, CHERI-related changes are primarily
+with respect to TLB management instructions (which now require the
+Access\_System\_Registers permission on \PCC{}) and TLB-entry contents.
+
+\begin{table}
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,31}\\
+\bitbox{1}{\rotateinbitbox{\small SCI}}
+\bitbox{1}{\rotateinbitbox{\small LCI}}
+\bitbox{30}{0} \\
+\bitbox{2}{0}
+\bitbox{24}{PFN}
+\bitbox{3}{C}
+\bitbox{1}{D}
+\bitbox{1}{V}
+\bitbox{1}{G}
+\end{bytefield}
+\end{center}
+\caption{EntryLo Register}
+\label{table:entrylo}
+\end{table}
+
+%\begin{table}
+%\begin{center}
+%\begin{tabular}{lll}
+%\toprule
+%EntryLo bit & Name & Description \\
+%\midrule
+%62 & \texttt{LCI} & Strip the tag from any value loaded via this TLB entry \\
+%63 & \texttt{SCI} & Throw an exception if a tagged value is stored via this TLB entry \\
+%\bottomrule
+%\end{tabular}
+%\end{center}
+%\caption{New permission bits added to the MIPS EntryLo portion of a TLB entry}
+%\label{table:cheri-mips-tlb-entries}
+%\end{table}
+
+Two new permission bits have been added to the MIPS EntryLo portion of each
+TLB entry to indicate whether a given memory page is configured to have
+capabilities loaded or stored (see Figure~\ref{table:entrylo}).
+This functionality can be used in a variety of ways to control and track
+capability use within a virtual address space.
+For example, mapping pages with \texttt{SCI} and/or \texttt{LCI} can be used to
+prevent sharing of tagged capability values between address spaces where
+capabilities might have different interpretations.
+\texttt{SCI} could also be used to implement a ``capability dirty bit'' in the TLB
+handler, tracking which pages have been used to store capabilities, perhaps
+for the purposes of efficient garbage collection or revocation.
+
+\begin{description}
+\item[Load Capability Inhibit (\texttt{LCI})] If this bit is set then capability
+  loads are disabled for the page.
+  If the \insnmipsref{CLC} instruction is used on a page with the \texttt{LCI}
+  bit set, and the load succeeds, the value loaded into the destination
+  register will have its tag bit cleared, even if the tag bit was set in
+  memory.
+
+\item[Store Capability Inhibit (\texttt{SCI})] If this bit is set, capability
+  stores are disabled for the page.
+  If the \insnmipsref{CSC} instruction is used on a page with the \texttt{SCI}
+  bit set, and the capability register to be stored has the tag bit set, then
+  a CP2 exception will be raised, with \capcausereg{} set to 0x9 (MMU
+  prohibits store capability).
+  If the capability register to be stored does not have the tag bit set (i.e.,
+  it contains non-capability data), then this exception will not be raised,
+  and the store will proceed.
+\end{description}
+
+\noindent
+%
+As with other TLB-related exceptions, \texttt{BadVAddr} will be set to the
+absolute virtual address that has triggered the fault, and \texttt{EntryHi}
+will also be set accordingly.%
+%
+\footnote{CHERI-MIPS is a bit of an architectural outlier, updating both
+\capcausereg{} (nominally, a CP2 register) and \texttt{BadVAddr} (CP0) on its
+capability-related MMU faults.  System software generally cares only about the
+faulting virtual address (i.e., \texttt{BadVAddr}) except for diagnostic
+reporting, and so we anticipate that most other CHERI instantiations will
+report only this value.}
+%
+This new fault is raised \emph{after} checking
+the existing \texttt{V} and \texttt{D} bits in the TLB entry; that is, existing
+``TLB Refill'' and ``TLB Modify'' exceptions arising from the store destination
+page take precedence.  (This choice slightly simplifies system software, which
+may assume that a ``MMU prohibits store capability'' fault necessarily points
+\texttt{BadVAddr} at a mapped, dirty page.)
+
+\section{Protection-Domain Transition with CInvoke}
+\label{section:protection-domain-transition-with-cinvoke}
+
+\rwnote{Much of the content here is architecture neutral, but some parts are
+  MIPS specific.}
+
+Cross-domain procedure calls are implemented using the \insnmipsref{CInvoke}
+instruction, which provides access to controlled non-monotonicity for the
+purposes of a privileged capability register-file transformation and memory
+access.
+The instruction accepts two capability-register operands, which represent the
+sealed code and data capability describing a target protection domain.
+\insnmipsref{CInvoke} checks that the two capabilities are valid, that both are
+sealed, that the code capability is executable, that the data capability is
+non-executable, and that they have a matching object type.
+
+\insnmipsref{CInvoke} unseals the sealed code and data capabilities
+and places them in \PCC{} and \IDC{}, with control transferred
+directly to the target code capability.
+A programming-language or concurrent programming-framework runtime might
+arrange that all sealed code capabilities point to a message-passing
+implementation that proceeds to check argument registers or clear other
+registers, switching directly to the target domain via a further
+\insnmipsref{CJR}, or returning to the caller if the message will be delivered
+asynchronously.
+
+Voluntary protection-domain crossing -- i.e., not triggered by an interrupt --
+will typically be modeled as a form of function invocation or message passing
+by the operating system.
+In either case, it is important that function callers/callees, message
+senders/recipients, and the operating system itself, be constructed to protect
+themselves from potential confidentiality or integrity problems arising from
+leaked or improperly consumed general-purpose integer registers or
+capabilities passed across domain transition.
+On invocation, callers will wish to ensure that non-argument registers, as
+well as unused argument registers, are cleared.
+Callees will wish to receive only expected argument registers.
+Similarly, on return, callees will wish to ensure that non-return registers,
+as well as unused return registers, are cleared.
+Likewise, callers will wish to receive back only expected return values.
+In practice, responsibility for this clearing lies with multiple of the
+parties: for example, only the compiler may be aware of which argument
+registers are unused for a particular function, whereas the operating system
+or message-passing routine may be able to clear other registers.
+Work performed by the operating system as a trusted intermediary in a
+reliable way may be usefully depended on by either party in order to prevent
+duplication of effort.
+For example, if the OS the clears non-argument
+registers on call, and non-return registers on return, caller and
+callee can avoid clearing those registers allowing that clearing
+to occur exactly once.
+\jhbnote{I'm tempted to replace OS in this paragraph with something
+  like ``domain-transfer supervisor'' since the intermediary may well
+  live in user space (like the runtime linker).}
+Efficient register clearing instructions (e.g., \insnmipsref{CClearRegs}) can
+also be used to substantially accelerate this process.
+
+In CHERI, the semantics of secure message passing or invocation are software defined, and we anticipate that different operating-system and programming-language security models might handle these, and other behaviors, in different ways.
+For example, in our prototype CheriBSD implementation, a userspace supervisor maintains a ``trusted stack'' onto which values are pushed during invocation, and from which values are popped on return.
+Over time, we anticipate providing multiple sets of semantics, perhaps corresponding to less synchronous domain-transition models, and allowing different userspace runtimes to select (or implement) the specific semantics their programming model requires.
+This is particularly important in order to provide flexible error handling: if a sandbox suffers a fault, or exceeds its execution-time budget, it is the OS and programming language that will define how recovery takes place, rather than the ISA definition.
+
+\section{Capability Register Conventions / Application Binary Interface
+  (ABI)}
+
+All ABIs implement the following capability register reservations for calls
+within a protection domain (i.e., ordinary jump-and-link-register / return
+instructions):
+
+\begin{itemize}
+	\item \creg{1}--\creg{2} are caller-save.  During a cross-domain call, these are used to pass the \PCC{} and \IDC{} values, respectively.  In the invoked context, they are always available as temporaries, irrespective of whether the function was invoked as the result of a cross-domain call.
+	\item \creg{3}--\creg{10} are used to pass arguments and are not preserved across calls.
+	\item \creg{11}--\creg{16} and \creg{25} are caller-save registers.
+		\nwfnote{Maybe add a note that \creg{25} was once reserved, thus its odd place in this list?}
+	\item \creg{17}--\creg{24} are callee-save registers.
+\end{itemize}
+
+\noindent
+In all ABIs, the following convention also applies:
+
+\begin{itemize}
+\item \creg{3} optionally contains a capability returned to a caller
+  (congruent to MIPS \mreg{v0}, \mreg{v1}).
+\end{itemize}
+
+\noindent
+The pure-capability ABI, used within compartments or for pure-capability
+(``CheriABI``) applications, implements the following further conventions for
+capability use:
+
+\begin{itemize}
+\item \creg{11}, in the pure-capability ABI, contains the stack capability
+  (congruent to MIPS \mreg{sp}).
+\item \creg{12}, in the pure-capability ABI, contains the jump register
+  (congruent to MIPS \mreg{t9}).
+\item \creg{17}, in the pure-capability ABI, contains the link register
+  (congruent to MIPS \mreg{ra}).
+\end{itemize}
+
+When calling (or being called) across protection domains, there is no
+guarantee that a non-malicious caller or callee will abide by these
+conventions.
+Thus, all registers should be regarded as caller-save, and callees cannot
+depend on caller-set capabilities for the stack and jump registers.
+Additionally, all capability registers that are not part of the explicit
+argument or return-value sets should be cleared via explicit assignment or
+via the \insnmipsref{CClearHi} and \insnmipsref{CClearLo} instructions.
+This will prevent leakage of rights to untrustworthy callers or callees, as
+well as accidental use (e.g., due to a compiler bug).
+Where rights are explicitly passed between domains, it may be desirable to
+clear the global bit that will (in a suitably configured runtime) limit
+further propagation of the capability.
+Similar concerns apply to general-purpose integer registers, or capability registers
+holding data, which should be preserved by the caller if their correct
+preservation is important, and cleared by the caller or callee if they might
+leak sensitive data.
+Optimized clearing instructions \insnmipsref{ClearHi} and \insnmipsref{ClearLo} are
+available to efficiently clear general-purpose integer registers.
+
+\mrnote{Is \IDC{} a caller-save or callee-save register?}
+
+\section{Potential Future Changes to the CHERI-MIPS ISA}
+
+The following changes have been discussed and are targeted for short-term
+implementation in the CHERI-MIPS architecture:
+
+\begin{itemize}
+\item Develop (modest) changes to \insnmipsref{CInvoke} so as to
+  ensure that the two sealed capabilities are in expected registers for the
+  callee.
+  In the original \insnnoref{CCall}, our extensions to MIPS CP0 allowed the exception handler to
+  check the trapping instruction's encoding to ensure \creg{1} and \creg{2}
+  were passed (or other ABI choices), ensuring reliable access to sealed
+  versions of the caller's operands -- giving access to the object type, for
+  example.
+  In userspace, we do not have access to MIPS CP0, and it would be preferable
+  to find some other way to reliably pass not just the unsealed versions, but
+  also caller sealed versions, to the callee.
+
+  One way to accomplish this would be to complete our shift of reserved
+  capability registers away from the main capability register file into a bank
+  of named system registers, allowing allowing the two input registers and two
+  output sealed registers to be placed in well-known locations for access by
+  the callee.
+  This would also avoid encoding use of \IDC{} in the instruction definition,
+  which is similarly undesirable.
+
+  \jhbnote{We've done the first part of this (shifting reserved cap
+    registers into a separate bank), so this needs to be revised to
+    just say the second half, but perhaps more explicitly?  (E.g.
+    reserving C27/C28 for outputs?)}
+
+\item
+  Another feature consideration for \insnmipsref{CInvoke} is the
+  need for the caller to construct its own return \PCC{} value.
+  In more conventional \insnmipsref{CJALR} jump-and-link-register
+  instructions, the call instruction itself saves the current \PCC{}.
+  While placing yet more obligation on the architecture to write to registers,
+  this would avoid substantial caller work (typically materialization of a
+  return address provided by the linker, \insnmipsref{CGetPCC}, and
+  \insnmipsref{CSetOffset} to construct a suitable return capability).
+
+\item Add instructions for loading/storing floating point registers via a
+  capability. This is not just a performance optimization, but also simplifies
+  register allocation in a compiler: storing a float by moving it to an
+  integer register and then storing the integer register to memory needs an
+  integer register that isn't being used for something else.
+\end{itemize}
+
+The following changes have been discussed for longer-term consideration:
+
+\begin{itemize}
+\item
+  Consider further the effects of combining general-purpose integer and capability
+  register files, which would avoid adding a new register file, but make some
+  forms of ABI compatibility more challenging.
+\end{itemize}

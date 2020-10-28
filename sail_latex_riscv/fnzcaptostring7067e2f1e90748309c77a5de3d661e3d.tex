@@ -1,0 +1,19 @@
+function #\hyperref[sailRISCVzcapToString]{capToString}# (cap) = {
+  let len = #\hyperref[sailRISCVzgetCapLength]{getCapLength}#(cap);
+  let len_str = #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVztozybits]{to\_bits}#(cap_len_width + 3, len));
+  /* Print architectural type which is -1 for unsealed caps */
+  let otype64 : CapAddrBits = if #\hyperref[sailRISCVzhasReservedOType]{hasReservedOType}#(cap) then #\hyperref[sailRISCVzEXTS]{EXTS}#(cap.otype) else #\hyperref[sailRISCVzEXTZ]{EXTZ}#(cap.otype);
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" t:",
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(if cap.tag then "1" else "0",
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" s:",
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cap) then "1" else "0",
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" perms:",
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(#\hyperref[sailRISCVzBitStr]{BitStr}#(0b0 @ #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cap)),
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" type:",
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(#\hyperref[sailRISCVzBitStr]{BitStr}#(otype64),
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" offset:",
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(#\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(cap)),
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" base:",
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(#\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(cap)),
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" length:", len_str)))))))))))))
+}

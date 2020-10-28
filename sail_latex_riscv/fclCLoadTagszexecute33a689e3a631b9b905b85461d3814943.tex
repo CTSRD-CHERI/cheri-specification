@@ -1,0 +1,52 @@
+let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
+let vaddr = cs1_val.address;
+let aq : bool = false;
+let rl : bool = false;
+if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_TagViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVznot]{not}# (cs1_val.permit_load) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_PermitLoadViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVznot]{not}# (cs1_val.permit_load_cap) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_PermitLoadCapViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVznot]{not}# (#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(cs1_val, vaddr, caps_per_cache_line * cap_size)) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVznot]{not}# (#\hyperref[sailRISCVzunsigned]{unsigned}#(vaddr) % (caps_per_cache_line * cap_size) == 0) then {
+  #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, #\hyperref[sailRISCVzEzyLoadzyAddrzyAlign]{E\_Load\_Addr\_Align}#());
+  RETIRE_FAIL
+} else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddr, #\hyperref[sailRISCVzRead]{Read}#(Cap)) {
+  #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(_), _) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unexpected cheri exception for tags load") },
+  #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
+  #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, ptw_info) => {
+    if ptw_info.ptw_lc != PTW_LC_OK then {
+      #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, #\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(EXC_LOAD_CAP_PAGE_FAULT));
+      RETIRE_FAIL
+    } else {
+      mtags : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(#\hyperref[sailRISCVzbits]{bits}#(caps_per_cache_line)) = #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzzzeros]{zeros}#());
+
+      foreach (i from 0 #\hyperref[sailRISCVzto]{to}# (caps_per_cache_line - 1)) {
+        match mtags {
+          #\hyperref[sailRISCVzMemException]{MemException}#(_) => (),
+          #\hyperref[sailRISCVzMemValue]{MemValue}#(tags) => {
+            match #\hyperref[sailRISCVzmemzyreadzycap]{mem\_read\_cap}#(addr + i * cap_size, aq, rl, false) {
+              #\hyperref[sailRISCVzMemException]{MemException}#(e) => mtags = #\hyperref[sailRISCVzMemException]{MemException}#(e),
+              #\hyperref[sailRISCVzMemValue]{MemValue}#(v) =>
+                mtags = #\hyperref[sailRISCVzMemValue]{MemValue}#([tags with i = #\hyperref[sailRISCVzboolzytozybit]{bool\_to\_bit}#(v.tag)])
+            }
+          }
+        }
+      };
+
+      match mtags {
+        #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
+        #\hyperref[sailRISCVzMemValue]{MemValue}#(v) => { #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(v); RETIRE_SUCCESS }
+      }
+    }
+  }
+}

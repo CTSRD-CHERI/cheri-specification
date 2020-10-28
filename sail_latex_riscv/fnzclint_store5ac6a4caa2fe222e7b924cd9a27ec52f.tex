@@ -1,0 +1,32 @@
+function #\hyperref[sailRISCVzclintzystore]{clint\_store}#(addr, width, data) = {
+  let addr = addr - #\hyperref[sailRISCVzplatzyclintzybase]{plat\_clint\_base}# ();
+  if addr == MSIP_BASE & ('n == 8 | 'n == 4) then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data) ^ " (mip.MSI <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data[0]) ^ ")");
+    mip->#\hyperref[sailRISCVzMSI]{MSI}#() = [data[0]];
+    #\hyperref[sailRISCVzclintzydispatch]{clint\_dispatch}#();
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(true)
+  } else if addr == MTIMECMP_BASE & 'n == 8 then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint<8>[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data) ^ " (mtimecmp)");
+    mtimecmp = #\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(data, 64); /* FIXME: Redundant zero_extend currently required by Lem backend */
+    #\hyperref[sailRISCVzclintzydispatch]{clint\_dispatch}#();
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(true)
+  } else if addr == MTIMECMP_BASE & 'n == 4 then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint<4>[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data) ^ " (mtimecmp)");
+    mtimecmp = #\hyperref[sailRISCVzvectorzyupdatezysubrange]{vector\_update\_subrange}#(mtimecmp, 31, 0, #\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(data, 32));  /* FIXME: Redundant zero_extend currently required by Lem backend */
+    #\hyperref[sailRISCVzclintzydispatch]{clint\_dispatch}#();
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(true)
+  } else if addr == MTIMECMP_BASE_HI & 'n == 4 then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint<4>[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data) ^ " (mtimecmp)");
+    mtimecmp = #\hyperref[sailRISCVzvectorzyupdatezysubrange]{vector\_update\_subrange}#(mtimecmp, 63, 32, #\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(data, 32)); /* FIXME: Redundant zero_extend currently required by Lem backend */
+    #\hyperref[sailRISCVzclintzydispatch]{clint\_dispatch}#();
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(true)
+  } else {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data) ^ " (<unmapped>)");
+    #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#())
+  }
+}

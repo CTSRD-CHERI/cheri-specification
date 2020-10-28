@@ -1,0 +1,17 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let cb_val = #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(cb);
+let ct_val = #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(ct);
+let equal : bool = cb_val.address == ct_val.address;
+let ltu : bool = cb_val.address <_u ct_val.address;
+let lts : bool = cb_val.address <_s ct_val.address;
+let cmp : bool = match op {
+  CEQ    => equal,
+  CNE    => not (equal),
+  CLT    => lts,
+  CLE    => lts | equal,
+  CLTU   => ltu,
+  CLEU   => ltu | equal,
+  CEXEQ  => cb_val == ct_val,
+  CNEXEQ => cb_val != ct_val
+};
+#\hyperref[sailMIPSzwGPR]{wGPR}#(rd) = #\hyperref[sailMIPSzzzerozyextend]{zero\_extend}# (cmp)

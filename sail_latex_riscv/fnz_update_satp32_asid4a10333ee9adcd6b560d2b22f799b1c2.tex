@@ -1,0 +1,2 @@
+function _update_Satp32_Asid (v, x) = let v = { v with Satp32_chunk_0 = update_subrange_bits(v.Satp32_chunk_0, 30, 22, subrange_bits(x, 8, 0)) } in
+  v

@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzextzyexczytypezytozystr]{ext\_exc\_type\_to\_str}#(e) =
+  match (e) {
+    EXC_LOAD_CAP_PAGE_FAULT => "load-cap-page-fault",
+    EXC_SAMO_CAP_PAGE_FAULT => "store/amo-cap-page-fault",
+    EXC_CHERI               => "cheri"
+  }

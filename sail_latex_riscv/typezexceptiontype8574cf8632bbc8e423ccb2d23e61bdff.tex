@@ -1,0 +1,21 @@
+union ExceptionType = {
+ E_Fetch_Addr_Align   : unit,
+ E_Fetch_Access_Fault : unit,
+ E_Illegal_Instr      : unit,
+ E_Breakpoint         : unit,
+ E_Load_Addr_Align    : unit,
+ E_Load_Access_Fault  : unit,
+ E_SAMO_Addr_Align    : unit,
+ E_SAMO_Access_Fault  : unit,
+ E_U_EnvCall          : unit,
+ E_S_EnvCall          : unit,
+ E_Reserved_10        : unit,
+ E_M_EnvCall          : unit,
+ E_Fetch_Page_Fault   : unit,
+ E_Load_Page_Fault    : unit,
+ E_Reserved_14        : unit,
+ E_SAMO_Page_Fault    : unit,
+
+ /* extensions */
+ E_Extension          : ext_exc_type
+}

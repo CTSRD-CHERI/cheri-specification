@@ -1,0 +1,6 @@
+function #\hyperref[sailMIPSzgetRepresentableAlignmentMask]{getRepresentableAlignmentMask}#(len) : #\hyperref[sailMIPSzbits]{bits}#(64) -> #\hyperref[sailMIPSzbits]{bits}#(64) = {
+  let (exact, c) = #\hyperref[sailMIPSzsetCapBounds]{setCapBounds}#(default_cap,  #\hyperref[sailMIPSzones]{ones}#() - len, 0b0 @ 0xffffffffffffffff);
+  let e : range(0, 52) = #\hyperref[sailMIPSzmin]{min}#(#\hyperref[sailMIPSzunsigned]{unsigned}#(c.E), 52);
+  let e' : range(0, 55) = if c.internal_e then e + 3 else 0;
+  #\hyperref[sailMIPSzones]{ones}#(64-e') @ #\hyperref[sailMIPSzzzeros]{zeros}#(e')
+}

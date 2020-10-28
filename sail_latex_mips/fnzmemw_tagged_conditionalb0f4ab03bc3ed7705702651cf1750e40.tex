@@ -1,0 +1,8 @@
+function #\hyperref[sailMIPSzMEMwzytaggedzyconditional]{MEMw\_tagged\_conditional}#(addr, size, tag, data) =
+{
+  #\hyperref[sailMIPSzMEMeazyconditional]{MEMea\_conditional}#(addr, size);
+  success = #\hyperref[sailMIPSzMEMvalzyconditional]{MEMval\_conditional}#(addr, size, #\hyperref[sailMIPSzreversezyendianness]{reverse\_endianness}#(data));
+  if success then
+     #\hyperref[sailMIPSzwritezytagzybool]{write\_tag\_bool}#(addr & cap_addr_mask, tag);
+  success;
+}

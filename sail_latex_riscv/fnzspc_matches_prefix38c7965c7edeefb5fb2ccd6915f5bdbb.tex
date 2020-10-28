@@ -1,0 +1,7 @@
+function spc_matches_prefix s = {
+  let n = #\hyperref[sailRISCVznzyleadingzyspaces]{n\_leading\_spaces}#(s);
+  match n {
+    0 => #\hyperref[sailRISCVzNone]{None}#(),
+    _ => #\hyperref[sailRISCVzSome]{Some}#((), n)
+  }
+}

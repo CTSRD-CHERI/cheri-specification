@@ -1,0 +1,23 @@
+let offset : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
+/* Get the address, #\hyperref[sailRISCVzX]{X}#(rs1) + offset.
+   Some extensions perform additional checks on address validity. */
+match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, offset, #\hyperref[sailRISCVzRead]{Read}#(Data), width) {
+  #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(e)  => { #\hyperref[sailRISCVzextzyhandlezydatazycheckzyerror]{ext\_handle\_data\_check\_error}#(e); RETIRE_FAIL },
+  #\hyperref[sailRISCVzExtzyDataAddrzyOK]{Ext\_DataAddr\_OK}#(vaddr) =>
+    if   #\hyperref[sailRISCVzcheckzymisaligned]{check\_misaligned}#(vaddr, width)
+    then { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, #\hyperref[sailRISCVzEzyLoadzyAddrzyAlign]{E\_Load\_Addr\_Align}#()); RETIRE_FAIL }
+    else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddr, #\hyperref[sailRISCVzRead]{Read}#(Data)) {
+      #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
+      #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) => {
+        let (aq, rl, res) = (false, false, false);
+        match (width, sizeof(xlen)) {
+          (BYTE, _)   => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+          (HALF, _)   => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+          (WORD, _)   =>
+             #\hyperref[sailRISCVzprocesszyfload32]{process\_fload32}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 4, aq, rl, res)),
+          (DOUBLE, 64) =>
+             #\hyperref[sailRISCVzprocesszyfload64]{process\_fload64}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 8, aq, rl, res))
+        }
+      }
+    }
+}

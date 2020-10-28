@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzextzygetzyptwzyerror]{ext\_get\_ptw\_error}#(eptwf : ext_ptw_fail) -> PTW_Error =
+  match (eptwf) {
+    EPTWF_NO_PERM  => #\hyperref[sailRISCVzPTWzyNozyPermission]{PTW\_No\_Permission}#(),
+    EPTWF_CAP_ERR  => #\hyperref[sailRISCVzPTWzyExtzyError]{PTW\_Ext\_Error}#(AT_CAP_ERR)
+  }

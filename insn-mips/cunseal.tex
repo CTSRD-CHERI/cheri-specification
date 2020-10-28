@@ -1,0 +1,55 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CUnseal}
+\insnmipslabel{cunseal}
+\subsection*{CUnseal: Unseal a Sealed Capability}
+
+\subsubsection*{Format}
+
+CUnseal cd, cs, ct
+
+\begin{center}
+\cherithreeop[header]{0xc}{cd}{cs}{ct}
+\end{center}
+
+\subsubsection*{Description}
+
+The sealed capability in $cs$ is unsealed with $ct$ and the result placed
+in $cd$. The global bit of $cd$ is the AND of the global bits of
+$cs$ and $ct$. $ct$ must be unsealed, have \emph{Permit\_Unseal} permission, and $ct$.\cbase{} + $ct$.\coffset{} must equal $cs$.\cotype{}.
+
+\subsubsection*{Semantics}
+
+\sailMIPScode{CUnseal}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cs}.\ctag{} is not set.
+\item
+\emph{ct}.\ctag{} is not set.
+\item
+\emph{cs} is not sealed.
+\item
+\emph{ct} is sealed.
+\item
+\emph{ct}.\coffset{} $\ge$ \emph{ct}.\clength{}
+\item
+\emph{ct}.\cperms{}.\emph{Permit\_Unseal} is not set.
+\item
+\emph{ct}.\cbase{} $+$ \emph{ct}.\coffset{} $\ne$ \emph{cs}.\cotype{}.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+There is no need to check if \emph{ct}.\cbase{} $+$ \emph{ct}.\coffset{}
+$>$ \emph{max\_otype}, because this can't happen:
+\emph{ct}.\cbase{} $+$ \emph{ct}.\coffset{} must equal \emph{cs}.\cotype{}
+for the \cotype{} check to have succeeded, and there is no way
+\emph{cs}.\cotype{} could have been set to a value that is out of range.
+\end{itemize}

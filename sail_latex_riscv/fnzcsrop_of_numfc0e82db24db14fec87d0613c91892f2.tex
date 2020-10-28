@@ -1,0 +1,5 @@
+function csrop_of_num arg# = match arg# {
+  0 => CSRRW,
+  1 => CSRRS,
+  _ => CSRRC
+}

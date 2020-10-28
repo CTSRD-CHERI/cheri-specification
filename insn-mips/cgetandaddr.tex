@@ -1,0 +1,29 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CGetAndAddr}
+\insnmipslabel{cgetandaddr}
+\subsection*{CGetAndAddr: Get Address of Capability with mask}
+
+\subsubsection*{Format}
+
+CGetAndAddr rd, cb, rs
+
+\begin{center}
+\cherithreeop[header]{0x23}{rd}{cb}{rs}
+\end{center}
+
+\subsubsection*{Description}
+
+\emph{rd} is set to \emph{cb}.\caddr{}  logically ANDed with \emph{rs}.
+
+\subsubsection*{Semantics}
+
+\sailMIPScode{CGetAndAddr}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item This instruction may be useful when C is using the lower bits of a pointer with known alignment to store additional metadata.
+\item This instruction is also useful when using a capability type as a union of pointers, integers and floating pointer numbers using a NaN-boxing representation.
+\item In a merged register file this instruction would not be necessary since the integer bitwise and could be used instead.
+\end{itemize}

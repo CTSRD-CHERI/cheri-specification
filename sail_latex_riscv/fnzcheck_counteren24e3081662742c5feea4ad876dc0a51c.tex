@@ -1,0 +1,15 @@
+function #\hyperref[sailRISCVzcheckzyCounteren]{check\_Counteren}#(csr : csreg, p : Privilege) -> bool =
+  match(csr, p) {
+    (0xC00, Supervisor) => mcounteren.#\hyperref[sailRISCVzCY]{CY}#() == 0b1,
+    (0xC01, Supervisor) => mcounteren.#\hyperref[sailRISCVzTM]{TM}#() == 0b1,
+    (0xC02, Supervisor) => mcounteren.#\hyperref[sailRISCVzIR]{IR}#() == 0b1,
+
+    (0xC00, User) => mcounteren.#\hyperref[sailRISCVzCY]{CY}#() == 0b1 & ((~ (#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#())) | scounteren.#\hyperref[sailRISCVzCY]{CY}#() == 0b1),
+    (0xC01, User) => mcounteren.#\hyperref[sailRISCVzTM]{TM}#() == 0b1 & ((~ (#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#())) | scounteren.#\hyperref[sailRISCVzTM]{TM}#() == 0b1),
+    (0xC02, User) => mcounteren.#\hyperref[sailRISCVzIR]{IR}#() == 0b1 & ((~ (#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#())) | scounteren.#\hyperref[sailRISCVzIR]{IR}#() == 0b1),
+
+    (_, _) => /* no HPM counters for now */
+              if   0xC03 <=_u csr & csr <=_u 0xC1F
+              then false
+              else true
+  }

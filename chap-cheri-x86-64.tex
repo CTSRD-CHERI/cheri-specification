@@ -1,0 +1,639 @@
+\chapter{The CHERI-x86-64 Instruction-Set Architecture (Sketch)}
+\label{chap:cheri-x86-64}
+
+\rwnote{New introduction is required, and some change of pitch.}
+
+In this chapter, we explore models for applying CHERI protection to the x86
+architecture.
+The x86 architecture is a widely deployed CPU architecture used in a
+variety of applications ranging from mobile to high-performance computing.
+The architecture has evolved over time from 16-bit processors without
+MMUs to present-day systems with 64-bit processors supporting virtual
+memory via a combination of segmentation and paging.
+
+The x86 architecture has spanned three register sizes (16, 32, and
+64 bits) and multiple memory management models.  We choose to define
+CHERI solely for the 64-bit x86 architecture for a variety of reasons
+including its more mature virtual-memory model, as well as its larger
+general-purpose integer register file.
+
+\section{Capability Registers versus Segments}
+
+The x86 architecture first added virtual memory support via
+relocatable and variable-sized segments.  Each segment was assigned a
+mask of permissions.  Memory references were resolved with respect to a
+specific segment including relocation to a base address, bounds
+checking, and access checks.  Special segment types permitted transitions
+to and from different protection domains.
+
+These features are similar to features in CHERI capabilities.
+However, there are also some key differences.
+
+First, x86 addresses are stored as a combination of an offset and a
+segment spanning two different registers.  General-purpose registers
+are used to hold offsets, and dedicated segment selector registers are
+used to hold information about a single segment.  The x86 architecture
+provides six segment selector registers -- three of which are reserved
+for code, stack, and general data accesses.  A fourth register is
+typically used to define the location of thread-local storage (TLS).
+This leaves two segment registers to use for fine-grained segments
+such as separate segments for individual stack variables.  These
+registers do not load a segment descriptor from arbitrary locations in
+memory.  Instead, each register selects a segment descriptor from a
+descriptor table with a limited number of entries.  One could treat
+the segment descriptor tables (or portions of these tables) as a cache
+of active segments.
+
+Second, more fine-grained segments are not derived from existing
+segments.  Instead, each entry in a descriptor table is independent.
+Write access to a descriptor table permits construction of arbitrary
+segments (including special segments that permit privilege
+transitions).  Restricting descriptor-table write access to kernel
+mode does not protect against construction of arbitrary segments in
+kernel mode due to bugs or vulnerabilities.  As a result, segment
+descriptors are not able to provide the same provenance guarantees as
+tagged capabilities.
+
+Third, existing segment descriptors do not have available bits for
+storing types or permissions more expressive than the existing
+read, write, and execute.
+
+Finally, x86 segmentation is typically not used in modern operating
+systems.  On the 32-bit x86 architecture, systems generally create
+segments with infinite bounds and use a non-zero base address only
+for a single segment that provides TLS.  The 64-bit x86 architecture
+codifies this by removing segment bounds entirely and supporting non-zero-base
+addresses only for two segment registers.
+Software for x86 systems stores only the offset portion of virtual
+addresses in pointer variables.  Segment registers are set to fixed
+values at program startup, never change, and are largely ignored.
+
+One approach for providing a similar set of features to CHERI
+capabilities on x86 would be to extend the existing segment primitives
+to accommodate some of these differences.  For example, descriptor-table
+entries could be tagged, whereby loading an untagged segment would trigger
+an exception.  However, some other potential changes are broader in
+scope (e.g., whether segment selectors should contain an index into a
+table, versus a logical address of a segment descriptor).  Extending
+segments would also result in a very different model compared to CHERI
+capabilities on other architectures, limiting the ability to share code
+and algorithms.  Instead, we propose to add CHERI capabilities to 64-bit
+x86 by extending existing general-purpose integer registers.
+
+\section{Tagged Capabilities and Memory}
+
+As with CHERI-MIPS and CHERI-RISC-V, we recommend that both memory and
+registers contain tagged capabilities.  Similar to CHERI-RISC-V, we also
+recommend a single, 128-bit format for CHERI-x86-64 capabilities.
+
+\section{Extending Existing Registers}
+
+The x86 architecture has expanded its general-purpose integer registers multiple
+times.  Thus, the 16-bit \AX{} register has been extended to 32-bit \EAX{}
+and 64-bit \RAX{}.
+We propose extending each general-purpose integer register to a tagged, 128-bit register
+able to contain a single capability.
+The capability-sized registers would be named with a `C' prefix in place
+of the `R' prefix used for 64-bit registers
+(\CAX{}, \CBX{}, etc.).
+As with CHERI-RISC-V,
+we recommend that reads of the general-purpose registers as integers return
+the cursor value (virtual address).
+Writes to general-purpose registers using non-capability-aware instructions
+should clear the tag and upper 64 bits of capability metadata, storing the
+desired integer value in the register's cursor.
+
+The \RIP{} register (which contains the address of the current instruction)
+would also be extended into a \CIP{} capability.  This would function as
+the equivalent of \PCC{} for CHERI-MIPS and CHERI-RISC-V.  As with
+those architectures, the
+value of \RIP{} should be the current offset of \CIP{} rather than the
+cursor value (virtual address).
+
+\section{Additional Capability Registers}
+
+Additional capability registers beyond those present in the general-purpose
+integer
+register set will also be required.
+
+A new register will be required to hold \DDC{} for controlling
+non-capability-aware memory accesses.
+
+The x86 architecture currently uses the \FS{} and \GS{} segment selector registers
+to provide thread-local storage (TLS).  In the 64-bit x86 architecture,
+these selectors are mostly reduced to holding an alternate base address
+that is added as an offset to the virtual address of existing instructions.
+For CHERI-x86-64 we recommend replacing these segment registers with two
+new capability registers: \CFS{} and \CGS{}.
+
+In addition, new capability registers may be required to manage user
+to kernel transitions as detailed below.
+
+\section{Using Capabilities with Memory Address Operands}
+
+As with other CHERI architectures, CHERI-x86-64 should support running existing
+x86-64 code, capability-aware code, and hybrid code.  This
+requires the architecture to support multiple addressing modes.
+The x86 architecture has implemented this in the past when it was
+extended to support 32-bit operation.  We propose to reuse some of the
+same infrastructure to support a new capability-based addressing
+mode.
+
+When x86 was extended from 16 bits to 32 bits, the architecture
+included the ability to run existing 16-bit code without modification
+as well as execute individual 16-bit or 32-bit instructions within a
+32-bit or 16-bit codebase.  The support for 16-bit versus 32-bit
+operation was
+split into two categories: operand size and addressing modes.  The
+code segment descriptor contains a single-bit `D' flag, which sets the
+default operand size and addressing mode.  These attributes can then
+be toggled to the non-default setting via opcode prefixes.  The 0x66
+prefix is used to toggle the operand size, and the 0x67 prefix is used
+to toggle the addressing mode.
+
+In 64-bit (``long'') mode, the `D' flag is currently always set to
+0 to indicate 32-bit operands and 64-bit addressing.  A value of
+1 for `D' is reserved.  The 0x67 opcode prefix is used to toggle
+between 32-bit and 64-bit addresses, but a few other single-byte opcodes
+are invalid in 64-bit mode and could be repurposed as a prefix.
+
+We propose a new capability-aware addressing mode that can be
+toggled via the `D' flag of the current code segment and a new 0x62
+opcode prefix.  (In 32-bit x86, the 0x62 opcode is the
+\insnnoref{BOUND} instruction, which is invalid in 64-bit mode.)
+If the `D' flag of a 64-bit code segment is set to 1,
+then the CPU would execute in ``capability mode'' -- which would include
+using the capability-aware addressing mode by default.  Individual
+instructions could toggle between capability-aware and ``plain''
+64-bit addressing via the 0x62 opcode prefix.  Addresses using the
+``plain'' 32-bit or 64-bit addressing would always be treated as offsets
+relative to \DDC{}.  Instructions using capability-aware addressing
+would always use 64-bit virtual addresses and ignore any 0x67 opcode
+prefix.
+
+Note that one can change the value of \CS{} in user mode (for example,
+a user process in FreeBSD/amd64 can switch between 32 and 64-bit by
+using a far call that loads a different value of \CS{}).  This would mean
+that user code could swap into pure-capability mode without requiring
+a system call.  However, this would not alter the contents of
+capability registers or their enforcement, merely the decoding of
+instructions.  If \DDC{} is invalid, then sandboxed code that switched to
+a non-capability \CS{} would still require valid capability registers to
+access memory.
+
+\subsection{Capability-Aware Addressing}
+
+For instructions with register-based memory operands, capability-aware
+addressing would use the capability version of the register rather
+than the virtual address relative to \DDC{}.
+
+For example:
+
+\begin{verbatim}
+mov 0x8(%cbp),%rax
+\end{verbatim}
+
+would read the 64-bit value at offset 8 from the capability described
+by the \CBP{} register.
+
+On the other hand,
+
+\begin{verbatim}
+mov 0x8(%rbp),%rax
+\end{verbatim}
+
+would read the 64-bit value at an offset of RBP+8 from the \DDC{} capability.
+Both instructions would use the same opcode aside from the addition of
+an 0x62 opcode prefix.  In a code segment with `D' set to 1, the second
+instruction would require the prefix.  In a code segment with `D' set to 0,
+the first instruction would require the prefix.
+
+\subsection{Scaled-Index Base Addressing}
+
+x86 also supports an addressing mode that combines the values of two
+registers to construct a virtual address known as scaled-index base
+addressing.  These addresses use one register, the \emph{base}, and a
+second register, the \emph{index}, multiplied by a scaling factor of 1, 2,
+4, or 8.  For these addresses, capability-aware addresses would select
+a capability for the base register, but the index register would use
+the integer value of the register.  For example:
+
+\begin{verbatim}
+mov (%rax,%rbx,4),%rcx
+\end{verbatim}
+
+This computes an effective address of \RAX{} + \RBX{} * 4 and loads the value
+at that address into \RCX{},  The capability-aware version would be:
+
+\begin{verbatim}
+mov (%cax,%rbx,4),%rcx
+\end{verbatim}
+
+That is, starting with the \CAX{} capability, \RBX{} * 4 would be added to the
+offset, and the resulting address validated against the \CAX{} capability.
+
+\subsection{RIP-Relative Addressing}
+
+The 64-bit x86 architecture added a new addressing mode to support more
+efficient Position-Independent Code (PIC) performance.
+This addressing mode uses an immediate offset
+relative to the current value of the instruction
+pointer.  These addresses are known as \RIP{}-relative addresses.
+
+To support existing code, \RIP{}-relative addresses should be resolved
+relative to \DDC{} when using ``plain'' 64-bit addressing.
+Specifically, the value of \RIP{} (offset of \CIP{}) would be added to
+the immediate offset.  The resulting value would then be used as an
+offset relative to \DDC{} for the load or store.
+
+When capability-aware addressing is used, \RIP{}-relative addresses
+should be resolved relative to \CIP{}.
+The immediate offset is applied to \CIP{} and the load
+or store is constrained by the bounds and permissions of \CIP{}.
+
+\subsection{Using Additional Capability Registers}
+
+The proposed capability-aware addressing mode proposed above allows
+for the capability versions of existing general-purpose integer registers such
+as \CAX{} or \CBP{} to be encoded in existing register instructions.
+However, it does not permit the direct use of the additional
+capability registers \DDC{}, \CFS{}, or \CGS{}.  \DDC{} is not expected to be
+used as an explicit base address, but \CFS{} and \CGS{} must be usable in this
+manner to support TLS with capability-aware addresses.
+
+One option would be to repurpose the existing \FS{} and \GS{} segment
+prefixes when used with instructions using capability-aware addresses
+to select an implicit base register of \CFS{} or \CGS{}, respectively.
+However, this approach is potentially confusing.  Would an instruction
+using an existing address of ``(\%cax)'' and an instruction prefix of
+``GS:'' simply use the cursor of \CAX{} (value of \RAX{}) as an offset
+relative to \CGS{}?  In addition, instructions that manipulate
+capabilities need a way to specify an additional capability register
+as an operand.
+
+To handle both of these cases, we propose to reuse the existing \FS{} and
+\GS{} segment prefixes to extend the capability register selector field
+in opcodes.  This is similar to the use of bits in \REX{} prefixes to
+extend the general-purpose integer register selector fields in other
+instructions.  Instructions with memory addresses will use at most one
+capability-register, and the \FS{} prefix could be used to select
+capability registers with an index of 32 or higher.  For instructions
+operating on two capability registers, the \FS{} prefix would affect the
+register selected for the first capability register operand, and the
+\GS{} prefix would affect the register selected for the second capability
+register operand.  Additional capability registers such as \DDC{}, \CFS{},
+and \CGS{} would be assigned register indices starting at 32 and require
+a suitable prefix.
+
+\subsection{Instructions with Implicit Memory Operands}
+
+Some x86 instructions have implicit memory operands addressed by a
+register.  These instructions should support addressing memory with
+capabilities.
+
+The ``string''
+instructions use \RSI{} as source address and \RDI{} as a destination address.
+For example, the
+\insnnoref{STOS} instruction stores the value in \AL{}/\AX{}/\EAX{}/\RAX{} to the address in
+\RDI{}, and then either increments or decrements the destination
+index register (depending on the Direction Flag).  When capability
+addressing mode is enabled,
+these string instructions should use \CSI{} instead of \RSI{} and \CDI{} instead of
+\RDI{}.
+
+Instructions that work with the stack such as \insnnoref{PUSH}
+or \insnnoref{CALL} use the stack pointer as an implicit
+operand.  In plain 64-bit mode, \RSP{} would be treated as an offset
+into \DDC{} to compute the stack pointer.  In ``capability mode'',
+these instructions would use \CSP{} as the stack pointer.  Hybrid code
+executing in plain 64-bit mode that uses \CSP{} as the stack pointer
+would simulate these instructions using \insnnoref{MOV}
+instructions and adjusting the offset of \CSP{}.  Similarly,
+``capability mode'' instructions using \RSP{} as the stack pointer
+would use \insnnoref{MOV} combined with adjustments to \RSP{}.
+
+\section{Capability-Aware Instructions}
+
+\subsection{Control-Flow Instructions}
+
+Existing control-flow operations such as \insnnoref{JMP},
+\insnnoref{CALL}, and \insnnoref{RET} would modify the offset of the
+\CIP{} capability as well as verify that the new offset is valid.
+
+New instructions would be required when performing a control-flow
+operation that loads a full \CIP{} capability.  For example, a new
+\insnnoref{CJMP} instruction would accept either a capability register
+or an in-memory capability as its sole argument and load the new capability
+into \CIP{} similar to the CHERI-RISC-V \insnriscvref{CJR} instruction.
+New \insnnoref{CCALL} and \insnnoref{CRET} instructions would be
+used for function calls that push the full \CIP{} capability onto the stack
+as the return address.
+
+One option for these new instructions may be to use an opcode prefix
+to toggle between loading a \RIP{} offset versus a full \CIP{}
+capability.  In that case, the default mode of an instruction may be
+governed by the `D' flag of the current code segment to permit compact
+instruction encoding for capability-aware software.  Note that since
+\insnnoref{CALL} and \insnnoref{JMP} may accept a memory
+operand, this opcode prefix would need to be a different prefix than
+the 0x62 used to toggle addressing modes.
+
+Another option that avoids the use of a new opcode prefix would be to
+offer new instructions that always operate on \CIP{} and choose a
+subset of comonly-used but shorter opcodes that default to loading a
+full \CIP{} instead of \RIP{} in ``capability mode''.
+
+The implicit stack pointer operand in \insnnoref{CALL} and
+\insnnoref{RET} also bears consideration.  To avoid an
+explosion of new opcodes while also providing compact enoding for
+common uses, these instructions would use \CSP{} as the stack pointer
+in ``capability mode'' and \RSP{} as the stack pointer in plain 64-bit
+mode.  Code that needed to use an alternate stack pointer would use
+explicit stack manipulation along with \insnnoref{JMP}.
+
+\subsection{Manipulating Capabilities}
+
+New instructions will need to be defined to support capability
+manipulations similar to other CHERI architectures.
+
+New \insnnoref{MOV} variants could handle loading and storing of
+capabilities similar to \insnref{CLC} and \insnref{CSC}.
+
+NULL-derived capabilities with constant values can be loaded into
+registers using existing \insnnoref{MOV} instructions which
+write into general purpose registers since those instructions will
+clear the upper 64-bits of metadata as a side effect.  Arbitrary
+null-derived capabilities can be stored to memory as a two instruction
+sequence where the first instruction uses an existing
+\insnnoref{MOV} of an immediate value into a general purpose
+register and the second stores the aliased capability register value
+into the destination.
+
+However, storing NULL pointers into memory is a frequent operation
+which might warrant optimization.  A few alternatives include:
+
+\begin{enumerate}
+  \item Use a two instruction sequence where the first instruction is
+    a well-known instruction for generating a zero value.  Modern
+    x86 CPUs complete such instructions during decoding so only the
+    second instruction would use execution pipeline resources.
+    However, this requires using a general purpose register to hold
+    the temporary zero value.
+
+  \item Add a read-only \CNULL register in the additional bank of
+    capability registers which can be used as the source of a
+    capability-sized \insnnoref{MOV}.
+
+  \item Add a new \insnnoref{MOVNULL} instruction which stores
+    a NULL capability to the destination.
+\end{enumerate}
+
+A new variant of \insnnoref{CMPXCHG} will be required to support
+atomic operations on capabilities.  (Note that \insnnoref{CMPXCHG16B}'s
+existing semantics are not suitable for capabilities
+as it divides the values into register pairs.)  It may also be
+desirable to define a capability variant of \insnnoref{XADD}.
+
+Variants of \insnnoref{PUSH}/\insnnoref{POP} could be used to
+save and restore capability registers on the stack -- if those operations
+are common enough to warrant new instructions rather than using
+capability \insnnoref{MOV} instructions paired with adjustments to
+\CSP{}.
+
+For other capability operations such as \insnref{CIncOffset}, we
+propose adding new CHERI-specific instructions rather than
+repurposing existing instructions such as \insnnoref{ADD}.
+Existing general-purpose x86 instructions support two operands rather
+than three operands.  To avoid introducing a new operand encoding
+format, we propose to use two-operand variants of CHERI
+instructions when adapting instructions to x86.
+
+The \insnnoref{LEA} instruction warrants additional consideration.
+When capability mode addressing is enabled for this instruction, the
+effective address should be a capability stored in a capability
+destination register.  This would permit the use of \insnnoref{LEA}
+to perform some operations such as \insnref{CIncOffset}, without
+overwriting the source capability register.
+
+Some x86 instructions such as \insnnoref{MOV} have variants
+which accept operands of differing sizes.  Assemblers and
+disassemblers can use suffixes such as \texttt{b}, \texttt{w},
+\texttt{l}, and \texttt{q} to explicitly state the operand size.  We
+recommand that the \texttt{c} suffix be used to explicitly state
+operands which are capability-sized.
+
+\subsection{Inspecting Tags}
+
+CHERI-MIPS provides dedicated \insnref{CBTU} and
+\insnref{CBTS} instructions for conditional branches.  For x86, a
+more natural model may be to add a new ``tagged'' flag to the
+\RFLAGS{} register.  Any instruction that stored a capability such as
+capability-aware variants of \insnnoref{MOV} would set this
+flag to the tag bit of the stored capability.  New conditional jump
+instructions would be added that tested this flag.
+
+\section{Capability Violation Faults}
+
+For reporting capability violations, we propose reserving a new
+exception vector.  This new exception would report an error code
+pushed as part of the exception frame similar to GP\# and PF\# faults.
+This error code would contain the capability exception code as
+described in Section~\ref{sec:capability_exception_causes} to indicate
+the specific violation.
+
+CHERI-MIPS and CHERI-RISC-V include the name of the register which
+triggers a capability violation.  It is not feasible to provide a
+direct analog of this on x86.  Indirect jumps and calls may raise an
+exception while loading a capability from memory that is not present
+in any register at the start of the instruction.  However, unlike page
+faults, capability violation faults are not generally restartable and
+the register name's primary use is for debugging convenience rather than
+correctness.  There are a few possible options for providing similar
+information:
+
+\begin{enumerate}
+\item Provide a copy of the faulting capability via one of the
+  currently-unused but reserved control registers, such as \CRFIVE{}
+  or \CRTWELVE{} -- similar to the PF\# virtual address stored in
+  \CRTWO{}.  This faulting capability would include the result of any
+  offset adjustments from immediates or scaled indices.  If the result
+  of offset adjustments made the capability unrepresentable, the
+  faulting capability would be a null capability holding the computed
+  virtual address.
+\item Similar to the above, but ignore offset adjustments and only
+  provide the base capability value.
+\item Provide the virtual address from the faulting capability in
+  \CRTWO{} similar to PF\#.  A debugger could examine the faulting
+  instruction's operands to determine which capability triggered the fault.
+\item Do nothing as the prior approaches may be too expensive to
+  implement.
+\end{enumerate}
+
+\section{Interrupt and Exception Handling}
+
+For interrupt and exception handling, we propose a new overall CPU
+mode that enables the use of capabilities.  The availability of this
+mode would be indicated by a new \insnnoref{CPUID} flag.  The
+mode would be enabled by setting a new bit in \CRFOUR{}.  When this mode
+is enabled, exceptions would push a new type of interrupt frame that
+would replace \RIP{} with the full \CIP{} capability, and \RSP{} with the full
+\CSP{} capability.  \insnnoref{IRET} would be modified to unwind this expanded stack
+frame.
+
+Interrupt and exception handlers require new capabilities for the
+program counter (\CIP{}) and stack pointer (\CSP{}) registers.  We consider
+two possible approaches.
+
+\subsection{Kernel Code and Stack Capabilities}
+
+The first approach would add two new control registers: the Kernel
+Code Capability (\KCC{}) and Kernel Stack Capability (\KSC{}).  Access to
+these registers would be restricted to supervisor mode.  These new registers
+could be named as instruction operands, using the same approach decribed
+earlier for \CFS{} and \CGS{}.
+
+Transitions into
+supervisor mode would load new offsets relative to \KCC{} and \KSC{} from
+existing data structures and tables to construct the new \CIP{} and \CSP{}
+register values.  For example, the current virtual address stored in
+each Interrupt Descriptor Table (\IDT{}) entry would be used as an offset
+relative to \KCC{} to build \CIP{}, and the address stored in the Interrupt
+Stack Table (\IST{}) entry in the current Task-State Segment (\TSS{}) would
+be used as an offset relative to \KSC{} to build \CSP{}.  Transitions via
+the \insnnoref{SYSCALL} instruction would use the offset from \LSTAR{} to
+construct the new \CIP{}.
+
+This approach does require broad capabilities
+for \KCC{} and \KSC{} that can accommodate any desired entry point or stack
+location.  However, it will require minimal changes to existing systems
+code such as operating-system kernels.
+
+\subsection{Capabilities in Entry Points}
+
+The second approach would be to replace virtual addresses stored in
+existing entry points with complete capabilities.  This is a more
+invasive change, requiring larger changes to existing systems code, but
+it enables the use of more fine-grained capabilities for each entry
+point.
+
+Setting the desired kernel stack pointers \CSP{} would require a new
+\TSS{} layout that expanded the existing \RSP{} and \IST{} entries to
+capabilities.
+
+For \insnnoref{SYSCALL}, a new control register \CSTAR{} could be
+added to hold the target instruction pointer.  As with \KCC{},
+this register would be a privileged register in the same bank as
+\CFS{} and \CGS{}.
+
+Entries in the \IDT{} would be expanded to 32-bytes, appending a capability
+code pointer in the last 16 bytes.  This would double the size of the
+\IDT{}, and most of the bytes would be unused.  However, it would
+ensure that all of the information currently stored in an \IDT{} entry
+(such as the segment selector, \IST{} index, and descriptor type) would
+be configurable.
+
+\subsection{\insnnoref{SWAPGS} and Capabilities}
+
+The \insnnoref{SWAPGS} instruction is used in user-to-kernel
+transitions for the 64-bit x86 architecture to permit separate TLS
+pointers for user and kernel mode.  One option would be to provide a
+capability version of \insnnoref{SWAPGS}, either by extending the
+\KGSBASE{} MSR to a capability, or adding a new MSR.  However, this
+instruction can be difficult to use.  Interrupt and exception handlers
+must be careful not to invoke \insnnoref{SWAPGS} if the interrupt
+or exception is taken while executing the kernel mode \GS{}.  We
+recommend avoiding the use of \insnnoref{SWAPGS}, and instead defining
+a new privileged control register \KGS{}.  Operating systems could
+either choose to use \KGS{} to initialize \CGS{} in interrupt and
+exception handlers, or else use \KGS{} directly as the kernel mode TLS
+pointer.
+
+\section{Page Tables}
+
+Similar to CHERI on other architectures, additional page-table
+permission bits governing loads and stores of capabilities are
+desirable.  In addition, it may be beneficial to have a ``capability
+dirty'' bit.  At present the 64-bit x86 architecture has reserved bits
+in a range from bit 52 (\texttt{MAXPHYADDR}) to bit 62.  The Protection Keys
+extension uses bits 59-62 from that range.  To avoid conflicting with
+Protection Keys, CHERI-x86-64 could use bits starting at bit 58 as described in Table~\ref{table:x86:pte}.  Higher bits are
+preferred, to permit maximal room for growth of the physical address
+field that currently ends at bit 51.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Bit & Name & Description \\
+\midrule
+58 & CW & Permits writes of tagged capabilities \\
+57 & CR & Permits reads of tagged capabilities \\
+56 & CD & Set when a tagged capability is written to this page \\
+\bottomrule
+\end{tabular}
+\end{center}
+\caption{CHERI-x86-64 Page Table Bits}
+\label{table:x86:pte}
+\end{table}
+
+If an instruction performs a memory access which violates a CHERI page
+permission (such as a store of a tagged capability to a page where the
+\texttt{CW} bit is clear), a page-fault (PF\#) exception should be
+raised.  Bit 6 (currently reserved) should be set in the page-fault
+error code provided by the processor indicating that the fault was
+caused by a capabilty permission violation.  Other bits in the page
+fault error code such as \texttt{P}, \texttt{W/R}, \texttt{U/S}, and
+\texttt{I/D} should be set to indicate the type of memory access.  In
+addition, the virtual address of the memory access should be provided
+in the \CRTWO{} register similar to other page-fault exceptions.
+
+Note that the \texttt{CR} and \texttt{CW} bits only fault if the
+capability being read or written is tagged.  Untagged capability
+values can be read from or written to memory regardless of the
+\texttt{CR} and \texttt{CW} permissions.  In addition, if the
+authorizing capability for a capability read does not hold \cappermLC,
+then reading a tagged capability will always return a capability with
+the tag cleared instead of faulting.
+
+Instruction fetches always ignore tags and will never raise a
+capability page-fault exception.
+
+\section{Capabilities and Integer Instructions}
+
+Throughout this chapter, we have proposed that CHERI-x86-64 should
+assume that existing integer instructions writing to a capaiblity
+register should always strip the tag with the exception of
+\insnnoref{LEA} in capability mode.  This approach offers the
+following benefits:
+
+\begin{itemize}
+\item
+It avoids ``implicit'' operations on capabilities.
+\item
+It is consistent with 32-bit instructions zero-extending results when
+stored in 64-bit registers in long mode.
+\item
+Micro-architecturally it permits integer instructions to always assume
+an untagged output.
+\end{itemize}
+
+However, an alternative approach would be for integer instructions to
+instead perform the requested integer operation against the virtual
+address, and strip the tag only if the new virtual address results in
+unrepresentable bounds.  In this model, existing instructions such as
+\insnnoref{ADD} or \insnnoref{SUB} could be used in
+place of \insnref{CIncOffset}.  This would offer the following
+benefits:
+
+\begin{itemize}
+\item
+Pointer manipulations may be able to use shorter instructions, because
+new capability-specific instructions will all likely be using 2-
+and 3-byte opcodes.
+\item
+Fewer new opcodes may be required, because some capability instructions
+might be fully implemented via existing instructions.   
+\item
+Compilers may be able to reuse existing code sequences for function
+prologues and epilogues.
+\end{itemize}

@@ -1,0 +1,100 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CCopyType}
+\insnmipslabel{ccopytype}
+\subsection*{CCopyType: Import the otype field of a Capability}
+
+\subsubsection*{Format}
+
+CCopyType cd, cb, ct
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,5,6,10,11,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x12}
+\bitbox{5}{0x0}
+\bitbox{5}{cd}
+\bitbox{5}{cb}
+\bitbox{5}{ct}
+\bitbox{6}{0x1e}
+\end{bytefield}
+\end{center}
+
+\subsubsection*{Description}
+
+
+\insnmipsref{CCopyType} attempts to interpret the contents of \emph{ct} as
+if it were a valid capability (even though \emph{ct}.\ctag{} is not required
+to be set, and so might contain any bit pattern),
+and extracts its \cotype{} field.
+If \emph{ct} is sealed, \emph{cd} is set to \emph{cb} with its \coffset{} field set to
+\emph{ct}.\cotype{} $-$ \emph{cb}.\cbase{}. If \emph{ct} is not sealed,
+\emph{cd} is set to the NULL capability with its \cbase{} $+$ \coffset{} fields
+set to $-1$.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CCopyType}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cd}, \emph{cb} or \emph{ct} are reserved registers and \PCC{} does not
+grant \emph{Access\_System\_Registers} permission.
+\item
+\emph{cb}.\ctag{} is not set.
+\item
+\emph{cb} is sealed.
+\item
+\emph{ct}.\cotype{} is outside the bounds of \emph{cb}.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+The intended use case for this instruction is as part of a routine for
+resetting the tag bit on a capability that has had its tag bit cleared
+(e.g. by being swapped out to disk and then back into memory).
+
+It is a requirement of this specification that if a capability has its
+tag bit cleared (either with \insnmipsref{CClearTag} or by copying it as
+data), and \insnmipsref{CCopyType} is used to extract the \cotype{} field
+of the result, then \emph{cd}.\cbase{} $+$ \emph{cd}.\coffset{} will be
+equal to the \cotype{} of the original capability if it was sealed,
+and \emph{cd}.\coffset{} will be -1 if the original capability was not
+sealed.
+\item
+Typical usage of this instruction will be to use \insnmipsref{CBuildCap} to
+extract the bounds and permissions of a capability, \insnmipsref{CCopyType}
+to extract the \cotype{}, and then use \insnmipsref{CCSeal} to seal the
+result of the first step with the correct \cotype{}.
+\item
+This instruction is an optimization. A similar effect could be achieved by
+using \insnmipsref{CGetType} to get \emph{ct}.\cotype{} and then
+\insnmipsref{CSetOffset} to set \emph{cd}.\coffset{}.
+\item
+-1 is not a valid value for the \cotype{} field, so the result distinguishes
+between the case when \emph{ct} was sealed and the case when it was not
+sealed.
+\item
+If \emph{ct} is sealed and an exception is not raised, then the result is
+guaranteed to be representable, because the bounds checks ensure that
+\emph{cd}'s cursor is within its bounds.
+\item
+If \emph{ct}.\cotype{} is outside of the bounds of \emph{ct}, this is an
+error condition (attempting to reconstruct a capability that \emph{cb} does
+not give you permission to create). In order to catch this error condition
+near to where the problem occurred, we raise an exception. This also has
+the benefit of avoiding the case where changing \emph{cb}'s \coffset{}
+results in a value that is not representable, as explained in the previous
+note.
+\end{itemize}
+
+\mrnote{What if \emph{cb} covers only a portion of the \cotype{} space,
+and \emph{ct}'s \cotype{} doesn't fall within it? As currently defined,
+we raise an exception. But what if we want to detect this error and handle
+it somehow? What if we have several capabilities covering different portions
+of the type space, and want to try them in turn until one works?}

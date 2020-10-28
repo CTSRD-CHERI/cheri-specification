@@ -1,0 +1,6 @@
+function #\hyperref[sailMIPSzincCapOffset]{incCapOffset}#(c, delta) : (Capability, #\hyperref[sailMIPSzbits]{bits}#(64)) -> (bool, Capability) =
+    let newAddress : #\hyperref[sailMIPSzbits]{bits}#(64) = c.address + delta in
+    let newCap     = { c with address = newAddress } in
+    let representable = #\hyperref[sailMIPSzcapBoundsEqual]{capBoundsEqual}#(c, newCap) in
+/*    let representable = #\hyperref[sailMIPSzfastRepCheck]{fastRepCheck}#(c, delta) in*/
+    (representable, newCap)

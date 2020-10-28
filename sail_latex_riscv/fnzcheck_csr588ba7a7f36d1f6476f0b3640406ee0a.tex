@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzcheckzyCSR]{check\_CSR}#(csr : csreg, p : Privilege, isWrite : bool) -> bool =
+    #\hyperref[sailRISCVziszyCSRzydefined]{is\_CSR\_defined}#(csr, p)
+  & #\hyperref[sailRISCVzcheckzyCSRzyaccess]{check\_CSR\_access}#(#\hyperref[sailRISCVzcsrAccess]{csrAccess}#(csr), #\hyperref[sailRISCVzcsrPriv]{csrPriv}#(csr), p, isWrite)
+  & #\hyperref[sailRISCVzcheckzyTVMzySATP]{check\_TVM\_SATP}#(csr, p)
+  & #\hyperref[sailRISCVzcheckzyCounteren]{check\_Counteren}#(csr, p)

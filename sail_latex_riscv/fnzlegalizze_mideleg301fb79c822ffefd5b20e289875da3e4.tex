@@ -1,0 +1,9 @@
+function #\hyperref[sailRISCVzlegalizzezymideleg]{legalize\_mideleg}#(o : Minterrupts, v : xlenbits) -> Minterrupts = {
+  /* M-mode interrupt delegation bits "should" be hardwired to 0. */
+  /* FIXME: needs verification against eventual spec language. */
+  let m = #\hyperref[sailRISCVzMkzyMinterrupts]{Mk\_Minterrupts}#(v);
+  let m = #\hyperref[sailRISCVzupdatezyMEI]{update\_MEI}#(m, 0b0);
+  let m = #\hyperref[sailRISCVzupdatezyMTI]{update\_MTI}#(m, 0b0);
+  let m = #\hyperref[sailRISCVzupdatezyMSI]{update\_MSI}#(m, 0b0);
+  m
+}

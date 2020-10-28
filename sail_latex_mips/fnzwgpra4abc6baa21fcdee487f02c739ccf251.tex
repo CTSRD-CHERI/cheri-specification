@@ -1,0 +1,10 @@
+function #\hyperref[sailMIPSzwGPR]{wGPR}# (idx, v) = {
+  let i as atom(_) = #\hyperref[sailMIPSzunsigned]{unsigned}#(idx) in
+  if i != 0 then {
+    if trace then {
+      #\hyperref[sailMIPSzprerr]{prerr}#(#\hyperref[sailMIPSzstringzyofzyint]{string\_of\_int}#(i));
+      #\hyperref[sailMIPSzprerrzybits]{prerr\_bits}#(" <- ", v);
+    };
+    GPR[i] = v;
+  };
+}

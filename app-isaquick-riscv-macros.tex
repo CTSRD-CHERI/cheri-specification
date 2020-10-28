@@ -1,0 +1,32 @@
+\input{app-isaquick-table-macros}
+
+\makeatletter
+\newcommand{\rvcherienctabletop}{\@cherienctable{@rvcheriencusetablestr}{top}{8}}
+\newcommand{\rvcherienctablesrcsrcdest}{\@cherienctable{@rvcheriencusetablestr}{srcsrcdest}{128}}
+\newcommand{\rvcherienctablesrcsrc}{\@cherienctable{@rvcheriencusetablestr}{srcsrc}{32}}
+\newcommand{\rvcherienctablesrc}{\@cherienctable{@rvcheriencusetablestr}{src}{32}}
+\newcommand{\rvcherienctablesrcdest}{\@cherienctable{@rvcheriencusetablestr}{srcdest}{32}}
+\newcommand{\rvcherienctabledest}{\@cherienctable{@rvcheriencusetablestr}{dest}{32}}
+\newcommand{\rvcherienctableexpload}{\@cherienctable{@rvcheriencusetablestr}{expload}{32}}
+\newcommand{\rvcherienctableexpstore}{\@cherienctable{@rvcheriencusetablestr}{expstore}{32}}
+
+\let\rvcheriasminsnref\insnriscvref
+\let\rvcheriasminsnnoref\insnnoref
+\providecommand{\rvcheriasmfmt}{}
+\renewcommand{\rvcheriasmfmt}[2][]{%
+  ~\raiseforbf{%
+    \textsf{\footnotesize{#2}}%
+    \ifthenelse{\equal{#1}{}}{%
+    }{%
+      ~{\textit{\scriptsize{(#1)}}}%
+    }%
+  }%
+}
+
+\newcommand{\rvcheriisaquick}[1]{%
+  \rvcheribitbox{#1}~\rvcheriasm{#1}%
+}
+
+\newcommand{\riscvbitboxaq}{\rotateinbitbox{\small aq}}
+\newcommand{\riscvbitboxrl}{\rotateinbitbox{\small rl}}
+\makeatother

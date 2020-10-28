@@ -1,0 +1,120 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CSShC}
+\insnmipslabel{csshc}
+\subsection*{CSShC: Store Short Capability via Capability}
+
+\subsubsection*{Format}
+
+CSShC cs, rt, offset(cb) \\
+CSShCR cs, rt(cb) \\
+CSShCI cs, offset(cb)
+
+\usesDDCinsteadofNULL{cb}
+
+\subsubsection*{Description}
+
+Capability register \emph{cs} is encoded to a short capability form and
+stored at the memory location specified by
+%
+\emph{addr} $\stackrel{\Delta}{=}$ \emph{cb.\cbase{}} $+$ \emph{cb.\coffset{}} $+$ \emph{rt} $+$ 16 $*$
+\emph{offset},
+%
+provided \emph{addr} is suitably aligned for short capabilities.
+%
+Capability register \emph{cb} must contain a capability that grants
+permission to store capabilities.
+%
+The bits in the tag memory associated with \emph{addr} are updated to
+indicate a short capability resides at this location if \emph{cs.\ctag{}} is
+set and encoding was successful.  See \cref{sec:windowedshortcaps} for
+possible tag representations.
+
+\subsubsection*{Encoding}
+
+As per \cref{sec:windowedshortcaps}, several properties must hold of the
+capabilities given to \insnmipsref{CSShC} for a successful store to take
+place:
+
+\begin{itemize}
+  \item \emph{cs} may be out of bounds by strictly less than 4 GiB.
+  \item The bounds of \emph{cs} must be representable in short capabilities.
+  \item If \emph{cs} is sealed, its \cotype{} must be representable in short
+        capabilities.
+\end{itemize}
+
+If any of the above tests fail, the store will take place but will update
+the tags corresponding to \emph{addr} to indicate that the memory contains
+data.
+
+Further, the following permission bits may not be stored in the short
+capability format, and may read back (via \insnmipsref{CLShC}) as false:
+Permit\_Seal, Permit\_Unseal, Permit\_SetCID,
+Permit\_Access\_System\_Registers, and Permit\_Store\_Local\_Capability.
+Software must, however, not depend on \insnmipsref{CSShC} to clear these
+bits; an \insnmipsref{CAndPerm} must be used to ensure that these rights
+are discarded.
+
+% \subsubsection*{Semantics}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\cchecktag{}
+\item
+\emph{cb} is sealed.
+\item
+\emph{cb}.\cperms.\emph{Permit\_Store} is not set.
+\item
+\emph{cb.\cperms.Permit\_Store\_Capability} is not set.
+\item
+\emph{cb.\cperms{}.Permit\_Store\_Local} is not set and
+\emph{cs.tag} is set and \emph{cs.\cperms{}.Global} is not set.
+\item
+\emph{addr} $+$ \emph{short\_capability\_size} $>$ \emph{cb}.\cbase{} $+$ \emph{cb.\clength{}}.
+\item
+\emph{addr} $<$ \emph{cb}.\cbase{}.
+\item
+\emph{cs.\cbase{}}, \emph{cs.\cbase{}} $+$ \emph{cs.\clength{}}, and
+the store's target memory location computed above differ in their top 32 bits.
+\end{itemize}
+
+\noindent
+A TLB Store exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cs.\ctag{}} is set and the \emph{S} bit in the TLB entry for the page
+containing \emph{addr} is not set.
+\end{itemize}
+
+\noindent
+An address error during store (AdES) exception is raised if:
+
+\begin{itemize}
+\item
+The virtual address \emph{addr} is not \emph{short\_capability\_size} aligned.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+If the address alignment check fails and one of the security checks fails,
+a coprocessor 2 exception (and not an address error exception) is raised.
+The priority of the exceptions is security-critical, because otherwise a
+malicious program could use the type of the exception that is raised to
+test the bottom bits of a register that it is not permitted to access.
+\item
+\emph{offset} is interpreted as a signed integer.
+\item
+The \insnnoref{CSShCI} mnemonic is equivalent to \insnmipsref{CSShC} with
+\emph{cb} being the zero register (\$zero). The \insnnoref{CSShCR} mnemonic
+is equivalent to \insnmipsref{CSShC} with \emph{offset} set to zero.
+\item
+Although the \emph{short\_capability\_size} can vary, the offset is always in
+multiples of 8 bytes (64 bits).
+\end{itemize}

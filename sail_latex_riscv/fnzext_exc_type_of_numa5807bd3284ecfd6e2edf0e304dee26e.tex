@@ -1,0 +1,5 @@
+function ext_exc_type_of_num arg# = match arg# {
+  0 => EXC_LOAD_CAP_PAGE_FAULT,
+  1 => EXC_SAMO_CAP_PAGE_FAULT,
+  _ => EXC_CHERI
+}

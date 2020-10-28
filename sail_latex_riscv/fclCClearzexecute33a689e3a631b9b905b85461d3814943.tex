@@ -1,0 +1,8 @@
+let q_u = #\hyperref[sailRISCVzunsigned]{unsigned}#(q);
+foreach (i from 0 to 7)
+  if m[i] == bitone then
+    if q_u == 0 & i == 0 then
+      DDC = null_cap
+    else
+      #\hyperref[sailRISCVzC]{C}#(8 * q_u + i) = null_cap;
+RETIRE_SUCCESS

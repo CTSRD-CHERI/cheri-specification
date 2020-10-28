@@ -1,0 +1,49 @@
+function #\hyperref[sailRISCVzinitzysys]{init\_sys}#() -> unit = {
+  cur_privilege = Machine;
+
+  mhartid     = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+
+  misa->#\hyperref[sailRISCVzMXL]{MXL}#() = #\hyperref[sailRISCVzarchzytozybits]{arch\_to\_bits}#(if sizeof(xlen) == 32 then RV32 else RV64);
+  misa->#\hyperref[sailRISCVzA]{A}#()   = 0b1;                            /* atomics */
+  misa->#\hyperref[sailRISCVzC]{C}#()   = #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(#\hyperref[sailRISCVzsyszyenablezyrvc]{sys\_enable\_rvc}#()); /* RVC */
+  misa->#\hyperref[sailRISCVzI]{I}#()   = 0b1;                            /* base integer ISA */
+  misa->#\hyperref[sailRISCVzM]{M}#()   = 0b1;                            /* integer multiply/divide */
+  misa->#\hyperref[sailRISCVzU]{U}#()   = 0b1;                            /* user-mode */
+  misa->#\hyperref[sailRISCVzS]{S}#()   = 0b1;                            /* supervisor-mode */
+
+  /* On RV64, we currently support either both F and D, or neither.
+   * On RV32, we currently only support F.
+   */
+  misa->#\hyperref[sailRISCVzF]{F}#()   = #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(#\hyperref[sailRISCVzsyszyenablezyfdext]{sys\_enable\_fdext}#());      /* single-precision */
+  misa->#\hyperref[sailRISCVzD]{D}#()   = if   sizeof(xlen) == 64
+                then #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(#\hyperref[sailRISCVzsyszyenablezyfdext]{sys\_enable\_fdext}#())  /* double-precision */
+                else 0b0;
+
+  mstatus = #\hyperref[sailRISCVzsetzymstatuszySXL]{set\_mstatus\_SXL}#(mstatus, misa.#\hyperref[sailRISCVzMXL]{MXL}#());
+  mstatus = #\hyperref[sailRISCVzsetzymstatuszyUXL]{set\_mstatus\_UXL}#(mstatus, misa.#\hyperref[sailRISCVzMXL]{MXL}#());
+  mstatus->#\hyperref[sailRISCVzSD]{SD}#()   = 0b0;
+
+  mip->#\hyperref[sailRISCVzbits]{bits}#()     = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  mie->#\hyperref[sailRISCVzbits]{bits}#()     = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  mideleg->#\hyperref[sailRISCVzbits]{bits}#() = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  medeleg->#\hyperref[sailRISCVzbits]{bits}#() = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  mtvec->#\hyperref[sailRISCVzbits]{bits}#()   = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  mcause->#\hyperref[sailRISCVzbits]{bits}#()  = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  mepc            = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  mtval           = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  mscratch        = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+
+  mcycle          = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  mtime           = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+
+  mcounteren->#\hyperref[sailRISCVzbits]{bits}#() = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+
+  minstret           = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+  minstret_written   = false;
+
+  #\hyperref[sailRISCVzinitzypmp]{init\_pmp}#();
+
+  // log compatibility with spike
+  if   #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#()
+  then #\hyperref[sailRISCVzprintzyreg]{print\_reg}#("CSR mstatus <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mstatus.#\hyperref[sailRISCVzbits]{bits}#()) ^ " (input: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0) : xlenbits) ^ ")")
+}

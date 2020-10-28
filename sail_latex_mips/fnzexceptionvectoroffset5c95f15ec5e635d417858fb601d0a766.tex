@@ -1,0 +1,9 @@
+function #\hyperref[sailMIPSzexceptionVectorOffset]{exceptionVectorOffset}# (ex) =
+  if (CP0Status.#\hyperref[sailMIPSzEXL]{EXL}#()) then
+    0x180 /* Always use common vector if in exception mode already */
+  else if ((ex == XTLBRefillL) | (ex == XTLBRefillS)) then
+    0x080
+  else if (ex == C2Trap) then
+    0x280 /* Special vector for CHERI traps */
+  else
+    0x180 /* Common vector */

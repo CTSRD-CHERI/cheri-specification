@@ -1,0 +1,48 @@
+function #\hyperref[sailMIPSzTLBTranslate2]{TLBTranslate2}# (vAddr, accessType, accessLevel) = {
+  let idx = #\hyperref[sailMIPSztlbSearch]{tlbSearch}#(vAddr) in
+  match idx {
+    #\hyperref[sailMIPSzSome]{Some}#(idx) =>
+      let i as atom(_) = #\hyperref[sailMIPSzunsigned]{unsigned}#(idx) in
+      let entry = *TLBEntries[i] in
+      let entryMask = entry.#\hyperref[sailMIPSzpagemask]{pagemask}#() in
+      let 'evenOddBit : range(12,28) = match (entryMask) {
+        0x0000  => 12,
+        0x0003  => 14,
+        0x000f  => 16,
+        0x003f  => 18,
+        0x00ff  => 20,
+        0x03ff  => 22,
+        0x0fff  => 24,
+        0x3fff  => 26,
+        0xffff  => 28,
+        _       => undefined
+      } in
+      let isOdd = (vAddr[evenOddBit]) in
+      let (caps : #\hyperref[sailMIPSzbits]{bits}#(1), caplg : #\hyperref[sailMIPSzbits]{bits}#(1), capl : #\hyperref[sailMIPSzbits]{bits}#(1), pfn : #\hyperref[sailMIPSzbits]{bits}#(24), d : #\hyperref[sailMIPSzbits]{bits}#(1), v : #\hyperref[sailMIPSzbits]{bits}#(1))  =
+        if (isOdd) then
+          (entry.#\hyperref[sailMIPSzcaps1]{caps1}#(), entry.#\hyperref[sailMIPSzcaplg1]{caplg1}#(), entry.#\hyperref[sailMIPSzcapl1]{capl1}#(), entry.#\hyperref[sailMIPSzpfn1]{pfn1}#(), entry.#\hyperref[sailMIPSzd1]{d1}#(), entry.#\hyperref[sailMIPSzv1]{v1}#())
+        else
+          (entry.#\hyperref[sailMIPSzcaps0]{caps0}#(), entry.#\hyperref[sailMIPSzcaplg0]{caplg0}#(), entry.#\hyperref[sailMIPSzcapl0]{capl0}#(), entry.#\hyperref[sailMIPSzpfn0]{pfn0}#(), entry.#\hyperref[sailMIPSzd0]{d0}#(), entry.#\hyperref[sailMIPSzv0]{v0}#()) in
+      if (~(v)) then
+        #\hyperref[sailMIPSzSignalExceptionTLB]{SignalExceptionTLB}#(if (accessType == StoreData) then XTLBInvS else XTLBInvL, vAddr)
+      else if ((accessType == StoreData) & ~(d)) then
+        #\hyperref[sailMIPSzSignalExceptionTLB]{SignalExceptionTLB}#(TLBMod, vAddr)
+      else
+        let res : #\hyperref[sailMIPSzbits]{bits}#(64) = #\hyperref[sailMIPSzzzerozyextend]{zero\_extend}#(pfn[23..(evenOddBit - 12)] @ vAddr[(evenOddBit - 1) .. 0]) in
+        let macr = if (accessType == StoreData) then
+                    if caps then Trap else Unrestricted
+                   else
+                    if capl then Clear
+                    else
+                        let gclg : #\hyperref[sailMIPSzbits]{bits}#(1) = match accessLevel {
+                            User => TLBEntryHi.#\hyperref[sailMIPSzCLGU]{CLGU}#(),
+                            Supervisor => TLBEntryHi.#\hyperref[sailMIPSzCLGS]{CLGS}#(),
+                            Kernel => TLBEntryHi.#\hyperref[sailMIPSzCLGK]{CLGK}#()
+                        } in
+                        if gclg != caplg then Trap else Unrestricted
+          in
+        (res,  macr),
+    #\hyperref[sailMIPSzNone]{None}#()  =>  #\hyperref[sailMIPSzSignalExceptionTLB]{SignalExceptionTLB}#(
+      if (accessType == StoreData) then XTLBRefillS else XTLBRefillL, vAddr)
+  }
+}

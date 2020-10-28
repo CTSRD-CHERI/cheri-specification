@@ -1,0 +1,12 @@
+function rop_of_num arg# = match arg# {
+  0 => RISCV_ADD,
+  1 => RISCV_SUB,
+  2 => RISCV_SLL,
+  3 => RISCV_SLT,
+  4 => RISCV_SLTU,
+  5 => RISCV_XOR,
+  6 => RISCV_SRL,
+  7 => RISCV_SRA,
+  8 => RISCV_OR,
+  _ => RISCV_AND
+}

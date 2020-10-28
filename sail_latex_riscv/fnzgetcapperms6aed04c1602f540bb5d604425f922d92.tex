@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cap) : Capability -> CapPermsBits =
+    let perms : #\hyperref[sailRISCVzbits]{bits}#(cap_uperms_shift) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzgetCapHardPerms]{getCapHardPerms}#(cap)) in
+    cap.uperms @ perms

@@ -1,0 +1,2 @@
+function within_mmio_readable forall 'n, 0 < 'n <= max_mem_access . (addr : xlenbits, width : atom('n)) -> bool =
+  #\hyperref[sailRISCVzwithinzyclint]{within\_clint}#(addr, width) | (#\hyperref[sailRISCVzwithinzyhtifzyreadable]{within\_htif\_readable}#(addr, width) & 1 <= 'n)

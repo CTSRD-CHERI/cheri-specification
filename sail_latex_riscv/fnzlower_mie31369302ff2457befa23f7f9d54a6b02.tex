@@ -1,0 +1,10 @@
+function #\hyperref[sailRISCVzlowerzymie]{lower\_mie}#(m : Minterrupts, d : Minterrupts) -> Sinterrupts = {
+  let s : Sinterrupts = #\hyperref[sailRISCVzMkzySinterrupts]{Mk\_Sinterrupts}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0));
+  let s = #\hyperref[sailRISCVzupdatezySEI]{update\_SEI}#(s, m.#\hyperref[sailRISCVzSEI]{SEI}#() & d.#\hyperref[sailRISCVzSEI]{SEI}#());
+  let s = #\hyperref[sailRISCVzupdatezySTI]{update\_STI}#(s, m.#\hyperref[sailRISCVzSTI]{STI}#() & d.#\hyperref[sailRISCVzSTI]{STI}#());
+  let s = #\hyperref[sailRISCVzupdatezySSI]{update\_SSI}#(s, m.#\hyperref[sailRISCVzSSI]{SSI}#() & d.#\hyperref[sailRISCVzSSI]{SSI}#());
+  let s = #\hyperref[sailRISCVzupdatezyUEI]{update\_UEI}#(s, m.#\hyperref[sailRISCVzUEI]{UEI}#() & d.#\hyperref[sailRISCVzUEI]{UEI}#());
+  let s = #\hyperref[sailRISCVzupdatezyUTI]{update\_UTI}#(s, m.#\hyperref[sailRISCVzUTI]{UTI}#() & d.#\hyperref[sailRISCVzUTI]{UTI}#());
+  let s = #\hyperref[sailRISCVzupdatezyUSI]{update\_USI}#(s, m.#\hyperref[sailRISCVzUSI]{USI}#() & d.#\hyperref[sailRISCVzUSI]{USI}#());
+  s
+}

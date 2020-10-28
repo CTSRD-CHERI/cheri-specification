@@ -1,0 +1,6 @@
+function #\hyperref[sailMIPSzMEMrzytaggedzyreserve]{MEMr\_tagged\_reserve}# (addr, size, allowTag) =
+{
+  let tag = if allowTag then #\hyperref[sailMIPSzreadzytagzybool]{read\_tag\_bool}#(addr & cap_addr_mask) else false in
+  let data = #\hyperref[sailMIPSzMEMrzyreserve]{MEMr\_reserve}#(addr, size) in
+  (tag, #\hyperref[sailMIPSzreversezyendianness]{reverse\_endianness}#(data))
+}

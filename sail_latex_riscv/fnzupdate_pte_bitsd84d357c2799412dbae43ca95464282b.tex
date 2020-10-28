@@ -1,0 +1,18 @@
+function #\hyperref[sailRISCVzupdatezyPTEzyBits]{update\_PTE\_Bits}#(p : PTE_Bits, a : #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), ext : extPte) -> #\hyperref[sailRISCVzoption]{option}#((PTE_Bits, extPte)) = {
+  // dirty bit
+  let update_d = p.#\hyperref[sailRISCVzD]{D}#() == 0b0 & (match a {
+                                  #\hyperref[sailRISCVzExecute]{Execute}#()       => false,
+                                  #\hyperref[sailRISCVzRead]{Read}#(_)         => false,
+                                  #\hyperref[sailRISCVzWrite]{Write}#(_)        => true,
+                                  #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _) => true
+                                });
+
+  // accessed bit
+  let update_a = p.#\hyperref[sailRISCVzA]{A}#() == 0b0;
+
+  if update_d | update_a then {
+    let np = #\hyperref[sailRISCVzupdatezyA]{update\_A}#(p, 0b1);
+    let np = if update_d then #\hyperref[sailRISCVzupdatezyD]{update\_D}#(np, 0b1) else np;
+    #\hyperref[sailRISCVzSome]{Some}#(np, ext)
+  } else #\hyperref[sailRISCVzNone]{None}#()
+}

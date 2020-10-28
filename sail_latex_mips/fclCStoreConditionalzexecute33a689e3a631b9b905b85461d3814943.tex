@@ -1,0 +1,36 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let cb_val = #\hyperref[sailMIPSzreadCapRegDDC]{readCapRegDDC}#(cb);
+if not (cb_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TagViolation, cb)
+else if cb_val.sealed then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, cb)
+else if not (cb_val.permit_store) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_PermitStoreViolation, cb)
+else
+{
+  let size    = #\hyperref[sailMIPSzwordWidthBytes]{wordWidthBytes}#(width);
+  let vAddr   = #\hyperref[sailMIPSzgetCapCursor]{getCapCursor}#(cb_val);
+  let vAddr64 = #\hyperref[sailMIPSztozybits]{to\_bits}#(64, vAddr);
+  if (vAddr + size) > #\hyperref[sailMIPSzgetCapTop]{getCapTop}#(cb_val) then
+    #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_LengthViolation, cb)
+  else if vAddr < #\hyperref[sailMIPSzgetCapBase]{getCapBase}#(cb_val) then
+    #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_LengthViolation, cb)
+  else if not (#\hyperref[sailMIPSzisAddressAligned]{isAddressAligned}#(vAddr64, width)) then
+    #\hyperref[sailMIPSzSignalExceptionBadAddr]{SignalExceptionBadAddr}#(AdES, vAddr64)
+  else
+  {
+    let pAddr  = #\hyperref[sailMIPSzTLBTranslate]{TLBTranslate}#(vAddr64, StoreData);
+    let rs_val = #\hyperref[sailMIPSzrGPR]{rGPR}#(rs);
+    let success : bool = if (CP0LLBit[0]) then
+        match width
+        {
+          B  => #\hyperref[sailMIPSzMEMwzyconditionalzywrapper]{MEMw\_conditional\_wrapper}#(pAddr, 1, rs_val[7..0]),
+          H  => #\hyperref[sailMIPSzMEMwzyconditionalzywrapper]{MEMw\_conditional\_wrapper}#(pAddr, 2, rs_val[15..0]),
+          W  => #\hyperref[sailMIPSzMEMwzyconditionalzywrapper]{MEMw\_conditional\_wrapper}#(pAddr, 4, rs_val[31..0]),
+          D  => #\hyperref[sailMIPSzMEMwzyconditionalzywrapper]{MEMw\_conditional\_wrapper}#(pAddr, 8, rs_val)
+        }
+      else
+        false;
+    #\hyperref[sailMIPSzwGPR]{wGPR}#(rd) = #\hyperref[sailMIPSzzzerozyextend]{zero\_extend}#(success);
+  }
+}

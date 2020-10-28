@@ -1,0 +1,22 @@
+let rs1_val = #\hyperref[sailRISCVzX]{X}#(rs1);
+let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
+let result : xlenbits = match op {
+  RISCV_ADD  => rs1_val + rs2_val,
+  RISCV_SLT  => #\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(rs1_val <_s rs2_val)),
+  RISCV_SLTU => #\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(rs1_val <_u rs2_val)),
+  RISCV_AND  => rs1_val & rs2_val,
+  RISCV_OR   => rs1_val | rs2_val,
+  RISCV_XOR  => rs1_val ^ rs2_val,
+  RISCV_SLL  => if   sizeof(xlen) == 32
+                then rs1_val << (rs2_val[4..0])
+                else rs1_val << (rs2_val[5..0]),
+  RISCV_SRL  => if   sizeof(xlen) == 32
+                then rs1_val >> (rs2_val[4..0])
+                else rs1_val >> (rs2_val[5..0]),
+  RISCV_SUB  => rs1_val - rs2_val,
+  RISCV_SRA  => if   sizeof(xlen) == 32
+                then #\hyperref[sailRISCVzshiftzyrightzyarith32]{shift\_right\_arith32}#(rs1_val, rs2_val[4..0])
+                else #\hyperref[sailRISCVzshiftzyrightzyarith64]{shift\_right\_arith64}#(rs1_val, rs2_val[5..0])
+};
+#\hyperref[sailRISCVzX]{X}#(rd) = result;
+RETIRE_SUCCESS

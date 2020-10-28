@@ -1,0 +1,27 @@
+function within_phys_mem forall 'n, 'n <= max_mem_access. (addr : xlenbits, width : atom('n)) -> bool = {
+  /* To avoid overflow issues when physical memory extends to the end
+   * of the addressable range, we need to perform address bound checks
+   * on unsigned unbounded integers.
+   */
+  let addr_int     = #\hyperref[sailRISCVzunsigned]{unsigned}#(addr);
+  let ram_base_int = #\hyperref[sailRISCVzunsigned]{unsigned}#(#\hyperref[sailRISCVzplatzyramzybase]{plat\_ram\_base}# ());
+  let rom_base_int = #\hyperref[sailRISCVzunsigned]{unsigned}#(#\hyperref[sailRISCVzplatzyromzybase]{plat\_rom\_base}# ());
+  let ram_size_int = #\hyperref[sailRISCVzunsigned]{unsigned}#(#\hyperref[sailRISCVzplatzyramzysizze]{plat\_ram\_size}# ());
+  let rom_size_int = #\hyperref[sailRISCVzunsigned]{unsigned}#(#\hyperref[sailRISCVzplatzyromzysizze]{plat\_rom\_size}# ());
+
+  /* todo: iterate over segment list */
+  if      (  ram_base_int <= addr_int
+           & (addr_int + sizeof('n)) <= (ram_base_int + ram_size_int))
+  then    true
+  else if (  rom_base_int <= addr_int
+           & (addr_int + sizeof('n)) <= (rom_base_int + rom_size_int))
+  then    true
+  else {
+    #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("within_phys_mem: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ " not within phys-mem:");
+    #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("  plat_rom_base: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVzplatzyromzybase]{plat\_rom\_base}# ()));
+    #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("  plat_rom_size: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVzplatzyromzysizze]{plat\_rom\_size}# ()));
+    #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("  plat_ram_base: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVzplatzyramzybase]{plat\_ram\_base}# ()));
+    #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("  plat_ram_size: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVzplatzyramzysizze]{plat\_ram\_size}# ()));
+    false
+  }
+}

@@ -1,0 +1,13 @@
+function num_of_cache_op_kind arg# = match arg# {
+  Cache_op_D_IVAC => 0,
+  Cache_op_D_ISW => 1,
+  Cache_op_D_CSW => 2,
+  Cache_op_D_CISW => 3,
+  Cache_op_D_ZVA => 4,
+  Cache_op_D_CVAC => 5,
+  Cache_op_D_CVAU => 6,
+  Cache_op_D_CIVAC => 7,
+  Cache_op_I_IALLUIS => 8,
+  Cache_op_I_IALLU => 9,
+  Cache_op_I_IVAU => 10
+}

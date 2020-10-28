@@ -1,0 +1,96 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CSetCID}
+\insnmipslabel{csetcid}
+\subsection*{CSetCID: Set the Architectural Compartment ID}
+
+\subsubsection*{Format}
+
+CSetCID cb
+
+%
+% XXXRW: Format and opcode still TODO.
+\begin{center}
+% XXXAR: 0x5 is currently the second available one-operand instruction
+\cherioneop[header]{0x5}{cb}
+\\
+\arnote{This encoding is not final -- do not implement}
+\end{center}
+
+\subsubsection*{Description}
+
+Set the architectural Compartment ID (CID) to \emph{cb}.\cbase{} +
+\emph{cb}.\coffset{} if \emph{cb} has the Permit\_Set\_CID permission and
+\emph{cb}.\coffset{} is in range.
+The CID can then be used by the microarchitecture to tag microarchitectural
+state.
+CIDs can be utilized in a similar style as ASID matching in TLBs to
+determine in what context microarchitectural state can be used.
+Typical use will be to prevent sharing where it could otherwise be used as a
+high-bandwidth microarchitectural side channel between compartments with
+confidentiality requirements -- for example, to limit the impact of
+Spectre-style attacks~\cite{Kocher2018spectre}.
+
+\subsubsection*{Semantics}
+
+\sailMIPScode{CSetCID}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cb}.\cperms.\emph{Permit\_Set\_CID} is not set.
+\item
+\emph{addr} + 1 $>$ \emph{cb}.\cbase{} $+$ \emph{cb}.\clength{}.
+\item
+\emph{addr} $<$ \emph{cb}.\cbase{}.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+  The CID can be queried using the \insnmipsref{CGetCID} instruction.
+\item
+  Although \insnmipsref{CSetCID} has no architectural side effects other than
+  setting an integer register with a compartment ID, the intent is that the
+  microarchitecture can be made aware of boundaries across which
+  microarchitectural side channels are less acceptable.
+  A key design goal for \insnmipsref{CSetCID} is to provide flexible
+  mechanism above which a range of software policies might be implemented.
+\item
+  For example, the software supervisor might arrange that all compartments
+  have unique CIDs such that branch-predictor state cannot be shared.
+  Other policies might use the same CID for compartments between which strong
+  confidentiality requirements are not present -- e.g., where only integrity
+  or availability protection is required.
+\item
+  We have chosen not to protect the architectural CID using
+  Access\_System\_Registers in order to support virtualizability of the domain
+  switcher -- and, in particular, to not require Access\_System\_Registers to
+  implement a domain switcher.
+  A new permission is used, together with bounds checks, such that ranges of
+  CIDs can be delegated when multiple domain switchers are in use.
+  For example, a set of CIDs might be reserved for domain-switch
+  implementations themselves, and then subranges delegated to individual
+  language runtimes or processes within the same address space.
+  Note that such a model could obligate two CID operations per domain switch
+  involving mutual distrust: one into the domain switcher, and a second out,
+  in order to not just protect the two endpoint domains from one another but
+  also the switcher.
+\item
+  How to ensure that \insnmipsref{CSetCID} is not speculated past (e.g., in
+  the case of microarchitectural side-channel attacks such as Spectre) is a
+  critical question.
+  We recommend that \insnmipsref{CSetCID} be considered serialising, and that
+  the CID be set immediately on switcher entry, as well as again on switcher
+  exit.
+\item
+  An alternative design choice would accept an integer general-purpose
+  register operand, \emph{rt}, as a second argument specifying the CID to
+  switch to.
+  This might be more consistent with the behavior of \insnmipsref{CGetCID},
+  but also consume more opcode space.
+\end{itemize}

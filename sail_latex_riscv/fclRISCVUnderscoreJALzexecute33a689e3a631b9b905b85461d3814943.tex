@@ -1,0 +1,20 @@
+let t : xlenbits = PC + #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
+/* Extensions get the first checks on the prospective target address. */
+match #\hyperref[sailRISCVzextzycontrolzycheckzypc]{ext\_control\_check\_pc}#(t) {
+  #\hyperref[sailRISCVzExtzyControlAddrzyError]{Ext\_ControlAddr\_Error}#(e) => {
+    #\hyperref[sailRISCVzextzyhandlezycontrolzycheckzyerror]{ext\_handle\_control\_check\_error}#(e);
+    RETIRE_FAIL
+  },
+  #\hyperref[sailRISCVzExtzyControlAddrzyOK]{Ext\_ControlAddr\_OK}#(target) => {
+    /* Perform standard alignment check */
+    if #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(target[1]) & (~ (#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()))
+    then {
+      #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(target, #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#());
+      RETIRE_FAIL
+    } else {
+      #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzgetzynextzypc]{get\_next\_pc}#();
+      #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(target);
+      RETIRE_SUCCESS
+    }
+  }
+}

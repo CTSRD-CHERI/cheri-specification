@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzinCapBounds]{inCapBounds}# (cap, addr, size) = {
+  let (base, top) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(cap);
+  let a = #\hyperref[sailRISCVzunsigned]{unsigned}#(addr);
+  (a >= base) & ((a + size) <= top)
+}

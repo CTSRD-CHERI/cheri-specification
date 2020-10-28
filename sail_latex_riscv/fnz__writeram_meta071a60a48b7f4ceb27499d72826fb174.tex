@@ -1,0 +1,16 @@
+function #\hyperref[sailRISCVzzyzyWriteRAMzyMeta]{\_\_WriteRAM\_Meta}#(addr, width, tag) = {
+  let tag_addr = #\hyperref[sailRISCVzaddrzytozytagzyaddr]{addr\_to\_tag\_addr}#(addr);
+  if #\hyperref[sailRISCVzgetzyconfigzyprintzymem]{get\_config\_print\_mem}#() then
+    #\hyperref[sailRISCVzprintzymem]{print\_mem}#("tag[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVztagzyaddrzytozyaddr]{tag\_addr\_to\_addr}#(tag_addr)) ^ "] <- " ^ (if tag then "1" else "0"));
+  #\hyperref[sailRISCVzMEMwzytag]{MEMw\_tag}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(tag_addr), tag);
+  /* If the write crosses a cap_size alignment boundary then we need
+   * to write the tag for the subsequent region.  Writes greater than
+   * cap_size that might span more than two regions are not supported.
+   */
+  let tag_addr2 = #\hyperref[sailRISCVzaddrzytozytagzyaddr]{addr\_to\_tag\_addr}#(addr + width - 1);
+  if tag_addr != tag_addr2 then {
+    if #\hyperref[sailRISCVzgetzyconfigzyprintzymem]{get\_config\_print\_mem}#() then
+      #\hyperref[sailRISCVzprintzymem]{print\_mem}#("tag[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVztagzyaddrzytozyaddr]{tag\_addr\_to\_addr}#(tag_addr2)) ^ "] <- " ^ (if tag then "1" else "0"));
+    #\hyperref[sailRISCVzMEMwzytag]{MEMw\_tag}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(tag_addr2), tag);
+  }
+}

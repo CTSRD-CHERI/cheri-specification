@@ -1,0 +1,827 @@
+{
+\setlength{\parindent}{0cm}
+
+\input{def-riscv-insns}
+\input{app-isaquick-riscv-macros}
+
+\chapter{CHERI-RISC-V ISA Quick Reference}
+\label{app:isaquick-riscv}
+
+	\section{Primary New Instructions}
+
+		The RISC-V specification reserves 4 major opcodes for extensions: 11 (0xb / 0b0001011), 43 (0x2b / 0b0101011), 91 (0x5b / 0b1011011), and 123 (0x7b / 0b1111011).
+		The proposed CHERI encodings use major opcode 0x5b for all capability instructions.
+
+		All register-register operations use the RISC-V R-type or I-type encoding formats.
+	\optype{Capability-Inspection}
+
+		\mrnote{What is the RISC-V equivalent of CPtrCmp?}
+		\jwnote{Wouldn't the legacy comparisons do the trick? (described above)}
+
+		\mrnote{We need to add \insnriscvref{CGetAddr}}
+
+		\mrnote{Given that, unlike CHERI-MIPS, CHERI RISC-V does not yet
+		have a backwards-compatibility problem, we might take the opportunity
+		to rationalize the bit positions of permission bits.}
+
+		\mmnote{I would prefer being able to click on the quick reference and jumping to the RISC-V specific Sail definitions.}
+
+		\rvcheriheader
+		\rvcheriisaquick{CGetPerm}
+
+		\rvcheriisaquick{CGetType}
+
+		\rvcheriisaquick{CGetBase}
+
+		\rvcheriisaquick{CGetLen}
+
+		\rvcheriisaquick{CGetTag}
+
+		\rvcheriisaquick{CGetSealed}
+
+		\rvcheriisaquick{CGetOffset}
+
+		\rvcheriisaquick{CGetFlags}
+
+		\rvcheriisaquick{CGetAddr}
+
+		\dcnote{CGetPCC is a Special}
+
+		\dcnote{CGetPCCSetOffset is AIUPC}
+
+	\optype{Capability-Modification}
+
+		\rvcheriheader
+		\rvcheriisaquick{CSeal}
+
+		\rvcheriisaquick{CUnseal}
+
+		\rvcheriisaquick{CAndPerm}
+
+		\rvcheriisaquick{CSetFlags}
+
+		\rvcheriisaquick{CSetOffset}
+
+		\rvcheriisaquick{CSetAddr}
+
+		\rvcheriisaquick{CIncOffset}
+
+		\rvcheriisaquick{CIncOffsetImm}
+
+		\rvcheriisaquick{CSetBounds}
+
+		\rvcheriisaquick{CSetBoundsExact}
+
+		\rvcheriisaquick{CSetBoundsImm}
+
+		\rvcheriisaquick{CClearTag}
+
+		\rvcheriisaquick{CBuildCap}
+
+		\rvcheriisaquick{CCopyType}
+
+		\rvcheriisaquick{CCSeal}
+
+		\rvcheriisaquick{CSealEntry}
+
+	\optype{Pointer-Arithmetic}
+
+		\dcnote{We might want a variant of these that works with DDC, because it's no longer a GPCR.}
+
+		\mrnote{The CHERI-MIPS way to get NULL is CFromPtr of \$zero and \$DDC, which will be a pain if \$DDC is a special register. Do we have a NULL capability register in RISC-V? If \$DDC is a special register, is it more important to have CFromPtr?}
+		\arnote{In the merged register file model we would have a NULL capability register
+		zero, which we should also keep in a potential split implementation (and finally add
+		to CHERI-MIPS as well). In that case we don't need a cfromptr \$zero since we can
+		just do a CInc/SetOffset \$cOut, \$cNULL, \$gpr.
+
+		To get a capability from DDC we should have a CFromDDC/CGetDDCSetOffset.
+		We also wouldn't need to use a new opcode for this since CToPtr raises an
+		exception on tag missing. Therefore, using it with the NULL register does not
+		make sense and we could use that encoding for CFromDDC.
+		If that complicates the decoder too much we can just keep that as an always
+		trapping instruction and add a separate CFromDDC opcode.}
+
+		\rvcheriheader
+		\rvcheriisaquick{CToPtr}
+
+		\rvcheriisaquick{CFromPtr}
+
+		\jwnote{We do not need CSub, since a standard Sub will return the difference between two capabilities.}
+
+		\jrtcnote{We do need a separate CSub with a split register file though,
+		so we define one that should be used even with a merged register file.}
+
+		\rvcheriisaquick{CSub}
+
+		\rvcheriisaquick{CMove}
+
+		%\dcnote{We probably shouldn't have these, because RISC-V doesn't have equivalents for integer registers - or we should define these as working on all registers.}
+
+		%\mrnote{If we have conditional moves, CMOVZ with a zero register
+		%can be used instead of CMove.}
+
+		%\mrnote{I thought in the MIPS case, we added
+		%integer and capability conditional moves because they
+		%were important for performance. CHERI-MIPS was originally planned to
+		%be MIPS III compatible, and we upgraded to MIPS IV mainly to get
+		%the integer conditional moves. It seems likely the same performance
+		%argument will apply to RISC-V.}
+
+		%\rvcheriisaquick{CMOVZ}
+
+		%\rvcheriisaquick{CMOVN}
+
+	%\optype{Pointer-Comparison}
+	% We inherit most of these from the RISC-V base specification.
+	% We should add EXEQ, NEXEQ and possibly EQ / NE which are omitted in the base spec
+
+		%\ptrcmp[header]{EQ}{0x14}
+		%\ptrcmp{NE}{0x15}
+		%\ptrcmp{LT}{0x16}
+		%\ptrcmp{LE}{0x17}
+		%\ptrcmp{LTU}{0x18}
+		%\ptrcmp{LEU}{0x19}
+		%\ptrcmp{NEXEQ}{0x21}
+		%\ptrcmp{EXEQ}{0x1a}
+
+	\optype{Pointer-Comparison}
+
+		\rvcheriisaquick{CTestSubset}
+
+		\rvcheriisaquick{CSetEqualExact}
+
+	\optype{Control-Flow}
+
+	\dcnote{RISC-V branch instructions all take two registers, so we end up	with a lot of spare bits if we want to use one for CBTS / CBTU.  It's probably better to fit them somewhere else in the opcode map.  Given that they're not common (outside of fast path selection for dynamic languages, where they may be performance critical), I'm inclined to suggest that we should omit them for now and later decide if it's better to do fusion on the CGetTag + BEZ / BNZ sequence or add them as new branches.}
+
+		\vspace{1.5ex}
+
+	  \dcnote{We probably don't need CJR to be a separate instruction, because we can use CJALR with the zero register as the link register}
+
+		\rvcheriisaquick{CJALR}
+
+		\vspace{1.5ex}
+
+		\rvcheriisaquick{CInvoke}
+
+	\optype{Special Capabilty Register Access}
+
+		\rvcheriisaquick{CSpecialRW}
+
+	\optype{Fast Register-Clearing}
+
+	\jwnote{These require 4 instructions to clear a complete register file,
+	once for each quarter, with an 8-bit mask for each.}
+
+		\rvcheriheader
+		\rvcheriisaquick{Clear}
+
+		\rvcheriisaquick{CClear}
+
+		\rvcheriisaquick{FPClear}
+
+	\optype{Adjusting to Compressed Capability Precision}
+
+		\rvcheriisaquick{CRoundRepresentableLength}
+
+		\rvcheriisaquick{CRepresentableAlignmentMask}
+
+\optype{Tag-Memory Access}
+
+\rvcheriisaquick{CLoadTags}
+
+\rvcheriisaquick{CClearTags}
+
+\optype{Memory Loads with Explicit Address Type}
+
+These memory load instructions explicitly expect either capability addresses
+or integer offsets to \DDC{}, with bounds coming either from cs1 or \DDC{}
+respectively. For non-reserved loads, the encoding of bits 24 to 20 tries to
+follow the standard RISC-V mapping for the width and signedness of the memory
+access:
+\begin{description}
+\item [bit 24] 0 to indicate non-reserved load.
+\item [bit 23] When 0, the load is DDC relative. Explicit capability is provided otherwise.
+\item [bit 22] When 0, the result of the load is sign-extended, and zero-extended otherwise.
+\item [bit 21-20] 00 loads a byte, 01 loads a half-word, 10 loads a word, 11 loads a double-word.
+\end{description}
+
+For reserved loads (which require the A extension), the encoding of bits 24 to
+20 tries to follow the standard RISC-V mapping for the width of the memory
+access:
+\begin{description}
+\item [bit 24] 1 to indicate LR version of the load.
+\item [bit 23] When 0, the load is DDC relative. Explicit capability is provided otherwise.
+\item [bit 22-20] 000 loads a byte, 001 loads a half-word, 010 loads a word, 011 loads a double-word, 100 loads a quad-word/capability.
+\end{description}
+
+Note that the RISC-V A extension (atomic) does not add unsigned versions of the
+LR instruction.\\
+Note that the LQ.\{DDC, CAP\} instructions do not strictly follow this
+pattern.\\
+
+\vspace{1em}
+
+\rvcheriheader
+\rvcheriisaquick{LB.DDC}
+
+\rvcheriisaquick{LH.DDC}
+
+\rvcheriisaquick{LW.DDC}
+
+\rvcheriisaquick{LC.DDC:RV32}
+
+\rvcheriisaquick{LD.DDC:RV64/128}
+
+\rvcheriisaquick{LC.DDC:RV64}
+
+\rvcheriisaquick{LQ.DDC:RV128}
+
+\rvcheriisaquick{LBU.DDC}
+
+\rvcheriisaquick{LHU.DDC}
+
+\rvcheriisaquick{LWU.DDC:RV64/128}
+
+\rvcheriisaquick{LDU.DDC:RV128}
+
+\rvcheriisaquick{LB.CAP}
+
+\rvcheriisaquick{LH.CAP}
+
+\rvcheriisaquick{LW.CAP}
+
+\rvcheriisaquick{LC.CAP:RV32}
+
+\rvcheriisaquick{LD.CAP:RV64/128}
+
+\rvcheriisaquick{LC.CAP:RV64}
+
+\rvcheriisaquick{LQ.CAP:RV128}
+
+\rvcheriisaquick{LBU.CAP}
+
+\rvcheriisaquick{LHU.CAP}
+
+\rvcheriisaquick{LWU.CAP:RV64/128}
+
+\rvcheriisaquick{LDU.CAP:RV128}
+
+\rvcheriisaquick{LR.B.DDC}
+
+\rvcheriisaquick{LR.H.DDC}
+
+\rvcheriisaquick{LR.W.DDC}
+
+\rvcheriisaquick{LR.C.DDC:RV32}
+
+\rvcheriisaquick{LR.D.DDC:RV64/128}
+
+\rvcheriisaquick{LR.C.DDC:RV64}
+
+\rvcheriisaquick{LR.Q.DDC:RV128}
+
+\rvcheriisaquick{LR.B.CAP}
+
+\rvcheriisaquick{LR.H.CAP}
+
+\rvcheriisaquick{LR.W.CAP}
+
+\rvcheriisaquick{LR.C.CAP:RV32}
+
+\rvcheriisaquick{LR.D.CAP:RV64/128}
+
+\rvcheriisaquick{LR.C.CAP:RV64}
+
+\rvcheriisaquick{LR.Q.CAP:RV128}
+
+\vspace{1em}
+
+\optype{Memory Stores with Explicit Address Type}
+
+These memory store instructions explicitly expect either capability addresses
+or integer offsets to \DDC{}, with bounds coming either from cs1 or \DDC{}
+respectively. The encoding of bits 11 to 7 tries to follow the standard RISC-V
+mapping for the width of the memory access:
+\begin{description}
+\item [bit 11] When 1 with the A extension, SC version of the store.
+\item [bit 10] When 0, the store is DDC relative. Explicit capability is provided otherwise.
+\item [bit 9-7] 000 stores a byte, 001 stores a half-word, 010 stores a word, 011 stores a double-word, 100 stores a quad-word/capability.
+\end{description}
+
+\vspace{1em}
+
+\rvcheriheader
+\rvcheriisaquick{SB.DDC}
+
+\rvcheriisaquick{SH.DDC}
+
+\rvcheriisaquick{SW.DDC}
+
+\rvcheriisaquick{SC.DDC:RV32}
+
+\rvcheriisaquick{SD.DDC:RV64/128}
+
+\rvcheriisaquick{SC.DDC:RV64}
+
+\rvcheriisaquick{SQ.DDC:RV128}
+
+\rvcheriisaquick{SB.CAP}
+
+\rvcheriisaquick{SH.CAP}
+
+\rvcheriisaquick{SW.CAP}
+
+\rvcheriisaquick{SC.CAP:RV32}
+
+\rvcheriisaquick{SD.CAP:RV64/128}
+
+\rvcheriisaquick{SC.CAP:RV64}
+
+\rvcheriisaquick{SQ.CAP:RV128}
+
+\rvcheriisaquick{SC.B.DDC}
+
+\rvcheriisaquick{SC.H.DDC}
+
+\rvcheriisaquick{SC.W.DDC}
+
+\rvcheriisaquick{SC.C.DDC:RV32}
+
+\rvcheriisaquick{SC.D.DDC:RV64/128}
+
+\rvcheriisaquick{SC.C.DDC:RV64}
+
+\rvcheriisaquick{SC.Q.DDC:RV128}
+
+\rvcheriisaquick{SC.B.CAP}
+
+\rvcheriisaquick{SC.H.CAP}
+
+\rvcheriisaquick{SC.W.CAP}
+
+\rvcheriisaquick{SC.C.CAP:RV32}
+
+\rvcheriisaquick{SC.D.CAP:RV64/128}
+
+\rvcheriisaquick{SC.C.CAP:RV64}
+
+\rvcheriisaquick{SC.Q.CAP:RV128}
+
+	\section{Memory-Access via Capability with Offset Instructions}
+
+	\optype{Memory-Access}
+
+	\dcnote{I'm not certain about operand order for these, because the RISC-V spec is too vague.  LC/SC fit into the existing load / store encoding space, capability-base versions use the same layout for loads and stores currently, though there's no reason that we couldn't shuffle things around if it simplifies decoding.}
+	\vspace{1.5ex}
+
+  \ajnote{Jon points out that if preserving the information of what kind of load loaded the pointer in the first place (which happens to be available early in decode, hence not introducing data dependent decoding later on), we can dereference it as a capability or a 64-bit pointer without relying on a new set of load/store instructions. I wonder whether this is a practical approach, or wether things like loading data via a 128-bit load and dereferencing a subset of that data as a 64-bit pointer is ever useful as this would no longer work (in context switches maybe that could be an issue?)}
+
+When using 64-bit capabilities in RV32, the RV64 instructions \texttt{LD} and \texttt{SD} are reused to behave as \texttt{LC} and \texttt{SC} respectively.\\
+
+		\begin{bytefield}{32}
+			\bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+			\bitbox{12}{imm}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x3}
+			\bitbox{5}{cd}
+			\bitbox{7}{0x3}
+		\end{bytefield}
+		\rvcheriasmfmt[RV32]{\rvcheriasminsnref{LC} cd, rs1, imm}
+
+		\begin{bytefield}{32}
+			\bitbox{7}{imm[11:5]}
+			\bitbox{5}{cs2}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x3}
+			\bitbox{5}{imm[0:4]}
+			\bitbox{7}{0x23}
+		\end{bytefield}
+		\rvcheriasmfmt[RV32]{\rvcheriasminsnref{SC} cs2, rs1, imm}\\
+
+When using 128-bit capabilities in RV64, the RV128 instructions \texttt{LQ} and \texttt{SQ} \textit{(anticipated encoding)} are reused to behave as \texttt{LC} and \texttt{SC} respectively.\\
+
+		\begin{bytefield}{32}
+			\bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+			\bitbox{12}{imm}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x2}
+			\bitbox{5}{cd}
+			\bitbox{7}{0xf}
+		\end{bytefield}
+		\rvcheriasmfmt[RV64]{\rvcheriasminsnref{LC} cd, rs1, imm}
+
+		\begin{bytefield}{32}
+			\bitbox{7}{imm[11:5]}
+			\bitbox{5}{cs2}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x4}
+			\bitbox{5}{imm[0:4]}
+			\bitbox{7}{0x23}
+		\end{bytefield}
+		\rvcheriasmfmt[RV64]{\rvcheriasminsnref{SC} cs2, rs1, imm}\\
+
+	\optype{Atomic Memory-Access}
+
+When using 64-bit capabilities in RV32, the RV64A instructions \texttt{LR.D}, \texttt{SC.D} and \texttt{AMOSWAP.D} are reused to behave as \texttt{LR.C}, \texttt{SC.C} and \texttt{AMOSWAP.C} respectively.\\
+
+		\begin{bytefield}{32}
+			\bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,26,27,31}\\
+			\bitbox{5}{0x2}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{0x0}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x3}
+			\bitbox{5}{cd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt[RV32]{\rvcheriasminsnnoref{LR.C} cd, rs1}
+
+		\begin{bytefield}{32}
+			\bitbox{5}{0x3}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{cs2}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x3}
+			\bitbox{5}{rd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt[RV32]{\rvcheriasminsnnoref{SC.C} rd, cs2, rs1}
+
+		\begin{bytefield}{32}
+			\bitbox{5}{0x1}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{cs2}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x3}
+			\bitbox{5}{cd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt[RV32]{\rvcheriasminsnnoref{AMOSWAP.C} cd, cs2, rs1}
+
+When using 128-bit capabilities in RV64, the RV64A instructions \texttt{LR.Q}, \texttt{SC.Q} and \texttt{AMOSWAP.Q} \textit{(anticipated encoding)} are reused to behave as \texttt{LR.C}, \texttt{SC.C} and \texttt{AMOSWAP.C} respectively.\\
+
+		\begin{bytefield}{32}
+			\bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,26,27,31}\\
+			\bitbox{5}{0x2}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{0x0}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x4}
+			\bitbox{5}{cd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt[RV64]{\rvcheriasminsnnoref{LR.C} cd, rs1}
+
+		\begin{bytefield}{32}
+			\bitbox{5}{0x3}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{cs2}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x4}
+			\bitbox{5}{rd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt[RV64]{\rvcheriasminsnnoref{SC.C} rd, cs2, rs1}
+
+		\begin{bytefield}{32}
+			\bitbox{5}{0x1}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{cs2}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x4}
+			\bitbox{5}{cd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt[RV64]{\rvcheriasminsnnoref{AMOSWAP.C} cd, cs2, rs1}
+
+We do not provide any of the other AMOs at this point when operating on
+capability values, as they generally make sense only when operating on integer
+values.
+
+Since capabilities have precise bounds, sub-word atomics cannot be implemented
+using word-sized atomics. To avoid unnecessary complexity compared with a
+non-CHERI RISC-V implementation, we define only \texttt{LR.B}, \texttt{SC.B},
+\texttt{LR.H} and \texttt{SC.H}, without any of the corresponding AMOs. We also
+only require these to be present in capability mode, but implementations may
+choose to always provide them for simplicity.
+
+		\begin{bytefield}{32}
+			\bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,26,27,31}\\
+			\bitbox{5}{0x2}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{0x0}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x0}
+			\bitbox{5}{rd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt{\rvcheriasminsnnoref{LR.B} rd, rs1}
+
+		\begin{bytefield}{32}
+			\bitbox{5}{0x3}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{rs2}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x0}
+			\bitbox{5}{rd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt{\rvcheriasminsnnoref{SC.B} rd, rs2, rs1}
+
+		\begin{bytefield}{32}
+			\bitbox{5}{0x2}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{0x0}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x1}
+			\bitbox{5}{rd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt{\rvcheriasminsnnoref{LR.H} rd, rs1}
+
+		\begin{bytefield}{32}
+			\bitbox{5}{0x3}
+			\bitbox{1}{\riscvbitboxaq}
+			\bitbox{1}{\riscvbitboxrl}
+			\bitbox{5}{rs2}
+			\bitbox{5}{rs1}
+			\bitbox{3}{0x1}
+			\bitbox{5}{rd}
+			\bitbox{7}{0x2f}
+		\end{bytefield}
+		\rvcheriasmfmt{\rvcheriasminsnnoref{SC.H} rd, rs2, rs1}
+
+	\section{Assembly Programming}
+
+	\subsection{Capability Register ABI Names}
+
+	Table~\ref{table:riscv-register-names} lists the ABI names of
+	the capability registers.  The ABI names follow from the ABI
+	names of the RISC-V \textbf{x} registers.  All capability registers are
+	Caller-Save in the hybrid ABI.	Capability registers follow
+	the same save requirements as \textbf{x} registers in the purecap ABI.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lllll}
+\toprule
+Register & ABI Name & Description						& Hybrid Saver & Purecap Saver \\
+\midrule
+c0	& cnull		& NULL pointer					& -		& - \\
+c1	& cra		& Return address					& Caller	& Caller \\
+c2	& csp		& Stack pointer					& Caller	& Callee \\
+c3	& cgp		& Global pointer					& -		& - \\
+c4	& ctp		& Thread pointer					& -		& - \\
+c5	& ct0		& Temporary/alternate link register	& Caller	& Caller \\
+c6-7 & ct1-2		& Temporaries						& Caller	& Caller \\
+c8	& cs0/cfp	& Saved register/frame pointer		& Caller	& Callee \\
+c9	& cs1		& Saved register					& Caller	& Callee \\
+c10-11 & ca0-1	& Function arguments/return values	& Caller	& Caller \\
+c12-17 & ca2-7	& Function arguments				& Caller	& Caller \\
+c18-27 & cs2-11	& Saved registers					& Caller	& Callee \\
+c28-31 & ct3-6	& Temporaries						& Caller	& Caller \\
+\bottomrule
+\end{tabular}
+\end{center}
+\caption{Assembler mnemonics for CHERI RISC-V capability registers}
+\label{table:riscv-register-names}
+\end{table}
+
+	\subsection{Capability Encoding Mode Instructions}
+
+	Table~\ref{table:riscv-capmode-instructions} lists instructions
+	which change semantics under capability mode.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Integer Instruction		& Capability Instruction \\
+\midrule
+\texttt{l\{b|h|w|d|c\} rd, offset(rs)} & \texttt{cl\{b|h|w|d|c\} rd, offset(cs)} \\
+\texttt{l\{b|h|w|d\}u rd, offset(rs)} & \texttt{cl\{b|h|w|d\}u rd, offset(cs)} \\
+\texttt{s\{b|h|w|d|c\} rs, offset(rd)} & \texttt{cs\{b|h|w|d|c\} rs, offset(cd)} \\
+\texttt{fl\{w|d|q\} fd, offset(rs)} & \texttt{cfl\{w|d|q\} fd, offset(cs)} \\
+\texttt{fs\{w|d|q\} fs, offset(rd)} & \texttt{cfs\{w|d|q\} fs, offset(cd)} \\
+\texttt{lr.\{b|h|w|d|c\} rd, (rs)} & \texttt{clr.\{b|h|w|d|c\} rd, (cs)} \\
+\texttt{sc.\{b|h|w|d|c\} rd, rs, (rm)} & \texttt{csc.\{b|h|w|d|c\} rd, rs, (cm)} \\
+\texttt{amo<op>.\{w|d\}[.order] rd, rs, (rm)} & \texttt{camo<op>.\{w|d\}[.order] rd, rs, (cm)} \\
+\texttt{auipc rd, offset} & \texttt{auipcc rd, offset} \\
+\texttt{c.jr rs} & \texttt{c.cjr cs} \\
+\texttt{c.jalr rs} & \texttt{c.cjalr cs} \\
+\texttt{c.l\{w|d\} rd, offset(rs)} & \texttt{c.cl\{w|d\} rd, offset(cs)} \\
+\texttt{c.l\{w|d\}sp rd, offset(sp)} & \texttt{c.cl\{w|d\}sp rd, offset(csp)} \\
+\texttt{c.s\{w|d\} rs, offset(rd)} & \texttt{c.cs\{w|d\} rs, offset(cd)} \\
+\texttt{c.s\{w|d\}sp rs, offset(sp)} & \texttt{c.cs\{w|d\}sp rs, offset(csp)} \\
+\texttt{c.flw fd, offset(rs)} & \texttt{c.cflw fd, offset(cs)} \\
+\texttt{c.flwsp fd, offset(sp)} & \texttt{c.cflwsp fd, offset(csp)} \\
+\texttt{c.fsw fs, offset(rd)} & \texttt{c.cfsw fs, offset(cd)} \\
+\texttt{c.fswsp fs, offset(sp)} & \texttt{c.cfswsp fs, offset(csp)} \\
+\texttt{c.fld fd, offset(rs)} & \texttt{c.clc cd, offset(cs)} \\
+\texttt{c.fldsp fd, offset(sp)} & \texttt{c.clcsp cd, offset(csp)} \\
+\texttt{c.fsd fs, offset(rd)} & \texttt{c.csc cs, offset(cd)} \\
+\texttt{c.fsdsp fs, offset(sp)} & \texttt{c.cscsp cs, offset(csp)} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\caption{Instructions Dependent on Encoding Mode}
+\label{table:riscv-capmode-instructions}
+\end{table}
+
+	Table~\ref{table:riscv-capmode-pseudo-remove} lists psuedoinstructions
+	removed in capability mode.
+	Table~\ref{table:riscv-capmode-pseudo-add} lists psuedoinstructions
+	added in capability mode.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Pseudoinstruction	& Meaning \\
+\midrule
+\texttt{la rd, symbol} & Load address \\
+\texttt{lla rd, symbol} & Load local address \\
+\texttt{l\{b|h|w|d\} rd, symbol} & Load global \\
+\texttt{s\{b|h|w|d\} rd, symbol, rt} & Store global \\
+\texttt{fl\{w|d\} rd, symbol, rt} & Floating-point load global \\
+\texttt{fs\{w|d\} rd, symbol, rt} & Floating-point store global \\
+\midrule
+\texttt{call symbol} & Call far-away subroutine \\
+\texttt{tail symbol} & Tail call far-away subroutine \\
+\bottomrule
+\end{tabular}
+\end{center}
+\caption{Pseudoinstructions Removed in Capability Mode}
+\label{table:riscv-capmode-pseudo-remove}
+\end{table}
+
+\begin{sidewaystable}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Pseudoinstruction	& Base Instruction(s)	& Meaning \\
+\midrule
+\texttt{clgc cd, sym} &
+  \begin{tabular}{@{}l@{}}
+  \texttt{1: auipcc cd, \%captab\_pcrel\_hi(sym)} \\ \texttt{\ \ \ \ clc cd, \%pcrel\_lo(1b)(cd)}
+  \end{tabular}
+ & Load from capability table \\
+\texttt{cllc cd, sym} &
+  \begin{tabular}{@{}l@{}}
+  \texttt{1: auipcc cd, \%pcrel\_hi(sym)} \\ \texttt{\ \ \ \ cincoffset cd, cd, \%pcrel\_lo(1b)}
+  \end{tabular}
+ & Load PCC-relative capability \\
+\midrule
+\texttt{cjr cs} & \texttt{cjalr cnull, cs} & Jump to capability \\
+\texttt{cjalr cs} & \texttt{cjalr cra, cs} & Jump to capability and link \\
+\texttt{cret} & \texttt{cjalr cnull, cra} & Return to capability \\
+\midrule
+\texttt{cspecialr cd, scr} & \texttt{cspecialrw cd, scr, cnull} & Read special capability register \\
+\texttt{cspecialw scr, cs} & \texttt{cspecialrw cnull, scr, cs} & Write special capability register \\
+\bottomrule
+\end{tabular}
+\end{center}
+\caption{Pseudoinstructions Added in Capability Mode}
+\label{table:riscv-capmode-pseudo-add}
+% TODO: should the hyperrefs for these pseudos link to CJALR instead?
+\insnriscvlabel{cjr}
+\insnriscvlabel{cret}
+\insnriscvlabel{cspecialr}
+\insnriscvlabel{cspecialw}
+\insnriscvlabel{cllc}
+\insnriscvlabel{clgc}
+\end{sidewaystable}
+
+	\section{Encoding Summary}
+
+	CHERI-RISC-V general-purpose instructions use the 0x5b major opcode and use the RISC-V R-type or I-type encoding formats.
+	CHERI-RISC-V uses the funct3 field from bits 14-12 as a top-level opcode, and funct7 as a secondary
+	opcode for standard 3-register operand instructions.
+	Two-register operand instructions and single-register operand instructions are a subset
+	of the 3-register operand encodings.
+
+	\subsection*{Top-level encoding allocation (funct3 field)}
+	{\scriptsize
+	\rvcherienctabletop
+	}
+
+	\subsection*{Two Source \& Dest encoding allocation (funct7 field)}
+	All three-register-operand (two sources, one destination) CHERI-RISC-V instructions use the RISC-V R-type encoding format, with the same funct field stored in funct7 and a 0 value in funct3.
+
+	\vspace{1em}
+
+	\rvcherirawbitbox{srcsrcdest}{func}{cd}{cs1}{rs2/cs2}
+
+	\vspace{1em}
+
+	{\scriptsize
+	\rvcherienctablesrcsrcdest
+	}
+
+	\subsection*{Stores encoding allocation  (rd field)}
+	Store instructions are of the following form:
+	\vspace{1em}
+
+	\rvcheriheader
+	\rvcherirawbitbox{expstore}{func}{rs2/cs2}{rs1/cs1}
+
+	\vspace{1em}
+
+	{\scriptsize
+	\def\rvcheriatomicfootnotemark{$\dagger$}
+	\rvcherienctableexpstore\\\\
+	$\dagger$ The SC.\{B, H, W, D, Q\}.\{DDC, CAP\} instructions are available only when the RISC-V A extension (atomic) is present.
+	}
+
+	\vspace{1em}
+
+	\subsection*{Loads encoding allocation  (rs2 field)}
+	Load instructions are of the following form:
+	\vspace{1em}
+
+	\rvcheriheader
+	\rvcherirawbitbox{expload}{func}{rd/cd}{rs1/cs1}
+
+	\vspace{1em}
+
+	{\scriptsize
+	\def\rvcheriatomicfootnotemark{$\dagger$}
+	\def\rvcherildufootnotemark{$\ddagger$}
+	\rvcherienctableexpload\\\\
+	$\dagger$ The LR.\{B, H, W, D, Q\}.\{DDC, CAP\} instructions are available only when the RISC-V A extension (atomic) is present.\\
+	$\ddagger$ LDU.\{DDC, CAP\} instructions are available only in RV128.
+	}
+
+	\vspace{1em}
+
+	\subsection*{Two Source encoding allocation  (rd field)}
+	Two Source instructions are of the following form:
+	\vspace{1em}
+
+	\rvcheriheader
+	\rvcherirawbitbox{srcsrc}{func}{rs1/cs1}{rs2/cs2}
+
+	\vspace{1em}
+
+	{\scriptsize
+	\rvcherienctablesrcsrc
+	}
+
+	\vspace{1em}
+
+	\subsection*{One Source encoding allocation (rs2 field)}
+	One Source instructions are of the following form:
+
+	\vspace{1em}
+
+	\rvcheriheader
+	\rvcherirawbitbox{src}{func}{rs1/cs1}
+
+	\vspace{1em}
+
+	{\scriptsize
+	\rvcherienctablesrc
+	}
+
+	\vspace{1em}
+
+	\subsection*{Source \& Dest encoding allocation (rs2 field)}
+	Source \& Dest instructions are of the following form:
+
+	\vspace{1em}
+
+	\rvcheriheader
+	\rvcherirawbitbox{srcdest}{func}{rd/cd}{rs1/cs1}
+
+	\vspace{1em}
+
+	{\scriptsize
+	\rvcherienctablesrcdest
+	}
+
+	\vspace{1em}
+
+	\subsection*{Dest-Only encoding allocation (rs1 field)}
+	We do not currently have any one-register-operand instructions, but any
+	future dest-only instructions will be of the following form:
+
+	\vspace{1em}
+
+	\rvcheriheader
+	\rvcherirawbitbox{dest}{func}{rd}
+
+	\vspace{1em}
+
+	{\scriptsize
+	\rvcherienctabledest
+	}

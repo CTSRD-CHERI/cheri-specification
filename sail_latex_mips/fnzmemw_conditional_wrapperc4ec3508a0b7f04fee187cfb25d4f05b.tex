@@ -1,0 +1,7 @@
+function #\hyperref[sailMIPSzMEMwzyconditionalzywrapper]{MEMw\_conditional\_wrapper}#(addr, size, data) =
+  {
+    /* require that writes don't cross capability #\hyperref[sailMIPSzboundaries]{boundaries}# (should be true due to mips alignment requirements) */
+    assert((addr & cap_addr_mask) == ((addr + #\hyperref[sailMIPSztozybits]{to\_bits}#(64, size - 1)) & cap_addr_mask));
+    /* On cheri non-capability writes must clear the corresponding tag */
+    #\hyperref[sailMIPSzMEMwzytaggedzyconditional]{MEMw\_tagged\_conditional}#(addr, size, false, data)
+  }

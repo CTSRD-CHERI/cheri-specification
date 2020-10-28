@@ -1,0 +1,17 @@
+function #\hyperref[sailRISCVzpmpAddrRange]{pmpAddrRange}#(cfg: Pmpcfg_ent, pmpaddr: xlenbits, prev_pmpaddr: xlenbits) -> pmp_addr_range = {
+  match #\hyperref[sailRISCVzpmpAddrMatchTypezyofzybits]{pmpAddrMatchType\_of\_bits}#(cfg.#\hyperref[sailRISCVzA]{A}#()) {
+    OFF   => #\hyperref[sailRISCVzNone]{None}#(),
+    TOR   => { #\hyperref[sailRISCVzSome]{Some}# ((prev_pmpaddr << 2, pmpaddr << 2)) },
+    NA4   => { // TODO: I find the spec unclear for entries marked NA4 and G = 1.
+               // (for G >= 2, it is the same as NAPOT). In particular, it affects
+               // whether pmpaddr[0] is always read as 0.
+               let lo = pmpaddr << 2;
+               #\hyperref[sailRISCVzSome]{Some}#((lo, lo + 4))
+             },
+    NAPOT => { let mask = pmpaddr ^ (pmpaddr + 1);  // generate 1s in signifying bits
+               let lo   = pmpaddr & (~ (mask));
+               let len  = mask + 1;
+               #\hyperref[sailRISCVzSome]{Some}#((lo << 2, (lo + len) << 2))
+             }
+  }
+}

@@ -1,0 +1,5 @@
+function sop_of_num arg# = match arg# {
+  0 => RISCV_SLLI,
+  1 => RISCV_SRLI,
+  _ => RISCV_SRAI
+}

@@ -1,0 +1,13 @@
+function #\hyperref[sailRISCVzprocessPending]{processPending}#(xip : Minterrupts, xie : Minterrupts, xideleg : xlenbits,
+                        priv_enabled : bool) -> interrupt_set = {
+  /* interrupts that are enabled but not delegated are pending */
+  let  effective_pend = xip.#\hyperref[sailRISCVzbits]{bits}#() & xie.#\hyperref[sailRISCVzbits]{bits}#() & (~ (xideleg));
+  /* the others are delegated */
+  let  effective_delg = xip.#\hyperref[sailRISCVzbits]{bits}#() & xideleg;
+  /* we have pending interrupts if this privilege is enabled */
+  if      priv_enabled & (effective_pend != #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0))
+  then    #\hyperref[sailRISCVzIntszyPending]{Ints\_Pending}#(effective_pend)
+  else if effective_delg != #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0)
+  then    #\hyperref[sailRISCVzIntszyDelegated]{Ints\_Delegated}#(effective_delg)
+  else    #\hyperref[sailRISCVzIntszyEmpty]{Ints\_Empty}#()
+}

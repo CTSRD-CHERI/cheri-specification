@@ -1,0 +1,31 @@
+function #\hyperref[sailRISCVzhandlezyloadzydatazyviazycap]{handle\_load\_data\_via\_cap}#(rd, auth_idx, auth_val, vaddrBits, is_unsigned, width) = {
+  let size = #\hyperref[sailRISCVzwordzywidthzybytes]{word\_width\_bytes}#(width);
+  let aq : bool = false;
+  let rl : bool = false;
+  if #\hyperref[sailRISCVznot]{not}#(auth_val.tag) then {
+    #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_TagViolation, auth_idx);
+    RETIRE_FAIL
+  } else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(auth_val) then {
+    #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_SealViolation, auth_idx);
+    RETIRE_FAIL
+  } else if #\hyperref[sailRISCVznot]{not}# (auth_val.permit_load) then {
+    #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_PermitLoadViolation, auth_idx);
+    RETIRE_FAIL
+  } else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(auth_val, vaddrBits, size)) then {
+    #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_LengthViolation, auth_idx);
+    RETIRE_FAIL
+  } else if #\hyperref[sailRISCVzcheckzymisaligned]{check\_misaligned}#(vaddrBits, width) then {
+    #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, #\hyperref[sailRISCVzEzyLoadzyAddrzyAlign]{E\_Load\_Addr\_Align}#());
+    RETIRE_FAIL
+  } else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddrBits, #\hyperref[sailRISCVzRead]{Read}#(Data)) {
+    #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(_), _) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unexpected cheri exception for data load") },
+    #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL },
+    #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) =>
+      match (width, sizeof(xlen)) {
+        (BYTE, _)    => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 1, aq, rl, false), is_unsigned),
+        (HALF, _)    => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 2, aq, rl, false), is_unsigned),
+        (WORD, _)    => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 4, aq, rl, false), is_unsigned),
+        (DOUBLE, 64) => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 8, aq, rl, false), is_unsigned)
+      }
+  }
+}

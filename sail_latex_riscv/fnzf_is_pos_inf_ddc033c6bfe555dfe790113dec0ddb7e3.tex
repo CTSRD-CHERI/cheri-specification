@@ -1,0 +1,6 @@
+function f_is_pos_inf_D   x64 = {
+  let (sign, exp, mant) = #\hyperref[sailRISCVzfsplitzyD]{fsplit\_D}# (x64);
+  (  (sign == #\hyperref[sailRISCVzzzeros]{zeros}#())
+   & (exp  == #\hyperref[sailRISCVzones]{ones}#())
+   & (mant == #\hyperref[sailRISCVzzzeros]{zeros}#()))
+}

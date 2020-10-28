@@ -1,0 +1,4 @@
+function #\hyperref[sailMIPSzsetCapAddr]{setCapAddr}#(c, addr) =
+    let newCap = { c with address = addr } in
+    let representable = #\hyperref[sailMIPSzcapBoundsEqual]{capBoundsEqual}#(c, newCap) in
+    (representable, newCap)

@@ -1,0 +1,58 @@
+function #\hyperref[sailRISCVzclintzyload]{clint\_load}#(t, addr, width) = {
+  let addr = addr - #\hyperref[sailRISCVzplatzyclintzybase]{plat\_clint\_base}# ();
+  /* FIXME: For now, only allow exact aligned access. */
+  if addr == MSIP_BASE & ('n == 8 | 'n == 4)
+  then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] -> " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mip.#\hyperref[sailRISCVzMSI]{MSI}#()));
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(mip.#\hyperref[sailRISCVzMSI]{MSI}#(), sizeof(8 * 'n)))
+  }
+  else if addr == MTIMECMP_BASE & ('n == 4)
+  then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint<4>[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] -> " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mtimecmp[31..0]));
+    /* FIXME: Redundant zero_extend currently required by Lem backend */
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(mtimecmp[31..0], 32))
+  }
+  else if addr == MTIMECMP_BASE & ('n == 8)
+  then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint<8>[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] -> " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mtimecmp));
+    /* FIXME: Redundant zero_extend currently required by Lem backend */
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(mtimecmp, 64))
+  }
+  else if addr == MTIMECMP_BASE_HI & ('n == 4)
+  then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint-hi<4>[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] -> " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mtimecmp[63..32]));
+    /* FIXME: Redundant zero_extend currently required by Lem backend */
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(mtimecmp[63..32], 32))
+  }
+  else if addr == MTIME_BASE & ('n == 4)
+  then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] -> " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mtime));
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(mtime[31..0], 32))
+  }
+  else if addr == MTIME_BASE & ('n == 8)
+  then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] -> " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mtime));
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(mtime, 64))
+  }
+  else if addr == MTIME_BASE_HI & ('n == 4)
+  then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] -> " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mtime));
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(mtime[63..32], 32))
+  }
+  else {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(addr) ^ "] -> <not-mapped>");
+    match t {
+      #\hyperref[sailRISCVzExecute]{Execute}#()  => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyFetchzyAccesszyFault]{E\_Fetch\_Access\_Fault}#()),
+      #\hyperref[sailRISCVzRead]{Read}#(Data) => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyLoadzyAccesszyFault]{E\_Load\_Access\_Fault}#()),
+      _          => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#())
+    }
+  }
+}

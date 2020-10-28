@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzcheckzyCSRzyaccess]{check\_CSR\_access}#(csrrw, csrpr, p, isWrite) =
+    (~ (isWrite == true & csrrw == 0b11))  /* read/write */
+  & (#\hyperref[sailRISCVzprivLevelzytozybits]{privLevel\_to\_bits}#(p) >=_u csrpr)      /* privilege */

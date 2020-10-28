@@ -1,0 +1,33 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CLCNT}
+\insnmipslabel{clcnt}
+\subsection*{CLCNT: Non-Temporal (Streaming) Load Capability via Capability}
+
+\subsubsection*{Format}
+
+CLCNT cd, rt(cb) \\
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,5,6,10,11,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x12}
+\bitbox{5}{0x00}
+\bitbox{5}{cd}
+\bitbox{5}{cb}
+\bitbox{5}{rt}
+\bitbox{6}{0x38}
+\end{bytefield}
+\end{center}
+
+\usesDDCinsteadofNULL{cb}
+
+\subsubsection*{Description}
+
+Architecturally equivalent to \insnmipsref{CLC} (q.v.), this instruction is
+intended as a hint to the cache fabric that the loaded line is expected to be
+used only a few times.  See \cref{app:exp:clcnt} for rationale and more
+discussion.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CLCNT}

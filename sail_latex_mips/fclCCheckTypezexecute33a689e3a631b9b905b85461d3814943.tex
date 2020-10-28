@@ -1,0 +1,13 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let cs_val = #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(cs);
+let cb_val = #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(cb);
+if not (cs_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TagViolation, cs)
+else if not (cb_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TagViolation, cb)
+else if not(cs_val.sealed) | #\hyperref[sailMIPSzhasReservedOType]{hasReservedOType}#(cs_val) then /* XXX should make latter a TypeViolation? */
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, cs)
+else if not(cb_val.sealed) | #\hyperref[sailMIPSzhasReservedOType]{hasReservedOType}#(cb_val) then  /* XXX should make latter a TypeViolation? */
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, cb)
+else if cs_val.otype != cb_val.otype then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TypeViolation, cs)

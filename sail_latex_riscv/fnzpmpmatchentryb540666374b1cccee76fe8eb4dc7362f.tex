@@ -1,0 +1,11 @@
+function #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr: xlenbits, width: xlenbits, acc: #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), priv: Privilege,
+                       ent: Pmpcfg_ent, pmpaddr: xlenbits, prev_pmpaddr: xlenbits) -> pmpMatch = {
+  let rng = #\hyperref[sailRISCVzpmpAddrRange]{pmpAddrRange}#(ent, pmpaddr, prev_pmpaddr);
+  match #\hyperref[sailRISCVzpmpMatchAddr]{pmpMatchAddr}#(addr, width, rng) {
+    PMP_NoMatch      => PMP_Continue,
+    PMP_PartialMatch => PMP_Fail,
+    PMP_Match        => if   #\hyperref[sailRISCVzpmpCheckPerms]{pmpCheckPerms}#(ent, acc, priv)
+                        then PMP_Success
+                        else PMP_Fail
+  }
+}

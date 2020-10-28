@@ -1,0 +1,15 @@
+let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
+let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
+if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_TagViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
+  RETIRE_FAIL
+} else {
+  let perms = #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cs1_val);
+  let mask = #\hyperref[sailRISCVztruncate]{truncate}#(rs2_val, cap_perms_width);
+  let newCap = #\hyperref[sailRISCVzsetCapPerms]{setCapPerms}#(cs1_val, (perms & mask));
+  #\hyperref[sailRISCVzC]{C}#(cd) = newCap;
+  RETIRE_SUCCESS
+}

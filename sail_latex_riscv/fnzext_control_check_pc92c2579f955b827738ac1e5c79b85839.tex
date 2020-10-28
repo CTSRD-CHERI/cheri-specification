@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzextzycontrolzycheckzypc]{ext\_control\_check\_pc}#(pc : xlenbits) -> #\hyperref[sailRISCVzExtzyControlAddrzyCheck]{Ext\_ControlAddr\_Check}#(ext_control_addr_error) = {
+  if   #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(PCC, pc, #\hyperref[sailRISCVzminzyinstructionzybytes]{min\_instruction\_bytes}# ()))
+  then #\hyperref[sailRISCVzExtzyControlAddrzyError]{Ext\_ControlAddr\_Error}#(CapEx_LengthViolation, PCC_IDX)
+  else #\hyperref[sailRISCVzExtzyControlAddrzyOK]{Ext\_ControlAddr\_OK}#(pc)
+}

@@ -1,0 +1,72 @@
+function #\hyperref[sailRISCVzwriteCSR]{writeCSR}# (csr : csreg, value : xlenbits) -> unit = {
+  let res : #\hyperref[sailRISCVzoption]{option}#(xlenbits) =
+  match (csr, sizeof(xlen)) {
+    /* machine mode */
+    (0x300,  _) => { mstatus = #\hyperref[sailRISCVzlegalizzezymstatus]{legalize\_mstatus}#(mstatus, value); #\hyperref[sailRISCVzSome]{Some}#(mstatus.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x301,  _) => { misa = #\hyperref[sailRISCVzlegalizzezymisa]{legalize\_misa}#(misa, value); #\hyperref[sailRISCVzSome]{Some}#(misa.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x302,  _) => { medeleg = #\hyperref[sailRISCVzlegalizzezymedeleg]{legalize\_medeleg}#(medeleg, value); #\hyperref[sailRISCVzSome]{Some}#(medeleg.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x303,  _) => { mideleg = #\hyperref[sailRISCVzlegalizzezymideleg]{legalize\_mideleg}#(mideleg, value); #\hyperref[sailRISCVzSome]{Some}#(mideleg.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x304,  _) => { mie = #\hyperref[sailRISCVzlegalizzezymie]{legalize\_mie}#(mie, value); #\hyperref[sailRISCVzSome]{Some}#(mie.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x305,  _) => { #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzsetzymtvec]{set\_mtvec}#(value)) },
+    (0x306,  _) => { mcounteren = #\hyperref[sailRISCVzlegalizzezymcounteren]{legalize\_mcounteren}#(mcounteren, value); #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(mcounteren.#\hyperref[sailRISCVzbits]{bits}#())) },
+    (0x320,  _) => { mcountinhibit = #\hyperref[sailRISCVzlegalizzezymcountinhibit]{legalize\_mcountinhibit}#(mcountinhibit, value); #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(mcountinhibit.#\hyperref[sailRISCVzbits]{bits}#())) },
+    (0x340,  _) => { mscratch = value; #\hyperref[sailRISCVzSome]{Some}#(mscratch) },
+    (0x341,  _) => { #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzsetzyxretzytarget]{set\_xret\_target}#(Machine, value)) },
+    (0x342,  _) => { mcause->#\hyperref[sailRISCVzbits]{bits}#() = value; #\hyperref[sailRISCVzSome]{Some}#(mcause.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x343,  _) => { mtval = value; #\hyperref[sailRISCVzSome]{Some}#(mtval) },
+    (0x344,  _) => { mip = #\hyperref[sailRISCVzlegalizzezymip]{legalize\_mip}#(mip, value); #\hyperref[sailRISCVzSome]{Some}#(mip.#\hyperref[sailRISCVzbits]{bits}#()) },
+
+    // Note: #\hyperref[sailRISCVzSome]{Some}#(value) returned below is not the legalized value due to locked entries
+    (0x3A0,  _) => { #\hyperref[sailRISCVzpmpWriteCfgReg]{pmpWriteCfgReg}#(0, value); #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzpmpReadCfgReg]{pmpReadCfgReg}#(0)) },  // pmpcfg0
+    (0x3A1, 32) => { #\hyperref[sailRISCVzpmpWriteCfgReg]{pmpWriteCfgReg}#(1, value); #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzpmpReadCfgReg]{pmpReadCfgReg}#(1)) },  // pmpcfg1
+    (0x3A2,  _) => { #\hyperref[sailRISCVzpmpWriteCfgReg]{pmpWriteCfgReg}#(2, value); #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzpmpReadCfgReg]{pmpReadCfgReg}#(2)) },  // pmpcfg2
+    (0x3A3, 32) => { #\hyperref[sailRISCVzpmpWriteCfgReg]{pmpWriteCfgReg}#(3, value); #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzpmpReadCfgReg]{pmpReadCfgReg}#(3)) },  // pmpcfg3
+
+    (0x3B0,  _) => { pmpaddr0  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp0cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp1cfg),  pmpaddr0,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr0) },
+    (0x3B1,  _) => { pmpaddr1  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp1cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp2cfg),  pmpaddr1,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr1) },
+    (0x3B2,  _) => { pmpaddr2  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp2cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp3cfg),  pmpaddr2,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr2) },
+    (0x3B3,  _) => { pmpaddr3  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp3cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp4cfg),  pmpaddr3,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr3) },
+    (0x3B4,  _) => { pmpaddr4  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp4cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp5cfg),  pmpaddr4,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr4) },
+    (0x3B5,  _) => { pmpaddr5  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp5cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp6cfg),  pmpaddr5,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr5) },
+    (0x3B6,  _) => { pmpaddr6  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp6cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp7cfg),  pmpaddr6,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr6) },
+    (0x3B7,  _) => { pmpaddr7  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp7cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp8cfg),  pmpaddr7,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr7) },
+    (0x3B8,  _) => { pmpaddr8  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp8cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp9cfg),  pmpaddr8,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr8) },
+    (0x3B9,  _) => { pmpaddr9  = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp9cfg),  #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp10cfg), pmpaddr9,  value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr9) },
+    (0x3BA,  _) => { pmpaddr10 = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp10cfg), #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp11cfg), pmpaddr10, value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr10) },
+    (0x3BB,  _) => { pmpaddr11 = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp11cfg), #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp12cfg), pmpaddr11, value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr11) },
+    (0x3BC,  _) => { pmpaddr12 = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp12cfg), #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp13cfg), pmpaddr12, value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr12) },
+    (0x3BD,  _) => { pmpaddr13 = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp13cfg), #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp14cfg), pmpaddr13, value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr13) },
+    (0x3BE,  _) => { pmpaddr14 = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp14cfg), #\hyperref[sailRISCVzpmpTORLocked]{pmpTORLocked}#(pmp15cfg), pmpaddr14, value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr14) },
+    (0x3BF,  _) => { pmpaddr15 = #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(#\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(pmp15cfg), false,                  pmpaddr15, value); #\hyperref[sailRISCVzSome]{Some}#(pmpaddr15) },
+
+    /* machine mode counters */
+    (0xB00,  _) => { mcycle[(sizeof(xlen) - 1) .. 0] = value; #\hyperref[sailRISCVzSome]{Some}#(value) },
+    (0xB02,  _) => { minstret[(sizeof(xlen) - 1) .. 0] = value; minstret_written = true; #\hyperref[sailRISCVzSome]{Some}#(value) },
+    (0xB80, 32) => { mcycle[63 .. 32] = value; #\hyperref[sailRISCVzSome]{Some}#(value) },
+    (0xB82, 32) => { minstret[63 .. 32] = value; minstret_written = true; #\hyperref[sailRISCVzSome]{Some}#(value) },
+
+    /* trigger/debug */
+    (0x7a0,  _) => { tselect = value; #\hyperref[sailRISCVzSome]{Some}#(tselect) },
+
+    /* supervisor mode */
+    (0x100,  _) => { mstatus = #\hyperref[sailRISCVzlegalizzezysstatus]{legalize\_sstatus}#(mstatus, value); #\hyperref[sailRISCVzSome]{Some}#(mstatus.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x102,  _) => { sedeleg = #\hyperref[sailRISCVzlegalizzezysedeleg]{legalize\_sedeleg}#(sedeleg, value); #\hyperref[sailRISCVzSome]{Some}#(sedeleg.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x103,  _) => { sideleg->#\hyperref[sailRISCVzbits]{bits}#() = value; #\hyperref[sailRISCVzSome]{Some}#(sideleg.#\hyperref[sailRISCVzbits]{bits}#()) }, /* TODO: does this need legalization? */
+    (0x104,  _) => { mie = #\hyperref[sailRISCVzlegalizzezysie]{legalize\_sie}#(mie, mideleg, value); #\hyperref[sailRISCVzSome]{Some}#(mie.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x105,  _) => { #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzsetzystvec]{set\_stvec}#(value)) },
+    (0x106,  _) => { scounteren = #\hyperref[sailRISCVzlegalizzezyscounteren]{legalize\_scounteren}#(scounteren, value); #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(scounteren.#\hyperref[sailRISCVzbits]{bits}#())) },
+    (0x140,  _) => { sscratch = value; #\hyperref[sailRISCVzSome]{Some}#(sscratch) },
+    (0x141,  _) => { #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzsetzyxretzytarget]{set\_xret\_target}#(Supervisor, value)) },
+    (0x142,  _) => { scause->#\hyperref[sailRISCVzbits]{bits}#() = value; #\hyperref[sailRISCVzSome]{Some}#(scause.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x143,  _) => { stval = value; #\hyperref[sailRISCVzSome]{Some}#(stval) },
+    (0x144,  _) => { mip = #\hyperref[sailRISCVzlegalizzezysip]{legalize\_sip}#(mip, mideleg, value); #\hyperref[sailRISCVzSome]{Some}#(mip.#\hyperref[sailRISCVzbits]{bits}#()) },
+    (0x180,  _) => { satp = #\hyperref[sailRISCVzlegalizzezysatp]{legalize\_satp}#(#\hyperref[sailRISCVzcurzyArchitecture]{cur\_Architecture}#(), satp, value); #\hyperref[sailRISCVzSome]{Some}#(satp) },
+
+    _           => #\hyperref[sailRISCVzextzywritezyCSR]{ext\_write\_CSR}#(csr, value)
+  };
+  match res {
+    #\hyperref[sailRISCVzSome]{Some}#(v) => if   #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#()
+               then #\hyperref[sailRISCVzprintzyreg]{print\_reg}#("CSR " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(csr) ^ " <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(v) ^ " (input: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(value) ^ ")"),
+    #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzprintzybits]{print\_bits}#("unhandled write to CSR ", csr)
+  }
+}

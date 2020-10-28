@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(cap) : Capability -> (CapAddrInt, CapLen) =
+  let (base, top) = #\hyperref[sailRISCVzgetCapBoundsBits]{getCapBoundsBits}#(cap) in
+  (#\hyperref[sailRISCVzunsigned]{unsigned}#(base), #\hyperref[sailRISCVzunsigned]{unsigned}#(top))

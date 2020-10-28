@@ -1,0 +1,12 @@
+function #\hyperref[sailRISCVzaccessTypezytozystr]{accessType\_to\_str}# (a) =
+  match (a) {
+    #\hyperref[sailRISCVzRead]{Read}#(Data)            => "R",
+    #\hyperref[sailRISCVzWrite]{Write}#(Data)           => "W",
+    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data) => "RW",
+    #\hyperref[sailRISCVzRead]{Read}#(Cap)             => "RC",
+    #\hyperref[sailRISCVzWrite]{Write}#(Cap)            => "WC",
+    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Cap, Cap)   => "RCWC",
+    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Cap)  => "RWC",
+    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Cap, Data)  => "RCW",
+    #\hyperref[sailRISCVzExecute]{Execute}#()             => "X"
+  }

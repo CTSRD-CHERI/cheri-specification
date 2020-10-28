@@ -1,0 +1,6 @@
+function f_is_pos_zero_S   x32 = {
+  let (sign, exp, mant) = #\hyperref[sailRISCVzfsplitzyS]{fsplit\_S}# (x32);
+  (  (sign == #\hyperref[sailRISCVzzzeros]{zeros}#())
+   & (exp  == #\hyperref[sailRISCVzzzeros]{zeros}#())
+   & (mant == #\hyperref[sailRISCVzzzeros]{zeros}#()))
+}

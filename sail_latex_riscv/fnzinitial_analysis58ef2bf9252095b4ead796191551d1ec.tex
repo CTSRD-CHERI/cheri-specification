@@ -1,0 +1,169 @@
+function #\hyperref[sailRISCVzinitialzyanalysis]{initial\_analysis}# (instr:ast) -> (regfps,regfps,regfps,niafps,diafp,instruction_kind) = {
+  iR = [| |] : regfps;
+  oR = [| |] : regfps;
+  aR = [| |] : regfps;
+  ik = #\hyperref[sailRISCVzIKzysimple]{IK\_simple}#() : instruction_kind;
+  Nias = [| #\hyperref[sailRISCVzNIAFPzysuccessor]{NIAFP\_successor}#() |] : niafps;
+  Dia = #\hyperref[sailRISCVzDIAFPzynone]{DIAFP\_none}#() : diafp;
+
+  match instr {
+     #\hyperref[sailRISCVzEBREAK]{EBREAK}#() => (),
+     #\hyperref[sailRISCVzUTYPE]{UTYPE}#(imm, rd, op) => {
+	    if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+     },
+     #\hyperref[sailRISCVzRISCVzyJAL]{RISCV\_JAL}#(imm, rd) => {
+	    if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+            let offset : #\hyperref[sailRISCVzbits]{bits}#(64) = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm) in
+            Nias = [| #\hyperref[sailRISCVzNIAFPzyconcretezyaddress]{NIAFP\_concrete\_address}# (PC + offset) |];
+            ik = #\hyperref[sailRISCVzIKzybranch]{IK\_branch}#();
+     },
+     #\hyperref[sailRISCVzRISCVzyJALR]{RISCV\_JALR}#(imm, rs, rd) => {
+            if (rs == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs)) :: iR;
+            if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+            let offset : #\hyperref[sailRISCVzbits]{bits}#(64) = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm) in
+            Nias = [| #\hyperref[sailRISCVzNIAFPzyindirectzyaddress]{NIAFP\_indirect\_address}#() |];
+            ik = #\hyperref[sailRISCVzIKzybranch]{IK\_branch}#();
+     },
+     #\hyperref[sailRISCVzBTYPE]{BTYPE}#(imm, rs2, rs1, op) => {
+            if (rs2 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs2)) :: iR;
+            if (rs1 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: iR;
+            ik = #\hyperref[sailRISCVzIKzybranch]{IK\_branch}#();
+            let offset : #\hyperref[sailRISCVzbits]{bits}#(64) = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm) in
+            Nias = [| #\hyperref[sailRISCVzNIAFPzyconcretezyaddress]{NIAFP\_concrete\_address}#(PC + offset), #\hyperref[sailRISCVzNIAFPzysuccessor]{NIAFP\_successor}#() |];
+      },
+      #\hyperref[sailRISCVzITYPE]{ITYPE}#(imm, rs, rd, op) => {
+            if (rs == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs)) :: iR;
+            if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+      },
+      #\hyperref[sailRISCVzSHIFTIOP]{SHIFTIOP}#(imm, rs, rd, op) => {
+             if (rs == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs)) :: iR;
+             if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+      },
+      #\hyperref[sailRISCVzRTYPE]{RTYPE}#(rs2, rs1, rd, op) => {
+             if (rs2 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs2)) :: iR;
+             if (rs1 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: iR;
+             if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+      },
+      #\hyperref[sailRISCVzCSR]{CSR}#(csr, rs1, rd, is_imm, op) => {
+               let isWrite : bool = match op {
+                   CSRRW  => true,
+                   _      => if is_imm then #\hyperref[sailRISCVzunsigned]{unsigned}#(rs1) != 0 else #\hyperref[sailRISCVzunsigned]{unsigned}#(rs1) != 0
+               };
+               iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzcsrzyname]{csr\_name}#(csr)) :: iR;
+               if ~(is_imm) then {
+                  iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: iR;
+               };
+               if isWrite then {
+                  oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzcsrzyname]{csr\_name}#(csr)) :: oR;
+               };
+               oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+      },
+      #\hyperref[sailRISCVzLOAD]{LOAD}#(imm, rs, rd, unsign, width, aq, rl) => { /* XXX "unsigned" causes name conflict in lem shallow embedding... */
+             if (rs == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs)) :: iR;
+             if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+             aR = iR;
+             ik =
+               match (aq, rl) {
+                 (false, false) => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_plain),
+                 (true,  false) => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_acquire),
+                 (true,  true)  => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_strong_acquire),
+
+                 _  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("LOAD type not implemented in initial_analysis")
+               }
+      },
+      #\hyperref[sailRISCVzSTORE]{STORE}#(imm, rs2, rs1, width, aq, rl) => {
+             if (rs2 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs2)) :: iR;
+             if (rs1 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: iR;
+             if (rs1 == 0b00000) then () else aR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: aR;
+             ik =
+               match (aq, rl) {
+                 (false, false) => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_plain),
+                 (false, true)  => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_RISCV_release),
+                 (true,  true)  => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_RISCV_strong_release),
+
+                 _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORE type not implemented in initial_analysis")
+               }
+      },
+      #\hyperref[sailRISCVzADDIW]{ADDIW}#(imm, rs, rd) => {
+             if (rs == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs)) :: iR;
+             if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+      },
+      #\hyperref[sailRISCVzSHIFTW]{SHIFTW}#(imm, rs, rd, op) => {
+             if (rs == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs)) :: iR;
+             if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+      },
+      #\hyperref[sailRISCVzRTYPEW]{RTYPEW}#(rs2, rs1, rd, op) => {
+             if (rs2 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs2)) :: iR;
+             if (rs1 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: iR;
+             if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+      },
+      #\hyperref[sailRISCVzFENCE]{FENCE}#(pred, succ) => {
+             ik =
+               match (pred, succ) {
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzyrwzyrw]{Barrier\_RISCV\_rw\_rw}# ()),
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzyrzyrw]{Barrier\_RISCV\_r\_rw}# ()),
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzyrzyr]{Barrier\_RISCV\_r\_r}# ()),
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzyrwzyw]{Barrier\_RISCV\_rw\_w}# ()),
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzywzyw]{Barrier\_RISCV\_w\_w}# ()),
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzywzyrw]{Barrier\_RISCV\_w\_rw}# ()),
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzyrwzyr]{Barrier\_RISCV\_rw\_r}# ()),
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzyrzyw]{Barrier\_RISCV\_r\_w}# ()),
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzywzyr]{Barrier\_RISCV\_w\_r}# ()),
+
+                 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00) => #\hyperref[sailRISCVzIKzysimple]{IK\_simple}# (),
+
+                 _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("barrier type not implemented in initial_analysis")
+               };
+      },
+      #\hyperref[sailRISCVzFENCEzyTSO]{FENCE\_TSO}#(pred, succ) => {
+             ik =
+               match (pred, succ) {
+		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzytso]{Barrier\_RISCV\_tso}# ()),
+                 _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("barrier type not implemented in initial_analysis")
+               };
+      },
+     #\hyperref[sailRISCVzFENCEI]{FENCEI}#() => {
+              ik = #\hyperref[sailRISCVzIKzysimple]{IK\_simple}# (); // for RMEM, should morally be Barrier_RISCV_i
+     },
+     #\hyperref[sailRISCVzLOADRES]{LOADRES}#(aq, rl, rs1, width, rd) => {
+            if (rs1 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: iR;
+            if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+            aR = iR;
+            ik = match (aq, rl) {
+              (false, false) => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_reserved),
+              (true,  false) => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_reserved_acquire),
+              (true,  true)  => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_reserved_strong_acquire),
+              (false, true)  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("LOADRES type not implemented in initial_analysis")
+            };
+     },
+     #\hyperref[sailRISCVzSTORECON]{STORECON}#(aq, rl, rs2, rs1, width, rd) => {
+            if (rs2 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs2)) :: iR;
+            if (rs1 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: iR;
+            if (rs1 == 0b00000) then () else aR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: aR;
+            if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+             ik = match (aq, rl) {
+               (false, false) => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_RISCV_conditional),
+               (false, true)  => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_RISCV_conditional_release),
+               (true,  true)  => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_RISCV_conditional_strong_release),
+
+               (true,  false) => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORECON type not implemented in initial_analysis")
+             };
+      },
+      #\hyperref[sailRISCVzAMO]{AMO}#(op, aq, rl, rs2, rs1, width, rd) => {
+             if (rs2 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs2)) :: iR;
+             if (rs1 == 0b00000) then () else iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: iR;
+             if (rs1 == 0b00000) then () else aR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: aR;
+             if (rd == 0b00000) then () else oR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rd)) :: oR;
+             ik = match (aq, rl) {
+               (false, false) => #\hyperref[sailRISCVzIKzymemzyrmw]{IK\_mem\_rmw}# (Read_RISCV_reserved, Write_RISCV_conditional),
+               (false, true)  => #\hyperref[sailRISCVzIKzymemzyrmw]{IK\_mem\_rmw}# (Read_RISCV_reserved, Write_RISCV_conditional_release),
+               (true,  false) => #\hyperref[sailRISCVzIKzymemzyrmw]{IK\_mem\_rmw}# (Read_RISCV_reserved_acquire,
+                                                                       Write_RISCV_conditional),
+               (true,  true)  => #\hyperref[sailRISCVzIKzymemzyrmw]{IK\_mem\_rmw}# (Read_RISCV_reserved_acquire,
+                                                                       Write_RISCV_conditional_release)
+             };
+      },
+        _ => ()
+  };
+  (iR,oR,aR,Nias,Dia,ik)
+}

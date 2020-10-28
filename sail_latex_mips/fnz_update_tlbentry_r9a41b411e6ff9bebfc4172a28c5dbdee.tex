@@ -1,0 +1,2 @@
+function _update_TLBEntry_r (v, x) = let v = { v with TLBEntry_chunk_1 = update_subrange_bits(v.TLBEntry_chunk_1, 38, 37, subrange_bits(x, 1, 0)) } in
+  v

@@ -1,0 +1,2 @@
+process_loadres : forall ('n : Int), (0 < 'n & 'n <= xlen_bytes).
+  (regidx, xlenbits, MemoryOpResult(bits(8 * 'n)), bool) -> Retired

@@ -1,0 +1,24 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CClearTag}
+\insnmipslabel{ccleartag}
+\subsection*{CClearTag: Clear the Tag Bit}
+
+\subsubsection*{Format}
+
+CClearTag cd, cb
+
+\begin{center}
+\cheritwoop[header]{0xb}{cd}{cb}
+\end{center}
+
+\subsubsection*{Description}
+
+Capability register \emph{cd} is replaced with the contents of \emph{cb}, with
+the tag bit cleared.
+
+\subsubsection*{Semantics}
+
+\sailMIPScode{CClearTag}
+
+

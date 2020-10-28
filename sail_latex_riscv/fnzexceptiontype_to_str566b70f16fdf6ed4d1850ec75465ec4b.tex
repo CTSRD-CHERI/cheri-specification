@@ -1,0 +1,22 @@
+function #\hyperref[sailRISCVzexceptionTypezytozystr]{exceptionType\_to\_str}#(e) =
+  match (e) {
+    #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#()   => "misaligned-fetch",
+    #\hyperref[sailRISCVzEzyFetchzyAccesszyFault]{E\_Fetch\_Access\_Fault}#() => "fetch-access-fault",
+    #\hyperref[sailRISCVzEzyIllegalzyInstr]{E\_Illegal\_Instr}#()      => "illegal-instruction",
+    #\hyperref[sailRISCVzEzyBreakpoint]{E\_Breakpoint}#()         => "breakpoint",
+    #\hyperref[sailRISCVzEzyLoadzyAddrzyAlign]{E\_Load\_Addr\_Align}#()    => "misaligned-load",
+    #\hyperref[sailRISCVzEzyLoadzyAccesszyFault]{E\_Load\_Access\_Fault}#()  => "load-access-fault",
+    #\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#()    => "misaliged-store/amo",
+    #\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#()  => "store/amo-access-fault",
+    #\hyperref[sailRISCVzEzyUzyEnvCall]{E\_U\_EnvCall}#()          => "u-call",
+    #\hyperref[sailRISCVzEzySzyEnvCall]{E\_S\_EnvCall}#()          => "s-call",
+    #\hyperref[sailRISCVzEzyReservedzy10]{E\_Reserved\_10}#()        => "reserved-0",
+    #\hyperref[sailRISCVzEzyMzyEnvCall]{E\_M\_EnvCall}#()          => "m-call",
+    #\hyperref[sailRISCVzEzyFetchzyPagezyFault]{E\_Fetch\_Page\_Fault}#()   => "fetch-page-fault",
+    #\hyperref[sailRISCVzEzyLoadzyPagezyFault]{E\_Load\_Page\_Fault}#()    => "load-page-fault",
+    #\hyperref[sailRISCVzEzyReservedzy14]{E\_Reserved\_14}#()        => "reserved-1",
+    #\hyperref[sailRISCVzEzySAMOzyPagezyFault]{E\_SAMO\_Page\_Fault}#()    => "store/amo-page-fault",
+
+    /* extensions */
+    #\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(e)         => #\hyperref[sailRISCVzextzyexczytypezytozystr]{ext\_exc\_type\_to\_str}#(e)
+  }

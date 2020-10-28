@@ -1,0 +1,23 @@
+function #\hyperref[sailRISCVznumzyofzyExceptionType]{num\_of\_ExceptionType}#(e) =
+  match (e) {
+    #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#()   => 0,
+    #\hyperref[sailRISCVzEzyFetchzyAccesszyFault]{E\_Fetch\_Access\_Fault}#() => 1,
+    #\hyperref[sailRISCVzEzyIllegalzyInstr]{E\_Illegal\_Instr}#()      => 2,
+    #\hyperref[sailRISCVzEzyBreakpoint]{E\_Breakpoint}#()         => 3,
+    #\hyperref[sailRISCVzEzyLoadzyAddrzyAlign]{E\_Load\_Addr\_Align}#()    => 4,
+    #\hyperref[sailRISCVzEzyLoadzyAccesszyFault]{E\_Load\_Access\_Fault}#()  => 5,
+    #\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#()    => 6,
+    #\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#()  => 7,
+    #\hyperref[sailRISCVzEzyUzyEnvCall]{E\_U\_EnvCall}#()          => 8,
+    #\hyperref[sailRISCVzEzySzyEnvCall]{E\_S\_EnvCall}#()          => 9,
+    #\hyperref[sailRISCVzEzyReservedzy10]{E\_Reserved\_10}#()        => 10,
+    #\hyperref[sailRISCVzEzyMzyEnvCall]{E\_M\_EnvCall}#()          => 11,
+    #\hyperref[sailRISCVzEzyFetchzyPagezyFault]{E\_Fetch\_Page\_Fault}#()   => 12,
+    #\hyperref[sailRISCVzEzyLoadzyPagezyFault]{E\_Load\_Page\_Fault}#()    => 13,
+    #\hyperref[sailRISCVzEzyReservedzy14]{E\_Reserved\_14}#()        => 14,
+    #\hyperref[sailRISCVzEzySAMOzyPagezyFault]{E\_SAMO\_Page\_Fault}#()    => 15,
+
+    /* extensions */
+    #\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(e)         => #\hyperref[sailRISCVznumzyofzyextzyexczytype]{num\_of\_ext\_exc\_type}#(e)
+
+  }

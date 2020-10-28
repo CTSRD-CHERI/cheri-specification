@@ -1,0 +1,115 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CL[BHWD][U]}
+\insnmipslabel{clbhwd}
+\subsection*{Load Integer via Capability Register}
+
+\subsubsection*{Format}
+
+CLB rd, rt, offset(cb)\\
+CLH rd, rt, offset(cb)\\
+CLW rd, rt, offset(cb)\\
+CLD rd, rt, offset(cb)\\
+CLBU rd, rt, offset(cb)\\
+CLHU rd, rt, offset(cb)\\
+CLWU rd, rt, offset(cb)\\
+CLBR rd, rt(cb)\\
+CLHR rd, rt(cb)\\
+CLWR rd, rt(cb)\\
+CLDR rd, rt(cb)\\
+CLBUR rd, rt(cb)\\
+CLHUR rd, rt(cb)\\
+CLWUR rd, rt(cb)\\
+CLBI rd, offset(cb)\\
+CLHI rd, offset(cb)\\
+CLWI rd, offset(cb)\\
+CLDI rd, offset(cb)\\
+CLBUI rd, offset(cb)\\
+CLHUI rd, offset(cb)\\
+CLWUI rd, offset(cb)
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,1,3,10,11,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x32}
+\bitbox{5}{rd}
+\bitbox{5}{cb}
+\bitbox{5}{rt}
+\bitbox{8}{offset}
+\bitbox{1}{s}
+\bitbox{2}{t}
+\end{bytefield}
+\end{center}
+
+\usesDDCinsteadofNULL{cb}
+
+\subsubsection*{Purpose}
+
+Loads a data value via a capability register, and extends the value to fit the target register.
+
+\subsubsection*{Description}
+
+The lower part of integer register \emph{rd} is loaded from the memory
+location specified by \emph{cb.\cbase{}} + \emph{cb.\coffset{}} + \emph{rt} +
+$2^t$ $*$  \emph{offset}. Capability register \emph{cb} must
+contain a valid capability that grants permission to load data.
+
+The size of the value loaded depends on the value of the \emph{t} field:
+
+\begin{description}
+	\item[0] byte (8 bits)
+	\item[1] halfword (16 bits)
+	\item[2] word (32 bits)
+	\item[3] doubleword (64 bits)
+\end{description}
+
+The extension behavior depends on the value of the \emph{s} field: 1 indicates sign extend, 0 indicates zero extend.  For example, \insnmipsref[clbhwd]{CLWU} is encoded by setting \emph{s} to 0 and \emph{t} to 2, \insnmipsref[clbhwd]{CLB} is encoded by setting \emph{s} to 1 and
+\emph{t} to 0.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CLoad}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\cchecktag{}
+\item
+\emph{cb} is sealed.
+\item
+\emph{cb}.\cperms.\emph{Permit\_Load} is not set.
+\item
+\emph{addr} $+$ \emph{size} $>$ \emph{cb}.\cbase{} $+$ \emph{cb}.\clength{}
+
+NB: The check depends on the size of the data loaded.
+\item
+\emph{addr} $<$ \emph{cb}.\cbase{}
+\end{itemize}
+
+An AdEL exception is raised if \emph{addr} is not correctly aligned.
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+This instruction reuses the opcode from the Load Word to Coprocessor 2
+(\insnnoref{LWC2}) instruction in the MIPS Specification.
+\item
+\emph{rt} is treated as an unsigned integer.\note{rmn30}{since rt is 64-bit and addr is computed modulo $2^{64}$ it doesn't make any difference whether it is treated as signed or unsigned. It actually can make sense to think of it as a signed offset. Maybe we should remove this note? Important to note that immediate offset is signed, however.}
+\item
+\emph{offset} is treated as a signed integer.
+% \item
+% The result of the addition does not wrap around (i.e., an exception is
+% raised if cb.\cbase{} $+$ cb.\coffset{} $+$ \emph{rt} $+$ \emph{offset}
+% is less than zero, or greater than \emph{maxaddr}).
+% \item
+% The temporary variable \emph{addr} can have values that are less than zero
+% or greater than $2^{64}-1$; the computation of \emph{addr} does not wrap
+% around modulo $2^{64}$.
+\item
+BERI1 has a compile-time option to allow unaligned loads and stores. If BERI1
+is built with this option, an unaligned load will only raise an exception if
+it crosses a cache line boundary.
+\end{itemize}

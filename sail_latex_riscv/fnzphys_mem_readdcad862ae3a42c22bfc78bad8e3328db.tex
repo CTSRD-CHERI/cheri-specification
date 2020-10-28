@@ -1,0 +1,14 @@
+function phys_mem_read forall 'n, 0 < 'n <= max_mem_access . (t : #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), paddr : xlenbits, width : atom('n), aq : bool, rl: bool, res : bool, meta : bool) -> #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#((#\hyperref[sailRISCVzbits]{bits}#(8 * 'n), mem_meta)) = {
+  let result = (match #\hyperref[sailRISCVzreadzykindzyofzyflags]{read\_kind\_of\_flags}#(aq, rl, res) {
+    #\hyperref[sailRISCVzSome]{Some}#(rk) => #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzreadzyram]{read\_ram}#(rk, paddr, width, meta)),
+    #\hyperref[sailRISCVzNone]{None}#()   => #\hyperref[sailRISCVzNone]{None}#()
+  }) : #\hyperref[sailRISCVzoption]{option}#((#\hyperref[sailRISCVzbits]{bits}#(8 * 'n), mem_meta));
+  match (t, result) {
+    (#\hyperref[sailRISCVzExecute]{Execute}#(),  #\hyperref[sailRISCVzNone]{None}#()) => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyFetchzyAccesszyFault]{E\_Fetch\_Access\_Fault}#()),
+    (#\hyperref[sailRISCVzRead]{Read}#(Data), #\hyperref[sailRISCVzNone]{None}#()) => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyLoadzyAccesszyFault]{E\_Load\_Access\_Fault}#()),
+    (_,          #\hyperref[sailRISCVzNone]{None}#()) => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#()),
+    (_,      #\hyperref[sailRISCVzSome]{Some}#(v, m)) => { if   #\hyperref[sailRISCVzgetzyconfigzyprintzymem]{get\_config\_print\_mem}#()
+                              then #\hyperref[sailRISCVzprintzymem]{print\_mem}#("mem[" ^ #\hyperref[sailRISCVztozystr]{to\_str}#(t) ^ "," ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(paddr) ^ "] -> " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(v));
+                              #\hyperref[sailRISCVzMemValue]{MemValue}#(v, m) }
+  }
+}

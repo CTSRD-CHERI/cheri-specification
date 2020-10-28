@@ -1,0 +1,5 @@
+function _set_SV48_PTE_Ext (r_ref, v) = {
+    r = __bitfield_deref(r_ref);
+    r.SV48_PTE_chunk_0 = update_subrange_bits(r.SV48_PTE_chunk_0, 63, 54, subrange_bits(v, 9, 0));
+    (*r_ref) = r
+}

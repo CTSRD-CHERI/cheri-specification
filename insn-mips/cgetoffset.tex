@@ -1,0 +1,23 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CGetOffset}
+\insnmipslabel{cgetoffset}
+\subsection*{CGetOffset: Move Offset to an Integer Register}
+
+\subsubsection*{Format}
+
+CGetOffset rd, cb
+
+\begin{center}
+\cheritwoop[header]{0x6}{rd}{cb}
+\end{center}
+
+\subsubsection*{Description}
+
+Integer register \textit{rd} is set equal to the \coffset{} fields of
+capability register \textit{cb}.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CGetOffset}
+
+

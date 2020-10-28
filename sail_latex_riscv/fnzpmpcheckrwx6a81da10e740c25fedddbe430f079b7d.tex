@@ -1,0 +1,8 @@
+function #\hyperref[sailRISCVzpmpCheckRWX]{pmpCheckRWX}#(ent, acc) = {
+  match acc {
+    #\hyperref[sailRISCVzRead]{Read}#(_)      => ent.#\hyperref[sailRISCVzR]{R}#() == 0b1,
+    #\hyperref[sailRISCVzWrite]{Write}#(_)     => ent.#\hyperref[sailRISCVzW]{W}#() == 0b1,
+    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_) => ent.#\hyperref[sailRISCVzR]{R}#() == 0b1 & ent.#\hyperref[sailRISCVzW]{W}#() == 0b1,
+    #\hyperref[sailRISCVzExecute]{Execute}#()    => ent.#\hyperref[sailRISCVzX]{X}#() == 0b1
+  }
+}

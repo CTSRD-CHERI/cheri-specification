@@ -1,0 +1,45 @@
+function #\hyperref[sailRISCVzfetch]{fetch}#() -> FetchResult =
+  /* fetch PC check for extensions: extensions return a transformed PC to fetch,
+   * but any exceptions use the untransformed PC.
+   */
+  match #\hyperref[sailRISCVzextzyfetchzycheckzypc]{ext\_fetch\_check\_pc}#(PC, PC) {
+    #\hyperref[sailRISCVzExtzyFetchAddrzyError]{Ext\_FetchAddr\_Error}#(e)   => #\hyperref[sailRISCVzFzyExtzyError]{F\_Ext\_Error}#(e),
+    #\hyperref[sailRISCVzExtzyFetchAddrzyOK]{Ext\_FetchAddr\_OK}#(use_pc) => {
+      if   (use_pc[0] != bitzero | (use_pc[1] != bitzero & (~ (#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()))))
+      then #\hyperref[sailRISCVzFzyError]{F\_Error}#(#\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#(), PC)
+      else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(use_pc, #\hyperref[sailRISCVzExecute]{Execute}#()) {
+        #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _)     => #\hyperref[sailRISCVzFzyError]{F\_Error}#(e, PC),
+        #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(ppclo, _) => {
+          /* split instruction fetch into 16-bit granules to handle RVC, as
+           * well as to generate precise fault addresses in any fetch
+           * exceptions.
+           */
+          match #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzExecute]{Execute}#(), ppclo, 2, false, false, false) {
+            #\hyperref[sailRISCVzMemException]{MemException}#(e) => #\hyperref[sailRISCVzFzyError]{F\_Error}#(e, PC),
+            #\hyperref[sailRISCVzMemValue]{MemValue}#(ilo)   => {
+              if   #\hyperref[sailRISCVzisRVC]{isRVC}#(ilo)
+              then #\hyperref[sailRISCVzFzyRVC]{F\_RVC}#(ilo)
+              else {
+                /* fetch PC check for the next instruction granule */
+                PC_hi : xlenbits = PC + 2;
+                match #\hyperref[sailRISCVzextzyfetchzycheckzypc]{ext\_fetch\_check\_pc}#(PC, PC_hi) {
+                  #\hyperref[sailRISCVzExtzyFetchAddrzyError]{Ext\_FetchAddr\_Error}#(e)      => #\hyperref[sailRISCVzFzyExtzyError]{F\_Ext\_Error}#(e),
+                  #\hyperref[sailRISCVzExtzyFetchAddrzyOK]{Ext\_FetchAddr\_OK}#(use_pc_hi) => {
+                    match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(use_pc_hi, #\hyperref[sailRISCVzExecute]{Execute}#()) {
+                      #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _)     => #\hyperref[sailRISCVzFzyError]{F\_Error}#(e, PC_hi),
+                      #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(ppchi, _) => {
+                        match #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzExecute]{Execute}#(), ppchi, 2, false, false, false) {
+                          #\hyperref[sailRISCVzMemException]{MemException}#(e) => #\hyperref[sailRISCVzFzyError]{F\_Error}#(e, PC_hi),
+                          #\hyperref[sailRISCVzMemValue]{MemValue}#(ihi)   => #\hyperref[sailRISCVzFzyBase]{F\_Base}#(#\hyperref[sailRISCVzappend]{append}#(ihi, ilo))
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }

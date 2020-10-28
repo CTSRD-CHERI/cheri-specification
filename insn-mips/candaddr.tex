@@ -1,0 +1,43 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CAndAddr}
+\insnmipslabel{candaddr}
+\subsection*{CAndAddr: Mask Address of Capability}
+
+\subsubsection*{Format}
+
+CAndAddr cd, cb, rs
+
+\begin{center}
+\cherithreeop[header]{0x24}{cd}{cb}{rs}
+\end{center}
+
+\subsubsection*{Description}
+
+\emph{cd} is set to \emph{cb} with \emph{cb}.\caddr{} logically ANDed with \emph{rs}.
+If the new address causes the capability to become unrepresentable then an untagged capability with address set to the masked address is returned.
+
+\subsubsection*{Semantics}
+
+\sailMIPScode{CAndAddr}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cb}.\ctag{} is set and \emph{cb} is sealed.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item This instruction may be appropriate for use cases in which C is masking pointers
+before use, for example when the lower bits are used to store additional metadata in a pointer with known alignment.
+\item This instructions also allows more efficient aligning down (and up) of capabilities. In C source code this will
+almost always be a compile time constant so we might discover that we need a version of this instruction that
+takes an immediate operand. Using a 5-bit immediate field we could encode align-down/align-up masks from
+$2$ to $2^{32}$.
+\item This instruction is also useful in order to create precisely representable bounds for heap and stack allocations.
+\end{itemize}

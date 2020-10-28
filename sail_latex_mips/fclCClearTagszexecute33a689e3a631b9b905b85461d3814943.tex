@@ -1,0 +1,31 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let cb_val = #\hyperref[sailMIPSzreadCapRegDDC]{readCapRegDDC}#(cb);
+if not (cb_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TagViolation, cb)
+else if cb_val.sealed then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, cb)
+else if not (cb_val.permit_store) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_PermitStoreViolation, cb)
+else
+{
+  let vAddr   = #\hyperref[sailMIPSzgetCapCursor]{getCapCursor}#(cb_val);
+  let vAddr64 = #\hyperref[sailMIPSztozybits]{to\_bits}#(64, #\hyperref[sailMIPSzgetCapCursor]{getCapCursor}#(cb_val));
+  if (vAddr + caps_per_cacheline * cap_size) > #\hyperref[sailMIPSzgetCapTop]{getCapTop}#(cb_val) then
+    #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_LengthViolation, cb)
+  else if vAddr < #\hyperref[sailMIPSzgetCapBase]{getCapBase}#(cb_val) then
+    #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_LengthViolation, cb)
+  else if not(vAddr % (cap_size * caps_per_cacheline) == 0) then
+    #\hyperref[sailMIPSzSignalExceptionBadAddr]{SignalExceptionBadAddr}#(AdEL, vAddr64)
+  else
+  {
+    let pAddr  = #\hyperref[sailMIPSzTLBTranslate]{TLBTranslate}#(vAddr64, StoreData);
+    foreach (i from 0 #\hyperref[sailMIPSzto]{to}# (caps_per_cacheline - 1))
+    {
+      /* We could use write_tag_bool instead of reading data and writing it out again
+         but that would be incompatible with the way proofs are currently done.
+         There are concurrency implications to this method. */
+      let (_, mem) = #\hyperref[sailMIPSzMEMrzytagged]{MEMr\_tagged}#(pAddr + i*cap_size, cap_size, false);
+      #\hyperref[sailMIPSzMEMwzytagged]{MEMw\_tagged}#(pAddr + i*cap_size, cap_size, false, mem);
+    }
+  }
+}

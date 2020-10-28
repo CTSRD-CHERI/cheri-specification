@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzcheckzyreszymisaligned]{check\_res\_misaligned}#(vaddr : xlenbits, width : word_width) -> bool =
+  match width {
+    BYTE   => false,
+    HALF   => vaddr[0] == bitone,
+    WORD   => vaddr[0] == bitone | vaddr[1] == bitone,
+    DOUBLE => vaddr[0] == bitone | vaddr[1] == bitone | vaddr[2] == bitone
+  }

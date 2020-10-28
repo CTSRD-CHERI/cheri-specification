@@ -1,0 +1,14 @@
+function read_kind_of_num arg# = match arg# {
+  0 => Read_plain,
+  1 => Read_reserve,
+  2 => Read_acquire,
+  3 => Read_exclusive,
+  4 => Read_exclusive_acquire,
+  5 => Read_stream,
+  6 => Read_RISCV_acquire,
+  7 => Read_RISCV_strong_acquire,
+  8 => Read_RISCV_reserved,
+  9 => Read_RISCV_reserved_acquire,
+  10 => Read_RISCV_reserved_strong_acquire,
+  _ => Read_X86_locked
+}

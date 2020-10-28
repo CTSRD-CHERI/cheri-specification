@@ -1,0 +1,44 @@
+function #\hyperref[sailRISCVzhandlezystorezydatazyviazycap]{handle\_store\_data\_via\_cap}#(rs2, auth_idx, auth_val, vaddrBits, width) = {
+  let size = #\hyperref[sailRISCVzwordzywidthzybytes]{word\_width\_bytes}#(width);
+  let aq : bool = false;
+  let rl : bool = false;
+  if #\hyperref[sailRISCVznot]{not}#(auth_val.tag) then {
+    #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_TagViolation, auth_idx);
+    RETIRE_FAIL
+  } else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(auth_val) then {
+    #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_SealViolation, auth_idx);
+    RETIRE_FAIL
+  } else if #\hyperref[sailRISCVznot]{not}# (auth_val.permit_store) then {
+    #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_PermitStoreViolation, auth_idx);
+    RETIRE_FAIL
+  } else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(auth_val, vaddrBits, size)) then {
+    #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_LengthViolation, auth_idx);
+    RETIRE_FAIL
+  } else if #\hyperref[sailRISCVzcheckzymisaligned]{check\_misaligned}#(vaddrBits, width) then {
+    #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, #\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#());
+    RETIRE_FAIL
+  } else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddrBits, #\hyperref[sailRISCVzWrite]{Write}#(Data)) {
+    #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(_), _) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unexpected cheri exception for data store") },
+    #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL },
+    #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) => {
+      let eares : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(unit) = #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, size, aq, rl, false);
+      match (eares) {
+        #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL },
+        #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
+          let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
+          let res : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) = match (width, sizeof(xlen)) {
+            (BYTE, _)     => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 1, rs2_val[7..0],  aq, rl, false),
+            (HALF, _)     => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 2, rs2_val[15..0], aq, rl, false),
+            (WORD, _)     => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq, rl, false),
+            (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq, rl, false)
+          };
+          match (res) {
+            #\hyperref[sailRISCVzMemValue]{MemValue}#(true)  => RETIRE_SUCCESS,
+            #\hyperref[sailRISCVzMemValue]{MemValue}#(false) => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("store got false from mem_write_value"),
+            #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL }
+          }
+        }
+      }
+    }
+  }
+}

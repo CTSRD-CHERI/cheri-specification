@@ -1,0 +1,5 @@
+function #\hyperref[sailMIPSzsetzynextzypcc]{set\_next\_pcc}#(newPCC) = {
+  NextPCC    = newPCC;
+  DelayedPCC = newPCC; /* always write DelayedPCC together with NextPCC so
+                          that non-capability branches don't override PCC */
+}

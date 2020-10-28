@@ -1,0 +1,5 @@
+function _set_XContextReg_XR (r_ref, v) = {
+    r = __bitfield_deref(r_ref);
+    r.XContextReg_chunk_0 = update_subrange_bits(r.XContextReg_chunk_0, 32, 31, subrange_bits(v, 1, 0));
+    (*r_ref) = r
+}

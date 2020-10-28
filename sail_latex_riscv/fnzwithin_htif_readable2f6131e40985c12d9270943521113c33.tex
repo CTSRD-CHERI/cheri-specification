@@ -1,0 +1,2 @@
+function within_htif_readable forall 'n, 0 < 'n <= max_mem_access . (addr : xlenbits, width : atom('n)) -> bool =
+    #\hyperref[sailRISCVzplatzyhtifzytohost]{plat\_htif\_tohost}#() == addr | (#\hyperref[sailRISCVzplatzyhtifzytohost]{plat\_htif\_tohost}#() + 4 == addr & width == 4)

@@ -1,0 +1,2 @@
+mmio_read : forall ('n : Int), (0 < 'n & 'n <= max_mem_access).
+  (AccessType(ext_access_type), xlenbits, int('n)) -> MemoryOpResult(bits(8 * 'n))

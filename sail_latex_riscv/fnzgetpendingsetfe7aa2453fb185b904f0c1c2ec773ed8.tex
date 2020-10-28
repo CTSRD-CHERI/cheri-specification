@@ -1,0 +1,32 @@
+function #\hyperref[sailRISCVzgetPendingSet]{getPendingSet}#(priv : Privilege) -> #\hyperref[sailRISCVzoption]{option}#((xlenbits, Privilege)) = {
+  assert(#\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#(), "no user mode: M/U or M/S/U system required");
+  let effective_pending = mip.#\hyperref[sailRISCVzbits]{bits}#() & mie.#\hyperref[sailRISCVzbits]{bits}#();
+  if  effective_pending == #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0) then #\hyperref[sailRISCVzNone]{None}#() /* fast path */
+  else {
+    /* Higher privileges than the current one are implicitly enabled,
+     * while lower privileges are blocked.  An unsupported privilege is
+     * considered blocked.
+     */
+    let mIE = priv != Machine | (priv == Machine & mstatus.#\hyperref[sailRISCVzMIE]{MIE}#() == 0b1);
+    let sIE = #\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#() & (priv == User | (priv == Supervisor & mstatus.#\hyperref[sailRISCVzSIE]{SIE}#() == 0b1));
+    let uIE = #\hyperref[sailRISCVzhaveNExt]{haveNExt}#() & (priv == User & mstatus.#\hyperref[sailRISCVzUIE]{UIE}#() == 0b1);
+    match #\hyperref[sailRISCVzprocessPending]{processPending}#(mip, mie, mideleg.#\hyperref[sailRISCVzbits]{bits}#(), mIE) {
+      #\hyperref[sailRISCVzIntszyEmpty]{Ints\_Empty}#()      => #\hyperref[sailRISCVzNone]{None}#(),
+      #\hyperref[sailRISCVzIntszyPending]{Ints\_Pending}#(p)   => let r = (p, Machine) in #\hyperref[sailRISCVzSome]{Some}#(r),
+      #\hyperref[sailRISCVzIntszyDelegated]{Ints\_Delegated}#(d) =>
+        if (~ (#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#())) then {
+          if uIE then let r = (d, User) in #\hyperref[sailRISCVzSome]{Some}#(r)
+          else                             #\hyperref[sailRISCVzNone]{None}#()
+        } else {
+          /* the delegated bits are pending for S-mode */
+          match #\hyperref[sailRISCVzprocessPending]{processPending}#(#\hyperref[sailRISCVzMkzyMinterrupts]{Mk\_Minterrupts}#(d), mie, sideleg.#\hyperref[sailRISCVzbits]{bits}#(), sIE) {
+            #\hyperref[sailRISCVzIntszyEmpty]{Ints\_Empty}#()      => #\hyperref[sailRISCVzNone]{None}#(),
+            #\hyperref[sailRISCVzIntszyPending]{Ints\_Pending}#(p)   => let r = (p, Supervisor) in #\hyperref[sailRISCVzSome]{Some}#(r),
+            #\hyperref[sailRISCVzIntszyDelegated]{Ints\_Delegated}#(d) => if   uIE
+                                 then let r = (d, User) in #\hyperref[sailRISCVzSome]{Some}#(r)
+                                 else #\hyperref[sailRISCVzNone]{None}#()
+          }
+        }
+    }
+  }
+}

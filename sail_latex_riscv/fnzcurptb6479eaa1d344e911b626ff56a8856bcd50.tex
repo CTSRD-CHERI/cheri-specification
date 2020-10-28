@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzcurPTB64]{curPTB64}#(satp : #\hyperref[sailRISCVzbits]{bits}#(64)) -> paddr64 = {
+  let s = #\hyperref[sailRISCVzMkzySatp64]{Mk\_Satp64}#(satp);
+  #\hyperref[sailRISCVzshiftl]{shiftl}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(s.#\hyperref[sailRISCVzPPN]{PPN}#()), PAGESIZE_BITS)
+}

@@ -1,0 +1,12 @@
+function #\hyperref[sailRISCVzwritezyram]{write\_ram}#(wk, addr, width, data, meta) = {
+  /* Write out metadata only if the value write succeeds.
+   * It is assumed for now that this write always succeeds;
+   * there is currently no return value.
+   * FIXME: We should convert the external API for all backends
+   * (not just for Lem) to consume the value along with the
+   * metadata to ensure atomicity.
+   */
+  let ret : bool = #\hyperref[sailRISCVzzyzywritezymem]{\_\_write\_mem}#(wk, sizeof(xlen), addr, width, data);
+  if ret then #\hyperref[sailRISCVzzyzyWriteRAMzyMeta]{\_\_WriteRAM\_Meta}#(addr, width, meta);
+  ret
+}

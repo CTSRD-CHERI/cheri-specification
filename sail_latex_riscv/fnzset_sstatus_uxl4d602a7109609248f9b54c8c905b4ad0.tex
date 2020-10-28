@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzsetzysstatuszyUXL]{set\_sstatus\_UXL}#(s : Sstatus, a : arch_xlen) -> Sstatus = {
+  let m = #\hyperref[sailRISCVzMkzyMstatus]{Mk\_Mstatus}#(s.#\hyperref[sailRISCVzbits]{bits}#());
+  let m = #\hyperref[sailRISCVzsetzymstatuszyUXL]{set\_mstatus\_UXL}#(m, a);
+  #\hyperref[sailRISCVzMkzySstatus]{Mk\_Sstatus}#(m.#\hyperref[sailRISCVzbits]{bits}#())
+}

@@ -1,0 +1,6 @@
+function f_is_pos_norm_D   x64 = {
+  let (sign, exp, mant) = #\hyperref[sailRISCVzfsplitzyD]{fsplit\_D}# (x64);
+  (  (sign == #\hyperref[sailRISCVzzzeros]{zeros}#())
+   & (exp  != #\hyperref[sailRISCVzzzeros]{zeros}#())
+   & (exp  != #\hyperref[sailRISCVzones]{ones}#()))
+}

@@ -1,0 +1,5 @@
+function _set_StatusReg_SX (r_ref, v) = {
+    r = __bitfield_deref(r_ref);
+    r.StatusReg_chunk_0 = update_subrange_bits(r.StatusReg_chunk_0, 6, 6, subrange_bits(v, 0, 0));
+    (*r_ref) = r
+}

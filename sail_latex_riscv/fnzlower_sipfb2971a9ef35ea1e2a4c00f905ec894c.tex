@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzlowerzysip]{lower\_sip}#(s : Sinterrupts, d : Sinterrupts) -> Uinterrupts = {
+  let u : Uinterrupts = #\hyperref[sailRISCVzMkzyUinterrupts]{Mk\_Uinterrupts}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0));
+  let u = #\hyperref[sailRISCVzupdatezyUEI]{update\_UEI}#(u, s.#\hyperref[sailRISCVzUEI]{UEI}#() & d.#\hyperref[sailRISCVzUEI]{UEI}#());
+  let u = #\hyperref[sailRISCVzupdatezyUTI]{update\_UTI}#(u, s.#\hyperref[sailRISCVzUTI]{UTI}#() & d.#\hyperref[sailRISCVzUTI]{UTI}#());
+  let u = #\hyperref[sailRISCVzupdatezyUSI]{update\_USI}#(u, s.#\hyperref[sailRISCVzUSI]{USI}#() & d.#\hyperref[sailRISCVzUSI]{USI}#());
+  u
+}

@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzarchitecture]{architecture}#(a : arch_xlen) -> #\hyperref[sailRISCVzoption]{option}#(Architecture) =
+  match (a) {
+    0b01 => #\hyperref[sailRISCVzSome]{Some}#(RV32),
+    0b10 => #\hyperref[sailRISCVzSome]{Some}#(RV64),
+    0b11 => #\hyperref[sailRISCVzSome]{Some}#(RV128),
+    _    => #\hyperref[sailRISCVzNone]{None}#()
+  }

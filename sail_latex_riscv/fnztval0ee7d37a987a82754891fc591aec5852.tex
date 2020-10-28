@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVztval]{tval}#(excinfo : #\hyperref[sailRISCVzoption]{option}#(xlenbits)) -> xlenbits = {
+  match (excinfo) {
+    #\hyperref[sailRISCVzSome]{Some}#(e) => e,
+    #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0)
+  }
+}

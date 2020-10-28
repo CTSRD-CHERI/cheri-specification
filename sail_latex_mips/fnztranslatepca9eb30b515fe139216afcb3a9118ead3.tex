@@ -1,0 +1,18 @@
+function #\hyperref[sailMIPSzTranslatePC]{TranslatePC}# (vAddr) = {
+  #\hyperref[sailMIPSzincrementCP0Count]{incrementCP0Count}#();
+  let pcc = PCC;
+  let (base, top) = #\hyperref[sailMIPSzgetCapBounds]{getCapBounds}#(pcc);
+  let absPC = base + #\hyperref[sailMIPSzunsigned]{unsigned}#(vAddr);
+  if ((absPC % 4)  != 0) then /* bad PC alignment */
+    (#\hyperref[sailMIPSzSignalExceptionBadAddr]{SignalExceptionBadAddr}#(AdEL, #\hyperref[sailMIPSztozybits]{to\_bits}#(64, absPC))) /* XXX absPC may be truncated */
+  else if not (pcc.tag) then
+    (#\hyperref[sailMIPSzraisezyc2zyexceptionzynoreg]{raise\_c2\_exception\_noreg}#(CapEx_TagViolation))
+  else if (pcc.sealed) then
+    (#\hyperref[sailMIPSzraisezyc2zyexceptionzynoreg]{raise\_c2\_exception\_noreg}#(CapEx_SealViolation))
+  else if not(pcc.permit_execute) then
+    (#\hyperref[sailMIPSzraisezyc2zyexceptionzynoreg]{raise\_c2\_exception\_noreg}#(CapEx_PermitExecuteViolation))
+  else if ((absPC + 4) > top) then
+    (#\hyperref[sailMIPSzraisezyc2zyexceptionzynoreg]{raise\_c2\_exception\_noreg}#(CapEx_LengthViolation))
+  else
+    #\hyperref[sailMIPSzTLBTranslate]{TLBTranslate}#(#\hyperref[sailMIPSztozybits]{to\_bits}#(64, absPC), Instruction) /* XXX assert absPC never gets truncated due to above check and top <= 2^64 for valid caps */
+}

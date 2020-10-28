@@ -1,0 +1,13 @@
+function f_un_rm_op_D_of_num arg# = match arg# {
+  0 => FSQRT_D,
+  1 => FCVT_W_D,
+  2 => FCVT_WU_D,
+  3 => FCVT_D_W,
+  4 => FCVT_D_WU,
+  5 => FCVT_S_D,
+  6 => FCVT_D_S,
+  7 => FCVT_L_D,
+  8 => FCVT_LU_D,
+  9 => FCVT_D_L,
+  _ => FCVT_D_LU
+}

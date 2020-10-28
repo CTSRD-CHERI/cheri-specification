@@ -1,0 +1,17 @@
+function #\hyperref[sailRISCVzmakezyTLBzyEntry]{make\_TLB\_Entry}#(asid, global, vAddr, pAddr, pte, level, pteAddr, levelBitSize) = {
+  let shift : nat = PAGESIZE_BITS + (level * levelBitSize);
+  /* fixme hack: use a better idiom for masks */
+  let vAddrMask  : #\hyperref[sailRISCVzbits]{bits}#('valen) = #\hyperref[sailRISCVzshiftl]{shiftl}#(vAddr ^ vAddr ^ #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b1), shift) - 1;
+  let vMatchMask : #\hyperref[sailRISCVzbits]{bits}#('valen) = ~ (vAddrMask);
+  struct {
+    asid = asid,
+    global = global,
+    pte = pte,
+    pteAddr = pteAddr,
+    vAddrMask = vAddrMask,
+    vMatchMask = vMatchMask,
+    vAddr = vAddr & vMatchMask,
+    pAddr = #\hyperref[sailRISCVzshiftl]{shiftl}#(#\hyperref[sailRISCVzshiftr]{shiftr}#(pAddr, shift), shift),
+    age = mcycle
+  }
+}

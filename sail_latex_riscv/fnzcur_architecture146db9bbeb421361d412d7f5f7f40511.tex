@@ -1,0 +1,12 @@
+function #\hyperref[sailRISCVzcurzyArchitecture]{cur\_Architecture}#() -> Architecture = {
+  let a : arch_xlen =
+    match (cur_privilege) {
+      Machine    => misa.#\hyperref[sailRISCVzMXL]{MXL}#(),
+      Supervisor => #\hyperref[sailRISCVzgetzymstatuszySXL]{get\_mstatus\_SXL}#(mstatus),
+      User       => #\hyperref[sailRISCVzgetzymstatuszyUXL]{get\_mstatus\_UXL}#(mstatus)
+    };
+  match #\hyperref[sailRISCVzarchitecture]{architecture}#(a) {
+    #\hyperref[sailRISCVzSome]{Some}#(a) => a,
+    #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Invalid current architecture")
+  }
+}

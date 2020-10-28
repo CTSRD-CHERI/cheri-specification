@@ -1,0 +1,9 @@
+if #\hyperref[sailRISCVzhaveFExt]{haveFExt}#() then {
+  foreach (i from 0 to 7)
+    if m[i] == bitone then
+      #\hyperref[sailRISCVzF]{F}#(8 * #\hyperref[sailRISCVzunsigned]{unsigned}#(q) + i) = #\hyperref[sailRISCVzzzeros]{zeros}#();
+  RETIRE_SUCCESS
+} else {
+  #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+  RETIRE_FAIL
+}

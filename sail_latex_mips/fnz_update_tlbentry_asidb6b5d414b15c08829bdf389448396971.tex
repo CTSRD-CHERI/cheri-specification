@@ -1,0 +1,2 @@
+function _update_TLBEntry_asid (v, x) = let v = { v with TLBEntry_chunk_1 = update_subrange_bits(v.TLBEntry_chunk_1, 9, 2, subrange_bits(x, 7, 0)) } in
+  v

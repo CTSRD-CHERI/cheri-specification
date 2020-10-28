@@ -1,0 +1,78 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CToPtr}
+\insnmipslabel{ctoptr}
+\subsection*{CToPtr: Capability to Integer Pointer}
+
+\subsubsection*{Format}
+
+CToPtr rd, cb, ct
+
+\begin{center}
+\cherithreeop[header]{0x12}{rd}{cb}{ct}
+\end{center}
+
+\usesDDCinsteadofNULL{ct}
+
+\subsubsection*{Description}
+
+If \emph{cb} has its tag bit unset (i.e. it is either the
+NULL capability, or contains some other non-capability data),
+then \emph{rd} is set to zero. Otherwise, \emph{rd} is set to
+\emph{cb}.\cbase{} $+$ \emph{cb}.\coffset{} - \emph{ct}.\cbase{}
+
+This instruction can be used to convert a capability into a pointer that
+uses the C language convention that a zero value represents the NULL pointer.
+Note that \emph{rd} will also be zero if \emph{cb}.\cbase{} $+$
+\emph{cb}.\coffset{} $=$ \emph{ct}.\cbase{};
+this is similar to the C language not being able to distinguish a
+NULL pointer from a pointer to a structure at address 0.
+\arnote{Should we just return the address for untagged values to handle cases such as \ccode{(void* __capability)-1)}?}
+
+% XXXRW: Address notes:
+%
+%\note{dc552}{We need to output 0 if the input capability is out of bounds for the
+%gsl::span and related bounds checking to work.  I have added the required check
+%commented out.}
+% \arnote{why can't we just use the capability directly in hybrid mode?}
+%
+%\note{dc552}{The names cb and ct are confusing for this instruction.  cb is not
+%the base register and ct is not the target.}
+
+\arnote{The operand order here is inconsistent with cfromptr/cbuildcap: the authorizing capability is the third operand instead of the second.}
+
+\subsubsection*{Semantics}
+
+\sailMIPScode{CToPtr}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception will be raised if:
+
+\begin{itemize}
+\item
+\emph{ct}.\ctag{} is not set.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+\emph{ct} being sealed will not cause an exception to be raised.
+This is for further study.
+\item
+This instruction has two different means of returning an error code:
+raising an exception (if \emph{ct}.\ctag{} is not set, or the registers
+are not accessible) and returning a NULL pointer if \emph{cb}.\ctag{}
+is not set.
+\item
+If the range of \emph{cb} is outside the range of \emph{ct}, a pointer relative
+to \emph{ct} can't always be used in place of \emph{cb}: some reads or writes
+will fail because they are outside the range of \emph{ct}. To handle this case,
+the application can use the \insnmipsref{CTestSubset} instruction
+followed by a conditional move.
+
+\item \insnmipsref{CGetAddr} similarly allows access to the sum of the base
+and offset of the operand capability, but without the translation relative to the
+authorizing capability or validity/sealed checks on the operand.
+\end{itemize}

@@ -1,0 +1,13 @@
+function #\hyperref[sailRISCVzfindPendingInterrupt]{findPendingInterrupt}#(ip : xlenbits) -> #\hyperref[sailRISCVzoption]{option}#(InterruptType) = {
+  let ip = #\hyperref[sailRISCVzMkzyMinterrupts]{Mk\_Minterrupts}#(ip);
+  if      ip.#\hyperref[sailRISCVzMEI]{MEI}#() == 0b1 then #\hyperref[sailRISCVzSome]{Some}#(I_M_External)
+  else if ip.#\hyperref[sailRISCVzMSI]{MSI}#() == 0b1 then #\hyperref[sailRISCVzSome]{Some}#(I_M_Software)
+  else if ip.#\hyperref[sailRISCVzMTI]{MTI}#() == 0b1 then #\hyperref[sailRISCVzSome]{Some}#(I_M_Timer)
+  else if ip.#\hyperref[sailRISCVzSEI]{SEI}#() == 0b1 then #\hyperref[sailRISCVzSome]{Some}#(I_S_External)
+  else if ip.#\hyperref[sailRISCVzSSI]{SSI}#() == 0b1 then #\hyperref[sailRISCVzSome]{Some}#(I_S_Software)
+  else if ip.#\hyperref[sailRISCVzSTI]{STI}#() == 0b1 then #\hyperref[sailRISCVzSome]{Some}#(I_S_Timer)
+  else if ip.#\hyperref[sailRISCVzUEI]{UEI}#() == 0b1 then #\hyperref[sailRISCVzSome]{Some}#(I_U_External)
+  else if ip.#\hyperref[sailRISCVzUSI]{USI}#() == 0b1 then #\hyperref[sailRISCVzSome]{Some}#(I_U_Software)
+  else if ip.#\hyperref[sailRISCVzUTI]{UTI}#() == 0b1 then #\hyperref[sailRISCVzSome]{Some}#(I_U_Timer)
+  else                         #\hyperref[sailRISCVzNone]{None}#()
+}

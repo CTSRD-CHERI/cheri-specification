@@ -1,0 +1,52 @@
+function #\hyperref[sailRISCVzcheckPTEPermission]{checkPTEPermission}#(ac : #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), priv : Privilege, mxr : bool, do_sum : bool, p : PTE_Bits, ext : extPte, ext_ptw : ext_ptw) -> PTE_Check = {
+  /*
+   * Although in many cases MXR doesn't make sense for capabilities, we honour
+   * it for three reasons:
+   *
+   * 1. It provides uniformity rather than giving strange and surprising edge cases.
+   *
+   * 2. The tag-dependence of stores is achieved by passing Data in for untagged
+   *    capabilities. Thus, not honouring MXR for capabilities would result in
+   *    differences in whether MXR had an effect based on the tag.
+   *
+   * 3. It's simpler to implement yet still #\hyperref[sailRISCVzsafe]{safe}# (LC is unaffected by MXR).
+   */
+  let base_succ : bool =
+  match (ac, priv) {
+    (#\hyperref[sailRISCVzRead]{Read}#(_),      User)       => p.#\hyperref[sailRISCVzU]{U}#() == 0b1 & (p.#\hyperref[sailRISCVzR]{R}#() == 0b1 | (p.#\hyperref[sailRISCVzX]{X}#() == 0b1 & mxr)),
+    (#\hyperref[sailRISCVzWrite]{Write}#(_),     User)       => p.#\hyperref[sailRISCVzU]{U}#() == 0b1 & p.#\hyperref[sailRISCVzW]{W}#() == 0b1,
+    (#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_), User)       => p.#\hyperref[sailRISCVzU]{U}#() == 0b1 & p.#\hyperref[sailRISCVzW]{W}#() == 0b1 & (p.#\hyperref[sailRISCVzR]{R}#() == 0b1 | (p.#\hyperref[sailRISCVzX]{X}#() == 0b1 & mxr)),
+    (#\hyperref[sailRISCVzExecute]{Execute}#(),    User)       => p.#\hyperref[sailRISCVzU]{U}#() == 0b1 & p.#\hyperref[sailRISCVzX]{X}#() == 0b1,
+
+    (#\hyperref[sailRISCVzRead]{Read}#(_),      Supervisor) => (p.#\hyperref[sailRISCVzU]{U}#() == 0b0 | do_sum) & (p.#\hyperref[sailRISCVzR]{R}#() == 0b1 | (p.#\hyperref[sailRISCVzX]{X}#() == 0b1 & mxr)),
+    (#\hyperref[sailRISCVzWrite]{Write}#(_),     Supervisor) => (p.#\hyperref[sailRISCVzU]{U}#() == 0b0 | do_sum) & p.#\hyperref[sailRISCVzW]{W}#() == 0b1,
+    (#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_), Supervisor) => (p.#\hyperref[sailRISCVzU]{U}#() == 0b0 | do_sum) & p.#\hyperref[sailRISCVzW]{W}#() == 0b1 & (p.#\hyperref[sailRISCVzR]{R}#() == 0b1 | (p.#\hyperref[sailRISCVzX]{X}#() == 0b1 & mxr)),
+    (#\hyperref[sailRISCVzExecute]{Execute}#(),    Supervisor) => p.#\hyperref[sailRISCVzU]{U}#() == 0b0 & p.#\hyperref[sailRISCVzX]{X}#() == 0b1,
+
+    (_,            Machine)    => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("m-mode mem perm check")
+  };
+
+  let e = #\hyperref[sailRISCVzMkzyExtzyPTEzyBits]{Mk\_Ext\_PTE\_Bits}#(ext);
+  let ptw_lc = if e.#\hyperref[sailRISCVzCapRead]{CapRead}#()  == 0b1 then PTW_LC_OK else PTW_LC_CLEAR;
+  let ptw_sc = if e.#\hyperref[sailRISCVzCapWrite]{CapWrite}#() == 0b1 then PTW_SC_OK else PTW_SC_TRAP;
+  let (succ, ext_ptw') : (bool, ext_ptw) =
+  match (base_succ, ac) {
+    /* Base translation exceptions take priority over CHERI exceptions */
+    (false, _)                     => (false, init_ext_ptw),
+
+    (true,  #\hyperref[sailRISCVzRead]{Read}#(Cap))             => (true, #\hyperref[sailRISCVzextzyptwzylczyjoin]{ext\_ptw\_lc\_join}#(ext_ptw, ptw_lc)),
+    (true,  #\hyperref[sailRISCVzWrite]{Write}#(Cap))            => (true, #\hyperref[sailRISCVzextzyptwzysczyjoin]{ext\_ptw\_sc\_join}#(ext_ptw, ptw_sc)),
+    (true,  #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Cap))  => (true, #\hyperref[sailRISCVzextzyptwzysczyjoin]{ext\_ptw\_sc\_join}#(ext_ptw, ptw_sc)),
+    (true,  #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Cap, Data))  => (true, #\hyperref[sailRISCVzextzyptwzylczyjoin]{ext\_ptw\_lc\_join}#(ext_ptw, ptw_lc)),
+    (true,  #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Cap, Cap))   => (true, #\hyperref[sailRISCVzextzyptwzysczyjoin]{ext\_ptw\_sc\_join}#(#\hyperref[sailRISCVzextzyptwzylczyjoin]{ext\_ptw\_lc\_join}#(ext_ptw, ptw_lc), ptw_sc)),
+
+    (true,  #\hyperref[sailRISCVzRead]{Read}#(Data))            => (true, ext_ptw),
+    (true,  #\hyperref[sailRISCVzWrite]{Write}#(Data))           => (true, ext_ptw),
+    (true,  #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data)) => (true, ext_ptw),
+    (true,  #\hyperref[sailRISCVzExecute]{Execute}#())             => (true, ext_ptw)
+  };
+
+  if succ
+  then #\hyperref[sailRISCVzPTEzyCheckzySuccess]{PTE\_Check\_Success}#(ext_ptw')
+  else #\hyperref[sailRISCVzPTEzyCheckzyFailure]{PTE\_Check\_Failure}#(ext_ptw', if ext_ptw'.ptw_sc == PTW_SC_TRAP then EPTWF_CAP_ERR else EPTWF_NO_PERM)
+}

@@ -1,0 +1,11 @@
+function #\hyperref[sailRISCVzextzycontrolzycheckzyaddr]{ext\_control\_check\_addr}#(pc : xlenbits) -> #\hyperref[sailRISCVzExtzyControlAddrzyCheck]{Ext\_ControlAddr\_Check}#(ext_control_addr_error) = {
+  let pcc_base = #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(PCC);
+  /* We are given the addr without any bit[0] clearing, so the addition
+   * below may include a set addr[0], and so the bounds checks should
+   * be accurate.
+   */
+  let target : xlenbits = [pcc_base + pc with 0=bitzero];
+  if   #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(PCC, target, #\hyperref[sailRISCVzminzyinstructionzybytes]{min\_instruction\_bytes}# ()))
+  then #\hyperref[sailRISCVzExtzyControlAddrzyError]{Ext\_ControlAddr\_Error}#(CapEx_LengthViolation, PCC_IDX)
+  else #\hyperref[sailRISCVzExtzyControlAddrzyOK]{Ext\_ControlAddr\_OK}#(target)
+}

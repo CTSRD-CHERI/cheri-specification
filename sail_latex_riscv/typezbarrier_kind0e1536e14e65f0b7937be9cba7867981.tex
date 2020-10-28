@@ -1,0 +1,22 @@
+union barrier_kind = {
+  Barrier_Sync : unit,
+  Barrier_LwSync : unit,
+  Barrier_Eieio : unit,
+  Barrier_Isync : unit,
+  Barrier_DMB : (a64_barrier_domain, a64_barrier_type),
+  Barrier_DSB : (a64_barrier_domain, a64_barrier_type),
+  Barrier_ISB : unit,
+  Barrier_MIPS_SYNC : unit,
+  Barrier_RISCV_rw_rw : unit,
+  Barrier_RISCV_r_rw : unit,
+  Barrier_RISCV_r_r : unit,
+  Barrier_RISCV_rw_w : unit,
+  Barrier_RISCV_w_w : unit,
+  Barrier_RISCV_w_rw : unit,
+  Barrier_RISCV_rw_r : unit,
+  Barrier_RISCV_r_w : unit,
+  Barrier_RISCV_w_r : unit,
+  Barrier_RISCV_tso : unit,
+  Barrier_RISCV_i : unit,
+  Barrier_x86_MFENCE : unit
+}

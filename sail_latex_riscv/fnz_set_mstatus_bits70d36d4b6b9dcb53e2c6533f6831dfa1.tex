@@ -1,0 +1,5 @@
+function _set_Mstatus_bits (r_ref, v) = {
+    r = __bitfield_deref(r_ref);
+    r.Mstatus_chunk_0 = update_subrange_bits(r.Mstatus_chunk_0, 63, 0, subrange_bits(v, 63, 0));
+    (*r_ref) = r
+}

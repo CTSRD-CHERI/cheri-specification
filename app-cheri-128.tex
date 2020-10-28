@@ -1,0 +1,498 @@
+\chapter{CHERI-128 Alternative Compression Formats (Deprecated)}
+\label{app:cheri-128}
+\label{sec:compressed-candidates}
+
+On the path to developing our current capability compression scheme, CHERI
+Concentrate (see \cref{subsec:cheri-concentrate}), we developed three earlier
+128-bit formats based on floating-point compression of bounds relative to the
+virtual address in a capability.
+We present those techniques here to explore potential tradeoffs in their
+designs and potential alternative approaches.
+
+\section{CHERI-128 candidate 1}
+
+\begin{figure}[h]
+\begin{center}
+\begin{bytefield}[bitwidth=7pt]{64}
+\bitheader[endianness=big]{0,63} \\
+\begin{rightwordgroup}{128\\bits}
+\bitbox{23}{\cperms{}'23} & \bitbox{2}{\color{lightgray}\rule{\width}{\height}} & \bitbox{6}{\cexponent{}'6} & \bitbox{16}{\ctobase{}'16} & \bitbox{16}{\ctobound{}'16} & \bitbox{1}{\csealed{}} &  \\
+\bitbox{16}{\cotype{}'16} & \bitbox{48}{\ccursor{}'48}
+\end{rightwordgroup}
+\end{bytefield}
+\end{center}
+\caption{CHERI-128 c1 memory representation of a capability}
+\label{fig:cheri128c1-memory-representation-of-a-capability}
+\end{figure}
+
+\paragraph{\csealed{}}
+
+The \csealed{} flag is set if the capability is sealed and is clear otherwise.
+See the discussion of \cotype{} below.
+
+\paragraph{\cexponent{}}
+
+The 6-bit \cexponent{} field gives an exponent for the \ctobase{} and \ctobound{} fields.
+The exponent is the number of bits that \ctobase{} and \ctobound{} should be shifted before being added to \ccursor{} when performing bounds checking.
+
+\paragraph{\ctobase{}}
+
+This 16-bit field contains a signed integer that is to be shifted by \cexponent{} and added to \ccursor{} (with the lower bits set to 0) to give the \cbase{} of the capability.
+This field must be adjusted upon any update to \ccursor{} to preserve the \cbase{} of the capability.
+
+\newcommand{\mask}{{\bf mask}}
+\begin{equation*}
+\mask{} = -1 << \cexponent{}
+\end{equation*}
+\begin{equation*}
+\cbase{} = (\ctobase{} << \cexponent{}) + \ccursor{} \& \mask{}
+\end{equation*}
+
+\paragraph{\cperms}
+
+The 23-bit \cperms{} field contains precisely the same 15-bits of permissions as the 256-bit version.  The \cperms{} field has 8-bits of software-defined permissions at the top, down from 16-bits in the 256-bit version.
+
+\paragraph{\ctobound{}}
+
+This 16-bit field contains a signed integer that is to be shifted by \cexponent{} and added to \ccursor{} (with the lower bits set to 0) to give the bound of the capability.
+The \clength{} of the capability is reported by subtracting \cbase{} from the resulting bound.
+This field must be adjusted upon any update to \ccursor{} to preserve the \clength{} of the capability.
+
+\begin{equation*}
+\cbase{} + \clength{} = (\ctobound{} << \cexponent{}) + \ccursor{} \& \mask{}
+\end{equation*}
+
+\paragraph{\cotype{}}
+
+The 16-bit \cotype{} field corresponds directly to the \cotype{} bit vector but is defined only when the capability is sealed.
+If \csealed{} is cleared, the architectural \cotype{} is $2^{64}-1$
+but and the bits devoted to object type representation are instead an extension of \ccursor{}.
+
+\paragraph{\ccursor{}}
+
+The 64-bit \ccursor{} value holds a 48-bit absolute virtual address that is equal to the architectural \cbase{} + \coffset{}.
+The address in \ccursor{} is the full 64-bit MIPS virtual address when the capability is unsealed,
+and it holds a compressed virtual address when the capability is sealed.
+The compression format places the 5 bits of the address segment in bits [47:42], replacing unused bits of the virtual address.
+When the capability is unsealed, the segment bits are placed at the top of a 64-bit address and the rest are ``sign" extended.
+
+\begin{equation*}
+\ccursor{} = \cbase{} + \coffset{}
+\end{equation*}
+
+\paragraph{Compression Notes}
+When \insnref{CSetBounds} is not supplied with a length that can be expressed with byte precision, the resulting capability has an \cexponent{} that is non-zero and \ctobase{} and \ctobound{} describe units of size $2^\cexponent{}$.
+\cexponent{} is selected such that the pointer can wander outside of the bounds by at least the entire size of the capability both below the base and above the bound without becoming unrepresentable.
+As a result, a 16-bit \ctobase{} and \ctobound{} require both a sign bit and a bit for additional range that cannot contribute to the size of representable objects.
+The greatest length that can be represented with byte granularity for a 16-bit \ctobase{} and \ctobound{} is $2^{14}=16KiB$.
+The resulting alignment in bytes required for an allocation can be derived from the length by rounding to the nearest power of two and dividing by this number.
+
+\begin{equation*}
+alignment\_bits = \lceil log_2(X) \rceil - 14
+\end{equation*}
+
+\section{CHERI-128 candidate 2 (Low-fat pointer inspired)}
+
+\begin{figure}[h]
+\begin{center}
+\begin{bytefield}[bitwidth=7pt]{64}
+\bitheader[endianness=big]{0,63} \\
+\begin{rightwordgroup}{128\\bits}
+\bitbox{23}{\cperms{}'23} & \bitbox{6}{\cexponent{}'6} & \bitbox{2}{\color{lightgray}\rule{\width}{\height}} & \bitbox{16}{\cbasebits{}'16} & \bitbox{16}{\ctopbits{}'16} & \bitbox{1}{\csealed{}} &  \\
+\bitbox{16}{\cotype{}'16} & \bitbox{48}{\ccursor{}'48}
+\end{rightwordgroup}
+\end{bytefield}
+\end{center}
+\caption{CHERI-128 c2 memory representation of a capability}
+\label{fig:cheri-128c2-memory-representation-of-a-capability}
+\end{figure}
+
+
+\newcommand{\correction}{{\bf correction}}
+
+\paragraph{\cbasebits{}}
+This 16-bit field gives bits to be inserted into \ccursor{}[\cexponent{}+15:\cexponent{}], with the lower bits set to 0, to produce the base of the capability.
+\[\cbase{} = \{\ccursor{}[63:\cexponent{} + 16] + \correction, \cbasebits{}\}\ll \cexponent{}\]
+The bits above $(\cexponent{} + 16)$ in \ccursor{} may differ from \cbase{} by at most 1, i.e.
+\[\correction{} = f(\cbasebits{}, \ctopbits{}, \ccursor{}[\cexponent{}+15:\cexponent])= (1, 0, or -1)\]
+
+\begin{figure}[h]
+\begin{center}
+\begin{bytefield}[bitwidth=7pt]{64}
+\bitheader[endianness=big]{0,63} \\
+\bitbox{34}{\ccursor{}[63:\cexponent{} + 16] + \correction~'(48-\cexponent)} & \bitbox{20}{\ctopbits{}~'16} & \bitbox{10}{0~'\cexponent} \\
+\end{bytefield}
+\end{center}
+\caption{CHERI-128 c2 base construction}
+\label{fig:cheri-128c2-base-construction}
+\end{figure}
+
+
+\paragraph{\ctopbits{}}
+
+This 16-bit field gives bits to be inserted into the bits of \ccursor{} at \cexponent{} to produce the representable top of the capability equal to (top - 1024).
+To compute the top, a circuit must insert \ctopbits{} at \cexponent{}, set the lower bits to 0, subtract 1024, and add a potential carry bit.
+The carry bit is implied if \ctopbits{} is less than \cbasebits{}, as the top will never be less than the bottom of an object.
+\[\cbound{} = \{\ccursor{}[63:\cexponent{} + 16] + \correction, \ctopbits{}, 0\}\]
+The bits above $(\cexponent{} + 16)$ in \ccursor{} may differ from \cbound{} by at most 1:
+\[\correction{} = f(\cbasebits{}, \ctopbits{}, \ccursor{}[\cexponent{}+15:\cexponent])= (1, 0, or -1)\]
+
+\begin{figure}[h]
+\begin{center}
+\begin{bytefield}[bitwidth=7pt]{64}
+\bitheader[endianness=big]{0,63} \\
+\bitbox{34}{\ccursor{}[63:\cexponent{} + 16] + \correction~'(48-\cexponent)} & \bitbox{20}{\ctopbits{}~'16} & \bitbox{10}{0~'\cexponent} \\
+\end{bytefield}
+\end{center}
+\caption{CHERI-128 c2 top bound construction}
+\label{fig:cheri-128c2-top-bound-construction}
+\end{figure}
+
+\paragraph{Candidate 2 Notes}
+Candidate 2 is inspired by ``Low-fat pointers"~\cite{kwon:lowfat},
+which insert selected bits into the pointer to produce the bounds.
+The Low-fat pointer representation does not allow a pointer to go out of bounds, but we observe that \ccursor{} could wander out of bounds without causing \cbase{} and \cbound{} to become ambiguous as long as these three remain within the same $2^{(\cexponent{} + 16)}$-sized region.
+Candidate 2 sets the edges of this range to a fixed $1024^\cexponent{}$ bytes beyond each bound, and encodes these in the top and bottom fields to allow high-speed access during pointer arithmetic.
+
+\section{CHERI-128 candidate 3}
+
+After substantial exploration, we developed a third compression model,
+CHERI-128, which is somewhat similar to candidate 2 with two improvements:
+
+\begin{itemize}
+%\item A smaller, 4 bit \cexponent{} with shift positions limited to multiples of 4 to reduce wiring requirements.
+\item Condense hardware and software permissions, making room for larger \cbasebits{} and \ctopbits{} fields in the unsealed capability format.
+\item A new sealed capability format, which reduces the size of \cbasebits{} and \ctopbits{} to make room for a larger \cotype{} and software-defined permissions.
+\cotype{} no longer aliases bits of \ccursor{} but rather the bounds
+metadata.
+\end{itemize}
+
+Subsequent refinement of CHERI-128 gave rise to our current compression
+scheme, CHERI Concentrate~\cite{Woodruff2019}, detailed in
+\cref{subsec:cheri-concentrate}.
+
+\paragraph{Alternative exponents}
+The CHERI-128 scheme treats the
+exponent (\cexponent{}) as a $2^\cexponent{}$ multiplier, though we
+note that in our current implementation the bottom two bits of
+\cexponent{} are forced to be zero, so the exponent is actually
+$16^{\cexponent[5:2]}$.  Clearly we could chose different precision
+for the exponent, trading precision for hardware cost and bits in the
+capability format.
+
+\paragraph{Alternative precision for \cT{} and \cB{}}
+Currently we use 20-bits to represent top and bottom bounds (\cT{} and
+\cB{}).  This gives us a great deal of precision; however, reducing these
+bit widths may well be workable for a broad range of software.  In
+particular, we may wish to reduce the size of these fields in the
+sealed capability format since sealed objects are a new concept and
+introducing strong alignment requirements does not appear to have
+significant penalty.  Similarly, the bit widths could be increased for better
+precision.
+
+\paragraph{Alternative \cotype{} size}
+We may wish to adjust the field widths for the sealed capability
+format to allow a larger \cotype{}, thereby allowing more sandboxes
+without risk of \cotype{} reuse.
+
+\paragraph{Alternative \cperms{}}
+We may wish to adjust field widths to increase the number of
+permission bits.
+
+\subsection{Implementation}
+\label{subsec:cheri-128-implementation}
+
+This section describes the compressed capability format known as
+CHERI-128~\cite{UCAM-CL-TR-936}.
+The compressed in-memory formats for CHERI-128 unsealed and sealed
+capabilities are depicted in
+Figures~\ref{fig:unsealed-cheri128-memory-representation-of-a-capability}
+and~\ref{fig:sealed-cheri128-memory-representation-of-a-capability}.
+
+\begin{figure}[h]
+\begin{center}
+\begin{bytefield}[bitwidth=6pt]{64}
+\bitheader[endianness=big]{0,63} \\
+\begin{rightwordgroup}{128 bits}
+\bitbox{15}{\cmuperms{}'15} & \bitbox{2}{\color{lightgray}\rule{\width}{\height}} & \bitbox{6}{\cexponent{}'6} & \bitbox{1}{0} & \bitbox{20}{\cB{}'20} & \bitbox{20}{\cT{}'20} & \\
+\bitbox{64}{\caddr{}'64}
+\end{rightwordgroup}
+\end{bytefield}
+\end{center}
+\caption{Unsealed CHERI-128 memory representation of a capability}
+\label{fig:unsealed-cheri128-memory-representation-of-a-capability}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+\begin{bytefield}[bitwidth=6pt]{64}
+\bitheader[endianness=big]{0,63} \\
+\begin{rightwordgroup}{128 bits}
+\bitbox{15}{\cmuperms{}'15} & \bitbox{2}{\color{lightgray}\rule{\width}{\height}} & \bitbox{6}{\cexponent{}'6} & \bitbox{1}{1} & \bitbox{8}{\cB{}[19:12]} & \bitbox{12}{\cotype{}\_hi'12} & \bitbox{8}{\cT[19:12]{}}  &  \bitbox{12}{\cotype{}\_lo'12}& \\
+\bitbox{64}{\caddr{}'64}
+\end{rightwordgroup}
+\end{bytefield}
+\end{center}
+\caption{Sealed CHERI-128 memory representation of a capability}
+\label{fig:sealed-cheri128-memory-representation-of-a-capability}
+\end{figure}
+
+\begin{table}[b!]
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+architectural bit\# & \cmuperms{} bit\#& Name \\
+\midrule
+\cperms{}[0] & 0 & \cappermG \\
+\cperms{}[1] & 1 & \cappermX \\
+\cperms{}[2] & 2 & \cappermL \\
+\cperms{}[3] & 3 & \cappermS \\
+\cperms{}[4] & 4 & \cappermLC \\
+\cperms{}[5] & 5 & \cappermSC \\
+\cperms{}[6] & 6 & \cappermSLC \\
+\cperms{}[7] & 7 & \cappermSeal \\
+\cperms{}[8] & 8 & \cappermCInvoke \\
+\cperms{}[9] & 9 & \cappermUnseal \\
+\cperms{}[10] & 10 & \cappermASR \\
+\cuperms{}[15--18] & 11--14 & Software-defined permissions \\
+\bottomrule
+\end{tabular}
+\end{center}
+\caption{Permission bit mapping}
+\label{table:cheri128-perms-bits-mapping}
+\end{table}
+
+\begin{description}[align=right, labelwidth=2em]
+\item[\cmuperms{}]  Hardware permissions for this format are trimmed from those listed in Table~\ref{table:capability-permission-bits} by consolidating system registers. The condensed format is listed in Table~\ref{table:cheri128-perms-bits-mapping}
+
+\item[\cexponent{}] Is an exponent for both the top (\cT{}) and bottom
+  (\cB{}) bits --- see calculations below.  Currently the bottom two
+  bits of \cexponent{} are zero.
+
+\item[\csealed{}] Indicates if a capability is sealed or not, listed simply as 0 or 1 in Figures
+\ref{fig:unsealed-cheri128-memory-representation-of-a-capability} and
+\ref{fig:sealed-cheri128-memory-representation-of-a-capability} respectively
+due to each format being specific to the state of the sealed bit.
+
+\item[\caddr{}] A 64-bit value holding a virtual address equal to the
+  architectural $\cbase{} + \coffset{}$.
+
+\item[\cB{}]
+A 20-bit value used to reconstruct the architectural \cbase{}.
+When deriving a capability with a requested \rbase{} and \rlength{}, we have:
+\[\cB{} = \left\lfloor \frac{\rbase{}}{2^{\cexponent{}}} \right\rfloor
+\mathbf{mod} \; 2^{20}\]
+Which can be rewritten as a bit-manipulation:
+\[\cB{} = \rbase{}[19+\cexponent{}:\cexponent{}]\hfill\]
+For sealed capabilities, $\cB{}[11:0] = 0$
+
+\item[\cT{}]
+A 20-bit value used to reconstruct the architectural \ctop{} ($\cbase{}+\clength{}$).
+When deriving a capability with a requested \rbase{} and \rlength{}, we have:
+\[\cT = \left\lceil \frac{\rbase{} + \rlength{}}{2^{\cexponent{}}} \right\rceil \mathbf{mod} \; 2^{20}\]
+Rewritten as bit manipulations:
+\[
+\cT{} =\begin{cases}
+(\rbase{} + \rlength{})[19+\cexponent{}:\cexponent{}],& \text{if } (\rbase{} + \rlength{})[\cexponent{}-1:0] = 0\\
+(\rbase{} + \rlength{})[19+\cexponent{}:\cexponent{}] + 1,& \text{otherwise}
+\end{cases}
+\]
+\item[\cotype{}]
+The 24-bit \cotype{} field (concatenation of the two \cotype{} fields of Figure~\ref{fig:sealed-cheri128-memory-representation-of-a-capability}) corresponds to the least-significant 24 bits of the architectural \cotype{} bit vector.  These bits are not allocated in an unsealed capability, and the \cotype{} of an unsealed capability is $2^{64}-1$; the encoded value $2^{24}-1$ is reserved.
+
+\end{description}
+
+\noindent
+The hardware computes \cexponent{} according to the following formula:
+\[\cexponent{} = \left\lceil \mathbf{plog_2}\left(\frac{(\rlength{}) \cdot (1+2^{-6})}{2^{20}}\right) \right\rceil\hfill{}\text{where}\hfill{}\mathbf{plog_2}(x)=\begin{cases}
+0, &\text{if }x<1\\
+\mathbf{log_2}(x), &\text{otherwise}
+\end{cases}\]
+which is equivalent to the following bit manipulation:
+\[\cexponent{} = \mathbf{idxMSNZ}((\rlength{} + (\rlength{} \gg 6))\gg19)\]%XXX use an "algorithmic" evironment ?
+where:
+\begin{itemize}
+% XXX-BD: idxMSNZ is a new function we made up.  I wonder if it would make
+% sense to define it in terms of clz() (count leading zeros) which is a
+% standard function implemented by compilers.
+\item $\mathbf{idxMSNZ}(x)$ returning the index of the most significant bit set in $x$
+\item $(\rlength{} + (\rlength{} \gg 6))$ being a 65-bit result
+\end{itemize}
+\pagebreak[2]
+\noindent
+Note that:\nopagebreak[4]%
+\begin{itemize}
+\item \cexponent{} is rounded up to the nearest representable value.
+  In the current implementation the bottom two bits of \cexponent{}
+  are zero.  For example, the above \cexponent{} calculation returned
+  the value 1, then it would be rounded up to 4.
+\item $\rlength{}$ is artificially inflated in the computation of
+  \cexponent{} in such a way that:
+  \[\rlength{} + 8 \text{KiB} \leq 2^{\cexponent{}+20}\]
+  to ensure that there is a representable region which is at least one
+  page above and below the base and bound.  This allows pointers to
+  stray up to a page beyond the base and bound without causing an
+  exception, a feature which is necessary to run much legacy C-code.
+\item \cexponent{} is computed in such a way that loss of precision
+  due to alignment requirements is minimized, i.e., \cexponent{} is
+  the smallest natural n satisfying:
+  \[\mathbf{maxLength}(n) \geq \rlength{}\hfill\text{where}\hfill
+  \mathbf{maxLength}(n)=\left\lfloor \frac{2^{n+20}}{1+2^{-6}} \right\rfloor\hfill\]
+\end{itemize}
+
+\subsection{Representable Bounds Check}
+
+When \caddr{} is incremented (or decremented) we need to ascertain
+whether the resulting capability is representable.  We do not check to
+see if the capability is within bounds at this point, which is done
+only on dereference (load/store instructions).
+
+We first ascertain if we are \emph{inRange} and then if we are \emph{inLimits}.
+The \emph{inRange} test determines whether an inspection of only the lower bits of
+the pointer and increment can yield a definitive answer.
+The \emph{inLimits} test assumes the success of the \emph{inRange} test, and determines
+whether the update to $\caddr{}_{mid}$ could take it beyond the limits of the representable space.
+
+The increment $i$ is \emph{inRange} if its absolute value is less than $s$, the size of the
+representable region:
+\[ inRange = -s < i < s\]
+
+This reduces to a test that all the bits of $I_{top}$ ($i[63:\cexponent{}+20]$) are the same.
+For \emph{inLimits}, we need only $\caddr{}_{mid}$ ($\caddr{}[19+\cexponent{}:\cexponent{}]$),
+$I_{mid}$ ($i[\cexponent{}+19:\cexponent{}]$), and the sign of $i$ to ensure that we have not
+crossed either $R$ ($\cB{} - 2^{12}$), the limits of the representable region:
+\[
+  inLimits=\begin{cases}
+                   I_{mid} < (R - \caddr{}_{mid} - 1),& \text{if } i \geq 0 \\
+                   I_{mid} \geq (R - \caddr{}_{mid}) \land R \neq \caddr{}_{mid},& \text{if } i < 0 \\
+                \end{cases}
+\]
+
+When we are incrementing upwards, we must conservatively subtract one from the representable limit
+to account for any carry that may propagate up from the lower
+bits of the full pointer add.
+When the increment is negative, we must conservatively disallow any operation where $\caddr{}_{mid}$ begins
+at the representable limit as the standard test would spuriously allow any negative offset.
+
+One final test is required that ensures that, if $\cexponent{} \geq 44$, any increment is representable.
+This handles a number of corner cases related to $T$, $B$, and $\caddr{}_{mid}$ describing
+bits beyond the top of the pointer.
+Our final fast \emph{representable} check composes these three tests:
+\[ representable = (inRange  \land  inLimits)  \lor  (\cexponent{} \geq 44)\]
+
+
+\subsection{Decompressing Capabilities}
+
+When producing the architectural \cbase{} of a capability, the value is computed by inserting \cB{} into \caddr{}[19+\cexponent{}:\cexponent{}], inserting zeros in \caddr{}[\cexponent-1:0], and adding a potential correction \cbasecorrection{} to \caddr{}[63:20+\cexponent{}] as defined in Table~\ref{table:address-correction}:
+\begin{align*}
+&\cbase{}[63:20+\cexponent{}] = \caddr{}[63:20+\cexponent{}]+\cbasecorrection{}\\
+&\cbase{}[19+\cexponent{}:\cexponent{}] = \cB{}\\
+&\cbase{}[\cexponent{}-1:0] = 0
+\end{align*}
+
+When producing the architectural \ctop{} ($=\cbase{}+\clength{}$) of a
+capability, the value is computed by inserting \cT{} into
+\caddr{}[19+\cexponent{}:\cexponent{}], inserting zeros in
+\caddr{}[\cexponent-1:0], and adding a potential correction
+\ctopcorrection{} to \caddr{}[63:20+\cexponent{}] as defined in Table
+\ref{table:address-correction}:
+\begin{align*}
+&\ctop{}[64:20+\cexponent{}] = \caddr{}[63:20+\cexponent{}]+\ctopcorrection{}\\
+&\ctop{}[19+\cexponent{}:\cexponent{}] = \cT{}\\
+&\ctop{}[\cexponent{}-1:0] = 0
+\end{align*}
+Note that \ctop{} is a 65-bit quantity to allow the upper bound to be
+larger than the address space.  For example, this is used at reset
+to allow the default data capability to address all of the virtual
+address space, because \ctop{} must be one byte more than the top
+address.  In this special case, $\cexponent{} \geq 45$.
+
+For sealed capabilities, $\cB{}[11:0] = 0$ and $\cT{}[11:0] = 0$.
+
+\begin{table}[h!]
+\begin{minipage}{.15\textwidth}
+\begin{align*}
+&\text{We define}\\
+\caddr{}_{mid} &= \caddr{}[19+\cexponent{}:\cexponent{}]\\
+R &= \cB{} - 2^{12}
+\end{align*}
+\end{minipage}
+%\vline
+\hspace{.05\textwidth}
+\begin{minipage}{.70\textwidth}
+\begin{tabular}{ccrp{2em}ccr}
+\cmidrule[\heavyrulewidth]{1-3}\cmidrule[\heavyrulewidth]{5-7}
+$\caddr{}_{mid}<R$ & $\cB{}<R$ & $\cbasecorrection{}$&&$\caddr{}_{mid}<R$ & $\cT{}<R$ & $\ctopcorrection{}$\\
+\cmidrule{1-3}\cmidrule{5-7}
+$0$ & $0$ & $0$  &&$0$ & $0$ & $0$\\
+$0$ & $1$ & $+1$ &&$0$ & $1$ & $+1$\\
+$1$ & $0$ & $-1$ &&$1$ & $0$ & $-1$\\
+$1$ & $1$ & $0$  &&$1$ & $1$ & $0$\\
+\cmidrule[\heavyrulewidth]{1-3}\cmidrule[\heavyrulewidth]{5-7}
+\end{tabular}
+\end{minipage}
+\caption{Calculating \cbasecorrection{} and \ctopcorrection{}}
+\label{table:address-correction}
+\end{table}
+
+\subsection{Bounds Alignment Requirements}
+\label{sec:cheri-128-alignment}
+
+%%% TODO: using 3/4 below is really too conservative but makes the
+%%% numbers look reasonable.  Nevertheless, perhaps 7/8 would work
+%%% better?
+
+\paragraph{Unsealed capabilities:} Compressed capabilities impose bounds alignment requirements on software if
+precise bounds are required.  The calculation of \cexponent{} determines
+the alignment requirement (see
+Section~\ref{subsec:cheri-128-implementation}):
+\[alignment = 2^\cexponent{}\]
+where \cexponent{} is determined by the requested length of the region
+(\rlength{}).  Note
+that in the current implementation the bottom two bits of \cexponent{}
+are zero, so the value is rounded up.
+
+Since the calculation of \cexponent{} is a little complicated, it can be
+convenient to have a conservative approximation:\\
+
+% The following is a bit of a hack to get the 3/4 small (inline
+% format) while trying to present in display format:
+\hspace{1em}\(\rlength{} <  2^\cexponent{} \cdot \frac{3}{4} \text{MiB}\)\\
+
+\noindent
+So the conservative approximation of \cexponent{} can be computed as
+follows (or the precise version used from
+Section~\ref{subsec:cheri-128-implementation}), noting that \cexponent{}
+is also rounded up to ensure the bottom two bits are zero:
+\[\cexponent = \left\lceil plog_2 \left (\frac{\rlength{}}{\frac{3}{4} \text{MiB}} \right) \right\rceil\]
+i.e.\ for an object length less than $\frac{3}{4}$ MiB you get byte
+alignment (since \cexponent{}=0 so $alignment=1$).  You then go to 16-byte alignment
+for objects less than $2^4 \cdot \frac{3}{4} \text{MiB} = 12 \text{MiB}$, etc.  Page
+alignment (4 KiB pages) is required only when objects are between 1 GiB
+and 3 GiB.
+
+Note that the actual length of the region covered will be rounded up to the nearest $alignment$ boundary.
+
+\paragraph{Sealed capabilities}
+have more restrictive alignment requirements due to fewer bits
+available to represent \cT{} and \cB{}.  The hardware will
+raise an exception when sealing an unsealed capability where the
+bottom 12 bits of \cT{} and \cB{} are not zero.  As a
+consequence, the alignment becomes:
+\[alignment = 2^{\cexponent{}+12}\] The relationship between \rlength{}
+and \cexponent{} remains the same, but the actual length of the region
+covered will be rounded up to the new $alignment$.  Thus, for small
+regions alignment is on $4$ KiB (page) boundaries and the length of the
+region protected is a multiple of pages up to $\frac{3}{4}$ MiB.
+Length of region up to $2^4 \cdot \frac{3}{4} = 12$ MiB are aligned on
+64 KiB boundaries.  Similarly, a region of length $1$ GiB to
+$3$ GiB will be $16$ MiB aligned.
+
+\note{Because of this increased alignment requirement, it might make sense
+to encode the \cotype{}s permitted to be manipulated by a \cappermSeal- /
+\cappermUnseal-bearing capability as left-shifted some, perhaps by as much
+as $12$.  This would allow sealing a capability bearing sealing/unsealing
+authority to one or a small number of \cotype{}s, rather than only those
+authorizing manipulation of $2^{12}$ \cotype{}s at once.  A similar
+observation holds about the granularity of compartment IDs that can be
+authorized by sealed capabilities.}{nwf}

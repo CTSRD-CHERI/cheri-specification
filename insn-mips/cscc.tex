@@ -1,0 +1,67 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CSCC}
+\insnmipslabel{cscc}
+\subsection*{CSCC: Store Conditional Capability via Capability}
+
+\subsubsection*{Format}
+
+CSCC rd, cs, cb
+
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,2,3,5,6,10,11,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x12}
+\bitbox{5}{0x10}
+\bitbox{5}{cs}
+\bitbox{5}{cb}
+\bitbox{5}{rd}
+\bitbox{2}{\color{lightgray}\rule{\width}{\height}}
+\bitbox{4}{0111}
+\end{bytefield}
+\end{center}
+\usesDDCinsteadofNULL{cb}
+
+% \textbf{TO DO: Describe what this instruction does.}
+
+\subsubsection*{Semantics}
+\sailMIPScode{CSCC}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cb}.\ctag{} is not set.
+\item
+\emph{cb} is sealed.
+\item
+\emph{cb}.\cperms.\emph{Permit\_Store} is not set.
+\item
+\emph{cb}.\cperms{}.\emph{Permit\_Store\_Capability} is not set.
+\item
+\emph{cb}.\cperms{}.\emph{Permit\_Store\_Local\_Capability} is not set
+and \emph{cs}.\cperms.\emph{Global} is not set.
+\item
+\emph{addr} $+$ \emph{capability\_size} $>$
+\emph{cb}.\cbase{} $+$ \emph{cb}.\clength{}
+\item
+\emph{addr} $<$ \emph{cb}.\cbase{}
+\end{itemize}
+
+A TLB Store exception is raised if:
+
+\begin{itemize}
+\item
+The \emph{S} bit in the TLB entry corresponding to virtual address
+\emph{addr} is not set.
+\end{itemize}
+
+An address error during store (AdES) exception is raised if:
+
+\begin{itemize}
+\item
+\emph{addr} is not correctly aligned.
+\end{itemize}

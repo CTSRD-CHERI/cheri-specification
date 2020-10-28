@@ -1,0 +1,16 @@
+function #\hyperref[sailRISCVzhtifzyload]{htif\_load}#(t, paddr, width) = {
+  if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+  then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("htif[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(paddr) ^ "] -> " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(htif_tohost));
+  /* FIXME: For now, only allow the expected access widths. */
+  if      width == 8 & (paddr == #\hyperref[sailRISCVzplatzyhtifzytohost]{plat\_htif\_tohost}#())
+  then    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(htif_tohost, 64))         /* FIXME: Redundant zero_extend currently required by Lem backend */
+  else if width == 4 & paddr == #\hyperref[sailRISCVzplatzyhtifzytohost]{plat\_htif\_tohost}#()
+  then    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(htif_tohost[31..0], 32))  /* FIXME: Redundant zero_extend currently required by Lem backend */
+  else if width == 4 & paddr == #\hyperref[sailRISCVzplatzyhtifzytohost]{plat\_htif\_tohost}#() + 4
+  then    #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(htif_tohost[63..32], 32)) /* FIXME: Redundant zero_extend currently required by Lem backend */
+  else match t {
+    #\hyperref[sailRISCVzExecute]{Execute}#()  => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyFetchzyAccesszyFault]{E\_Fetch\_Access\_Fault}#()),
+    #\hyperref[sailRISCVzRead]{Read}#(Data) => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyLoadzyAccesszyFault]{E\_Load\_Access\_Fault}#()),
+    _          => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#())
+  }
+}

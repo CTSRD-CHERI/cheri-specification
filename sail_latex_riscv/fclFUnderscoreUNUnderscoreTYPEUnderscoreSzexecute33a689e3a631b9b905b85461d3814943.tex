@@ -1,0 +1,17 @@
+let rs1_val_S = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs1));
+
+let rd_val_10b : #\hyperref[sailRISCVzbits]{bits}# (10) =
+  if      #\hyperref[sailRISCVzfzyiszynegzyinfzyS]{f\_is\_neg\_inf\_S}#     (rs1_val_S) then 0b_00_0000_0001
+  else if #\hyperref[sailRISCVzfzyiszynegzynormzyS]{f\_is\_neg\_norm\_S}#    (rs1_val_S) then 0b_00_0000_0010
+  else if #\hyperref[sailRISCVzfzyiszynegzysubnormzyS]{f\_is\_neg\_subnorm\_S}# (rs1_val_S) then 0b_00_0000_0100
+  else if #\hyperref[sailRISCVzfzyiszynegzyzzerozyS]{f\_is\_neg\_zero\_S}#    (rs1_val_S) then 0b_00_0000_1000
+  else if #\hyperref[sailRISCVzfzyiszyposzyzzerozyS]{f\_is\_pos\_zero\_S}#    (rs1_val_S) then 0b_00_0001_0000
+  else if #\hyperref[sailRISCVzfzyiszyposzysubnormzyS]{f\_is\_pos\_subnorm\_S}# (rs1_val_S) then 0b_00_0010_0000
+  else if #\hyperref[sailRISCVzfzyiszyposzynormzyS]{f\_is\_pos\_norm\_S}#    (rs1_val_S) then 0b_00_0100_0000
+  else if #\hyperref[sailRISCVzfzyiszyposzyinfzyS]{f\_is\_pos\_inf\_S}#     (rs1_val_S) then 0b_00_1000_0000
+  else if #\hyperref[sailRISCVzfzyiszySNaNzyS]{f\_is\_SNaN\_S}#        (rs1_val_S) then 0b_01_0000_0000
+  else if #\hyperref[sailRISCVzfzyiszyQNaNzyS]{f\_is\_QNaN\_S}#        (rs1_val_S) then 0b_10_0000_0000
+  else #\hyperref[sailRISCVzzzeros]{zeros}#();
+
+#\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}# (rd_val_10b);
+RETIRE_SUCCESS

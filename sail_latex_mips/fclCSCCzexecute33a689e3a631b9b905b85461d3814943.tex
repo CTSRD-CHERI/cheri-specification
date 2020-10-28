@@ -1,0 +1,38 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let cs_val = #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(cs);
+let cb_val = #\hyperref[sailMIPSzreadCapRegDDC]{readCapRegDDC}#(cb);
+if not (cb_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TagViolation, cb)
+else if cb_val.sealed then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, cb)
+else if not (cb_val.permit_store) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_PermitStoreViolation, cb)
+else if not (cb_val.permit_store_cap) & (cs_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_PermitStoreCapViolation, cb)
+else if not (cb_val.permit_store_local_cap) & (cs_val.tag) & not (cs_val.global) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_PermitStoreLocalCapViolation, cb)
+else
+{
+  let vAddr   = #\hyperref[sailMIPSzgetCapCursor]{getCapCursor}#(cb_val);
+  let vAddr64 = #\hyperref[sailMIPSztozybits]{to\_bits}#(64, vAddr);
+  if (vAddr + cap_size) > #\hyperref[sailMIPSzgetCapTop]{getCapTop}#(cb_val) then
+    #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_LengthViolation, cb)
+  else if vAddr < #\hyperref[sailMIPSzgetCapBase]{getCapBase}#(cb_val) then
+    #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_LengthViolation, cb)
+  else if (vAddr % cap_size) != 0 then
+    #\hyperref[sailMIPSzSignalExceptionBadAddr]{SignalExceptionBadAddr}#(AdES, vAddr64)
+  else
+  {
+    let (pAddr, macr) = #\hyperref[sailMIPSzTLBTranslateC]{TLBTranslateC}#(vAddr64, StoreData);
+    let mtag : bool = match (if cs_val.tag == false then Unrestricted else macr) {
+      Trap => #\hyperref[sailMIPSzraisezyc2zyexceptionzybadaddr]{raise\_c2\_exception\_badaddr}#(CapEx_TLBNoStoreCap, cs, vAddr64),
+      Clear => false,
+      Unrestricted => cs_val.tag
+    };
+    let success = if (CP0LLBit[0]) then
+        #\hyperref[sailMIPSzMEMwzytaggedzyconditional]{MEMw\_tagged\_conditional}#(pAddr, cap_size, mtag, #\hyperref[sailMIPSzcapToMemBits]{capToMemBits}#(cs_val))
+      else
+        false;
+    #\hyperref[sailMIPSzwGPR]{wGPR}#(rd) = #\hyperref[sailMIPSzzzerozyextend]{zero\_extend}#(success);
+  }
+}

@@ -1,0 +1,9 @@
+function #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#() -> unit = {
+  let info = if #\hyperref[sailRISCVzplatzymtvalzyhaszyillegalzyinstzybits]{plat\_mtval\_has\_illegal\_inst\_bits}# ()
+             then #\hyperref[sailRISCVzSome]{Some}#(instbits)
+             else #\hyperref[sailRISCVzNone]{None}#();
+  let t : sync_exception = struct { trap    = #\hyperref[sailRISCVzEzyIllegalzyInstr]{E\_Illegal\_Instr}#(),
+                                    excinfo = info,
+                                    ext     = #\hyperref[sailRISCVzNone]{None}#() };
+  #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(#\hyperref[sailRISCVzexceptionzyhandler]{exception\_handler}#(cur_privilege, #\hyperref[sailRISCVzCTLzyTRAP]{CTL\_TRAP}#(t), PC))
+}

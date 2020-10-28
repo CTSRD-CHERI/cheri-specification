@@ -1,0 +1,5 @@
+let capVal = #\hyperref[sailRISCVzC]{C}#(cs1);
+#\hyperref[sailRISCVzX]{X}#(rd) = if   #\hyperref[sailRISCVzhasReservedOType]{hasReservedOType}#(capVal)
+        then #\hyperref[sailRISCVzEXTS]{EXTS}#(capVal.otype)
+        else #\hyperref[sailRISCVzEXTZ]{EXTZ}#(capVal.otype);
+RETIRE_SUCCESS

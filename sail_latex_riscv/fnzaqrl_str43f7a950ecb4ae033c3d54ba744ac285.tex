@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzaqrlzystr]{aqrl\_str}#(aq : bool, rl : bool) -> string =
+  match (aq, rl) {
+    (false, false) => "",
+    (false, true)  => ".rl",
+    (true, false)  => ".aq",
+    (true, true)   => ".aqrl"
+  }

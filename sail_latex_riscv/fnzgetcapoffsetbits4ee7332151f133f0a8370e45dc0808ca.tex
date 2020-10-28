@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(c) : Capability -> CapAddrBits =
+    let base : CapAddrBits = #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(c) in
+    c.address - base

@@ -1,0 +1,72 @@
+This version of the \textit{CHERI Instruction-Set Architecture} is an interim
+version distributed for review by DARPA and our collaborators:
+
+\begin{itemize}
+
+\item The CHERI Concentrate capability compression format is now documented,
+  with a more detailed rationale section than the prior CHERI-128 section.
+
+\item The \insnref{CLCBI} (Capability Load Capability with Big Immediate)
+  instruction, which accelerates position-independent access to global
+  variables, is no longer considered experimental.
+
+\item The architecture-neutral description of tagged memory has been
+  clarified.
+
+\item The maximum supported lengths for both compressed and uncompressed
+  capabilities has been updated: $2^{64}$ for 128-bit +capabilities, and
+  $2^{64} - 1$ for 256-bit capabilities.
+
+\item It is clarified that \insnref{CLoadTags} instruction must provide
+  cache coherency consistent with other load instructions.
+  We recommend ``non-temporal'' behavior, in which unnecessary cache-line
+  fills are avoided to limit cache pollution during revocation.
+
+\item We now define the object type for unsealed capabilities, returned by
+  the \insnref{CGetType} instruction, as $2^{64}-1$ rather than $0$.
+
+\item An experimental section has been added on how CHERI capabilities might
+  compose with memory-versioning schemes such as Sparc ADI and Arm MTE
+  (see Section~\ref{app:exp:versioning}).
+
+\item Pseudocode throughout the CHERI ISA specification is now generated from
+  our Sail formal model of the CHERI-MIPS ISA~\cite{sail-popl2019}.
+
+\item The \hyperref[glossary]{Glossary} has been updated for CHERI ISAv7
+  changes including CHERI-RISC-V, split vs. merged register files,
+  capabilities for physical addresses, and special capability registers.
+
+\item Capability exception codes are now shared across architectures.
+
+\item CHERI-RISC-V now includes capability-relative floating-point load and
+  store instructions.
+  We have clarified that existing RISC-V floating-point load and store
+  instructions are constrained by \DDC{}.
+
+\item CHERI-RISC-V now throws exceptions, rather than clearing tags, when
+  non-mono\-tonic register-to-register capability operations are attempted.
+
+\item While a specific encoding-mode transition mechanism is not yet specified
+  for CHERI-RISC-V, candidate schemes are described and compared in greater
+  detail.
+
+\item CHERI-RISC-V's ``capability encoding mode'' now has different impacts
+  for uncompressed instructions vs. compressed instructions: In the compressed
+  ISA, jump instructions also become capability relative.
+
+\item CHERI-RISC-V page-table entries now contain a ``capability dirty bit''
+  to assist with tracking the propagation of capabilities.
+
+\item Throwing an exception on an out-of-bounds capability-relative jump
+  rather than on the target fetch is now more clearly explained: This improves
+  debuggability by maintaining precise information about context state on
+  jump, whereas after the jump, bounds may not be representable due to
+  capability compression.
+  When an inappropriate \EPCC{} is installed, the exception will still be
+  thrown on instruction fetch.
+
+\item A new \ErrorEPCC{} special register has been defined, to assist with
+  exceptions thrown within exception handlers; its behavior is modeled on the
+  existing MIPS \ErrorEPC{} special register.
+
+\end{itemize}

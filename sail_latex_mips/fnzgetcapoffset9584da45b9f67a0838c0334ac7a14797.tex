@@ -1,0 +1,3 @@
+function #\hyperref[sailMIPSzgetCapOffset]{getCapOffset}#(c) : Capability -> uint64 =
+    let base = #\hyperref[sailMIPSzgetCapBase]{getCapBase}#(c) in
+    (#\hyperref[sailMIPSzunsigned]{unsigned}#(c.address) - base) % #\hyperref[sailMIPSzpow2]{pow2}#(64)

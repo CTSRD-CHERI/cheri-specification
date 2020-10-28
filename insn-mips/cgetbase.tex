@@ -1,0 +1,23 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CGetBase}
+\insnmipslabel{cgetbase}
+\subsection*{CGetBase: Move Base to an Integer Register}
+
+\subsubsection*{Format}
+
+CGetBase rd, cb
+
+\begin{center}
+\cheritwoop[header]{0x2}{rd}{cb}
+\end{center}
+
+\subsubsection*{Description}
+
+Integer register \textit{rd} is set equal to the \cbase{} field of capability
+register \textit{cb}.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CGetBase}
+
+

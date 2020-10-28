@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr : xlenbits, e : ExceptionType) -> unit = {
+  let t : sync_exception = struct { trap    = e,
+                                    excinfo = #\hyperref[sailRISCVzSome]{Some}#(addr),
+                                    ext     = #\hyperref[sailRISCVzNone]{None}#() } in
+  #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(#\hyperref[sailRISCVzexceptionzyhandler]{exception\_handler}#(cur_privilege, #\hyperref[sailRISCVzCTLzyTRAP]{CTL\_TRAP}#(t), PC))
+}

@@ -1,0 +1,73 @@
+function #\hyperref[sailRISCVzwalk48]{walk48}#(vaddr, ac, priv, mxr, do_sum, ptb, level, global, ext_ptw) = {
+  let va = #\hyperref[sailRISCVzMkzySV48zyVaddr]{Mk\_SV48\_Vaddr}#(vaddr);
+  let pt_ofs : paddr64 = #\hyperref[sailRISCVzshiftl]{shiftl}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzshiftr]{shiftr}#(va.#\hyperref[sailRISCVzVPNi]{VPNi}#(), (level * SV48_LEVEL_BITS))[(SV48_LEVEL_BITS - 1) .. 0]),
+                                PTE48_LOG_SIZE);
+  let pte_addr = ptb + pt_ofs;
+  match (#\hyperref[sailRISCVzmemzyread]{mem\_read}#(ac, #\hyperref[sailRISCVzEXTZ]{EXTZ}#(pte_addr), 8, false, false, false)) {
+    #\hyperref[sailRISCVzMemException]{MemException}#(_) => {
+/*    #\hyperref[sailRISCVzprint]{print}#("#\hyperref[sailRISCVzwalk48]{walk48}#(vaddr=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(vaddr) ^ " level=" ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(level)
+            ^ " pt_base=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(ptb)
+            ^ " pt_ofs=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(pt_ofs)
+            ^ " pte_addr=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(pte_addr)
+            ^ ": invalid pte address"); */
+      #\hyperref[sailRISCVzPTWzyFailure]{PTW\_Failure}#(#\hyperref[sailRISCVzPTWzyAccess]{PTW\_Access}#(), ext_ptw)
+    },
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(v) => {
+      let pte = #\hyperref[sailRISCVzMkzySV48zyPTE]{Mk\_SV48\_PTE}#(v);
+      let pbits = pte.#\hyperref[sailRISCVzBITS]{BITS}#();
+      let ext_pte = pte.#\hyperref[sailRISCVzExt]{Ext}#();
+      let pattr = #\hyperref[sailRISCVzMkzyPTEzyBits]{Mk\_PTE\_Bits}#(pbits);
+      let is_global = global | (pattr.#\hyperref[sailRISCVzG]{G}#() == 0b1);
+/*    #\hyperref[sailRISCVzprint]{print}#("#\hyperref[sailRISCVzwalk48]{walk48}#(vaddr=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(vaddr) ^ " level=" ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(level)
+            ^ " pt_base=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(ptb)
+            ^ " pt_ofs=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(pt_ofs)
+            ^ " pte_addr=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(pte_addr)
+            ^ " pte=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(v)); */
+      if #\hyperref[sailRISCVzisInvalidPTE]{isInvalidPTE}#(pbits, ext_pte) then {
+/*      #\hyperref[sailRISCVzprint]{print}#("walk48: invalid pte"); */
+        #\hyperref[sailRISCVzPTWzyFailure]{PTW\_Failure}#(#\hyperref[sailRISCVzPTWzyInvalidzyPTE]{PTW\_Invalid\_PTE}#(), ext_ptw)
+      } else {
+        if #\hyperref[sailRISCVzisPTEPtr]{isPTEPtr}#(pbits, ext_pte) then {
+          if level > 0 then {
+            /* walk down the pointer to the next level */
+            #\hyperref[sailRISCVzwalk48]{walk48}#(vaddr, ac, priv, mxr, do_sum, #\hyperref[sailRISCVzshiftl]{shiftl}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(pte.#\hyperref[sailRISCVzPPNi]{PPNi}#()), PAGESIZE_BITS), level - 1, is_global, ext_ptw)
+          } else {
+            /* last-level PTE contains a pointer instead of a leaf */
+/*          #\hyperref[sailRISCVzprint]{print}#("walk48: last-level pte contains a ptr"); */
+            #\hyperref[sailRISCVzPTWzyFailure]{PTW\_Failure}#(#\hyperref[sailRISCVzPTWzyInvalidzyPTE]{PTW\_Invalid\_PTE}#(), ext_ptw)
+          }
+        } else { /* leaf PTE */
+          match #\hyperref[sailRISCVzcheckPTEPermission]{checkPTEPermission}#(ac, priv, mxr, do_sum, pattr, ext_pte, ext_ptw) {
+            #\hyperref[sailRISCVzPTEzyCheckzyFailure]{PTE\_Check\_Failure}#(ext_ptw, ext_ptw_fail) => {
+/*            #\hyperref[sailRISCVzprint]{print}#("walk48: pte permission check failure"); */
+              #\hyperref[sailRISCVzPTWzyFailure]{PTW\_Failure}#(#\hyperref[sailRISCVzextzygetzyptwzyerror]{ext\_get\_ptw\_error}#(ext_ptw_fail), ext_ptw)
+            },
+	    #\hyperref[sailRISCVzPTEzyCheckzySuccess]{PTE\_Check\_Success}#(ext_ptw) => {
+              if level > 0 then { /* superpage */
+                /* fixme hack: to get a mask of appropriate size */
+                let mask = #\hyperref[sailRISCVzshiftl]{shiftl}#(pte.#\hyperref[sailRISCVzPPNi]{PPNi}#() ^ pte.#\hyperref[sailRISCVzPPNi]{PPNi}#() ^ #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b1), level * SV48_LEVEL_BITS) - 1;
+                if (pte.#\hyperref[sailRISCVzPPNi]{PPNi}#() & mask) != #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0) then {
+                  /* misaligned superpage mapping */
+/*                #\hyperref[sailRISCVzprint]{print}#("walk48: misaligned superpage mapping"); */
+                  #\hyperref[sailRISCVzPTWzyFailure]{PTW\_Failure}#(#\hyperref[sailRISCVzPTWzyMisaligned]{PTW\_Misaligned}#(), ext_ptw)
+                } else {
+                  /* add the appropriate bits of the VPN to the superpage PPN */
+                  let ppn = pte.#\hyperref[sailRISCVzPPNi]{PPNi}#() | (#\hyperref[sailRISCVzEXTZ]{EXTZ}#(va.#\hyperref[sailRISCVzVPNi]{VPNi}#()) & mask);
+/*                let res = #\hyperref[sailRISCVzappend]{append}#(ppn, va.#\hyperref[sailRISCVzPgOfs]{PgOfs}#());
+                  #\hyperref[sailRISCVzprint]{print}#("walk48: using superpage: pte.ppn=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(pte.#\hyperref[sailRISCVzPPNi]{PPNi}#())
+                        ^ " ppn=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(ppn) ^ " res=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(res)); */
+                  #\hyperref[sailRISCVzPTWzySuccess]{PTW\_Success}#(#\hyperref[sailRISCVzappend]{append}#(ppn, va.#\hyperref[sailRISCVzPgOfs]{PgOfs}#()), pte, pte_addr, level, is_global, ext_ptw)
+                }
+              } else {
+                /* normal leaf PTE */
+/*              let res = #\hyperref[sailRISCVzappend]{append}#(pte.#\hyperref[sailRISCVzPPNi]{PPNi}#(), va.#\hyperref[sailRISCVzPgOfs]{PgOfs}#());
+                #\hyperref[sailRISCVzprint]{print}#("walk48: pte.ppn=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(pte.#\hyperref[sailRISCVzPPNi]{PPNi}#()) ^ " ppn=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(pte.#\hyperref[sailRISCVzPPNi]{PPNi}#()) ^ " res=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(res)); */
+                #\hyperref[sailRISCVzPTWzySuccess]{PTW\_Success}#(#\hyperref[sailRISCVzappend]{append}#(pte.#\hyperref[sailRISCVzPPNi]{PPNi}#(), va.#\hyperref[sailRISCVzPgOfs]{PgOfs}#()), pte, pte_addr, level, is_global, ext_ptw)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

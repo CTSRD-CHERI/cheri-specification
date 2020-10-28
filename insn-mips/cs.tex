@@ -1,0 +1,103 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CS[BHWD]}
+\insnmipslabel{csbhwd}
+\subsection*{CS[BHWD]: Store Integer via Capability}
+
+\subsubsection*{Format}
+
+CSB rs, rt, offset(cb)\\
+CSH rs, rt, offset(cb)\\
+CSW rs, rt, offset(cb)\\
+CSD rs, rt, offset(cb)\\
+CSBR rs, rt(cb)\\
+CSHR rs, rt(cb)\\
+CSWR rs, rt(cb)\\
+CSDR rs, rt(cb)\\
+CSBI rs, offset(cb)\\
+CSHI rs, offset(cb)\\
+CSWI rs, offset(cb)\\
+CSDI rs, offset(cb)\\
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,1,3,10,11,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x3A}
+\bitbox{5}{rs}
+\bitbox{5}{cb}
+\bitbox{5}{rt}
+\bitbox{8}{offset}
+\bitbox{1}{0}
+\bitbox{2}{t}
+\end{bytefield}
+\end{center}
+
+\usesDDCinsteadofNULL{cb}
+
+\subsubsection*{Purpose}
+
+Stores some or all of a register into a memory location.
+
+\subsubsection*{Description}
+
+Part of integer register \emph{rs} is stored to the memory location specified by
+\emph{cb.\cbase{}} + \emph{cb.\coffset{}} + \emph{rt} + $2^t$ $*$ \emph{offset}.
+Capability register \emph{cb} must contain a capability that grants permission
+to store data.
+
+The \emph{t} field determines how many bits of the register are stored to memory:
+
+\begin{description}
+	\item[0] byte (8 bits)
+	\item[1] halfword (16 bits)
+	\item[2] word (32 bits)
+	\item[3] doubleword (64 bits)
+\end{description}
+
+If less than 64 bits are stored, they are taken from the least-significant
+end of the register.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CStore}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\cchecktag{}
+\item
+\emph{cb} is sealed.
+\item
+\emph{cb}.\cperms.\emph{Permit\_Store} is not set.
+\item
+\emph{addr} $+$ \emph{size} $>$ \emph{cb}.\cbase{} $+$ \emph{cb}.\clength{}.
+\item
+\emph{addr} $<$ \emph{cb}.\cbase{}
+\end{itemize}
+
+An address error during store (AdES) is raised if:
+
+\begin{itemize}
+\item
+\emph{addr} is not aligned.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+This instruction reuses the opcode from the Store Word from Coprocessor 2
+(\insnnoref{SWC2}) instruction in the MIPS Specification.
+\item
+\emph{rt} is treated as an unsigned integer.
+\item
+\emph{offset} is treated as a signed integer.
+% \item
+% The computation of \emph{addr} does not wrap around modulo $2^{64}$.
+\item
+BERI1 has a compile-time option to allow unaligned loads and stores. If BERI1
+is built with this option, an unaligned store will only raise an exception if
+it crosses a cache line boundary.
+\end{itemize}

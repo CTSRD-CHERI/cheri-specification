@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzgetRepresentableAlignmentMask]{getRepresentableAlignmentMask}#(len) : xlenbits -> xlenbits = {
+  let (exact, c) = #\hyperref[sailRISCVzsetCapBounds]{setCapBounds}#(default_cap, #\hyperref[sailRISCVztozybits]{to\_bits}#(sizeof(xlen), 0), 0b0 @ len);
+  let e = #\hyperref[sailRISCVzmin]{min}#(#\hyperref[sailRISCVzunsigned]{unsigned}#(c.E), maxE);
+  let e' = if c.internal_e then e + internal_exponent_take_bits else 0;
+  #\hyperref[sailRISCVzones]{ones}#(sizeof(xlen)-e') @ #\hyperref[sailRISCVzzzeros]{zeros}#(e')
+}

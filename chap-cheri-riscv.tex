@@ -1,0 +1,1578 @@
+\chapter{The CHERI-RISC-V Instruction-Set Architecture}
+\label{chap:cheri-riscv}
+
+
+\newcommand{\riscvloadcappagefault}{0x1A}
+\newcommand{\riscvstorecappagefault}{0x1B}
+\newcommand{\riscvcheriexception}{0x1C}
+
+In this chapter we propose a draft application of the CHERI protection model
+to the RISC-V ISA.
+We build on our experience designing CHERI-MIPS, revisiting key design choices
+and also adapting the model anew to a similar but distinct instruction set
+with a more contemporary set of architectural features.
+We choose to design CHERI-RISC-V as a parameterizable instruction set that
+includes several key design points that allow us to evaluate both
+microarchitectural and architectural implications via side-by-side
+experiments.
+This specification is a draft in that it remains a work-in-progress and has
+not yet been fully elaborated or realized in microarchitecture.
+In particular, we are aware that our compiler-targeted instruction set is
+likely to be largely usable, but the privileged aspects, including exception
+handling and page-table walking, will likely require further iteration.
+We anticipate substantial changes in future CHERI ISA revisions as the
+CHERI-RISC-V ISA matures.
+
+\section{The RISC-V Instruction-Set Architecture}
+
+RISC-V is a contemporary open-source architecture developed at the University
+of California at Berkeley.
+RISC-V is intended to be used with a range of microprocessors spanning small
+32-bit microcontrollers intended for embedded applications to larger 64-bit
+superscalar processors intended for use in datacenter computing.
+The RISC-V ISA is reminiscent of MIPS, with some important differences: a more
+modular design allows the ISA to be more easily subsetted and extended; a
+variable-length instruction encoding improves code density; the MMU has a
+hardware page-table walker rather than relying on software TLB management;
+the ISA avoids exposing pipelining behaviors to software (e.g., there is no
+branch-delay slot); and it has a more contemporary approach to atomic memory
+instructions.
+Various drafts and standardized extensions add other more contemporary
+features such as hypervisor support.  There is also ongoing work to define
+broader platform behaviors beyond the architecture, including platform
+self-description and peripheral-device enumeration.
+At the time of writing, the RISC-V userspace ISA has been standardized
+(v2.2)~\cite{RISCV:User:2.2}, but the privileged ISA remains under
+development (v1.10)~\cite{RISCV:Privileged:1.10}\footnote{As v1.11 of the
+privileged specification remains a work-in-progress, we define CHERI-RISC-V
+relative to v1.10.}. \mmnote{1.11 is ratified now, so we should rewrite this chapter with v1.11 changes.}
+
+%\textbf{XXXRW: It would be nice to propose an extension name; unfortunately,
+%the `C' extension is already used for compressed instructions.
+%`S' is taken for the supervisor extensions, and `P' for SIMD.
+%Perhaps we should be `W' for Weally Secure, Doc?}
+
+\section{CHERI-RISC-V Approach}
+
+Our application of CHERI to the RISC-V architecture is motivated by several
+opportunities:
+
+\begin{itemize}
+\item To gain access to a maturing open-source ISA, hardware, and software
+  ecosystem, for the purposes of a stronger experimental baseline and
+  methodology (such as more mature core variants).
+  At the time of writing, the MIPS software ecosystem remains richer, but we
+  see a substantial community effort at filling gaps for RISC-V.
+
+\item To demonstrate the portability of the CHERI approach across multiple
+  architectures, and in particular to illustrate how portable CHERI software
+  stacks can be designed and maintained despite underlying architectural
+  differences.
+
+\item To apply lessons learned from CHERI-MIPS in an entirely fresh
+  application of the protection model to a new architecture.
+  Many of our MIPS design choices reflect pragmatic design choices made prior
+  to the development of full compiler and operating-system stacks, and are
+  difficult to change within those stacks.
+
+\item To revisit and scientifically explore a design space around CHERI
+  integration into a target architecture -- for example, around the use of
+  register files and exceptions.
+
+\item To support new CHERI experimentation in the space of microcontrollers,
+  heterogenous cores and accelerators, and DMA, as well as in relation to
+  microarchitectural side channels.
+
+\item To lay groundwork for possible open-source transition of the CHERI
+  protection model into the RISC-V architecture.
+\end{itemize}
+
+In the following subsections, we describe our high-level approach before
+providing a more detailed specification of CHERI-RISC-V.
+
+\subsection{Target RISC-V ISA Variants}
+
+The RISC-V ISA defines both 32-bit (\texttt{XLEN}=32) and 64-bit
+(\texttt{XLEN}=64) base integer instruction
+sets (RV32I, RV64I). \mmnote{Maybe mention that we don't support RV128I,
+because it has not been ratified yet.}
+Our current proposal would support either mode with few differences beyond
+capability width, although safe support for both modes in a single processor
+is not specified at this time.
+\pgnnote{This may be understated.  It may also be misinterpreted,
+  as to whether what exists is not safe, or not done at all.
+  That seems ambiguous.  The RISC-V privileged spec itself
+  is mostly parameterized for XLEN (Prashanth), and I would presume
+  perhaps the CHERI-RISC-V might also, as it seems is described below.}
+\pdrnote{I think adding the word dynamically clears up this confusion?}
+Our definition of CHERI-RISC-V should work with either 32-register or
+16-register (RV32E) variants of RISC-V.
+We specify CHERI as applied to RVG, which consists of the general-purpose
+elements of the RISC-V ISA: integer, multiplication and division,
+atomic, floating-point, and double floating-point instructions.
+We also describe extensions to RVS, the supervisor extension defined in the
+privileged portion of the ISA.
+
+\subsection{CHERI-RISC-V is an ISA Design Space}
+
+A key aim in CHERI-RISC-V is to allow experiments to be run comparing various
+CHERI-related parameters: Are the general-purpose integer and capability
+register files separate or merged?  Are capabilities with respect to 32-bit or
+64-bit virtual addresses?  What are the impacts of various instruction-set
+variations or microarchitectural optimizations?  How does greater investment
+of opcode space affect performance -- and what techniques, such as instruction
+compression or different capability-aware modes, may impact this?  How can
+CHERI interact with other architectural specializations such as DMA and
+heterogenous compute?
+To answer these and other questions, we have designed CHERI-RISC-V as an ISA
+design space, in which several key design dimensions are parameterized:
+
+\begin{itemize}
+\item Both 32-bit and 64-bit RISC-V are extended, with 64-bit and 128-bit
+  capabilities respectively.
+
+\item Both split and merged general-purpose integer and capability register
+  files are supported.
+
+% XXXRW: We now think that we are not doing this in CHERI-RISC-V.
+%
+%\item Both exception-throwing and tag-clearing variants of monotonic
+%  capability manipulation instructions are supported.
+%  \arnote{I thought we had concluded that we should not be throwing exceptions unless absolutely required.}
+
+\item Optional instruction variations and an optional ``capability encoding
+  mode'' that
+  invest opcode space differently to reduce instruction count for common
+  instruction sequences -- especially with respect to load/store instructions
+  that occupy substantial quantities of opcode space.
+\end{itemize}
+
+With respect to all of these design dimensions, we intend that specific
+instantiated microarchitectures, compiler targets, compiled operating systems,
+and compiled software stacks support only one point in the space.
+However, we hope that carefully parameterized hardware and software designs
+will be able to target more than one point to allow side-by-side comparison
+from the perspectives of hardware resource utilization, performance, security,
+and compatibility.
+
+\subsection{CHERI-RISC-V Strategy}
+
+Our baseline strategy transliterates non-load/store CHERI-specific
+instruction definitions ``as is'' to the greatest extent possible, and retains
+the fundamental CHERI design choices including the use of capabilities in
+tagged capability registers (protected by guarded manipulation) and tagged
+memory.
+As with MIPS, legacy RISC-V integer-relative load/store instructions similarly
+indirect via \DDC{}, and instruction fetch via \PCC{}.
+We utilize the same in-memory capability representation, architectural
+constants, and compression model in both CHERI-MIPS and CHERI-RISC-V.
+
+Certain necessary divergences arise around RISC-V-specific aspects of the ISA,
+in particular around privileged features such as exception handling and
+hardware page-table support.
+Greater variation also arises around memory load/store instructions, where we
+attempt to conform to the RISC-V philosophy (supporting only relatively simple
+addressing modes due to the assumption of micro-op fusion), and for branch
+instructions (where no branch-delay slot is used).
+
+A key area where CHERI-RISC-V differs from CHERI-MIPS is in allowing the
+general-purpose integer and capability register files to be ``merged'', in the
+style of 64-bit extensions to 32-bit architectures, rather than introducing a
+new capability register file.
+This approach offers the potential for reduced microarchitectural overhead due
+to reduced control logic, as well as reduced disruption to software context
+management.
+Both ``split'' and ``merged'' register files are supported in CHERI-RISC-V to
+allow explicit evaluation of their respective compatibility, security, and
+performance tradeoffs.
+
+% XXXRW: We now think we are not doing this in CHERI-RISC-V.
+%
+%Another area of specific intentional divergence is in shifting from delivering
+%exceptions on non-monotonic register-to-register operations to instead
+%clearing the tag during register write back, which may offer more
+%conventional compiler-driven error handling, as well as simplifying
+%superscalar designs by allowing the possibility of an exception being thrown
+%to be identified during instruction decode for register-to-register
+%instructions.\pmnote{``Intentional divergence'' is perhaps too strong, since the goal is to explore/support both options?}
+
+Wherever possible, we attempt to conform to the specific aesthetic of RISC-V,
+such as with respect to opcode layout choices and aligning the semantics of
+new Special Capability Register access instructions with existing RISC-V CSRs.
+
+\pgnnote{This begs the question of whether we will remain fully compliant
+  with the RISC-V privileged spec, or must necessarily deviate.}
+
+\subsection{Architectural Features Shared with CHERI-MIPS}
+
+The following CHERI-MIPS features have been transliterated into CHERI-RISC-V:
+
+\begin{itemize}
+\item Tagged memory with capability-width tag granularity and alignment.
+\item An identical architectural capability format (i.e., fields accessed via
+  explicit instructions).
+\item An identical in-memory capability format, including compression model(s)
+  -- except that the format is little endian.
+  We anticipate transitioning CHERI-MIPS to a little-endian in-memory format
+  in due course.
+\item Registers able to hold capabilities are tagged.
+\item \PCC{} transforms and controls program-counter-relative fetches.
+\item \DDC{} transforms and controls legacy RISC-V load-store instructions,
+  including relocating access addresses using the capability base and offset.
+\item Requests for non-monotonic capability transformations,
+  capability-related violations (such as loads/stores/fetches via untagged
+  capabilities, out-of-bound accesses, and so on) trigger immediate precise
+  exceptions.
+\item It is never left ambiguous as to whether a register index operand to a
+  load or store instruction, or the register target of a jump instruction,
+  is a capability and therefore must have a tag set.
+  This both ensures that a split register file can be used (as it is always
+  clear what register file the operand reads from) and also reinforces
+  intentionality.
+\item The Access\_System\_Registers permission bit limits privileged ISA
+  operations when within privileged rings.
+  While RISC-V's specific privileged operations differ, the intent remains the
+  same: to allow code compartmentalization within the privileged ring.
+\end{itemize}
+
+\subsection{Architectural Features that Differ from CHERI-MIPS}
+
+The following important differences arise between CHERI-MIPS and CHERI-RISC-V:
+
+\begin{itemize}
+\item CHERI-RISC-V supports a ``merged'' register-file variant.
+\item RISC-V exception handling -- including register banking, scratch
+  registers, and cause mechanism -- is used.
+\item A new exception code, \riscvloadcappagefault{}, will be
+  reported in the RISC-V \xcause{} CSRs when a load attempts to fetch a
+  capability through a valid page table entry granting read permission but
+  forbidding loads of capabilities.  This fault otherwise behaves like a RISC-V
+  load page fault.
+\item A new exception code, \riscvstorecappagefault{}, will be
+  reported in the RISC-V \xcause{} CSRs when a store attempts to write a
+  capability through a valid page table entry granting write permission but
+  forbidding stores of capabilities.  This fault otherwise behaves like a
+  RISC-V store/AMO page fault.
+\item A new exception code, \riscvcheriexception{}, will be
+  reported in the RISC-V \xcause{} CSRs when other
+  capability-related exceptions (such as tag violations) occur.
+  %
+  Additional capability-specific exception cause information, such
+  as more specific cause information and the identity of the faulting
+  register is reported in the existing \xtval{} CSRs (see
+  Section~\ref{subsubsec-cheri-tval}).
+\item New per-mode capability CSRs are added as \xccsr{} (see
+  Section~\ref{subsubsec-ccsrs}).
+\item CHERI-related page permissions are added to RISC-V architectural
+  page-table formats rather than MIPS TLB entries.
+\item In CHERI-MIPS, memory capabilities (i.e., those with \cappermL,
+  \cappermS, ... permissions) always have a virtual-address interpretation.
+  This still allows describing physical addresses due to MIPS's architectural
+  physically mapped segments, which directly map portions of the physical
+  address space into the virtual address space.
+
+  In CHERI-RISC-V, the interpretation of addresses in memory capabilities
+  depends on whether virtual addressing is enabled via the RISC-V
+  \texttt{satp} CSR\footnote{This is not a substantially different design
+  choice than in CHERI-MIPS or with MMU addressing enabled: memory
+  capabilities are interpreted relative to the active address space, and
+  control of that address space is delegated to suitably privileged code,
+  whether configuring a simple direct map between virtual and physical memory,
+  or managing multiple more complex address spaces.
+  In all cases, care is required as physical-memory access authorized by a
+  capability is determined by the addressing mode and current translation
+  table contents.}.
+  When \texttt{satp} is set to \texttt{Bare}, capabilities have a
+  physical-address interpretation.
+  When \texttt{satp} enables page-table translation, capabilities have a
+  virtual-address interpretation.
+\item Both XLEN=32 and XLEN=64 will be supported (albeit not dynamically).
+  In the future, it may be desirable to also support XLEN=128.
+\item A richer set of atomic instructions is extended with capability
+  support.
+\item There is support only for compressed capabilities (128 bit for XLEN=64;
+  64 bit for XLEN=32).
+\item Floating point is fully supported, including capability-relative
+  floating-point load and store instructions.
+\item The \cflags{} field contains a single bit indicating the ``capability
+  encoding mode'' to use when the capability is installed as \PCC{}.
+\item In the non-compressed RISC-V encoding, the capability encoding mode
+  allows existing opcodes, e.g.\ for loads, stores, \insnnoref{auipc},
+  to be interpreted as expecting capability rather than integer operands
+  (reducing opcode footprint while maintaining intentionality).
+\item In the compressed RISC-V encoding, the capability encoding mode allows
+  existing load, store, and jump opcodes to be interpreted as expecting
+  capability rather than integer operands.
+
+% XXXRW: We are no longer doing this in CHERI-RISC-V:
+%
+%\item Instructions performing operations that would violate monotonicity or
+%  otherwise lead to an undereferenceable (e.g., unrepresentable) capability
+%  clear the tag when writing the register back, rather than immediately
+%  throwing an exception.
+%  Later attempts to dereference those capabilities will throw a tag
+%  violation exception.
+%  \jrtcnote{In CHERI-RISC-V is an ISA Design Space we say both
+%    exception-throwing and tag-clearing variants are supported}
+\end{itemize}
+
+\section{CHERI-RISC-V Specification}
+
+In this section, we describe in greater detail the integration of CHERI into
+the RISC-V instruction set, drawing attention to both similarities and
+differences from CHERI-MIPS.
+Draft instruction opcode encodings can be found in
+Appendix~\ref{app:isaquick-riscv}; these are expected to change as our approach
+evolves.
+
+\pmnote{Perhaps mention something like this:
+
+\subsection{CHERI as a non-standard RISC-V extension}
+
+CHERI is integrated into the RISC-V ISA as a non-standard extension
+named Xcheri, and follows the idioms for RISC-V extensions to the
+extent possible.  In the extension terminology of the RISC-V
+specification, CHERI is a \emph{greenfield} extension since it adds
+new instructions by populating a new instruction encoding space.  The
+prefix used for the encoding is currently ``1011011'', placing it in
+the \emph{custom-2/rv128} opcode space that the specification allows
+for use for custom instruction set extensions on RV64; this makes it a
+standard-compatible global encoding. (See however the discussion in
+Section~\ref{section:cheri-risc-v-rv128-lq-sq}.)
+
+A CHERI-RISC-V processor has the X bit of the \texttt{misa} register
+hardwired to 1 on boot to indicate the presence of a non-standard
+extension.  Information tying this set X bit to the Xcheri extension
+would be communicated to system software in a platform-specific manner.
+}
+\pdrnote{Agreed: this would be great, although pedantically, our adding of
+load cap and store cap in non-extension space must make us brownfield?}
+
+\subsection{Tagged Capabilities and Memory}
+
+In CHERI-MIPS, we allow both registers and memory to hold tagged capabilities,
+allowing capabilities and data to be intermingled.
+This allows capabilities to be embedded within in-memory data structures, and
+supports the implementation of capability-oblivious memory copy operations.
+We recommend that the same approach be taken in CHERI-RISC-V, as this will
+maintain strong C-language pointer compatibility for capabilities.
+This implies the use of tagged memory as in CHERI-MIPS, consisting of 1-bit
+tags protecting capability-aligned, capability-sized words of memory in
+CHERI-RISC-V, implemented with suitable protection and atomicity properties.
+
+While we currently do not define CHERI-RISC-V support for RV128, we anticipate
+that we will wish to support RV128 in the future.
+It seems plausible that 256-bit capabilities might incorporate 128-bit
+addresses along with compressed bounds in a similar manner to our 128-bit
+capabilities for 64-bit addresses.
+
+\subsection{Capability Register File}
+
+In 64-bit MIPS, we introduce an additional capability register file to hold
+tagged capability registers, rather than extending the
+general-purpose integer register file.
+In RISC-V, we are presented with a choice: introduce a new (``split'')
+register file (e.g., as occurs with the RISC-V F extension for floating
+point), or extend the existing (``merged'') general-purpose integer registers in the
+base instruction set.
+
+Both options can be effectively targeted by a CHERI-aware compiler, but offer
+quite different performance tradeoffs for both the microarchitecture and
+software code generation.
+For example, an additional register file may require additional control logic,
+especially in simpler pipelined designs, and additional registers may impose an
+additional data-cache footprint due to additional callee/caller register saving and context switching.
+
+In CHERI-RISC-V, we choose to specify the instruction set such that the
+register-file choice is parameterized, allowing the design space to be
+evaluated experimentally.
+Particular CPUs and compiled software stacks will target only one of these two
+approaches.
+
+\subsubsection{Split Register File}
+
+In CHERI-RISC-V, the split register file works much as in CHERI-MIPS: CHERI
+instructions with capability register operands access the capability register
+file, and integer operands specify access to the integer register file.
+
+\pmnote{The increased cost of context switching due to the larger
+  register context can be alleviated in some cases using the support
+  in \texttt{mstatus.XS} for optimizing context saves and restores.}
+
+\subsubsection{Merged Register File}
+
+In CHERI-RISC-V, we alternatively allow use of a \textit{merged
+register file} in which general-purpose integer registers optionally hold
+full
+capabilities, along with a tag, reducing the amount of control logic otherwise
+required (by avoiding an additional register file).
+This also reduces the size of register context growth, but does require us to
+avoid a design choice made in earlier version of the CHERI-MIPS ISA in which
+certain general capability registers had reserved functions, such as \DDC{}
+and \EPCC{}.
+These must instead be accessed via Special Capability Registers accessed via
+dedicated instructions similar to those accessing conventional RISC-V Control
+and Status Registers (CSRs), which offer
+two further advantages: the number of capability
+registers can more easily be varied (e.g., in RV32E), and the special behavior
+of those registers with respect to legacy memory access and exception handling
+is disentangled from the register file's control logic.
+Clean separation of general-purpose vs.\ control capability registers is also a
+design choice present in the CHERI-MIPS ISA as of CHERI ISAv7 for these
+reasons.
+
+Merging the general-purpose integer and capability register files raises the
+question of whether and how non-capability-aware instructions should
+interact with capability values in registers -- a concern not dissimilar to
+the behavior of instructions on 64-bit architectures offering legacy 32-bit
+support.
+We specify that individual instructions reading from, or writing to, a
+register in the register file have fixed integer or capability interpretations
+based on the opcode encoding -- i.e., that new instructions be introduced that
+explicitly specify whether capability semantics are required for an input or
+output register, or that the current architectural mode unambiguously specify
+integer or capability operand interpretation.
+
+A further design choice relates to the specific subset of general-purpose
+integer registers that are extended to capability width, as it need not be the
+case that all are.
+In our baseline specification, we extend all registers, but allow software
+ABIs to limit specific numbered registers to only integer use.
+We hope to evaluate different points in this design space to determine whether
+performance tradeoffs favour a complete set of capability registers, or simply
+a partial set (which might reduce microarchitectural overhead).
+
+The bottom \texttt{XLEN} bits of the register will contain the integer
+interpretation (which, for a capability, will be its address\pdrnote{Does this also
+cover capabilities which authorise type space rather than address space?}), and the
+top \texttt{XLEN} bits (plus additional tag bit) will contain any capability
+metadata.
+When a register is read as an integer (i.e., using an opcode that dictates an
+integer interpretation),
+the register's bottom \texttt{XLEN} bits will be utilized, and any other bits ignored.
+When a register is written as an integer, its bottom \texttt{XLEN} bits will
+hold the new
+integer value, and the top \texttt{XLEN} bits and tag bit will be cleared to match
+those of the NULL capability. This both prevents in-register corruption of tagged
+capabilities by implicitly clearing the tag, and also provides reasonable semantics
+for integer access to capability values.
+
+\subsubsection{Capability Length Architectural Constant (CLEN)}
+
+One challenge in introducing CHERI support is that the architectural constant,
+\texttt{XLEN}, the number of bits in a register, is used to define numerous
+behaviors throughout the ISA, such as the size of CSRs, the operation of
+integer operations, the size of addresses, and so on.
+We choose to leave \texttt{XLEN} as constant as the majority of these operations
+are intended to be of the natural integer size (e.g., for addition).
+However, this does mean that in some cases we need to introduce new
+instructions intended to operate on full capability-wide values.
+We introduce a new architectural constant, \texttt{CLEN}, which we define as
+$2\times$\texttt{XLEN}, which excludes the tag bit.
+Operations such as capability-width CSR access, capability load, and capability
+store will operate on \texttt{CLEN}$+1$ bits including the tag bit.
+
+Specifically, for 32-bit CHERI-RISC-V, \texttt{CLEN} will be 64 bits, and for
+64-bit CHERI-RISC-V, \texttt{CLEN} will be 128 bits, affecting a variety of
+functions including the stride of tag bits in physical memory.
+Opcode space is reserved in the RISC-V ISA for 64-bit load and store
+instructions even when \texttt{XLEN} is 32, and we can reuse these opcode
+reservations and encodings to load 64-bit \texttt{CLEN} words as well as
+their tag bit.
+Similarly, when \texttt{XLEN} is 64, we can use 128-bit \texttt{CLEN} load
+and store opcodes.
+
+We do not currently define support for 32-bit compatibility (with or without
+capability support) when operating in a 64-bit RISC-V processor, but
+anticipate that adding non-capability-aware 32-bit support would be
+straightforward.
+We also do not yet define an architecture supporting multiple capability
+widths concurrently, but recognize that there are certain use cases -- such as
+when interoperating between a 64-bit application core and a 32-bit
+microcontroller within a single System-on-Chip (SoC) -- where this would be
+valuable.
+
+\subsection{Capability-Aware Instructions}
+
+In CHERI-MIPS, two general categories of instructions are added: those that
+query or manipulate capability fields within registers, and those that
+utilize registers for the purposes of load, store, or jump operations.
+
+Register-to-register instructions querying and manipulating fields can remain
+roughly as defined in CHERI-MIPS, allowing integer values to be moved in and
+out of portions of an in-register capability, subject to guarded manipulation.
+As such, they are simply new instructions defined in CHERI-RISC-V and added to
+the opcode space.
+When using a split register file, those instructions operate as in CHERI-MIPS,
+accessing the integer or capability register files as specified.
+With the merged register file, integer and capability values are instead read
+from, and written back to, the same register file.
+
+In CHERI-RISC-V, assuming that capabilities are stored in the general-purpose
+integer register file, it is possible to imagine having memory-access and
+control-flow instructions condition their behavior based on the presence of a
+tag, selecting a compatible integer behavior if the tag is not set, and a
+capability behavior if it is set.
+However, this would violate the principle of intentional use: not only should
+privilege be minimized, but it should not be unintentionally, implicitly, or
+ambiguously exercised.
+Allowing a corrupted capability (i.e., one with its tag stripped due to an
+overlapping data write) to dereference \DDC{} implicitly would violate this
+design goal.
+We therefore specify strong \textit{type safety} for all capability-aware
+instructions: all instructions explicitly encode whether an integer or
+capability operand is being used, and attempts to use untagged values where
+tagged ones are expected will lead to an exception.
+
+\subsection{Control and Status Registers (CSRs)}
+\label{subsection:cheri-riscv-csrs}
+
+CHERI-RISC-V extends the behavior of the baseline RISC-V integer CSR set,
+allowing capability control over access to some CSRs for compartmentalization
+purposes, as well as adding several new CSRs to control capability-related
+functionality.
+These are accessed via existing RISC-V CSR instructions, and their encodings
+are given in Table~\ref{tab:risc-v-control-and-status-registers}.
+New Special Capability Registers (SCRs), accessed via new CSR-like
+instructions, are described in Section~\ref{subsection:cheri-riscv-scrs}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c>{\raggedright\arraybackslash}p{2.7in}>{\raggedright\arraybackslash}p{2.5in}}
+\toprule
+\textbf{Encoding} & \textbf{Register} & Privilege notes \\
+\midrule
+\textbf{0x8C0} & User capability control and status register (\uccsr{}) & \PCC{}.\cperms{}.\emph{Access\_System\_Registers} \\
+\textbf{0x9C0} & Supervisor capability control and status register (\sccsr{}) & \{S,M\}-mode \& \PCC{}.\cperms{}.\emph{Access\_System\_Registers} \\
+\textbf{0xBC0} & Machine capability control and status register (\mccsr{}) & M-mode \& \PCC{}.\cperms{}.\emph{Access\_System\_Registers} \\
+\bottomrule
+\end{tabular}
+\caption{Control and Status Registers (CSRs)}
+\label{tab:risc-v-control-and-status-registers}
+\end{table}
+
+\subsubsection{Controlling Access to CSRs}
+
+Accessing some RISC-V CSRs also requires the PCC{}.\cperms{}.\emph{Access\_System\_Registers}
+permission to be set for the currently executing code.
+This allows privileged-level code to be constrained from interfering with key
+system management functionality (such as exception handling).
+We adopt a whitelist approach: reading or writing any CSR requires the permission, with the exceptions listed in Table~\ref{tab:risc-v-access-system-registers-whitelist}.
+
+\pdrnote{Text describing current makeshift whitelist, pending updates. TODO we want three separate permissions: UASR, SASR, MASR, permitting access only to the
+corresponding privilege mode's CSRs. Debate still open over whether these are encoded as 3 bits, or as a 2-bit counter that monotonicity can only decrease
+(make less privileged). This could either be a separate instruction or implicitly enforced on CAndPerms. We likely still want some kind of whitelist after this change}
+\ajnote{I am not sure I am fully happy with that, but probably just need to be convinced by someone that this is the way to go... It feels weird that a user task which used to just access, say, the instret or time csr suddenly needs Access\_System\_Registers on its PCC.}
+\pmnote{User access to the instret and time csrs are already constrained by scounteren.{IR,TM}; i.e. the user task will suffer an exception if these are not enabled by the supervisor. Access\_System\_Registers on its PCC would be similar.}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{cc}
+\toprule
+\textbf{CSR}           & \textbf{Read/Write} \\
+\texttt{cycle(h)}      & Read-Only           \\
+\texttt{time(h)}       & Read-Only           \\
+\texttt{instret(h)}    & Read-Only           \\
+\texttt{hmpcounter(h)} & Read-Only           \\
+[1.5em]
+\texttt{fflags}        & Read-Write          \\
+\texttt{frm}           & Read-Write          \\
+\texttt{fcsr}          & Read-Write          \\
+\bottomrule
+\end{tabular}
+\caption{CSR Whitelist. The accesses shown are the only CSR accesses that are permitted when the installed PCC does not have the \emph{Access\_System\_Registers} permission bit set.}
+\label{tab:risc-v-access-system-registers-whitelist}
+\end{table}
+
+\subsubsection{Capability Exception Reporting}
+\label{subsubsec-cheri-tval}
+
+CHERI-RISC-V extends the definition of the Trap Value CSRs, \xtval{}, to
+report capability exception details as described in
+Figure~\ref{fig-cheri-tval} (shown for XLEN=32):
+
+\begin{figure}[!h]
+\begin{center}
+\begin{bytefield}[bitwidth=\textwidth/34]{32}
+  \bitheader[endianness=big]{0,4,5,10,31} \\
+  \bitbox{21}{\textbf{WPRI}}
+  \bitbox{6}{\texttt{cap idx}}
+  \bitbox{5}{\texttt{cause}}
+\end{bytefield}
+\caption{\xtval{} register format for Capability Exception}
+\label{fig-cheri-tval}
+\end{center}
+\end{figure}
+
+\begin{description}
+\item [cause] The \texttt{cause} field reports the capability exception code as described in Section~\ref{sec:capability_exception_causes}.
+\item [cap idx] The \texttt{cap idx} field reports the index of the capability register that caused the last exception.  When
+the most significant bit is set, the 5 least significant bits are used to index
+the special purpose capability register file described in
+Table~\ref{tab:risc-v-special-capability-registers}, otherwise, they index the
+general-purpose capability register file.
+\end{description}
+
+\subsubsection{Capability Control and Status Registers (CCSRs)}
+\label{subsubsec-ccsrs}
+New per HART \xccsr{} \texttt{XLEN}-bit RISC-V CSRs are defined as per
+Figure~\ref{fig-ccsr} (shown for XLEN=32):
+
+\begin{figure}[!h]
+\begin{center}
+\begin{bytefield}[bitwidth=\textwidth/34]{32}
+  \bitheader[endianness=big]{0,1,2,4,5,9,10,15,16,31} \\
+  \bitbox{16}{\textbf{WIRI}}
+  \bitbox{6}{\texttt{cap idx}}
+  \bitbox{5}{\texttt{cause}}
+%  \bitbox{1}{\texttt{m}}
+  \bitbox{3}{\textbf{WIRI}}
+  \bitbox{1}{\texttt{d}}
+  \bitbox{1}{\texttt{e}}
+\end{bytefield}
+\caption{\xccsr{} register format; WIRI bits are Write Ignore Read Ignore.}
+\label{fig-ccsr}
+\end{center}
+\end{figure}
+
+\pmnote{WIRI has been removed from the RISC-V specification.  The spec
+  now typically uses WPRI (Write-Preserve, Read-Ignore) for such
+  undefined bits (e.g. in \texttt{mstatus}).  Both WARL (Write-Any,
+  Read-Legal) and WLRL (Write-Legal, Read-Legal) seem unsuitable here.
+  The RISC-V spec unsatisfyingly does not specify what happens if
+  software doesn't preserve values for WPRI, but then this spec
+  doesn't need to either.}
+
+\begin{description}
+\item [e] The \texttt{e} ``enable'' bit \ajnote{read only? / only wriFable in u-mode? only writable with a specific permission in pcc?} tells whether capability extensions are enabled or disabled.
+\item [d] The \texttt{d} ``dirty'' bit tells whether a capability register has been written. This is intended to help with memory requirements when implementing context switching.  \arnote{Is this still useful if we have hybrid and purecap co-process communication?}
+\hmnote{If the user-mode apps are purecap, and the kernel is hybrid (or does not do any cap ops at all), this bit might be useful
+to do lazy CHERI-context save/restore similar fo floating point.}
+%\item [m] The \texttt{m} ``mode'' bit controls the current capability encoding
+%mode (i.e. the behavior of memory instructions).
+\item [cause] The \texttt{cause} field reports the cause of the last capability exception, following the encoding described in Table~\ref{table:capability-cause}.
+\item [cap idx] The \texttt{cap idx} field reports the index of the capability register that caused the last exception.
+\end{description}
+
+The \texttt{cause} and \texttt{cap idx} fields of this register are deprecated
+and will be replaced by \xtval{}.
+
+\subsection{Special Capability Registers (SCRs)}
+\label{subsection:cheri-riscv-scrs}
+
+Special Capability Registers (SCRs) are similar to CSRs in that they affect
+special functions such as exception delivery, rather than being
+general-purpose registers, but have capability rather than integer types.
+SCRs are therefore accessed via new capability-aware instructions.
+
+The new \asm{CSpecialRW} instruction allows reading and writing special
+capability registers. When the destination register is 0, the instruction shall
+not read the special capability register and shall not cause any of the
+side-effects that might occur on a special capability register read, similar to
+the standard \asm{csrrw} RISC-V instruction. When the source register is 0, the
+instruction will not write to the special capability register at all, and so
+shall not cause any of the side effects that might otherwise occur on a special
+capability register write, similarly to the standard \asm{csrrs/c} RISC-V
+instruction.
+
+Table~\ref{tab:risc-v-special-capability-registers} lists the SCRs
+available via that instruction, as well as their values at CPU reset, which
+will be set in a manner consistent with the description in
+Section~\ref{sec:capability-state-on-cpu-reset}.
+Whether a register is initialized to NULL or the omnipotent capability, its
+flags field will be initialized to zero (specifying integer encoding mode).
+
+\pdrnote{I have added MTDC, UTDC, STDC to match exception handling section.
+Might be worth further discussion to decide if we need/want them.}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{cllcccc@{}}
+\toprule
+& \textbf{Register} & \textbf{Modes} & \textbf{Access} & \textbf{Reset} & \textbf{Extends} \\ \midrule
+\textbf{0} & Program counter capability (\PCC{})     & U, S, M & RO & $\infty$ & \PC{} \\
+\textbf{1} & Default data capability (\DDC{})        & U, S, M & -  & $\infty$ & -     \\
+[1.5em]
+\textbf{4} & User trap code capability (\UTCC{})     & U, S, M & ASR & $\infty$    & \utvec{} \\
+\textbf{5} & User trap data capability (\UTDC{})     & U, S, M & ASR & $\emptyset$ & -        \\
+\textbf{6} & User scratch capability (\UScratchC{})  & U, S, M & ASR & $\emptyset$ & -        \\
+\textbf{7} & User exception PC capability (\UEPCC{}) & U, S, M & ASR & $\infty$    & \uepc{} \\
+[1.5em]
+
+\textbf{12} & Supervisor trap code capability (\STCC{})     & S, M & ASR & $\infty$    & \stvec{} \\
+\textbf{13} & Supervisor trap data capability (\STDC{})     & S, M & ASR & $\emptyset$ & -        \\
+\textbf{14} & Supervisor scratch capability (\SScratchC{})  & S, M & ASR & $\emptyset$ & -        \\
+\textbf{15} & Supervisor exception PC capability (\SEPCC{}) & S, M & ASR & $\infty$    & \sepc{}  \\
+[1.5em]
+
+\textbf{28} & Machine trap code capability (\MTCC{})     & M & ASR & $\infty$    & \mtvec{} \\
+\textbf{29} & Machine trap data capability (\MTDC{})     & M & ASR & $\emptyset$ & -        \\
+\textbf{30} & Machine scratch capability (\MScratchC{})  & M & ASR & $\emptyset$ & -        \\
+\textbf{31} & Machine exception PC capability (\MEPCC{}) & M & ASR & $\infty$    & \mepc{}  \\
+\bottomrule
+\end{tabular}
+\caption{Special Capability Registers (SCRs).
+SCRs 4-7 are available only with the N extension, and 12-15 only with the S
+extension.
+\textbf{Modes} shows which RISC-V privilege modes are allowed to access the
+registers.
+\textbf{Access} indicates additional restrictions on accessing the registers:
+\PCC{} is read-only via \insnriscvref{CSpecialRW}, but is set by
+\insnriscvref{CJALR} and during exceptions; \textit{ASR} indicates
+\PCC{}.\cperms{} must grant \cappermASR{} to permit access (in addition to
+being in a permitted mode).
+\textbf{Reset} indicates whether the register should be initialised to the
+default root capability ($\infty$) or NULL capability ($\emptyset$).
+Some special capabilities registers are extensions of existing RISC-V
+registers, with the capability offset being equal to the original register.
+\note{We should describe this in more detail including behavior if they are
+sealed or become unrepresentable and what to do about PC alignment. Note this
+table shares quite a lot with \cref{subsection:riscv:exceptionhandling}}{rmn30}
+}
+\label{tab:risc-v-special-capability-registers}
+\end{table}
+
+Where an SCR extends a RISC-V CSR, e.g.\ \MTCC{} extending \mtvec{},
+any read to the CSR shall return the offset of the corresponding SCR.
+Similarly, any write to the CSR shall set the offset of the SCR to the value
+written.
+This shall be equivalent to a \insnriscvref{CSetOffset} instruction, but with
+any exception condition instead just clearing the tag of the SCR.
+This allows sealed capabilities to be held in SCRs without allowing them to
+be modified in a tag-preserving way, while also preventing exceptions when
+installing trap vectors: something that can be problematic where the task
+is delegated to a higher privilege level.
+Some RISC-V CSRs have write ignore bits, or otherwise implicitly modify
+the written value to restrict the CSR to legal values.
+These modifications must be applied to the SCR's new offset when writing a CSR
+extended by an SCR, or to the offset of the newly written capability when
+using \insnriscvref{CSpecialRW}.
+\insnriscvref{CSpecialRW} of a sealed capability to an SCR which extends a CSR
+with any non-preserved bits clears the tag on the capability, even if the
+offset would not be changed.
+As per the rest of the RISC-V specification, should the SCR become
+unrepresentable as a result of the offset being set, the resulting address is
+preserved, and the rest of the capability is cleared to match the null
+capability.
+Note that this means a read of the CSR (where the SCR has restricted bounds)
+may not be consistent with the preceding write, but this approach is
+consistent with the invalidating of other RISC-V capabilities, and allows a
+meaningful address to be reported should the SCR be dereferenced.
+
+\arnote{what about an unprivileged register for TLS?} \hmnote{Unlike ARM, RISC-V uses a general-purpose integer register \textit{tp}
+for TLS in user-level. In the kernel, the thread's kernel's context pointer
+is saved in the scratch register. We try to follow RISC-V design where possible.}
+
+\subsection{Efficiently Encoding Capability-Relative Operations}
+\label{subsec-encoding-cap-ops}
+
+The RISC-V instructions that interpret arguments or results as addresses
+(e.g.\ loads, stores, jumps, \insnnoref{auipc}) can either act on integer pointers
+relative to \DDC{} or \PCC{}, or on explicit capabilities.
+For example, capability-relative load and store instructions accept (and expect) capability
+operands that relocate and constrain data accesses, performing tag, bounds,
+permission, and other checks as required.
+However, load and store instructions occupy large amounts of instruction
+encoding space due to having multiple register operands and large immediate
+values.
+One consideration in adding CHERI support to RISC-V is the degree to which we
+are willing to occupy large chunks of remaining encoding space by simply
+supplementing each address-manipulating instruction with a
+corresponding capability-relative version, as we did in CHERI-MIPS.
+Other options that conserve opcode space include utilizing a more limited set
+of addressing modes or using smaller immediate sizes for capability-relative
+instructions -- with a potentially significant negative impact on performance
+due to an increase in resulting code size.
+We therefore consider several points in this design space:
+
+\begin{itemize}
+\item Introduce a full set of new load and store instructions occupying
+  substantial opcode space, but providing more efficient capability-intensive
+  generated code.
+
+\item Introduce only a limited set of new load and store instructions,
+  reducing new opcode utilization, and supportingly less efficient
+  capability-intensive generated code.
+
+\item Introduce a new \textit{capability encoding mode} in which
+  existing RISC-V load-store opcode space is reused for capability-relative
+  accesses, allowing a rich set of load-store instructions without
+  substantially occupying available RISC-V opcode space.
+
+  In the conventional (legacy) \textit{integer encoding mode}, a small set of
+  capability-relative loads and stores are added, tuned to limit opcode
+  space utilization -- e.g., by having small or no immediates -- at the cost
+  of increased code footprint.
+
+  To maintain intentionality, this approach is never ambiguous in either mode
+  as to whether load and store opcodes are intended to access relative to
+  integer or capability operand: address operands are always integer relative
+  in integer encoding mode, and always capability relative in capability
+  encoding mode.
+
+  Pure-capability and hybrid code can be generated against either encoding,
+  but will be most efficient (in terms of instruction footprint) when
+  generated against the corresponding mode.
+  We have specified that the encoding mode will change as a result of jumping
+  to a \PCC{} with a different encoding-mode flag.
+  Section~\ref{section:capability-encoding-mode} considers other options for
+  encoding-mode switches.
+\end{itemize}
+
+\noindent
+In the interest of experimentation, we plan to pursue all three approaches
+in stages, considering tradeoffs around efficiency and instruction-set design
+across a range of workloads:
+
+\begin{enumerate}
+\item Begin by adding a conservative set of capability-relative load and store
+instructions without immediate offsets, which will consume a small amount of
+opcode space, and be sufficient to allow initial compiler engineering to take
+place.
+
+\item Introduce an architectural ``encoding mode bit'' in which RISC-V
+instruction encodings used for integer-relative \DDC{}-constrained loads and
+stores are instead used for CHERI-RISC-V capability-relative loads and stores.
+To continue to allow hybrid code when in capability mode, we would introduce a
+further simple set of \DDC{}-indirected integer-relative loads and stores with
+no immediate, similar to the capability-relative set described above.
+
+\item Introduce a full set of capability-relative loads and stores
+with immediate offsets to enable full flexibility without switching modes.
+While this may not be acceptable to the upstream community without increasing
+the size of instructions, we should understand how much performance is being
+lost by reducing the flexibility of code generation.
+\end{enumerate}
+
+As register-relative jump instructions have relatively light opcode
+utilization, and because there are many easy-to-imagine uses for protecting
+control flow using capabilities even in hybrid code, we do not apply semantic
+changes to those baseline non-compressed RISC-V instructions when in
+capability encoding mode.
+The implications for compressed instructions are described in
+Section~\ref{subsection:compressed-instructions}.
+
+\subsubsection{Encoding Modes}
+\label{sec:cheri-riscv-encmodes}
+
+%We define two encoding modes selected using the \texttt{m} bit of \xccsr{} (see
+%Section~\ref{subsubsec-ccsrs}):
+
+We define two encoding modes, selected using the CHERI-RISC-V-specific
+encoding-mode flag in the capability \cflags{} field of \PCC{}:
+
+\begin{description}
+\item[Integer encoding mode (0)] Conventional RISC-V execution mode, in which
+  address operands to existing RISC-V load and store opcodes contain
+  \textit{integer addresses}.
+  If using a merged register file, the upper \texttt{XLEN} bits and tag bit of
+  the operand register will be ignored.
+  The dereference will implicitly occur relative to \DDC{}.
+  The tag bit on \DDC{} must indicate that a valid capability is present, and
+  all capability-related checks (such as bounds checks) must be performed in
+  order for a successful load or store to take place.
+
+\item[Capability encoding mode (1)] CHERI capability encoding mode, in which address operands to
+  existing RISC-V load and store opcodes contain \textit{capabilities}.
+  The tag bit must indicate a valid capability is present, and all
+  capability-related checks (such as bounds checks) must be performed in order
+  for a successful load or store to take place.
+\end{description}
+
+The operating system will automatically save and restore \PCC{} on context
+switches, preserving an execution context's encoding mode.
+It is essential that changes in encoding mode be properly observed when an
+exception is processed, as the exception handler must execute with expected
+semantics or risk insecure behavior.
+When \xTCC{} is set by the operating system, it should contain an appropriate
+encoding-mode flag to ensure that exception handlers utilize the correct
+instruction encoding.
+
+%\rwnote{Should we say something about architectural visibility of an
+%  encoding-mode change -- i.e., that it's visible only after an exception is
+%  fired, when an exception returns, or on a jump?}
+
+%
+%\rwnote{Or is there a status CSR being restored during exception entry...?}\ajnote{\mccsr{} would be the one implicitly used to decide on instruction decoding when entering an m-mode exception, \sccsr{} for s-mode, and \uccsr{} for u-mode exceptions.}
+%\pmnote{There is space in mstatus[30:23] that could be used to store the per-ring mode bits.
+%  There is also a reserved but unused trap-mode bit in mtvec.mode[1] that could be used to determine instruction decoding of the exception handler.}
+
+\subsubsection{Non-Compressed Instructions Affected by Capability Encoding
+  Mode}
+
+The following non-compressed RISC-V load and store instructions would be
+affected by the capability encoding-mode bit (see the following section for
+further details on compressed instructions):
+
+\medskip
+
+\begin{savenotes}
+\begin{tabular}{llllll}
+\textit{Integer load} & LB & LH & LW & LD & LQ \\
+\textit{Integer load (unsigned)} & LBU & LHU & LWU & LDU & \\
+\textit{Integer store} & SB & SH & SW & SD & SQ \\
+\textit{Floating-point load} & FLW & FLD & FLQ & & \\
+\textit{Floating-point store} & FSW & FSD & FSQ & & \\
+\textit{Atomic} & LR & SC & AMOSWAP & AMOADD & AMOAND \\
+\textit{Atomic (cont)} & AMOOR & AMOXOR & AMOMAX & AMOMIN & \\
+\textit{Address calculation} & AUIPC\footnote{See Section~\ref{section:cheri-risc-v-auipc}.} & & & & \\
+\end{tabular}
+\end{savenotes}
+
+\subsection{Compressed Instructions}
+\label{subsection:compressed-instructions}
+
+\rwnote{Ensure that this text is up-to-date after our revisions to the
+  encoding-mode mechanism.}
+
+The compressed instruction extension (extension \texttt{C}) is now
+routinely used by the RISC-V gcc compiler to improve code density.  It seems
+likely that the \texttt{C}ompressed extension will become mandatory for
+the \texttt{G}eneral configuration (which is currently
+\texttt{IMAFD}).
+Two problems arise in adding compressed instruction support for capabilities:
+the need for additional opcode space for load, store, and jump instructions;
+and the need to add new instructions to load and store capabilities.
+
+Given the tight encoding space for compressed instructions, some
+registers (e.g.~the stack pointer - \texttt{sp}) are implicit for some
+instructions.  Since there appears to be no free encoding space to
+differentiate between a capability-\texttt{sp} and an
+integer-\texttt{sp}, one potential design choice is to use our capability
+encoding mode to also control the interpretation of compressed instructions.
+Similarly, for compressed loads and
+stores that can use only registers \texttt{x8}--\texttt{x15} as the
+base address, the encoding mode would allow us to reuse opcode space.
+As with the baseline compressed instruction set, this imposes ABI-related
+constraints on the architecture, and would require the compiler to conform to
+those constraints in order to accomplish the best code density.
+
+In his thesis~\cite{WatermanThesis2016}, Waterman gives the following
+function prologue and epilogue examples to illustrate how compressed
+instructions improve code density:
+
+\begin{small}
+\begin{verbatim}
+   prologue_legacy:       epilogue_legacy:
+     c.addi sp, -16         c.ldsp ra, 8(sp)
+     c.sdsp ra, 8(sp)       c.ldsp s0, 0(sp)
+     c.sdsp s0, 0(sp)       c.addi sp, 16
+     c.jr t0                c.jr ra
+\end{verbatim}
+\end{small}
+
+For capability-aware code, saving and restoring the return address
+(\texttt{ra}) requires capability store and load instructions.
+Given the frequency of capability use for the pure-capability code targeted by
+our capability encoding mode (all pointer loads and stores), one option might
+be to relieve pressure on the compressed opcode space by removing the less
+frequently used floating-point double load and store instructions.
+For RV64, we could replace the compressed load floating-point double
+(\texttt{C.FLD}) with compressed load capability (\texttt{C.LC}) with
+the same encoding as compressed load quad (\texttt{C.LQ}) used in
+RV128.  Similarly, replace: \texttt{C.FSD} with \texttt{C.SC}
+(compressed store capability). For stack-relative memory access,
+replace floating-point double operations with capability operations:
+\texttt{C.FLDSP} with \texttt{C.LCSP} and \texttt{C.FSDSP} with
+\texttt{C.SCSP}.
+
+In the RISC-V I base instruction set (non-compressed instructions), we chose to make
+capability jump instructions available in both integer and capability encoding
+modes, as they use relatively little encoding space compared to the amount of
+free space available.
+In the RISC-V C extension (compressed instructions), the amount of free space is
+far smaller, leading us to select a different design choice: when in capability
+encoding mode, as with load-store instructions, we interpret existing compressed
+instructions \insnnoref{C.J}, \insnnoref{C.JAL}, \insnnoref{C.JR}, and
+\insnnoref{C.JALR} as the capability instructions \insnriscvref{CJAL},
+\insnriscvref{CJR}, and \insnriscvref{CJALR}, accepting capability rather than
+integer register operands for jump target registers and link registers.
+
+There is one large gap in the compressed instruction encoding at
+\verb#100X_XXXX_XXXX_XX00# (where \verb#X#$=$ don't care) that could
+be used to support a \insnriscvref{CIncOffsetImm} (\texttt{c.cincoff})
+instruction to allow the stack pointer to be adjusted.
+
+This would result in capability-aware prologue and epilogues:
+
+\begin{small}
+\begin{verbatim}
+   prologue_cap_aware:    epilogue_cap_aware:
+     c.cincoff csp, -16     c.lcsp cra, 8(csp)
+     c.scsp cra, 8(csp)     c.lcsp s0, 0(csp)
+     c.scsp cs0, 0(csp)     c.cincoff csp, 16
+     c.cjr ct0              c.cjr cra
+\end{verbatim}
+\end{small}
+
+A further interaction relates to encoding-mode selection.
+If we pursue a design choice using the lowest bit of a target jump address to
+set the encoding used following a jump, then no additional opcode pressure is
+introduced.
+If we instead choose to use new instructions, such as to get or set the mode
+explicitly, then additional space might be required.
+The amount of space required would be modest, but this additional usage might
+be a further consideration in the encoding-mode management strategy.
+
+If the approach of using a mode bit for compressed instructions is
+adopted, then it follows that the uncompressed versions of the
+instructions should follow suit to preserve the design intent that
+all compressed instructions can be expanded out to uncompressed
+instructions by the processor's decoder, and that the assembler should
+be permitted to optimize uncompressed instructions into their
+compressed form where possible.
+\pdrnote{These last two paragraphs do seem a bit stale, and do we need to
+add a note about the prologue assuming it's been called in the correct
+mode? (or doing a check)}
+
+\subsubsection{Compressed Instructions Affected by Capability Encoding Mode}
+
+The following compressed instructions are affected by capability encoding
+mode:
+
+\medskip
+
+\begin{tabular}{llllll}
+\textit{Control flow} & C.JALR & C.JR & & \\
+\textit{Compressed integer load} & C.LW & C.LD & C.LWSP & C.LDSP & \\
+\textit{Compressed integer store} & C.SW & C.SD & C.SWSP & C.SDSP & \\
+\textit{Compressed floating-point load} & C.FLW & C.FLD & C.FLWSP & C.FLDSP & \\
+\textit{Compressed floating-point store} & C.FSW & C.FSD & C.FSWSP & C.FSDSP & \\
+\end{tabular}
+
+\subsection{Floating Point}
+
+The vast majority of floating-point instructions are not impacted by the
+presence of CHERI-RISC-V.
+In CHERI-MIPS, we did not define capability-relative load and store
+instructions for floats and doubles, requiring that they loaded via
+general-purpose integer registers and then be moved into floating-point registers,
+leading to reduced code density.
+Existing RISC-V floating-point load and store instructions, in the
+integer encoding mode, are relocated and constrained by \DDC{}.
+In CHERI-RISC-V, we define a new set of simple capability-relative load and
+store instructions, as well as a more rich set via capability encoding mode.
+
+In CHERI-MIPS, the floating point status and control register is part of the floating
+point coprocessor, not co-processor 0, and so can be accessed without needing
+\emph{Access\_System\_Registers} permission. In CHERI-RISC-V, the floating point control
+registers (FCSR, FRM, and FFlags) are whitelisted in Table \ref{tab:risc-v-access-system-registers-whitelist}
+so they can be accessed without needing \emph{Access\_System\_Registers permission}.
+
+\subsection{Exception Handling}
+\label{subsection:riscv:exceptionhandling}
+RISC-V defines several privilege modes, including machine mode, user mode, and
+supervisor mode, with exceptions allowing controlled transition between those modes.
+CHERI-RISC-V introduces several new exception-related Special Capability Registers
+to supplement existing RISC-V exception CSRs with new capability-related functionality.
+In addition, when a capability exception is raised, \xtval{} will provide
+details about the exception as described in Section~\ref{subsubsec-cheri-tval}.
+
+\subsubsection{Exceptions to Machine Mode}
+We define the following new special capability registers that can be read and
+written only from machine mode:
+
+\begin{itemize}
+\item \MEPCC{} - Machine Mode Exception Program Counter Capability (extends
+  \mepc{})
+\item \MTDC{} - Machine Mode Data Capability
+\item \MTCC{} - Machine Mode Trap Code Capability (extends \mtvec{})
+\item \MScratchC{} - Machine Mode Scratch Capability
+\end{itemize}
+
+\subsubsection{Exceptions to Supervisor Mode}
+
+We define the following new special capability registers that can be read and
+written only from supervisor mode and above:
+
+\begin{itemize}
+\item \SEPCC{} - Supervisor Mode Exception Program Counter Capability (extends
+  \sepc{})
+\item \STDC{} - Supervisor Mode Data Capability
+\item \STCC{} - Supervisor Mode Trap Code Capability (extends
+  \stvec{})
+\item \SScratchC{} - Supervisor Mode Scratch Capability
+\end{itemize}
+
+\subsubsection{Exceptions to User Mode}
+
+We employ the ``N'' extension (for ``User-Level Interrupts'') being developed in
+the newer versions of the RISC-V specifications, and extend it with the following
+new special capability registers that can be read and written from any mode:
+
+\begin{itemize}
+\item \UEPCC{} - User Mode Exception Program Counter Capability (extends
+  \uepc{})
+\item \UTDC{} - User Mode Data Capability
+\item \UTCC{} - User Mode Trap Code Capability (extends \utvec{})
+\item \UScratchC{} - User Mode Scratch Capability
+\end{itemize}
+
+The extension could be leveraged for user-space-only implementations
+of \insnriscvref{CInvoke}, as well as routing specific interrupts from
+suitable devices to user-level compartments for handling by sandboxed
+device drivers.
+
+Explicit vector and data capabilities replace our definitions of the \KCC{}
+and \KDC{} Special Capability Registers in CHERI-MIPS, giving each ring its
+own code and data capabilities to utilize during exception handling.
+We define ``scratch capabilities'' to allow the exception handler to stash a
+capability register for the purposes of having a working register that
+corresponding data capabilities can be loaded to in order to begin a full
+context save.
+This is consistent with RISC-V's use of scratch registers in various modes to
+avoid committing general-purpose integer registers to exception handling, as happens
+in the MIPS ABI with \regname{k0} and \regname{k1}.
+We are therefore able to similarly avoid the need for CHERI-MIPS's \KRC{} and
+\KQC{}.
+
+When exception behavior, e.g.\ a trapping instruction, \insnnoref{ecall},
+or \xRET{}, causes \PCC{} to take a value stored in an SCR, it is possible that
+the SCR contains a capability that would not be a valid \PCC{} (untagged,
+sealed, not executable, or improperly aligned).
+In these cases, the value is still installed in \PCC{}, and a check on the next
+instruction fetch will trigger a further exception.
+
+% XXXRW: We are no longer doing this in CHERI-RISC-V:
+%
+%\subsection{Exceptions vs. Tag Clearing on Capability Manipulation Failure}
+%
+%In CHERI-MIPS, in keeping with the MIPS ISA design, many instructions are able
+%to throw exceptions -- not only the load/store/jump variants, but also
+%operations to manipulate capability fields.
+%In more complex microarchitectures, it may be desirable to limit the set of
+%instructions that can throw exceptions.
+%If that is desirable for CHERI-RISC-V, then this could be accomplished by
+%shifting manipulation instructions from throwing exceptions on non-permitted
+%access to clearing the tag bit in the target register.
+%This maintains the security invariant that monotonicity (and other aspects)
+%is enforced, but shifts the point of exception delivery from manipulation to
+%dereference.
+%
+%One risk in adopting this approach is that debugging non-derefenceable
+%pointers may become more difficult, due to greater asynchrony.
+%An additional architectural status bit that can be checked to detect loss of a
+%tag by an instruction would allow compiler-inserted instrumentation to check
+%for tag loss at suitable moments (e.g., after potentially tag-stripping
+%operations such as pointer manipulation).
+
+\subsection{Virtual Memory and Page Tables}
+\label{subsection:riscv:pagetables}
+
+In CHERI-RISC-V, capability addresses are interpreted with respect to the
+privilege level of the processor in line with RISC-V's handling of integer
+addresses.
+%
+In Machine Mode, capability addresses are generally interpreted as physical
+addresses; if the \texttt{mstatus} \texttt{MPRV} flag is asserted, then data
+accesses (but not instruction accesses) will be interpreted as if performed by
+lower-privileged modes.
+%
+In Supervisor and User Modes, capability addresses are interpreted as dictated
+by the current \texttt{satp} configuration: addresses are virtual if paging is
+enabled and physical if not.
+%
+% \hmnote{It is more accurate to say that addresses are interpreted as virtual
+% addresses IIF SATP.mode != Bare. There could exist M/U processors with no
+% virtual addresses, or even SW that, theoretically but not practically runs on
+% M/S/U processors that still work with SATP.mode = Bare across all rings.}
+
+Unlike in CHERI-MIPS, the page-table walker is implemented by the architecture
+and not the software stack, and in the absence of further extensions to the
+page-table format, continues to contain physical addresses loaded and stored
+on behalf of executing software.
+In CHERI-RISC-V, we require the Access\_System\_Registers permission to change
+the page-table root (\texttt{satp}) and other virtual-memory parameters.
+(In the future, it may be desirable to extend the page-table walking mechanism
+to itself utilize capabilities, allowing the walker to be constrained;
+see \cref{app:exp:physcap:ptw}.)
+
+As with CHERI-MIPS, it is desirable to extend the Memory Management Unit
+to constrain the loading and storing of valid capabilities via specific page
+mappings.
+In CHERI-MIPS, this is expressed via two new Translation Look-aside Buffer
+(TLB) permissions that, if not granted, cause loads to strip tags and stores to
+trigger an exception when storing a capability with an asserted tag bit.
+%
+The natural translation of this idea to RISC-V, which includes architectural
+support for page tables, rather than software TLB management, would be to add
+two effectively identical permission bits to the current Page Table Entry
+(PTE) format.
+%
+Unfortunately, there are no remaining spare bits in the RISC-V Sv32 (32-bit)
+PTE format for additional hardware permissions.
+(For the purposes of prototyping, we could utilize the two
+available software-defined PTE permission bits -- but these are likely to be
+used in current operating systems, requiring a longer-term solution.)
+%
+The Sv39 (39-bit) and Sv48 (48-bit) PTE formats include several reserved bits,
+some of which we allocate for use by CHERI-RISC-V; see \cref{fig:riscv:sv39}.
+%
+We go beyond the CHERI-MIPS permission taxonomy and offer more nuanced control
+over and observation of capability flow through pages.
+
+\subsubsection{Capability Stores}
+
+Capability stores are mediated with two bits per PTE, called CW and CD.  Their
+effect on capability flow parallels the existing W and D bits and is described
+by the following table:
+
+\begin{center}
+%
+\begin{tabular}{ccl}
+
+\textbf{CW} & \textbf{CD} & \textbf{Behavior} \\
+0 & X & Trap on capability stores (exception code \riscvstorecappagefault{}) \\
+1 & 0 & Capability stores atomically raise CD or fault (as above) \\
+1 & 1 & Capability stores permitted
+\end{tabular}
+%
+\end{center}
+
+\noindent Currently, implementations must apply these behaviors to all
+instructions which would store an asserted capability tag; that is, they are
+dependent on the tag bit. This may be relaxed in future versions of this
+specification to all instructions which \emph{could} store an asserted
+capability tag, removing the dependence on the tag bit. Instructions which are
+able to move only data (and so necessarily clear tags) will not interact with
+these PTE flags. CHERI-aware Sv32 implementations, lacking room in their PTEs,
+will act as though CW and CD are \emph{set}.
+
+As with the existing D bit, there are two permitted approaches for hardware to
+take in response to an attempted store with an asserted CHERI tag and through a
+PTE with clear CD:
+%
+\begin{inenum}
+%
+  \item raise a store capability page fault (exception code
+  \riscvstorecappagefault{}), or
+%
+  \item atomically update the PTE to set CD.  In this case, the existing rules
+  regarding atomicity continue to apply: the PTW must check, atomically, that
+  the PTE is valid and has W and CW both set, and the PTE update must become
+  visible no later than the causal store.
+%
+\end{inenum}
+%
+Capability-store instructions are still stores and so are expected to check the
+W permission, in addition to CW, and to set the existing D bit (or fault if it
+is clear, using the existing RISC-V \xcause{} code) in addition to the CD bit
+(or fault, using the new capability store/AMO page fault \xcause{} code).
+%
+The ordering of checks of, and updates to, the PTE follows the scheme of RISC-V
+but interdigitates capability mediation: V, U, and W must be checked first,
+followed by CW, before any of D and/or CD (and/or A) are atomically asserted or
+are used as grounds for faulting.  In the latter case, D and/or A take
+precedence over CD.
+
+The PTE bits CW and CD have no necessary relationship to any of the CHERI tag
+bits on the corresponding physical page.  In particular, CD does not reflect
+the presence of capabilities on the page, much as D does not reflect anything
+about the particular values of data on a page.  Software-enforced temporal
+safety mechanisms, for example, are anticipated to regularly clear CD (and
+even, occasionally, CW) on PTEs referencing pages that nevertheless contain
+capabilities.
+
+\subsubsection{Capability Loads}
+
+Aside from experimental behavior,\nwfnote{to be fwd ref'd} there are three
+behaviors we would like to elicit upon attempted load of a capability: succeed,
+strip loaded tags, or raise a fault.  To leave sufficient room for
+experimentation, we reserve three bits for mediation of capability loads, CR,
+CRM, and CRG, but we reserve most configurations (which will raise page faults
+by virtue of being invalid settings in PTEs).  These bits interact with
+capability flow as follows:
+
+\begin{center}
+%
+\begin{tabular}{cccl}
+
+\textbf{CR} & \textbf{CRM} & \textbf{CRG} & \textbf{Behavior} \\
+0 & 0 & 0 & Capability loads strip tags on loaded result \\
+0 & 1 & 0 & Capability loads fault (exception code \riscvloadcappagefault) \\
+0 & X & 1 & \textit{Reserved for future use} \\
+1 & 0 & 0 & Capability loads are unaltered \\
+1 & 0 & 1 & \textit{Reserved for future use} \\
+1 & 1 & X & \textit{Reserved for generational load barriers}
+\end{tabular}
+%
+\end{center}
+
+\noindent As with CW/CD, implementations are required to take a data-dependent
+disposition when a PTE is configured to fault on a capability load, raising
+faults only when the resulting tag is set.  Future versions of this
+specification may, similarly, relax this to any instruction which \emph{could}
+load a capability with a set tag. CHERI-aware Sv32 implementations will act as
+though CR is \emph{set} and both CRM and CRG are clear.
+
+\nwfnote{Asking as an almost entirely software person... might it be
+possible to use Sv39 PTE layouts on an otherwise standard RV32 machine?
+Rather than using a 3-level translation table, one could maintain a 2-level
+scheme by requiring the use of aligned, consecutive pairs of physical pages
+for PDs and PTs, or even a kind of gross hybrid in which the PDs retain
+their Sv32 structure and only the leaf PTs become increasingly aligned and
+full of 64-bit structures.  Atomic operations in software against the page
+structures would be impossible without some treachery, but these are
+unlikely to be required by software.  This may also not be very attractive,
+as it fundamentally makes CHERI-RISC-V an odd duck, but existing RISC-V code
+is likely relatively easily adopted to such a Sv39-on-32 scheme.}
+
+\begin{figure}
+
+\begin{center}
+\begin{bytefield}[endianness=big,bitwidth=2.4em]{16}
+\bitheader[lsb=48]{48,53,54,58,59,60,61,62,63}\\
+\bitbox{1}{CW}
+\bitbox{1}{CR}
+\bitbox{1}{CD}
+\bitbox{1}{CRM}
+\bitbox{1}{CRG}
+\bitbox{5}{\textit{Reserved}}
+\bitbox{6}{PPN[2] \dots}\\
+
+\bitheader[lsb=32]{32,47}\\
+\bitbox{16}{\dots PPN[2] \dots} \\
+
+\bitheader[lsb=16]{16,18,19,27,28,31}\\
+\bitbox{4}{\dots PPN[2]}
+\bitbox{9}{PPN[1]}
+\bitbox{3}{PPN[0] \dots}\\
+
+\bitheader{0,1,2,3,4,5,6,7,8,9,10,15}\\
+\bitbox{6}{\dots PPN[0]}
+\bitbox{2}{RSW}
+\bitbox{1}{D}
+\bitbox{1}{A}
+\bitbox{1}{G}
+\bitbox{1}{U}
+\bitbox{1}{X}
+\bitbox{1}{W}
+\bitbox{1}{R}
+\bitbox{1}{V}
+\end{bytefield}
+\end{center}
+
+\caption{A Sv39 PTE showing CHERI extensions in bits 59 through 63.}
+\label{fig:riscv:sv39}
+\end{figure}
+
+\subsection{The RV128 LQ, SQ, and Atomic Instructions}
+\label{section:cheri-risc-v-rv128-lq-sq}
+
+The putative 128-bit RISC-V ISA (RV128) reserves additional quadword load and
+store instructions, \insnnoref{LQ} and \insnnoref{SQ}, to be
+used to load and store 128-bit quantities, as well as quad-word atomics.
+In CHERI-RISC-V for RV64, we reuse these hypothesised opcode encodings for our
+129-bit capability load and store instructions, \insnriscvref{LC} and
+\insnriscvref{SC}, to avoid additional opcode commitment.
+We also introduce corresponding atomics on capabilities reusing the
+quad-word atomic opcodes.
+
+Should the future RV128 standard utilize 128-bit addresses, then the most
+natural course of action would be to utilize compressed 256-bit capabilities,
+and add new capability load and store opcodes for the broader capability
+width.
+However, should an RV128 be defined that instead uses 64-bit virtual
+addresses (i.e., one with 128-bit data registers but not a 128-bit address
+space), our current opcode-space reuse would not be appropriate for a
+corresponding CHERI-RISC-V variant.
+Overloaded opcodes might reduce intentionality and in the split register-file
+configuration we would be unable to distinguish operations intended for the
+integer register file vs. the capability register file.
+With respect to intentionality, it remains to be seen how essential this
+concern is with respect to security: tag-free copies could still be
+implemented efficiently by stripping Permit\_Load\_Capability from a source
+capability during a memory copy.
+However, the alignment requirements imposed by our capability load, store,
+and atomic instructions can be beneficial in debugging what is otherwise
+potential tag loss.
+Should RV128 be more fully specified in the future, we will need to revisit
+whether capability load instructions can be combined with the
+\insnnoref{LQ}, \insnnoref{SQ}, and atomic instructions.
+
+\subsection{The AUIPC Instruction}
+\label{section:cheri-risc-v-auipc}
+
+The RISC-V \insnnoref{AUIPC} instruction generates an address derived
+from \PC{} and a 20-bit immediate, typically intended to be used in generating
+addresses for global variables.
+Because this instruction occupies a significant amount of opcode space, we
+choose to implement a capability-based version of the instruction only in the
+capability encoding mode, where the instruction returns a capability derived
+from \PCC{} rather than an integer virtual address.
+When using \insnnoref{AUIPC} to generate an integer in the capability
+encoding mode, or a capability in the integer encoding mode, an additional,
+less efficient, instruction sequence must be used instead.
+Depending on the code linkage model, it might also be desirable to have a
+further version of the instruction, \insnnoref{AUICGP}, which returns
+a capability derived from a global capability table register.
+
+\subsection{\PCC{} alignment}
+\label{section:cheri-risc-v-pcc-align}
+
+Matching the RISC-V specification, we specify that installation of an
+insufficiently aligned \PC{} triggers exception at the jump rather than at
+the jump target.
+However, CHERI-RISC-V poses additional potential alignment issues.
+In particular, an unaligned base in \PCC{} would force either its address
+or its offset to be similarly unaligned.
+Since the architecturally visible \PC{} is the offset of \PCC{}, allowing
+this to be unaligned would break assumptions made by RISC-V software, while
+allowing the address to be unaligned may break assumptions made in
+RISC-V SoCs.
+We instead specify that the \PCC{} base must be 4-byte aligned when compressed
+instructions are disabled.
+This is enforced on the capability-based jump instruction, throwing an
+Unaligned Base exception.
+Whenever compressed instructions are enabled, the \PCC{} base may be aligned to
+only 2 bytes, however writes to the WARL field of \texttt{misa} to re-enable
+compressed instructions are ignored while the \PCC{} base is not 4-byte
+aligned, as is the case if the \PC{} would be unaligned.
+The following edge-case behaviors relating to CSRs/SCRs are also specified:
+\begin{itemize}
+\item \insnriscvref{CSpecialRW} instructions that attempt to write a capability
+      into \xTCC{} with a base that is not 4-byte aligned (regardless of whether
+      compressed instructions are enabled) shall leave \xTCC{} unmodified.
+      This simplifies the treatment of the lowest two bits of \xtvec{},
+      which are used in the RISC-V specification to determine the vectoring
+      mode of an exception.
+\item \xEPCC{} can be written with an arbitrarily aligned base.
+      Reads of \xEPCC{} (via \xRET{}, \insnriscvref{CSpecialRW}, or CSR read
+      from \xepc{}) implicitly mask the offset as per \xepc{} in the RISC-V
+      specification, triggering a Representability Violation if the resulting
+      capability is unrepresentable.
+      An \xRET{} to a capability with an insufficiently aligned base causes an
+      Unaligned Base exception on the following instruction fetch.
+\end{itemize}
+
+\pmnote{Perhaps add a sub-section on PCC alignment: The RISC-V
+  architecture has the property that with the RVC compressed
+  instruction-set extension, the processor cannot generate
+  fetch-misaligned faults.  However, if PCC is improperly set, then
+  CHERI-RISC-V could generate such faults.  Since compiler-generated
+  code would normally use aligned offsets, we could just ensure that
+  explicit assignments to PCC result in an aligned base.  One way to
+  ensure this would be to zero the lowest bits needed for alignment:
+  lowest bit for RVC, and lowest 2-bits for non-RVC systems.  It might
+  be simplest to always zero the lowest 2-bits, even for RVC.}
+
+% \subsection{Capability Encoding Mode}
+% \label{subsec-cap-mode}
+%
+% \rwnote{This section not yet edited after planning session, relocation from
+%   the CHERI-RISC-V appendix.}
+
+% \newcommand{\capmode}{\textbf{capability encoding mode}}
+
+% When the \texttt{e} ``enable'' field is set, the use of capability registers and
+% instructions is enabled.
+% The \texttt{d} ``dirty'' field is set by hardware when the capability registers
+% are written to\footnote{The dirty bit is only useful to accelerate context
+% switch for an architecture with a dedicated capability register file. If the
+% architecture is using a merged register file for capability and integer
+% registers, the dirty field should be removed}.
+% When the \texttt{m} ``mode'' field is set, the processor operates in
+% ``\capmode{}''. Running in \capmode{} affects the behavior of certain
+% instructions as defined below.
+
+% Instructions that alter the control flow and cause memory accesses for
+% instruction fetches, such as branches and jumps, consider their target address
+% as an offset in \PCC{}.
+
+% In general, data memory accesses are checked against \DDC{} when not in
+% \capmode{}, and are checked against specific capability operands otherwise.
+% Instruction memory accesses are always checked against \PCC{}. On exception,
+% depending on the current privilege mode, the appropriate trap code capability
+% \UTCC{}, \STCC{} or \MTCC{} is loaded in \PCC{}, and \PCC{} is saved in the
+% appropriate \UEPCC{}, \SEPCC{} or \MEPCC{}. If the exception is a capability
+% exception, the appropriate RISC-V \ucause{}, \scause{} or \mcause{} is set to a
+% new ``capability exception'' cause, and the \texttt{cap idx} and \texttt{cause}
+% fields of the \xccsr{} are also updated.
+
+% The following instruction produces a \PCC{}-derived capability when in
+% \capmode{}, and an offset into \PCC{} otherwise:
+% \asm{AUIPC}
+% This allows the expected behavior both for integer-pointer code operating
+% relative to \PCC{} or \DDC{}, and for capability-pointer code that expects to
+% dereference a capability with its own bounds.
+
+% When in \capmode{}, the following instructions (which perform ordered
+% comparisons) read their operands as capabilities and must order tagged
+% capabilities after \arnote{consider tagged capabilitie greater than?} untagged capabilities. These instructions are:
+% \asm{BGEU},
+% \asm{BGE},
+% \asm{BLTU},
+% \asm{BLT},
+% \asm{SLTIU},
+% \asm{SLTI},
+% \asm{SLTU},
+% \asm{SLT}.
+
+% When in \capmode{}, the following instructions (which perform unordered
+% comparisons) read their operands as capabilities and compare all of the bits in
+% the register. These instructions are:
+% \asm{BNE}
+% \asm{BEQ}
+
+% Shifts are not defined on capabilities because most shifts will quickly take an
+% address out of the representable range.
+
+% 64-bit instructions that are specifically designed to operate on only the low 32
+% bits, similarly, do not make sense when applied to capabilities.
+
+% With a merged register file, the following instructions will ignore the
+% capability bits on source operands and clear them on the destination register:
+% \asm{ADD},
+% \asm{ADDI},
+% \asm{ADDIW},
+% \asm{ADDW},
+% \asm{ANDI},
+% \asm{AND},
+% \asm{ORI},
+% \asm{OR},
+% \asm{SLLIW},
+% \asm{SLLI},
+% \asm{SLLI},
+% \asm{SLLW},
+% \asm{SLL},
+% \asm{SRAIW},
+% \asm{SRAI},
+% \asm{SRAI},
+% \asm{SRAW},
+% \asm{SRA},
+% \asm{SRLIW},
+% \asm{SRLI},
+% \asm{SRLI},
+% \asm{SRLW},
+% \asm{SRL},
+% \asm{SUB},
+% \asm{SUBW},
+% \asm{XORI},
+% \asm{XOR}.
+
+% With a merged register file, the \asm{LUI} instruction clears all of the
+% capablity bits in the destination register.
+
+% When in \capmode{}, \asm{JALR} and \asm{JAL} write the capability link register
+% with \PCC{} + 4. \asm{JALR} also uses a capability operand for the target of
+% the jump.
+% \dcnote{It would be nice if they could set a thing that's both a capability and a valid address, but that's possible only if we don't do PCC-offsetting.}
+%
+% When not in \capmode{}, all existing load and store instructions treat the
+% memory address as a \DDC{}-relative address. With a merged register file, when
+% not in \capmode{}, load instructions will zero all of the capability bits in
+% their target register. When in \capmode{}, the address operand is a capability
+% register.
+% \asm{LBU},
+% \asm{LB},
+% \asm{LD},
+% \asm{LHU},
+% \asm{LH},
+% \asm{LWU},
+% \asm{LW},
+% \asm{SB},
+% \asm{SD},
+% \asm{SH},
+% \asm{SW}.
+
+\pmnote{Need a section on capability state on reset.}

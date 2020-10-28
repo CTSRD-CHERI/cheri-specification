@@ -1,0 +1,5 @@
+function _set_Mcause_Cause (r_ref, v) = {
+    r = __bitfield_deref(r_ref);
+    r.Mcause_chunk_0 = update_subrange_bits(r.Mcause_chunk_0, 62, 0, subrange_bits(v, 62, 0));
+    (*r_ref) = r
+}

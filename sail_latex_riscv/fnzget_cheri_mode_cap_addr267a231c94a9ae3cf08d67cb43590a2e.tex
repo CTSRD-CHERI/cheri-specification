@@ -1,0 +1,8 @@
+function #\hyperref[sailRISCVzgetzycherizymodezycapzyaddr]{get\_cheri\_mode\_cap\_addr}# (base_reg : regidx, offset : xlenbits) = {
+  if (PCC.flag_cap_mode) then
+    let base_cap = #\hyperref[sailRISCVzC]{C}#(base_reg) in
+    (base_cap, base_cap.address + offset, 0b0 @ base_reg)
+  else
+    let ddc = DDC in
+    (ddc, ddc.address + #\hyperref[sailRISCVzX]{X}#(base_reg) + offset, DDC_IDX);
+}

@@ -1,0 +1,2 @@
+function #\hyperref[sailRISCVzpczyalignmentzymask]{pc\_alignment\_mask}#() -> xlenbits =
+  ~(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(if misa.#\hyperref[sailRISCVzC]{C}#() == 0b1 then 0b00 else 0b10))

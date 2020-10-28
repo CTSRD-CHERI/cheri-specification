@@ -1,0 +1,63 @@
+function #\hyperref[sailRISCVzsetCapBounds]{setCapBounds}#(cap, base, top) : (Capability, CapAddrBits, CapLenBits) -> (bool, Capability) = {
+  /* {cap with base=base; length=(#\hyperref[sailRISCVzbits]{bits}#(64)) length; offset=0} */
+  let ext_base = 0b0 @ base;
+  let length = top - ext_base;
+  /* Find an exponent that will put the most significant bit of length
+   * second from the top as assumed during decoding. We ignore the bottom
+   * MW bits because those are handled by the ie = 0 format.
+   */
+  let e = maxE - #\hyperref[sailRISCVzcountzyleadingzyzzeros]{count\_leading\_zeros}#(length[cap_addr_width..cap_mantissa_width - 1]);
+  // Use use internal exponent if e is non-zero or if e is zero but
+  // but the implied bit of length is not #\hyperref[sailRISCVzzzero]{zero}# (denormal vs. normal case)
+  let ie = (e != 0) | length[cap_mantissa_width - 2] == bitone;
+
+  /* The non-ie e == 0 case is easy. It is exact so just extract relevant bits. */
+  Bbits = #\hyperref[sailRISCVztruncate]{truncate}#(base, cap_mantissa_width);
+  Tbits = #\hyperref[sailRISCVztruncate]{truncate}#(top, cap_mantissa_width);
+  lostSignificantTop : bool = false;
+  lostSignificantBase : bool = false;
+  incE : bool = false;
+
+  if ie then {
+    /* the internal exponent case is trickier */
+
+    /* Extract B and T #\hyperref[sailRISCVzbits]{bits}# (we lose 3 bits of each to store the exponent) */
+    B_ie = #\hyperref[sailRISCVztruncate]{truncate}#(base >> (e + 3), cap_mantissa_width - 3);
+    T_ie = #\hyperref[sailRISCVztruncate]{truncate}#(top >> (e + 3), cap_mantissa_width - 3);
+
+    /* Find out whether we have lost significant bits of base and top using a
+     * mask of bits that we will #\hyperref[sailRISCVzlose]{lose}# (including 3 extra for exp).
+     */
+    maskLo : CapLenBits = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzones]{ones}#(e+3));
+    lostSignificantBase = #\hyperref[sailRISCVzunsigned]{unsigned}#(ext_base & maskLo) != 0;
+    lostSignificantTop  = #\hyperref[sailRISCVzunsigned]{unsigned}#(top & maskLo) != 0;
+
+    if lostSignificantTop then {
+      /* we must increment T to make sure it is still above top even with lost bits.
+         It might wrap around but if that makes B<T then decoding will compensate. */
+      T_ie = T_ie + 1;
+    };
+
+    /* Has the length overflowed? We chose e so that the top two bits of len would be 0b01,
+       but either because of incrementing T or losing bits of base it might have grown. */
+    len_ie = T_ie - B_ie;
+    if len_ie[cap_mantissa_width - 4] == bitone then {
+      /* length overflow -- increment E by one and then recalculate
+         T, B etc accordingly */
+      incE = true;
+
+      lostSignificantBase = lostSignificantBase | B_ie[0] == bitone;
+      lostSignificantTop  = lostSignificantTop | T_ie[0] == bitone;
+
+      B_ie = #\hyperref[sailRISCVztruncate]{truncate}#(base >> (e + 4), cap_mantissa_width - 3);
+      let incT : range(0,1) = if lostSignificantTop then 1 else 0;
+      T_ie = #\hyperref[sailRISCVztruncate]{truncate}#(top >> (e + 4), cap_mantissa_width - 3) + incT;
+    };
+
+    Bbits = B_ie @ 0b000;
+    Tbits = T_ie @ 0b000;
+  };
+  let newCap = {cap with address=base, E=#\hyperref[sailRISCVztozybits]{to\_bits}#(6, if incE then e + 1 else e), B=Bbits, T=Tbits, internal_e=ie};
+  let exact = #\hyperref[sailRISCVznot]{not}#(lostSignificantBase | lostSignificantTop);
+  (exact, newCap)
+}

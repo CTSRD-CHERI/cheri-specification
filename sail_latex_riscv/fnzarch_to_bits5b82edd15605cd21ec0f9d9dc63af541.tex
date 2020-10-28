@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzarchzytozybits]{arch\_to\_bits}#(a : Architecture) -> arch_xlen =
+  match (a) {
+    RV32  => 0b01,
+    RV64  => 0b10,
+    RV128 => 0b11
+  }

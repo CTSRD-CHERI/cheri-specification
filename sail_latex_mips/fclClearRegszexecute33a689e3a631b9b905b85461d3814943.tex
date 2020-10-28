@@ -1,0 +1,13 @@
+if ((regset == CLo) | (regset == CHi)) then
+  #\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+foreach (i from 0 to 15)
+  if (m[i]) then
+    match regset {
+      GPLo  => #\hyperref[sailMIPSzwGPR]{wGPR}#(#\hyperref[sailMIPSztozybits]{to\_bits}#(5, i)) = #\hyperref[sailMIPSzzzeros]{zeros}#(),
+      GPHi  => #\hyperref[sailMIPSzwGPR]{wGPR}#(#\hyperref[sailMIPSztozybits]{to\_bits}#(5, i+16)) = #\hyperref[sailMIPSzzzeros]{zeros}#(),
+      CLo   => if i == 0 then
+                 DDC = null_cap
+               else
+                 #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(#\hyperref[sailMIPSztozybits]{to\_bits}#(5, i)) = null_cap,
+      CHi   => #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(#\hyperref[sailMIPSztozybits]{to\_bits}#(5, i+16)) = null_cap
+    }

@@ -1,0 +1,2 @@
+function _update_ContextReg_bits (v, x) = let v = { v with ContextReg_chunk_0 = update_subrange_bits(v.ContextReg_chunk_0, 63, 0, subrange_bits(x, 63, 0)) } in
+  v

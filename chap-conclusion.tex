@@ -1,0 +1,163 @@
+\chapter{Conclusion}
+\label{chap:conclusion}
+The CHERI project is in its tenth year -- an evolution described in detail in
+Chapter~\ref{chap:research}.
+Throughout the project, we have utilized hardware-software co-design, with an
+increasing focus on also co-designing with formal models.
+For the last several years, we have increased our focus on transition,
+including through a close collaboration with Arm in the development of their
+Morello architecture and hardware prototype~\cite{arm-morello}.
+Our contributions include:
+
+\begin{enumerate}
+\item We developed the CHERI protection model and reference CHERI-MIPS and
+  CHERI-RISC-V Instruction-Set Architectures, which  offer low-overhead
+  fine-grained memory protection and support scalable software
+  compartmentalization based on a hybrid capability model.
+  Over several generations of the ISA, we refined integration with
+  conventional
+  RISCs ISA, composed the capability-system model with the MMU, pursued strong
+  C-language compatibility, developed compartmentalization features based on
+  an object-capability model, refined the architecture to improve performance
+  and adoptability through features such as compressed 128-bit capabilities,
+  introduced support for temporal memory safety,
+  and developed the notion of a portable protection model that can be applied
+  to further ISAs.
+  We also explored the implications of CHERI on 32-bit microcontroller
+  architectures
+  that do not have MMUs, giving capabilities a physical interpretation, and
+  also taking into account common microcontroller microarchitectural choices.
+
+\item Employed increasingly complete formal models of the protection model and
+  ISA semantics.
+  We began by using PVS/SAL formal models of the ISA to analyze
+  expressivity and security.
+  Subsequently, and in close collaboration with the University of Cambridge's
+  EPSRC-funded Rigorous Engineering of Mainstream Systems (REMS) Project and
+  DARPA-funded CHERI Instruction-set Formal Verification (CIFV), we
+  developed L3 and SAIL formal models suitable to act as a gold model for
+  testing, to use in automated test generation, and as inputs to formal
+  verification tools to prove ISA-level security properties.
+  We have also used formal modeling to explore how CHERI interacts with
+  C-language semantics.
+  In the future, we hope to employ these models in support of hardware and
+  software verification.
+
+\item Elaborated the ISA feature set in CHERI to support real-world operating
+  systems -- primarily this has consisted of developing mature compositions of
+  CHERI's concepts with system features such as the MMU and exception model,
+  but also programmable interrupt controllers (PICs).
+  We have also spent considerable time refining successive versions of
+  the ISA intended to better support high levels of MMU-based operating-system
+  and C-language compatibility, as well as automatic use by compilers.
+  This work has incorporated ideas from, but also gone substantially beyond,
+  the C-language fat-pointer and software compartmentalization research
+  literature.
+
+\item Created our CheriBSD and CheriFreeRTOS operating-system prototypes.
+  These reference designs explore how CHERI integration with the OS can
+  improve both OS and application security.
+  We created prototype memory protection and software compartmentalization
+  environments including CheriBSD's CheriABI process environment, and multiple
+  approaches to sandboxing.
+  We have applied CHERI to protection of key system libraries, but also the
+  operating system kernel itself.
+  This has included substantial baseline OS infrastructure work, including
+  porting FreeBSD to the budding RISC-V architecture.
+
+\item Prototyped, tested, and refined CHERI ISA extensions across multiple CPU
+  architectures.
+  We have open sourced reference MIPS and RISC-V processor designs, and the
+  QEMU ISA-level emulator, on order to allow reproducible experimentation with
+  our approach, as well as to act as an open-source platform for other future
+  hardware-software research projects.
+
+\item Adapted the Clang/LLVM compiler suite to be able to generate CHERI ISA
+  instructions as directed by C-language annotations, exploring a variety of
+  language models, code-generation models, and ABIs.
+  We have explored two new C-language models and associated code generation:
+  a hybrid in which explicitly annotated or automatically inferred pointers
+  are compiled as capabilities; and a pure-capability model in which all
+  pointers and implied virtual addresses are compiled as capabilities.
+  Similarly, we have begun an exploration of how CHERI affects program
+  linkage, with early prototype integration with the compile-time and run-time
+  linkers.
+  These collectively provide strong spatial and pointer protection for both
+  data and code pointers.
+  We have upstreamed substantial improvements to Clang/LLVM MIPS support, as
+  well as changes making it easier to support ISA features such as extra-wide
+  pointers utilized in the CHERI ISA.
+  We have also begun to explore how CHERI can support higher-level language
+  protection, such as by using it to reinforce memory safety and security for
+  native code running under the Java Native Interface (JNI).
+
+\item Began to develop semi-automated techniques to assist software
+  developers in compartmentalizing applications using Capsicum and CHERI
+  features.
+  This is a subproject known as Security-Oriented Analysis of Application
+  Programs (SOAAP), and performed in collaboration with Google.
+
+\item Collaborated with Arm on the creation of Morello~\cite{arm-morello}, a
+  tight integration of CHERI into the ARMv8-A architecture as well as a
+  reference industrial quality microarchitecture.
+  Morello boards will ship for experimental use in late 2021 along with our
+  complete CHERI software stack.
+\end{enumerate}
+
+Collectively, these accomplishments have validated our research hypotheses:
+that a hybrid capability-system architecture and viable supporting
+microarchitecture can support low-overhead memory protection and fine-grained
+software compartmentalization while maintaining strong compatibility with
+current RISC, MMU-based, and C/C++-language software stacks, as well as an
+incremental software adoption path to additional trustworthiness.
+Further, the resulting protection model, co-designed around a specific ISA and
+concrete extensions, is in fact a generalizable and portable protection model
+that has been applied to other ISAs; it is suitable for a multitude of
+implementations in architecture and microarchitecture.
+Formal methodology deployed judiciously throughout the design and
+implementation process has increased our confidence that the resulting design
+can support robust and resilient software designs.
+
+\section{Future Work}
+We have made a strong beginning, but clearly there is still much to do in our
+remaining CHERI efforts.
+Our ongoing key areas of research include:
+
+\begin{itemize}
+\item
+Continuing to refine performance with respect to both the architecture (e.g.,
+models for capability compression) and microarchitecture (e.g., as relates to
+efficient implementations of compression and tagged memory).
+
+\item
+Exploring how CHERI's features might be scaled up (e.g., to superscalar
+processor designs), down (e.g., to 32-bit microcontrollers without MMUs), and
+to other compute types (e.g., DMA engines, GPUs, and so on).
+Also, looking at how CHERI interacts with other emerging hardware technologies
+such as non-volatile memory, where CHERI may support more rapid, robust, and
+secure adoption.
+
+\item
+Continuing to elaborate how CHERI should affect the design of operating
+systems (whether hybrid systems such as CheriBSD, or clean-slate designs),
+languages (e.g., C, C++, Java, and so on), and runtimes (e.g., system
+libraries, run-time linking, and higher-level language runtimes).
+
+\item
+Continuing to explore how CHERI affects software tracing and debugging; for
+example, through capability-aware software debuggers.
+
+\item
+Continuing to explore potential models for software compartmentalization, such
+as clean-slate microkernel-style message passing grounded in CHERI's
+object-capability features, but not hybridized with conventional OS designs.
+In addition, continuing to investigate potential approaches to semi- or
+fully automated software compartmentalization.
+
+\item
+Continuing our efforts to develop and utilize formal models of the
+microarchitecture, architecture, operating system, linkage model, language
+properties, compilation, and higher-level applications.
+This will help us understand (and ensure) the protection benefits of CHERI up
+and down the hardware-software stack.
+\end{itemize}

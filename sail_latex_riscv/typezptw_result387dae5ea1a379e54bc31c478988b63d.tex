@@ -1,0 +1,4 @@
+union #\hyperref[sailRISCVzPTWzyResult]{PTW\_Result}#('paddr : Type, 'pte : Type) = {
+  PTW_Success: ('paddr, 'pte, 'paddr, nat, bool, ext_ptw),
+  PTW_Failure: (PTW_Error, ext_ptw)
+}

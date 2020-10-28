@@ -1,0 +1,31 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CGetPCCIncOffset}
+\insnmipslabel{cgetpccincoffset}
+\subsection*{CGetPCCIncOffset: Move PCC to Capability Register and Increment Offset}
+
+\subsubsection*{Format}
+
+CGetPCCIncOffset cd, rs
+
+\begin{center}
+\cheritwoop[header]{0x13}{cd}{rs}
+\end{center}
+
+\subsubsection*{Description}
+
+Capability register \emph{cd} is set equal to the \PCC{}, with
+cd.\caddr{} set equal to \PCC{}.\caddr{} $+$
+\emph{rs}.
+
+\subsubsection*{Semantics}
+
+\sailMIPScode{CGetPCCIncOffset}
+
+\subsection*{Notes}
+
+\begin{itemize}
+\item
+This instruction is a performance optimization; a similar effect can be
+achieved with \insnmipsref{CGetPCC} followed by \insnmipsref{CIncOffset}.
+\end{itemize}

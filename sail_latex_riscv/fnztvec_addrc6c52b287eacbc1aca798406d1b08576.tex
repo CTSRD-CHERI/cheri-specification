@@ -1,0 +1,10 @@
+function #\hyperref[sailRISCVztveczyaddr]{tvec\_addr}#(m : Mtvec, c : Mcause) -> #\hyperref[sailRISCVzoption]{option}#(xlenbits) = {
+  let base : xlenbits = m.#\hyperref[sailRISCVzBase]{Base}#() @ 0b00;
+  match (#\hyperref[sailRISCVztrapVectorModezyofzybits]{trapVectorMode\_of\_bits}#(m.#\hyperref[sailRISCVzMode]{Mode}#())) {
+    TV_Direct => #\hyperref[sailRISCVzSome]{Some}#(base),
+    TV_Vector => if   c.#\hyperref[sailRISCVzIsInterrupt]{IsInterrupt}#() == 0b1
+                 then #\hyperref[sailRISCVzSome]{Some}#(base + (#\hyperref[sailRISCVzEXTZ]{EXTZ}#(c.#\hyperref[sailRISCVzCause]{Cause}#()) << 2))
+                 else #\hyperref[sailRISCVzSome]{Some}#(base),
+    TV_Reserved => #\hyperref[sailRISCVzNone]{None}#()
+  }
+}

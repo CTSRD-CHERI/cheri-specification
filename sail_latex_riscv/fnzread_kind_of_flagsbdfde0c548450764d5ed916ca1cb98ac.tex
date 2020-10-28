@@ -1,0 +1,11 @@
+function #\hyperref[sailRISCVzreadzykindzyofzyflags]{read\_kind\_of\_flags}# (aq : bool, rl : bool, res : bool) -> #\hyperref[sailRISCVzoption]{option}#(read_kind) =
+  match (aq, rl, res) {
+    (false, false, false) => #\hyperref[sailRISCVzSome]{Some}#(Read_plain),
+    (true, false, false)  => #\hyperref[sailRISCVzSome]{Some}#(Read_RISCV_acquire),
+    (true, true, false)   => #\hyperref[sailRISCVzSome]{Some}#(Read_RISCV_strong_acquire),
+    (false, false, true)  => #\hyperref[sailRISCVzSome]{Some}#(Read_RISCV_reserved),
+    (true, false, true)   => #\hyperref[sailRISCVzSome]{Some}#(Read_RISCV_reserved_acquire),
+    (true, true, true)    => #\hyperref[sailRISCVzSome]{Some}#(Read_RISCV_reserved_strong_acquire),
+    (false, true, false)  => #\hyperref[sailRISCVzNone]{None}#(), /* should these be instead throwing error_not_implemented as below? */
+    (false, true, true)   => #\hyperref[sailRISCVzNone]{None}#()
+  }

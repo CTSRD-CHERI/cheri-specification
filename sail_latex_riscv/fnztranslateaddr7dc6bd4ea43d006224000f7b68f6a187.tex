@@ -1,0 +1,31 @@
+function #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vAddr, ac) = {
+  let effPriv : Privilege = #\hyperref[sailRISCVzeffectivePrivilege]{effectivePrivilege}#(ac, mstatus, cur_privilege);
+  let mxr    : bool   = mstatus.#\hyperref[sailRISCVzMXR]{MXR}#() == 0b1;
+  let do_sum : bool   = mstatus.#\hyperref[sailRISCVzSUM]{SUM}#() == 0b1;
+  let mode : SATPMode = #\hyperref[sailRISCVztranslationMode]{translationMode}#(effPriv);
+
+  let asid = #\hyperref[sailRISCVzcurAsid64]{curAsid64}#(satp);
+  let ptb  = #\hyperref[sailRISCVzcurPTB64]{curPTB64}#(satp);
+
+  /* PTW extensions: initialize the PTW extension state. */
+  let ext_ptw : ext_ptw = init_ext_ptw;
+
+  match mode {
+    Sbare => #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(vAddr, ext_ptw),
+    Sv39  => { if   #\hyperref[sailRISCVzisValidSv39Addr]{isValidSv39Addr}#(vAddr)
+               then match #\hyperref[sailRISCVztranslate39]{translate39}#(asid, ptb, vAddr[38 .. 0], ac, effPriv, mxr, do_sum, SV39_LEVELS - 1, ext_ptw) {
+                      #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(pa, ext_ptw) => #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(pa), ext_ptw),
+                      #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(f, ext_ptw)  => #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVztranslationException]{translationException}#(ac, f), ext_ptw)
+                    }
+               else #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVztranslationException]{translationException}#(ac, #\hyperref[sailRISCVzPTWzyInvalidzyAddr]{PTW\_Invalid\_Addr}#()), ext_ptw)
+             },
+    Sv48  => { if   #\hyperref[sailRISCVzisValidSv48Addr]{isValidSv48Addr}#(vAddr)
+               then match #\hyperref[sailRISCVztranslate48]{translate48}#(asid, ptb, vAddr[47 .. 0], ac, effPriv, mxr, do_sum, SV48_LEVELS - 1, ext_ptw) {
+                      #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(pa, ext_ptw) => #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(pa), ext_ptw),
+                      #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(f, ext_ptw)  => #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVztranslationException]{translationException}#(ac, f), ext_ptw)
+                    }
+               else #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVztranslationException]{translationException}#(ac, #\hyperref[sailRISCVzPTWzyInvalidzyAddr]{PTW\_Invalid\_Addr}#()), ext_ptw)
+             },
+    _     => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unsupported address translation scheme")
+  }
+}

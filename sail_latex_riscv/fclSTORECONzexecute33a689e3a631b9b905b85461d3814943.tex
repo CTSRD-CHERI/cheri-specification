@@ -1,0 +1,69 @@
+if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == false then {
+  /* should only happen in rmem
+   * rmem: allow SC to fail very early
+   */
+  #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b1); RETIRE_SUCCESS
+} else {
+  if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
+    /* normal non-rmem case
+     * rmem: SC is allowed to #\hyperref[sailRISCVzsucceed]{succeed}# (but might fail later)
+     */
+    /* Get the address, #\hyperref[sailRISCVzX]{X}#(rs1) (no offset).
+     * Extensions might perform additional checks on address validity.
+     */
+    match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, #\hyperref[sailRISCVzzzeros]{zeros}#(), #\hyperref[sailRISCVzWrite]{Write}#(Data), width) {
+      #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(e)  => { #\hyperref[sailRISCVzextzyhandlezydatazycheckzyerror]{ext\_handle\_data\_check\_error}#(e); RETIRE_FAIL },
+      #\hyperref[sailRISCVzExtzyDataAddrzyOK]{Ext\_DataAddr\_OK}#(vaddr) => {
+        let aligned : bool =
+          /* BYTE and HALF would only occur due to invalid decodes, but it doesn't hurt
+           * to treat them as valid here; otherwise we'd need to throw an internal_error.
+           */
+          match width {
+            BYTE   => true,
+            HALF   => vaddr[0..0] == 0b0,
+            WORD   => vaddr[1..0] == 0b00,
+            DOUBLE => vaddr[2..0] == 0b000
+          };
+        if (~ (aligned))
+        then { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, #\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#()); RETIRE_FAIL }
+        else {
+          if #\hyperref[sailRISCVzmatchzyreservation]{match\_reservation}#(vaddr) == false then {
+            /* cannot happen in rmem */
+            #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b1); #\hyperref[sailRISCVzcancelzyreservation]{cancel\_reservation}#(); RETIRE_SUCCESS
+          } else {
+            match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddr, #\hyperref[sailRISCVzWrite]{Write}#(Data)) {  /* Write and ReadWrite are equivalent here:
+                                                        * both result in a SAMO exception */
+              #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
+              #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) => {
+                let eares : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(unit) = match (width, sizeof(xlen)) {
+                  (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 4, aq, rl, true),
+                  (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 8, aq, rl, true),
+                  _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORECON expected word or double")
+                };
+                match (eares) {
+                  #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL },
+                  #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
+                    rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
+                    let res : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) = match (width, sizeof(xlen)) {
+                      (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq, rl, true),
+                      (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq, rl, true),
+                      _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORECON expected word or double")
+                    };
+                    match (res) {
+                      #\hyperref[sailRISCVzMemValue]{MemValue}#(true)  => { #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0); #\hyperref[sailRISCVzcancelzyreservation]{cancel\_reservation}#(); RETIRE_SUCCESS },
+                      #\hyperref[sailRISCVzMemValue]{MemValue}#(false) => { #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b1); #\hyperref[sailRISCVzcancelzyreservation]{cancel\_reservation}#(); RETIRE_SUCCESS },
+                      #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+    RETIRE_FAIL
+  }
+}

@@ -1,0 +1,9 @@
+function #\hyperref[sailRISCVzaccruezyfflags]{accrue\_fflags}#(flags) = {
+  let f = fcsr.#\hyperref[sailRISCVzFFLAGS]{FFLAGS}#() | flags;
+  if  fcsr.#\hyperref[sailRISCVzFFLAGS]{FFLAGS}#() != f
+  then {
+    fcsr->#\hyperref[sailRISCVzFFLAGS]{FFLAGS}#() = f;
+    #\hyperref[sailRISCVzupdatezysoftfloatzyfflags]{update\_softfloat\_fflags}#(f);
+    #\hyperref[sailRISCVzdirtyzyfdzycontext]{dirty\_fd\_context}#();
+  }
+}

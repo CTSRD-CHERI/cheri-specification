@@ -1,0 +1,97 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CCSeal}
+\insnmipslabel{ccseal}
+\subsection*{CCSeal: Conditionally Seal a Capability}
+
+\subsubsection*{Format}
+
+CCSeal cd, cs, ct
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,5,6,10,11,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x12}
+\bitbox{5}{0x0}
+\bitbox{5}{cd}
+\bitbox{5}{cs}
+\bitbox{5}{ct}
+\bitbox{6}{0x1f}
+\end{bytefield}
+\end{center}
+
+\subsubsection*{Description}
+
+If \emph{ct}.\ctag{} is false or \emph{ct}.\cbase{} $+$ \emph{ct}.\coffset{}
+$= -1$, \emph{cs} is copied into \emph{cd}.
+Otherwise, capability register \emph{cs} is sealed with an \cotype{} of
+\emph{ct}.\cbase{} $+$ \emph{ct}.\coffset{}
+and the result is placed in \emph{cd} as follows:
+
+\begin{itemize}
+\item
+\emph{cd} is sealed with \emph{cd}.\cotype{} set to \emph{ct}.\cbase{} + \emph{ct}.\coffset{};
+\item
+and the other fields of \emph{cd} are copied from \emph{cs}.
+\end{itemize}
+
+\emph{ct} must grant \emph{Permit\_Seal} permission, and the new \cotype{}
+of \emph{cd} must be between \emph{ct}.\cbase{} and \emph{ct}.\cbase{} $+$
+\emph{ct}.\clength{} $-$ 1.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CCSeal}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cs}.\ctag{} is not set.
+\item
+\emph{cs} is sealed.
+\item
+\emph{ct}.\ctag{} is set and \emph{ct} is sealed.
+\item
+\emph{ct}.\cperms.\emph{Permit\_Seal} is not set.
+% \item
+% \emph{ct}.\cperms.\emph{Permit\_Execute} is not set.
+\item
+\emph{ct}.\ctag{} and \emph{ct}.\coffset{} $\ge$ \emph{ct}.length{}
+\item
+\emph{ct}.\ctag{} and \emph{ct}.\cbase{} $+$ \emph{ct}.\coffset{} $> \emph{max\_otype}$
+\item
+The bounds of \emph{cb} cannot be represented exactly in a sealed capability.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+If capability compression is in use, the range of possible (\cbase{},
+\clength{}, \coffset{}) values might be smaller for sealed capabilities
+than for unsealed capabilities. This means that \insnmipsref{CCSeal}
+can fail with an exception in the case where the bounds are no longer
+precisely representable.
+\item
+This instruction provides two means of indicating that the capability should
+not be sealed: either clearing the tag bit on \emph{ct} or setting \emph{ct}'s
+cursor to $-1$. A potential problem with just using a cursor of $-1$ (rather than
+clearing the tag bit) to disable sealing is that, depending on \emph{ct}'s
+\cbase{} and \coffset{}, setting \emph{ct}'s cursor to $-1$ might have a result
+that is not representable. However, the NULL capability has \ctag{} clear
+and can always have its cursor set to $-1$. (We implement casts from
+\verb+int+ to \verb+int_cap_t+ by setting the cursor of NULL to the value of the
+integer, and so this can hold a value of $-1$.) Directly clearing \emph{ct}'s
+tag to indicate that sealing should not be performed will work, because it
+is always possible to clear the tag bit. Setting \emph{ct}'s cursor to $-1$ with
+\insnmipsref{CSetOffset} to indicate that sealing should not be performed will
+also work, because this will either set the cursor to $-1$ or (if the result would
+not be representable) both clear the tag bit and set the cursor to $-1$. The
+latter method may be preferred in a code sequence that extracts the \cotype{}
+of a capability with \insnmipsref{CGetType}, getting a value of $-1$ if the
+capability is not sealed, setting the cursor of \emph{ct} to the result, and
+then using \insnmipsref{CCSeal} to seal a new capability to the same
+\cotype{} as the original.
+\end{itemize}

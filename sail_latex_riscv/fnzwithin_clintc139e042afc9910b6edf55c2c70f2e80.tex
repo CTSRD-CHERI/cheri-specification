@@ -1,0 +1,11 @@
+function within_clint forall 'n, 0 < 'n <= max_mem_access . (addr : xlenbits, width : atom('n)) -> bool = {
+  /* To avoid overflow issues when physical memory extends to the end
+   * of the addressable range, we need to perform address bound checks
+   * on unsigned unbounded integers.
+   */
+  let addr_int       = #\hyperref[sailRISCVzunsigned]{unsigned}#(addr);
+  let clint_base_int = #\hyperref[sailRISCVzunsigned]{unsigned}#(#\hyperref[sailRISCVzplatzyclintzybase]{plat\_clint\_base}# ());
+  let clint_size_int = #\hyperref[sailRISCVzunsigned]{unsigned}#(#\hyperref[sailRISCVzplatzyclintzysizze]{plat\_clint\_size}# ());
+    clint_base_int <= addr_int
+  & (addr_int + sizeof('n)) <= (clint_base_int + clint_size_int)
+}

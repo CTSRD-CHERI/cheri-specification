@@ -1,0 +1,6 @@
+function mmio_write forall 'n, 0 <'n <= max_mem_access . (paddr : xlenbits, width : atom('n), data: #\hyperref[sailRISCVzbits]{bits}#(8 * 'n)) -> #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) =
+  if   #\hyperref[sailRISCVzwithinzyclint]{within\_clint}#(paddr, width)
+  then #\hyperref[sailRISCVzclintzystore]{clint\_store}#(paddr, width, data)
+  else if #\hyperref[sailRISCVzwithinzyhtifzywritable]{within\_htif\_writable}#(paddr, width) & 'n <= 8
+  then #\hyperref[sailRISCVzhtifzystore]{htif\_store}#(paddr, width, data)
+  else #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#())

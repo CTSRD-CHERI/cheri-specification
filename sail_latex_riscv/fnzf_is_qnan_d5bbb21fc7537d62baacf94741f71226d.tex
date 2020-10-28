@@ -1,0 +1,5 @@
+function f_is_QNaN_D   x64 = {
+  let (sign, exp, mant) = #\hyperref[sailRISCVzfsplitzyD]{fsplit\_D}# (x64);
+  (  (exp == #\hyperref[sailRISCVzones]{ones}#())
+   & (mant [51] == bitone))
+}

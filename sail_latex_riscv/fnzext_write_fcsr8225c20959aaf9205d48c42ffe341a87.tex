@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzextzywritezyfcsr]{ext\_write\_fcsr}# (frm, fflags) = {
+  fcsr->#\hyperref[sailRISCVzFRM]{FRM}#()    = frm;      /* Note: frm can be an illegal value, 101, 110, 111 */
+  fcsr->#\hyperref[sailRISCVzFFLAGS]{FFLAGS}#() = fflags;
+  #\hyperref[sailRISCVzupdatezysoftfloatzyfflags]{update\_softfloat\_fflags}#(fflags);
+  #\hyperref[sailRISCVzdirtyzyfdzycontext]{dirty\_fd\_context}#();
+}

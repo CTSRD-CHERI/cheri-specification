@@ -1,0 +1,131 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CSC}
+\insnmipslabel{csc}
+\subsection*{CSC: Store Capability via Capability}
+
+\subsubsection*{Format}
+
+CSC cs, rt, offset(cb) \\
+CSCR cs, rt(cb) \\
+CSCI cs, offset(cb)
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,5,6,10,11,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x3e}
+\bitbox{5}{cs}
+\bitbox{5}{cb}
+\bitbox{5}{rt}
+\bitbox{11}{offset}
+\end{bytefield}
+\end{center}
+
+\usesDDCinsteadofNULL{cb}
+
+\subsubsection*{Description}
+
+Capability register \emph{cs} is stored at the memory location specified by
+\emph{cb.\cbase{}} $+$ \emph{cb.\coffset{}} $+$ \emph{rt} $+$ 16 $*$ \emph{offset},
+and the bit in the tag memory associated with \emph{cb.\cbase{}} $+$
+\emph{cb.\coffset{}} $+$ \emph{rt} $+$ 16 $*$ \emph{offset} is set to the value of
+\emph{cs.tag}.
+Capability register \emph{cb} must
+contain a capability that grants permission to store capabilities.  The virtual
+address \emph{cb.\cbase{}} $+$ \emph{cb.\coffset{}} $+$ \emph{rt} $+$
+16 $*$ \emph{offset} must be \emph{capability\_size} aligned.
+
+% When the 256-bit representation of capabilities is in use, the capability
+% is stored in memory in the format described in Figure
+% \ref{fig:memory-representation-of-a-capability}.
+% \cbase{}, \clength{} and \cotype{} are
+% stored in memory with the same endian-ness that the CPU uses for double-word
+% stores, i.e., big-endian. The bits of \cperms{} are stored with bit zero
+% being the least significant bit, so that the least significant bit of the
+% eighth byte stored is the \csealed{} bit,
+% the next significant bit is the \emph{Global} bit, the next is
+% \emph{Permit\_Execute} and so on.
+
+The various capability encoding schemes define bit representations in
+memory.  While a given instantiation of CHERI will use a particular scheme,
+software should, in general, not attempt to parse capability bit patterns
+from memory.  Instructions for capability interrogation (e.g.,
+\insnmipsref{CGetAddr}, \insnmipsref{CGetType}) do not require that their
+source registers be holding \emph{tagged} capabilities; software wishing to
+decode memory bit patterns should rather use \insnmipsref{CLC} and
+interrogate the result.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CSC}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\cchecktag{}
+\item
+\emph{cb} is sealed.
+\item
+\emph{cb}.\cperms.\emph{Permit\_Store} is not set.
+\item
+\emph{cb.\cperms.Permit\_Store\_Capability} is not set.
+\item
+\emph{cb.\cperms{}.Permit\_Store\_Local} is not set and
+\emph{cs.tag} is set and \emph{cs.\cperms{}.Global} is not set.
+\item
+\emph{addr} $+$ \emph{capability\_size} $>$ \emph{cb}.\cbase{}
+$+$ \emph{cb.\clength{}}.
+\item
+\emph{addr} $<$ \emph{cb}.\cbase{}.
+\end{itemize}
+
+\noindent
+A TLB Store exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cs.\ctag{}} is set and the \emph{S} bit in the TLB entry for the page
+containing \emph{addr} is not set.
+\end{itemize}
+
+\noindent
+An address error during store (AdES) exception is raised if:
+
+\begin{itemize}
+\item
+The virtual address \emph{addr} is not \emph{capability\_size} aligned.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+If the address alignment check fails and one of the security checks fails,
+a coprocessor 2 exception (and not an address error exception) is raised.
+The priority of the exceptions is security-critical, because otherwise a
+malicious program could use the type of the exception that is raised to
+test the bottom bits of a register that it is not permitted to access.
+\item
+It is permitted to store a local capability with the tag bit unset even if the permit store local bit is not set in \emph{cb}.
+This is because if the tag bit is not set then the permissions have no meaning.
+\item
+\emph{offset} is interpreted as a signed integer.
+\item
+This instruction reuses the opcode from the Store Doubleword from Coprocessor 2
+(\insnnoref{SDC2}) instruction in the MIPS Specification.
+\item
+The \insnnoref{CSCI} mnemonic is equivalent to \insnmipsref{CSC} with
+\emph{cb} being the zero register (\$zero). The \insnnoref{CSCR} mnemonic
+is equivalent to \insnmipsref{CSC} with \emph{offset} set to zero.
+\item
+BERI1 has a compile-time option to allow unaligned loads and stores.
+\insnmipsref{CSC} to an unaligned address will raise an exception even if
+BERI1 has been built with this option, because it would be a security
+vulnerability if an attacker could construct a corrupted capability with
+\ctag{} set by writing it to an unaligned address.
+\item
+Although the \emph{capability\_size} can vary, the offset is always in
+multiples of 16 bytes (128 bits).
+\end{itemize}

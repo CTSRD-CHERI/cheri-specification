@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzextzyexczytypezytozybits]{ext\_exc\_type\_to\_bits}#(e) =
+  match (e) {
+    EXC_LOAD_CAP_PAGE_FAULT => 0x1a,
+    EXC_SAMO_CAP_PAGE_FAULT => 0x1b,
+    EXC_CHERI               => 0x1c
+  }

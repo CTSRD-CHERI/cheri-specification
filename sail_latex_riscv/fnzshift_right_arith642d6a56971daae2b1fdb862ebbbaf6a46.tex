@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzshiftzyrightzyarith64]{shift\_right\_arith64}# (v : #\hyperref[sailRISCVzbits]{bits}#(64), shift : #\hyperref[sailRISCVzbits]{bits}#(6)) -> #\hyperref[sailRISCVzbits]{bits}#(64) =
+    let v128 : #\hyperref[sailRISCVzbits]{bits}#(128) = #\hyperref[sailRISCVzEXTS]{EXTS}#(v) in
+    (v128 >> shift)[63..0]

@@ -1,0 +1,8 @@
+if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
+  let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
+  let vaddr = cs1_val.address;
+  #\hyperref[sailRISCVzhandlezyloadreszydatazyviazycap]{handle\_loadres\_data\_via\_cap}#(rd, 0b0 @ cs1, cs1_val, vaddr, width)
+} else {
+  #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+  RETIRE_FAIL
+}

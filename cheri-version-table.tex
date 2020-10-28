@@ -1,0 +1,40 @@
+\begin{tabular}{llp{3.25in}}
+\toprule
+  Year(s) & Version & Description \\
+\midrule
+  2010- & ISAv1 & RISC capability-system model w/64-bit MIPS \\
+  2012 & & Capability registers and tagged memory \\
+  & & Guarded manipulation of registers \smallskip \\
+  2012 & ISAv2 & Extended tagging to capability registers \\
+  & & Capability-aware exception handling \\
+  & & MMU-based OS with CHERI support \smallskip \\
+  2014 & ISAv3~\cite{UCAM-CL-TR-864} & Fat pointers $+$ capabilities, compiler \\
+  & & Instructions to optimize hybrid code \\
+  & & Sealed capabilities, \insnnoref{CCall}/\insnnoref{CReturn} \smallskip \\
+  2015 & ISAv4~\cite{UCAM-CL-TR-876} & MMU-CHERI integration (TLB permissions) \\
+  & & ISA support for compressed capabilities \\
+  & & Hardware-accelerated domain switching \\
+  & & Multicore instructions: \insnnoref{LL}/\insnnoref{SC} variants \smallskip \\
+  2016 & ISAv5~\cite{UCAM-CL-TR-891} & CHERI-128 compressed capability model \\
+  & & Improved generated code efficiency \\
+  & & Initial in-kernel privilege limitations \smallskip \\
+  2017 & ISAv6~\cite{UCAM-CL-TR-907} & Mature kernel privilege limitations \\
+  & & Further generated code efficiency \\
+  & & CHERI-x86 and CHERI-RISC-V sketches \\
+  & & Jump-based protection-domain transition \smallskip \\
+  2019 & ISAv7~\cite{UCAM-CL-TR-927} & Architecture-neutral protection model \\
+  & & A more complete CHERI-RISC-V elaboration \\
+  & & Compartment IDs for side-channel resistance \\
+  & & 64-bit capabilities for 32-bit architectures \\
+  & & Architectural temporal memory safety \\
+  & & CHERI Concentrate compressed capabilities \smallskip \\
+  2020 & ISAv8~\cite{UCAM-CL-TR-951} & Compressed capabilities in abstract
+  model \\
+  & & 32- and 64-bit address sizes \\
+  & & Deployed sentry capabilities \\
+  & & Fully elaborated CHERI-RISC-V \\
+  & & MMU-assisted load-side-barrier revocation \\
+  & & Richer microarchitectural exploration \\
+  & & Synchronized with Arm Morello architecture~\cite{arm-morello} \\
+\bottomrule
+\end{tabular}

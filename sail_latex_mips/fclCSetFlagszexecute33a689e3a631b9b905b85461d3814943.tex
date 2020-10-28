@@ -1,0 +1,10 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let cb_val = #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(cb);
+let rt_val = #\hyperref[sailMIPSzrGPR]{rGPR}#(rt);
+if cb_val.tag & cb_val.sealed then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, cb)
+else
+{
+  let newCap  = #\hyperref[sailMIPSzsetCapFlags]{setCapFlags}#(cb_val, #\hyperref[sailMIPSztruncate]{truncate}#(rt_val, num_flags));
+  #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(cd, newCap);
+}

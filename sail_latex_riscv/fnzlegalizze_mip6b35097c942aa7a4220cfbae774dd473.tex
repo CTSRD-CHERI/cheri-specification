@@ -1,0 +1,14 @@
+function #\hyperref[sailRISCVzlegalizzezymip]{legalize\_mip}#(o : Minterrupts, v : xlenbits) -> Minterrupts = {
+  /* The only writable bits are the S-mode bits, and with the 'N'
+   * extension, the U-mode bits. */
+  let v = #\hyperref[sailRISCVzMkzyMinterrupts]{Mk\_Minterrupts}#(v);
+  let m = #\hyperref[sailRISCVzupdatezySEI]{update\_SEI}#(o, v.#\hyperref[sailRISCVzSEI]{SEI}#());
+  let m = #\hyperref[sailRISCVzupdatezySTI]{update\_STI}#(m, v.#\hyperref[sailRISCVzSTI]{STI}#());
+  let m = #\hyperref[sailRISCVzupdatezySSI]{update\_SSI}#(m, v.#\hyperref[sailRISCVzSSI]{SSI}#());
+  if #\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#() & #\hyperref[sailRISCVzhaveNExt]{haveNExt}#() then {
+    let m = #\hyperref[sailRISCVzupdatezyUEI]{update\_UEI}#(m, v.#\hyperref[sailRISCVzUEI]{UEI}#());
+    let m = #\hyperref[sailRISCVzupdatezyUTI]{update\_UTI}#(m, v.#\hyperref[sailRISCVzUTI]{UTI}#());
+    let m = #\hyperref[sailRISCVzupdatezyUSI]{update\_USI}#(m, v.#\hyperref[sailRISCVzUSI]{USI}#());
+    m
+  } else m
+}

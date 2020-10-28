@@ -1,0 +1,8 @@
+if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
+  let ddc_val = DDC;
+  let vaddr = ddc_val.address + #\hyperref[sailRISCVzX]{X}#(rs1);
+  #\hyperref[sailRISCVzhandlezyloadreszycapzyviazycap]{handle\_loadres\_cap\_via\_cap}#(cd, DDC_IDX, ddc_val, vaddr)
+} else {
+  #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+  RETIRE_FAIL
+}

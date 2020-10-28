@@ -1,0 +1,30 @@
+let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
+let newPC = [cs1_val.address with 0 = bitzero]; /* clear bit zero as for RISCV JALR */
+let newPCCBase = #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(cs1_val);
+if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_TagViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) & (#\hyperref[sailRISCVzsigned]{signed}#(cs1_val.otype) != otype_sentry) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVznot]{not}# (cs1_val.permit_execute) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_PermitExecuteViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(cs1_val, newPC, #\hyperref[sailRISCVzminzyinstructionzybytes]{min\_instruction\_bytes}#())) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs1);
+  RETIRE_FAIL
+} else if newPCCBase[0] == bitone | (newPCCBase[1] == bitone & ~(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#())) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_UnalignedBase, cs1);
+  RETIRE_FAIL
+} else if newPC[1] == bitone & ~(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()) then {
+  #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(newPC,  #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#());
+  RETIRE_FAIL
+} else {
+  let (success, linkCap) = #\hyperref[sailRISCVzsetCapAddr]{setCapAddr}#(PCC, nextPC); /* Note that nextPC accounts for compressed instrucitons */
+  assert(success, "Link cap should always be representable.");
+  assert(#\hyperref[sailRISCVznot]{not}# (#\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(linkCap)), "Link cap should always be unsealed");
+  #\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzsealCap]{sealCap}#(linkCap, #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_otype_width, otype_sentry));
+  nextPC = newPC;
+  nextPCC = #\hyperref[sailRISCVzunsealCap]{unsealCap}#(cs1_val);
+  RETIRE_SUCCESS
+}

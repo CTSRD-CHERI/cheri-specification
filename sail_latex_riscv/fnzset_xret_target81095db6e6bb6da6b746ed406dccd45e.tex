@@ -1,0 +1,8 @@
+function #\hyperref[sailRISCVzsetzyxretzytarget]{set\_xret\_target}#(p, value) = {
+  match p {
+    Machine    => MEPCC = #\hyperref[sailRISCVzsetCapOffsetOrNull]{setCapOffsetOrNull}#(MEPCC, value),
+    Supervisor => SEPCC = #\hyperref[sailRISCVzsetCapOffsetOrNull]{setCapOffsetOrNull}#(SEPCC, value),
+    User       => UEPCC = #\hyperref[sailRISCVzsetCapOffsetOrNull]{setCapOffsetOrNull}#(UEPCC, value)
+  };
+  value
+}

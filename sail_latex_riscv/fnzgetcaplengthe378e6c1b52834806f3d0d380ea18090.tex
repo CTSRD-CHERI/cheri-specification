@@ -1,0 +1,10 @@
+function #\hyperref[sailRISCVzgetCapLength]{getCapLength}#(c) : Capability -> CapLen =
+    let ('base, 'top) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(c) in {
+        /* For valid capabilties we expect top >= base and hence
+         * length >= 0 but representation does allow top < base in some
+         * cases so might encounter on untagged capabilities. Here we just
+         * pretend it is a 65-bit quantitiy and wrap.
+         */
+        assert (#\hyperref[sailRISCVznot]{not}#(c.tag) | top >= base);
+        (top - base) % #\hyperref[sailRISCVzpow2]{pow2}#(cap_len_width)
+    }

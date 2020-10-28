@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVznegatezyS]{negate\_S}# (x32) = {
+  let (sign, exp, mant) = #\hyperref[sailRISCVzfsplitzyS]{fsplit\_S}# (x32);
+  let new_sign = if (sign == 0b0) then 0b1 else 0b0;
+  #\hyperref[sailRISCVzfmakezyS]{fmake\_S}# (new_sign, exp, mant)
+}

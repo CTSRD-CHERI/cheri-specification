@@ -1,0 +1,79 @@
+if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
+  /* Get the address, #\hyperref[sailRISCVzX]{X}#(rs1) (no offset).
+   * Some extensions perform additional checks on address validity.
+   */
+  match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, #\hyperref[sailRISCVzzzeros]{zeros}#(), #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data), width) {
+    #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(e)  => { #\hyperref[sailRISCVzextzyhandlezydatazycheckzyerror]{ext\_handle\_data\_check\_error}#(e); RETIRE_FAIL },
+    #\hyperref[sailRISCVzExtzyDataAddrzyOK]{Ext\_DataAddr\_OK}#(vaddr) => {
+      match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddr, #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data)) {
+        #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
+        #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) => {
+          let eares : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(unit) = match (width, sizeof(xlen)) {
+            (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 4, aq & rl, rl, true),
+            (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 8, aq & rl, rl, true),
+            _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("AMO expected WORD or DOUBLE")
+          };
+          let is_unsigned : bool = match op {
+            AMOMINU => true,
+            AMOMAXU => true,
+            _       => false
+          };
+          let rs2_val : xlenbits = match width {
+            WORD   => if is_unsigned then #\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzX]{X}#(rs2)[31..0]) else #\hyperref[sailRISCVzEXTS]{EXTS}#(#\hyperref[sailRISCVzX]{X}#(rs2)[31..0]),
+            DOUBLE => #\hyperref[sailRISCVzX]{X}#(rs2),
+            _      => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("AMO expected WORD or DOUBLE")
+          };
+          match (eares) {
+            #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL },
+            #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
+              let mval : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(xlenbits) = match (width, sizeof(xlen)) {
+                (WORD, _)    => #\hyperref[sailRISCVzextendzyvalue]{extend\_value}#(is_unsigned, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data), addr, 4, aq, aq & rl, true)),
+                (DOUBLE, 64) => #\hyperref[sailRISCVzextendzyvalue]{extend\_value}#(is_unsigned, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data), addr, 8, aq, aq & rl, true)),
+                _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("AMO expected WORD or DOUBLE")
+              };
+              match (mval) {
+                #\hyperref[sailRISCVzMemException]{MemException}#(e)  => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL },
+                #\hyperref[sailRISCVzMemValue]{MemValue}#(loaded) => {
+                  let result : xlenbits =
+                    match op {
+                      AMOSWAP => rs2_val,
+                      AMOADD  => rs2_val + loaded,
+                      AMOXOR  => rs2_val ^ loaded,
+                      AMOAND  => rs2_val & loaded,
+                      AMOOR   => rs2_val | loaded,
+
+                      /* These operations convert bitvectors to integer values using [un]signed,
+                       * and back using #\hyperref[sailRISCVztozybits]{to\_bits}#().
+                       */
+                      AMOMIN  => #\hyperref[sailRISCVztozybits]{to\_bits}#(sizeof(xlen), #\hyperref[sailRISCVzmin]{min}#(#\hyperref[sailRISCVzsigned]{signed}#(rs2_val),   #\hyperref[sailRISCVzsigned]{signed}#(loaded))),
+                      AMOMAX  => #\hyperref[sailRISCVztozybits]{to\_bits}#(sizeof(xlen), #\hyperref[sailRISCVzmax]{max}#(#\hyperref[sailRISCVzsigned]{signed}#(rs2_val),   #\hyperref[sailRISCVzsigned]{signed}#(loaded))),
+                      AMOMINU => #\hyperref[sailRISCVztozybits]{to\_bits}#(sizeof(xlen), #\hyperref[sailRISCVzmin]{min}#(#\hyperref[sailRISCVzunsigned]{unsigned}#(rs2_val), #\hyperref[sailRISCVzunsigned]{unsigned}#(loaded))),
+                      AMOMAXU => #\hyperref[sailRISCVztozybits]{to\_bits}#(sizeof(xlen), #\hyperref[sailRISCVzmax]{max}#(#\hyperref[sailRISCVzunsigned]{unsigned}#(rs2_val), #\hyperref[sailRISCVzunsigned]{unsigned}#(loaded)))
+                    };
+                  let rval : xlenbits = match width {
+                    WORD   => #\hyperref[sailRISCVzEXTS]{EXTS}#(loaded[31..0]),
+                    DOUBLE => loaded,
+                    _      => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("AMO expected WORD or DOUBLE")
+                  };
+                  let wval : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) = match (width, sizeof(xlen)) {
+                    (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, result[31..0], aq & rl, rl, true),
+                    (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, result,        aq & rl, rl, true),
+                    _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("AMO expected WORD or DOUBLE")
+                  };
+                  match (wval) {
+                    #\hyperref[sailRISCVzMemValue]{MemValue}#(true)  => { #\hyperref[sailRISCVzX]{X}#(rd) = rval; RETIRE_SUCCESS },
+                    #\hyperref[sailRISCVzMemValue]{MemValue}#(false) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("AMO got false from mem_write_value") },
+                    #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} else {
+  #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+  RETIRE_FAIL
+}

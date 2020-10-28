@@ -1,0 +1,14 @@
+function #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}# (addr, width, aq, rl, con) = {
+  if (rl | con) & (~ (#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(addr, width)))
+  then #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#())
+  else match (aq, rl, con) {
+    (false, false, false) => #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzwritezyramzyea]{write\_ram\_ea}#(Write_plain, addr, width)),
+    (false, true,  false) => #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzwritezyramzyea]{write\_ram\_ea}#(Write_RISCV_release, addr, width)),
+    (false, false, true)  => #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzwritezyramzyea]{write\_ram\_ea}#(Write_RISCV_conditional, addr, width)),
+    (false, true , true)  => #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzwritezyramzyea]{write\_ram\_ea}#(Write_RISCV_conditional_release, addr, width)),
+    (true,  false, false) => throw(#\hyperref[sailRISCVzErrorzynotzyimplemented]{Error\_not\_implemented}#("store.aq")),
+    (true,  true,  false) => #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzwritezyramzyea]{write\_ram\_ea}#(Write_RISCV_strong_release, addr, width)),
+    (true,  false, true)  => throw(#\hyperref[sailRISCVzErrorzynotzyimplemented]{Error\_not\_implemented}#("sc.aq")),
+    (true,  true , true)  => #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzwritezyramzyea]{write\_ram\_ea}#(Write_RISCV_conditional_strong_release, addr, width))
+  }
+}

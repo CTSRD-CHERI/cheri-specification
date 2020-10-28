@@ -1,0 +1,10 @@
+function f_bin_op_D_of_num arg# = match arg# {
+  0 => FSGNJ_D,
+  1 => FSGNJN_D,
+  2 => FSGNJX_D,
+  3 => FMIN_D,
+  4 => FMAX_D,
+  5 => FEQ_D,
+  6 => FLT_D,
+  _ => FLE_D
+}

@@ -1,0 +1,8 @@
+let rs1_val_D = #\hyperref[sailRISCVzF]{F}#(rs1);
+let rm_3b     = #\hyperref[sailRISCVzencdeczyroundingzymode]{encdec\_rounding\_mode}# (#\hyperref[sailRISCVzselectzyinstrzyorzyfcsrzyrm]{select\_instr\_or\_fcsr\_rm}#  (rm));
+
+let (fflags, rd_val_S) = #\hyperref[sailRISCVzriscvzyf64ToF32]{riscv\_f64ToF32}# (rm_3b, rs1_val_D);
+
+#\hyperref[sailRISCVzwritezyfflags]{write\_fflags}#(fflags);
+#\hyperref[sailRISCVzF]{F}#(rd) = #\hyperref[sailRISCVznanzybox]{nan\_box}# (rd_val_S);
+RETIRE_SUCCESS

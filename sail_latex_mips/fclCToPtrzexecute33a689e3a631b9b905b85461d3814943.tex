@@ -1,0 +1,16 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let ct_val = #\hyperref[sailMIPSzreadCapRegDDC]{readCapRegDDC}#(ct);
+let cb_val = #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(cb);
+if not (ct_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TagViolation, ct)
+else if cb_val.tag & cb_val.sealed then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, cb)
+else
+{
+  let ctBase = #\hyperref[sailMIPSzgetCapBase]{getCapBase}#(ct_val);
+  /* Note: returning zero for untagged values breaks magic constants such as SIG_IGN */
+  #\hyperref[sailMIPSzwGPR]{wGPR}#(rd) = if not (cb_val.tag) then
+      #\hyperref[sailMIPSzzzeros]{zeros}#()
+    else
+      #\hyperref[sailMIPSztozybits]{to\_bits}#(64, #\hyperref[sailMIPSzgetCapCursor]{getCapCursor}#(cb_val) - ctBase)
+}

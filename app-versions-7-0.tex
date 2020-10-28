@@ -1,0 +1,56 @@
+This version of the \textit{CHERI Instruction-Set Architecture} is a full
+release of the Version 7 specification:
+
+\begin{itemize}
+\item We have now deprecated the CHERI-128 capability compression format, in
+  favor of CHERI Concentrate.
+
+\item The RISC-V \insnnoref{AUIPC} instruction now returns a
+  \PCC{}-relative capability in the capability encoding mode.
+
+\item Capabilities now contain a \cflags{} field (\cref{sec:model-flags}),
+  which will hold state that
+  can be changed without affecting privilege.
+  Corresponding experimental \insnref{CGetFlags} and
+  \insnref{CSetFlags} instructions have been added.
+
+\item The capability encoding-mode bit in CHERI-RISC-V is specified as a bit
+  in the \cflags{} field of a capability.
+  The current mode is defined as the flag bit in the currently installed
+  \PCC{}.
+  Design considerations and other potential options are described in
+  Chapter~\ref{chap:rationale}.
+
+\item We now more explicitly describe the reset states of special- and
+  general-purpose capability registers for CHERI-MIPS and CHERI-RISC-V.
+
+\item Compressed capabilities now contain a dedicated \cotype{} field that
+  always holds an object type (see
+  \cref{sec:model-object-types,section:object-type}), rather than stealing
+  bounds bits for object type when sealing.  Now, any representable capability
+  may be sealed.  Several object type values are reserved for architectural
+  experimentation (see \cref{tab:archotypes}).
+
+\item More detail is provided regarding the integration of CHERI Concentrate
+  with special registers, its alignment requirements, and so on.
+
+\item Initial discussion of a disjoint capability tree for physical
+  addresses and hardware facilities using these has been added to
+  the experimental appendix, in \cref{app:exp:physcap}.
+
+\item Initial discussion of a hybrid 64/128-bit capability design has been
+  added to the experimental appendix, in \cref{sec:windowedshortcaps}.
+
+\item We have added formal Sail instruction semantics for CHERI-RISC-V; this
+  is currently in Appendix~\ref{app:isaquick-riscv}.
+
+\item We have added a reference to our IEEE TC 2019 paper, \textit{CHERI
+  Concentrate: Practical Compressed Capabilities}, which describes our current
+  approach to capability compression.
+
+\item We have added a reference to Alexandre Joannou's PhD dissertation,
+  \textit{High-perform\-ance memory safety: optimizing the CHERI capability
+  machine}, which describes approaches to improving the efficiency of
+  capability compression and tagged memory.
+
+\end{itemize}

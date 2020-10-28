@@ -1,0 +1,4 @@
+function  select_instr_or_fcsr_rm   instr_rm =
+  if   (instr_rm == RM_DYN)
+  then #\hyperref[sailRISCVzencdeczyroundingzymode]{encdec\_rounding\_mode}# (fcsr.#\hyperref[sailRISCVzFRM]{FRM}#())
+  else instr_rm

@@ -1,0 +1,25 @@
+function #\hyperref[sailRISCVzloop]{loop}# () : unit -> unit = {
+  let insns_per_tick = #\hyperref[sailRISCVzplatzyinsnszyperzytick]{plat\_insns\_per\_tick}#();
+  i : int = 0;
+  step_no : int = 0;
+  #\hyperref[sailRISCVzwhile]{while}# (~ (htif_done)) do {
+    let stepped = #\hyperref[sailRISCVzstep]{step}#(step_no);
+    if stepped then step_no = step_no + 1;
+
+    /* check htif exit */
+    if htif_done then {
+      let exit_val = #\hyperref[sailRISCVzunsigned]{unsigned}#(htif_exit_code);
+      if exit_val == 0 then #\hyperref[sailRISCVzprint]{print}#("SUCCESS")
+      else #\hyperref[sailRISCVzprintzyint]{print\_int}#("FAILURE: ", exit_val);
+    } else {
+      /* update time */
+      i = i + 1;
+      if i == insns_per_tick then {
+        #\hyperref[sailRISCVztickzyclock]{tick\_clock}#();
+        /* for now, we drive the platform i/o at every clock tick. */
+        #\hyperref[sailRISCVztickzyplatform]{tick\_platform}#();
+        i = 0;
+      }
+    }
+  }
+}

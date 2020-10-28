@@ -1,0 +1,25 @@
+function #\hyperref[sailRISCVzextzyfetchzycheckzypc]{ext\_fetch\_check\_pc}#(start_pc, pc) = {
+  if   start_pc == pc
+  then {
+    pcc_base = #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(PCC);
+    /* We need to perform the permission checks only for the first granule. */
+    if      #\hyperref[sailRISCVznot]{not}#(PCC.tag)
+    then    #\hyperref[sailRISCVzExtzyFetchAddrzyError]{Ext\_FetchAddr\_Error}#(CapEx_TagViolation)
+    else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(PCC)
+    then    #\hyperref[sailRISCVzExtzyFetchAddrzyError]{Ext\_FetchAddr\_Error}#(CapEx_SealViolation)
+    else if #\hyperref[sailRISCVznot]{not}#(PCC.permit_execute)
+    then    #\hyperref[sailRISCVzExtzyFetchAddrzyError]{Ext\_FetchAddr\_Error}#(CapEx_PermitExecuteViolation)
+    else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(PCC, pc, 2))
+    then    #\hyperref[sailRISCVzExtzyFetchAddrzyError]{Ext\_FetchAddr\_Error}#(CapEx_LengthViolation)
+    /* Require that PCC.base be as aligned as PC. This
+       is also enforced when setting PCC in most places. */
+    else if pcc_base[0] != bitzero | (pcc_base[1] != bitzero & ~(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()))
+    then    #\hyperref[sailRISCVzExtzyFetchAddrzyError]{Ext\_FetchAddr\_Error}#(CapEx_UnalignedBase)
+    else    #\hyperref[sailRISCVzExtzyFetchAddrzyOK]{Ext\_FetchAddr\_OK}#(pc)
+  } else {
+    /* Perform only the bounds checks on the current granule, i.e. pc. */
+    if      #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(PCC, pc, 2))
+    then    #\hyperref[sailRISCVzExtzyFetchAddrzyError]{Ext\_FetchAddr\_Error}#(CapEx_LengthViolation)
+    else    #\hyperref[sailRISCVzExtzyFetchAddrzyOK]{Ext\_FetchAddr\_OK}#(pc)
+  }
+}

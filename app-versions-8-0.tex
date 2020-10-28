@@ -1,0 +1,260 @@
+This version of the \textit{CHERI Instruction-Set Architecture} is a full
+release of the Version 8 specification:
+
+\begin{itemize}
+\item We have performed modest updates to discuss Arm's Morello processor,
+  System-on-Chip (SoC), and board.
+  The authoritative reference to Morello is Arm's Morello
+  specification~\cite{arm-morello}.
+
+\item We have added a new chapter, Chapter~\ref{chap:microarchitecture},
+  describing the impact on CHERI on practical microarchitecture at a high
+  level.
+  It considers topics such as the impact of capabilities on the pipeline and
+  register file, efficient implementation of bounds compression and
+  decompression, fast bounds checking, tagged memory, and the potential
+  interaction with speculative execution.
+  This includes insights gained during the building of Arm's Morello
+  processor and SoC.
+
+\item Shift away from the idea that the fully precise 256-bit capabilities
+  are the essential model for CHERI.
+  Instead, describe capabilities as an architectural type made up of a set
+  of architectural fields, which may be constrained in terms of precision, and
+  that have an in-memory representation.
+  The microarchitecture may hold capabilities in another format internally
+  (e.g., when loaded in registers).
+
+\item The CHERI Concentrate description has been improved, including adding
+  information about the Fast Representability Check.
+  A number of constants have been updated.
+
+\item In several chapters, more care is taken when using the words
+  ``capability,'' ``pointer,'' and ``address,'' which are not interchangeable.
+
+\item Throughout, be more clear that CHERI applies to 32-bit architectures,
+  not just 64-bit architectures.
+  In Chapter~\ref{chap:architecture}, introduce \xlen{} and \clen{}
+  terminology previously only used for CHERI-RISC-V, to better abstract away
+  from specific address lengths.
+
+\item We are now more clear that capabilities may describe physical as well as
+  virtual addresses, and that virtual addressing may be implemented either
+  using software-managed TLBs (as on MIPS) or via architectural page tables
+  (as on RISC-V and ARMv8-A).
+
+\item The \insnnoref{CCall} instruction has been replaced with
+  \insnref{CInvoke}, which does not have a selector mechanism and supports
+  only exception-free domain transition.
+  The prior exception-based mechanism was introduced as scaffolding used
+  during domain-transition research, and the exception-free mechanism is our
+  preferred approach.
+  We have removed capability exception cause codes previously used
+  for that purpose, and will likely deprecate \insnref{CSetCause}, which was
+  used only for exception-based domain transition.
+
+\item The deprecated \insnnoref{CCheckPerm} and \insnnoref{CCheckType}
+  instructions have been removed as they were intended to be used with the
+  exception-based \insnnoref{CCall} mechanism.
+
+\item We have removed the experimental 64-bit capability format based on our
+  older CHERI-128 compression model.
+  We now document a 64-bit capability format as part of CHERI Concentrate in
+  Section~\ref{section:architectural-capabilities}.
+
+\item We now advocate for a policy of specifying a minimum capability bounds
+  precision, even with \insnref{CRRL} and \insnref{CRAM} instructions; see
+  Section~\ref{sec:the-value-of-architectural-minimum-precision}.
+
+\item We now more fully explore, and explain, exception throwing around
+  capability load and store permissions on capabilities and on page-table /
+  TLB entries.
+  MMU-originated exceptions are now distinct from CHERI exceptions.
+  Whereas a capability load through a capability without \cappermLC will always strip
+  the tag, a capability load via a page without load capability permission
+  will either strip the tag or throw an exception.
+  Similarly, a store via a page without permission to store a capability will
+  throw an exception if the tag bit is set on the capability being stored.
+
+\item We now discuss the use of per-page capability load barriers to
+  enable efficient capability revocation and garbage collection in
+  Section~\ref{section:capability-load-barriers}.  Load
+  barriers use additional MMU permissions to selectively trap on
+  capability loads.
+
+\item \insnref{CPtrCmp} has been changed to compare only the addresses of
+  the two capabilities, and no longer consider the tag bit, for non-exact
+  comparisons.
+  The previous behavior could result in surprising run-time failures of C/C++
+  programs.
+
+\item Sentry capabilities are no longer considered experimental.
+
+\item The instruction \insnref{CSealEntry} has been added to the ISA quick
+  references, from which it was missing.
+
+\item We now more completely elaborate how sentry capabilities interact with
+  exception handling, including automatic unsealing of sentries when installed
+  in exception program counters, not just when they are jumped to.
+
+\item Two new instructions (\insnmipsref{CGetPCCIncOffset} and
+  \insnmipsref{CGetPCCSetAddr}) have been added to improve code density when
+  generating code to create \PCC{}-derived capabilities for code or data
+  access.
+  This is of particular use when utilizing sentry capabilities.
+
+\item The \insnref{CRRL} and \insnref{CRAM} instructions, which assist with
+  capability bounds alignment and padding, are no longer considered
+  experimental.
+
+\item The \insnref{CLoadTags} instruction is no longer considered
+  experimental, and has now also been defined for CHERI-RISC-V.
+
+\item We have removed a note on \insnmipsref{CSeal}
+  regarding representable unsealed capabilities being unrepresentable as
+  sealed capabilities: all representable capabilities can now be sealed.
+
+\item We have a removed a note on \insnmipsref{CIncOffset} regarding a special
+  case in which offset of 0 is permitted to operate on sealed capabilities,
+  allowing \insnmipsref{CIncOffset} to be used to implement
+  \insnmipsref{CMove} as a pseudo-instruction.
+  This is no longer required, as \insnmipsref{CMove} is now its own
+  instruction to avoid this special casing.
+
+\item \insnmipsref{CIncOffset} is no longer specified to clear the base and
+  length if the bounds become unrepresentable, as we guarantee that the cursor
+  will hold the arithmetic result rather than the offset.
+
+\item \insnref{CSetFlags} no longer incorrectly notes that an exception
+  is thrown if the argument is untagged.
+
+\item We have added a new chapter, Chapter~\ref{chap:isaref-riscv}, listing the
+  semantics and encodings of CHERI-RISC-V instructions.
+
+\item Capability flags, and their associated instructions,
+  \insnref{CGetFlags} and \insnref{CSetFlags}, are no longer considered
+  experimental.
+  On CHERI-RISC-V, a capability flag is used to control what instruction
+  endcoding mode is active.
+  For details, see
+  \cref{sec:model-flags,sec:arch-flags,sec:cheri-riscv-encmodes}.
+
+\item Certain CHERI-RISC-V SCRs are now defined to exist only when their
+  corresponding extensions (e.g., the N extension) is present.
+
+\item In CHERI-RISC-V, when a special capability register is written using
+  \insnriscvref{CSpecialRW}, and some bits in the register are defined as WARL
+  (i.e., may be modified during the write), the tag bit will be cleared if the
+  capability value is sealed.
+
+\item A new Unaligned Base CHERI exception code has been defined, allowing
+  CHERI-RISC-V to throw an exception if the installed \PCC{} value has an
+  unaligned base.
+
+\item CHERI-RISC-V encodings are now defined for \insnriscvref{CRRL} and
+  \insnriscvref{CRAM}, and encoding space is reserved for a future implementation of
+  \insnriscvref{CClear} when using a split register file.
+
+\item CHERI-RISC-V encodings have been added for the
+  \insnriscvref{CSetEqualExact}, \insnriscvref{CLoadTags}, and
+  \insnriscvref{CClearTags} instructions.
+
+\item The CHERI-RISC-V exception cause code has changed from 0x20 to 0x1c
+  due to a collision with encoding space reserved for future use.
+
+\item We now define a set of CHERI-RISC-V atomic instructions corresponding to
+  the equivalent base RISC-V atomic instructions.
+
+\item We now document which RISC-V CSRs and FCSRs are white listed to not
+  require \cappermASR, such as the cycle counter.
+
+\item Capability exception cause codes are now properly architecture neutral,
+  but the mechanism for obtaining them is more accurately architecture
+  specific.
+
+\item CHERI-RISC-V now reports capability-related exception information via
+  the existing RISC-V Trap Value CSRs, \xtval{}, rather than through a new
+  capability cause register (a design inherited from CHERI-MIPS that is less
+  consistent with the baseline RISC-V design).
+
+\item We added two new exception codes for CHERI-related MMU faults to
+  CHERI-RISC-V.  For these exceptions, \xtval{} holds the address of
+  the faulting memory reference as with existing MMU faults on RISC-V.
+
+\item We added additional PTE bits to CHERI-RISC-V to support
+  capability revocation.  \texttt{CD} provides a capability dirty bit
+  to track pages holding capabilities.  \texttt{CRM} and \texttt{CRG}
+  enable per-page capability load barriers.
+
+\item We document the CHERI-RISC-V \insnriscvref{CRET}, \insnriscvref{CJR}, and
+  \insnriscvref{CJALR} assembly aliases.
+
+\item We have added a CHERI-RISC-V assembly programming section to the
+  CHERI-RISC-V ISA quick reference.
+
+\item There have been numerous updates to our CHERI-x86-64 architectural
+  sketch.  The page table permission bits have been adjusted to avoid
+  conflicting with the Protection Keys extension.  Violations of the
+  CHERI page table permissions now raise a page fault rather than a
+  CHERI fault.  The read capability permission now faults if violated
+  rather than stripping tags.  We have removed an ambiguous suggestion
+  for handling RIP-relative addressing.
+
+\item The interaction of CHERI with existing memory versioning schemes
+  (e.g., Arm MTE) in \cref{app:exp:versioning} is now more fully articulated
+  and includes support for integer-pointer versioning instructions as well as
+  a new atomic instruction to manipulate version values in memory.
+
+\item A new experimental instruction, \insnref{CLCNT}, has been proposed to
+  perform a non-temporal (streaming) load of a capability via a capability.
+  This instruction may prove useful when scanning memory for capabilities in
+  order to implement revocation.
+  We have not yet validated this approach through a full-stack implementation.
+
+\item A new experimental instruction, \insnref{CClearTags}, has been proposed
+  to perform fast zeroing of multiple tags in memory, and will not allocate
+  cache lines if data is not already present in a cache.
+  This instruction may prove useful when rapidly clearing capabilities for
+  revocation purposes, in the absence of data confidentiality requirements.
+  We have not yet validated this approach through a full-stack implementation.
+
+\item A new experimental protection-domain transition mechanism,
+  \textit{sealed indirect enter capabilities}, has been proposed to allow
+  a sealed entry capability to carry not just a pointer to domain-specific
+  code, but also to domain-specific data, by adding an additional level of
+  indirection.
+  A new instruction, \insnnoref{CInvokeInd}, would be used to invoke a
+  sealed indirect enter capability.
+  We have not yet validated this approach through a full-stack implementation.
+  This is described in Section~\ref{app:exp:indsentry}.
+
+\item A new \emph{ephemeral capability} type is proposed.
+  Ephemeral capabilities can be held in registers but not stored to memory,
+  and we consider the implications for fast cross-domain calls, and an
+  explicitly maintained delegation tree to provide prompt revocation of
+  delegation sub-trees.
+  We have not yet validated this approach through a full-stack implementation.
+  This is described in Section~\ref{app:exp:hierarchal-evocation}.
+
+\item A new \emph{anti-tamper seal} mechanism is proposed, to allow
+  validation that a delegated capability that has been returned has not been
+  modified (other than its address) while in use.
+  The suggested use case is around memory allocators, to ensure that a pointer
+  passed to free is consistent with the pointer originally allocated.
+  We have not yet validated this approach through a full-stack implementation.
+  This is described in Section~\ref{sec:anti-tamper}.
+
+\item We now describe potential capability-related prefetch instructions in
+  Section~\ref{sec:caching-and-explicit-prefetch}, with specific
+  consideration of side-channel attacks.
+  We also explicitly specify \DDC{} bounds checking on the MIPS
+  \insnnoref{PREF} prefetch instruction in
+  Section~\ref{sec:mips-prefetch}.
+
+\item We now reference our papers \textit{CHERIvoke: Characterising Pointer
+  Revocation using CHERI Capabilities for Temporal Memory Safety} (IEEE MICRO
+  2019), \textit{Rigorous engineering for hardware security: Formal modelling
+  and proof in the CHERI design and implementation process} (IEEE SSP 2020),
+  and \textit{Cornucopia: Temporal Safety for CHERI Heaps} (IEEE SSP 2020).
+
+\end{itemize}

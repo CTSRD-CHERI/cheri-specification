@@ -1,0 +1,92 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CClearRegs}
+\insnmipslabel{cclearregs}
+\insnmipslabel{cclearhi}
+\insnmipslabel{cclearlo}
+\insnmipslabel{clearhi}
+\insnmipslabel{clearlo}
+\insnmipslabel{fpclearhi}
+\insnmipslabel{fpclearlo}
+\subsection*{CClearRegs: Clear Multiple Registers}
+
+\subsubsection*{Format}
+ClearLo  mask \\
+ClearHi  mask \\
+CClearLo mask \\
+CClearHi mask \\
+FPClearLo mask \\
+FPClearHi mask
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x12}
+\bitbox{5}{0x0f}
+\bitbox{5}{regset}
+\bitbox{16}{mask}
+\end{bytefield}
+\end{center}
+
+\subsubsection*{Description}
+
+The registers in the target register set, \emph{regset}, corresponding
+to the set bits in the immediate \emph{mask} field are cleared.  That
+is, if bit 0 of \emph{mask} is set, then the lowest numbered register
+in \emph{regset} is cleared, and so on. The following values are
+defined for the \emph{regset} field:
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{l|l|l}
+Mnemonic & \emph{regset} & Affected registers   \\
+\midrule
+ClearLo  & 0 & \reg{0}--\reg{15}    \\
+ClearHi  & 1 & \reg{16}--\reg{31}   \\
+CClearLo & 2 & \DDC, \creg{1}--\creg{15}  \\
+CClearHi & 3 & \creg{16}--\creg{31} \\
+FPClearLo & 4 & {\bf F0--F15} \\
+FPClearHi & 5 & {\bf F16--F31} \\
+\end{tabular}
+\end{center}
+\end{figure}
+
+For integer registers, clearing means setting to zero.
+For capability registers, clearing consists of setting all
+capability fields such that the in-memory representation will be all zeroes,
+with a cleared tag bit, granting no rights.
+
+\paragraph{Note:} For \insnmipsref{CClearLo} bit 0 in \emph{mask} refers to \DDC{} and not \creg{0} since \creg{0} is the NULL register.
+
+\subsubsection*{Semantics}
+
+\sailMIPScode{ClearRegs}
+
+\subsubsection*{Exceptions}
+
+\begin{itemize}
+\item
+A Reserved Instruction exception is raised for unknown or
+unimplemented values of \emph{regset}.
+\item
+\insnmipsref{CClearLo} and \insnmipsref{CClearHi} raise a coprocessor
+unusable exception if the capability coprocessor is disabled.
+\item
+\insnmipsref{FPClearLo} and \insnmipsref{FPClearHi} raise a coprocessor
+unusable exception if the floating point unit is disabled.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+These instructions are designed to accelerate the register clearing
+that is required for secure domain transitions.  It is expected that
+they can be implemented efficiently in hardware using a single `valid'
+bit per register that is cleared by the ClearRegs instruction and set
+on any subsequent write to the register.
+\item
+The mnemonic for the integer-register instruction does not make it
+very clear what the instruction does.
+It would be preferable to have a more descriptive mnemonic.
+\end{itemize}

@@ -1,0 +1,5 @@
+function _set_SV39_PTE_BITS (r_ref, v) = {
+    r = __bitfield_deref(r_ref);
+    r.SV39_PTE_chunk_0 = update_subrange_bits(r.SV39_PTE_chunk_0, 7, 0, subrange_bits(v, 7, 0));
+    (*r_ref) = r
+}

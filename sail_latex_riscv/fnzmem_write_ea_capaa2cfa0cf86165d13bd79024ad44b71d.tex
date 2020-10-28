@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzmemzywritezyeazycap]{mem\_write\_ea\_cap}#(addr, aq, rl, con) = {
+  if   ~(#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(addr, cap_size))
+  then #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#())
+  else #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzzyzywritezymemzyea]{\_\_write\_mem\_ea}#(Write_plain, sizeof(xlen), addr, cap_size)) // FIXME: is Write_plain correct?
+}

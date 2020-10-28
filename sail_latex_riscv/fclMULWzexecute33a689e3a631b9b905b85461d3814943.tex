@@ -1,0 +1,14 @@
+if #\hyperref[sailRISCVzhaveMulDiv]{haveMulDiv}#() then {
+  let rs1_val = #\hyperref[sailRISCVzX]{X}#(rs1)[31..0];
+  let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2)[31..0];
+  let rs1_int : int = #\hyperref[sailRISCVzsigned]{signed}#(rs1_val);
+  let rs2_int : int = #\hyperref[sailRISCVzsigned]{signed}#(rs2_val);
+  /* to_bits requires expansion to 64 bits followed by truncation */
+  let result32 = #\hyperref[sailRISCVztozybits]{to\_bits}#(64, rs1_int * rs2_int)[31..0];
+  let result : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(result32);
+  #\hyperref[sailRISCVzX]{X}#(rd) = result;
+  RETIRE_SUCCESS
+} else {
+  #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+  RETIRE_FAIL
+}

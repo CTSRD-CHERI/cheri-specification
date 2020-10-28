@@ -1,0 +1,10 @@
+function #\hyperref[sailMIPSzcheckCP0Access]{checkCP0Access}# () =
+  {
+    let accessLevel = #\hyperref[sailMIPSzgetAccessLevel]{getAccessLevel}#() in
+    if ((accessLevel != Kernel) & (~(CP0Status.#\hyperref[sailMIPSzCU]{CU}#()[0]))) then
+      {
+        CP0Cause->#\hyperref[sailMIPSzCE]{CE}#() = 0b00;
+        #\hyperref[sailMIPSzSignalException]{SignalException}#(CpU);
+      };
+    #\hyperref[sailMIPSzcheckCP0AccessHook]{checkCP0AccessHook}#();
+  }

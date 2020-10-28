@@ -1,0 +1,11 @@
+struct #\hyperref[sailRISCVzTLBzyEntry]{TLB\_Entry}#('asidlen: Int, 'valen: Int, 'palen: Int, 'ptelen: Int) = {
+  asid : #\hyperref[sailRISCVzbits]{bits}#('asidlen),
+  global : bool,
+  vAddr : #\hyperref[sailRISCVzbits]{bits}#('valen),      /* VPN */
+  pAddr : #\hyperref[sailRISCVzbits]{bits}#('palen),      /* PPN */
+  vMatchMask : #\hyperref[sailRISCVzbits]{bits}#('valen), /* matching mask for superpages */
+  vAddrMask  : #\hyperref[sailRISCVzbits]{bits}#('valen), /* selection mask for superpages */
+  pte : #\hyperref[sailRISCVzbits]{bits}#('ptelen),       /* PTE */
+  pteAddr : #\hyperref[sailRISCVzbits]{bits}#('palen),    /* for dirty writeback */
+  age : #\hyperref[sailRISCVzbits]{bits}#(64)
+}

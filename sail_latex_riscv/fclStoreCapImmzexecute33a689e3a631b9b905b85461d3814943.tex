@@ -1,0 +1,3 @@
+let offset : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
+let (auth_val, vaddr, auth_idx) = #\hyperref[sailRISCVzgetzycherizymodezycapzyaddr]{get\_cheri\_mode\_cap\_addr}#(rs1_cs1, offset);
+#\hyperref[sailRISCVzhandlezystorezycapzyviazycap]{handle\_store\_cap\_via\_cap}#(cs2, auth_idx, auth_val, vaddr)

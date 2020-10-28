@@ -1,0 +1,13 @@
+function #\hyperref[sailRISCVzgetCapHardPerms]{getCapHardPerms}#(cap) : Capability -> #\hyperref[sailRISCVzbits]{bits}#(cap_hperms_width) =
+   (#\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_set_CID)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.access_system_regs)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_unseal)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_cinvoke)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_seal)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_store_local_cap)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_store_cap)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_load_cap)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_store)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_load)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.permit_execute)
+  @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.global))

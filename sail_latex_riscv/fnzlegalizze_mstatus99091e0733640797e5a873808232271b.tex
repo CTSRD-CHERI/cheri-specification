@@ -1,0 +1,29 @@
+function #\hyperref[sailRISCVzlegalizzezymstatus]{legalize\_mstatus}#(o : Mstatus, v : xlenbits) -> Mstatus = {
+  let m : Mstatus = #\hyperref[sailRISCVzMkzyMstatus]{Mk\_Mstatus}#(v);
+
+  /* We don't have any extension context yet. */
+  let m = #\hyperref[sailRISCVzupdatezyXS]{update\_XS}#(m, #\hyperref[sailRISCVzextStatuszytozybits]{extStatus\_to\_bits}#(Off));
+  /* FS is WARL, and making FS writable can support the M-mode emulation of an FPU
+   * to support code running in S/U-modes.  Spike does this, and for now, we match it.
+   * FIXME: This should be made a platform parameter.
+   */
+
+  let dirty = #\hyperref[sailRISCVzextStatuszyofzybits]{extStatus\_of\_bits}#(m.#\hyperref[sailRISCVzFS]{FS}#()) == Dirty | #\hyperref[sailRISCVzextStatuszyofzybits]{extStatus\_of\_bits}#(m.#\hyperref[sailRISCVzXS]{XS}#()) == Dirty;
+  let m = #\hyperref[sailRISCVzupdatezySD]{update\_SD}#(m, #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(dirty));
+
+  /* We don't support dynamic changes to SXL and UXL. */
+  let m = #\hyperref[sailRISCVzsetzymstatuszySXL]{set\_mstatus\_SXL}#(m, #\hyperref[sailRISCVzgetzymstatuszySXL]{get\_mstatus\_SXL}#(o));
+  let m = #\hyperref[sailRISCVzsetzymstatuszyUXL]{set\_mstatus\_UXL}#(m, #\hyperref[sailRISCVzgetzymstatuszyUXL]{get\_mstatus\_UXL}#(o));
+
+  /* Hardwired to zero in the absence of 'U' or 'N'. */
+  let m = if (~ (#\hyperref[sailRISCVzhaveNExt]{haveNExt}#())) then {
+             let m = #\hyperref[sailRISCVzupdatezyUPIE]{update\_UPIE}#(m, 0b0);
+             let m = #\hyperref[sailRISCVzupdatezyUIE]{update\_UIE}#(m, 0b0);
+             m
+          } else m;
+
+  if (~ (#\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#())) then {
+    let m = #\hyperref[sailRISCVzupdatezyMPRV]{update\_MPRV}#(m, 0b0);
+    m
+  } else m
+}

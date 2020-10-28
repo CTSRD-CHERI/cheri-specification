@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzlegalizzezyustatus]{legalize\_ustatus}#(m : Mstatus, v : xlenbits) -> Mstatus = {
+  let u = #\hyperref[sailRISCVzMkzyUstatus]{Mk\_Ustatus}#(v);
+  let s = #\hyperref[sailRISCVzlowerzymstatus]{lower\_mstatus}#(m);     // lower current mstatus to sstatus
+  let s = #\hyperref[sailRISCVzliftzyustatus]{lift\_ustatus}#(s, u);   // get updated sstatus
+  let m = #\hyperref[sailRISCVzliftzysstatus]{lift\_sstatus}#(m, s);   // lift it to an updated mstatus
+  m
+}

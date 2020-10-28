@@ -1,0 +1,14 @@
+function #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(capEx, regnum) =
+  {
+    #\hyperref[sailRISCVzprint]{print}#("CHERI " ^ #\hyperref[sailRISCVzstringzyofzycapex]{string\_of\_capex}#(capEx) ^ " Reg=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(regnum));
+    let cause : cheri_cause = struct {
+        cap_idx = regnum,
+        capEx   = capEx
+    };
+    let t : sync_exception = struct {
+      trap    = #\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(EXC_CHERI),
+      excinfo = (#\hyperref[sailRISCVzNone]{None}#() : #\hyperref[sailRISCVzoption]{option}#(xlenbits)),
+      ext     = #\hyperref[sailRISCVzSome]{Some}#(cause)
+    };
+    #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(#\hyperref[sailRISCVzexceptionzyhandler]{exception\_handler}#(cur_privilege, #\hyperref[sailRISCVzCTLzyTRAP]{CTL\_TRAP}#(t), PC))
+  }

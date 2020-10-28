@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzcapzyregzynamezyabi]{cap\_reg\_name\_abi}#(r) = {
+  match (r) {
+    0b00000 => "cnull",
+    _       => "c" ^ #\hyperref[sailRISCVzregzynamezyabi]{reg\_name\_abi}#(r)
+  }
+}

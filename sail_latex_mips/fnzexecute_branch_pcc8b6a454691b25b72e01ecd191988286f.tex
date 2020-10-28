@@ -1,0 +1,6 @@
+function #\hyperref[sailMIPSzexecutezybranchzypcc]{execute\_branch\_pcc}#(newPCC) = {
+  DelayedPC = #\hyperref[sailMIPSztozybits]{to\_bits}#(64, #\hyperref[sailMIPSzgetCapOffset]{getCapOffset}#(newPCC));
+  DelayedPCC = newPCC;
+  BranchPending = 0b1;
+  NextInBranchDelay = 0b1;
+}

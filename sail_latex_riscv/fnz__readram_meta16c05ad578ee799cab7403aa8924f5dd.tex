@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzzyzyReadRAMzyMeta]{\_\_ReadRAM\_Meta}#(addr, width) = {
+  let tag_addr = #\hyperref[sailRISCVzaddrzytozytagzyaddr]{addr\_to\_tag\_addr}#(addr);
+  let tag = #\hyperref[sailRISCVzMEMrzytag]{MEMr\_tag}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(tag_addr));
+  if #\hyperref[sailRISCVzgetzyconfigzyprintzymem]{get\_config\_print\_mem}#() then
+    #\hyperref[sailRISCVzprintzymem]{print\_mem}#("tag[R," ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVztagzyaddrzytozyaddr]{tag\_addr\_to\_addr}#(tag_addr)) ^ "] -> " ^ (if tag then "1" else "0"));
+  tag
+}

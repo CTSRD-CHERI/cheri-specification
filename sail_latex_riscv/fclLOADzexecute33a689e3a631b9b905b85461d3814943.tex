@@ -1,0 +1,23 @@
+let offset : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
+/* Get the address, #\hyperref[sailRISCVzX]{X}#(rs1) + offset.
+   Some extensions perform additional checks on address validity. */
+match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, offset, #\hyperref[sailRISCVzRead]{Read}#(Data), width) {
+  #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(e)  => { #\hyperref[sailRISCVzextzyhandlezydatazycheckzyerror]{ext\_handle\_data\_check\_error}#(e); RETIRE_FAIL },
+  #\hyperref[sailRISCVzExtzyDataAddrzyOK]{Ext\_DataAddr\_OK}#(vaddr) =>
+    if   #\hyperref[sailRISCVzcheckzymisaligned]{check\_misaligned}#(vaddr, width)
+    then { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, #\hyperref[sailRISCVzEzyLoadzyAddrzyAlign]{E\_Load\_Addr\_Align}#()); RETIRE_FAIL }
+    else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddr, #\hyperref[sailRISCVzRead]{Read}#(Data)) {
+      #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
+      #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(paddr, _) =>
+        match (width, sizeof(xlen)) {
+          (BYTE, _)   =>
+             #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 1, aq, rl, false), is_unsigned),
+          (HALF, _)   =>
+             #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 2, aq, rl, false), is_unsigned),
+          (WORD, _)   =>
+             #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 4, aq, rl, false), is_unsigned),
+          (DOUBLE, 64) =>
+             #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 8, aq, rl, false), is_unsigned)
+        }
+    }
+}

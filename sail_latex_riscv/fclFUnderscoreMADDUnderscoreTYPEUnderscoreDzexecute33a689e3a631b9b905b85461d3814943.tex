@@ -1,0 +1,14 @@
+let rs1_val_64b = #\hyperref[sailRISCVzF]{F}#(rs1);
+let rs2_val_64b = #\hyperref[sailRISCVzF]{F}#(rs2);
+let rs3_val_64b = #\hyperref[sailRISCVzF]{F}#(rs3);
+let rm_3b       = #\hyperref[sailRISCVzencdeczyroundingzymode]{encdec\_rounding\_mode}# (#\hyperref[sailRISCVzselectzyinstrzyorzyfcsrzyrm]{select\_instr\_or\_fcsr\_rm}#  (rm));
+let (fflags, rd_val_64b) : (#\hyperref[sailRISCVzbits]{bits}#(5), #\hyperref[sailRISCVzbits]{bits}#(64)) =
+  match op {
+    FMADD_D  => #\hyperref[sailRISCVzriscvzyf64MulAdd]{riscv\_f64MulAdd}# (rm_3b, rs1_val_64b, rs2_val_64b, rs3_val_64b),
+    FMSUB_D  => #\hyperref[sailRISCVzriscvzyf64MulAdd]{riscv\_f64MulAdd}# (rm_3b, rs1_val_64b, rs2_val_64b, #\hyperref[sailRISCVznegatezyD]{negate\_D}# (rs3_val_64b)),
+    FNMSUB_D => #\hyperref[sailRISCVzriscvzyf64MulAdd]{riscv\_f64MulAdd}# (rm_3b, #\hyperref[sailRISCVznegatezyD]{negate\_D}# (rs1_val_64b), rs2_val_64b, rs3_val_64b),
+    FNMADD_D => #\hyperref[sailRISCVzriscvzyf64MulAdd]{riscv\_f64MulAdd}# (rm_3b, #\hyperref[sailRISCVznegatezyD]{negate\_D}# (rs1_val_64b), rs2_val_64b, #\hyperref[sailRISCVznegatezyD]{negate\_D}# (rs3_val_64b))
+  };
+#\hyperref[sailRISCVzwritezyfflags]{write\_fflags}#(fflags);
+#\hyperref[sailRISCVzF]{F}#(rd) = rd_val_64b;
+RETIRE_SUCCESS

@@ -1,0 +1,208 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CInvoke}
+\insnmipslabel{cinvoke}
+\subsection*{CInvoke: Call into Another Security Domain}
+
+\subsubsection*{Format}
+
+CInvoke cs, cb
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,10,11,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x12}
+\bitbox{5}{0x05}
+\bitbox{5}{cs}
+\bitbox{5}{cb}
+\bitbox{11}{0x001}
+\end{bytefield}
+\end{center}
+
+\subsubsection*{Description}
+
+\insnmipsref{CInvoke} is used to jump between protection domains,
+unsealing sealed code and data-capability operands, subject to checks on those
+capabilities.
+This allows the target protection domain to gain access to a different set of capabilities,
+supporting implementation of software encapsulation.
+The two operand capabilities must be accessible, be valid capabilities, be
+sealed, have matching types, and have suitable permissions and bounds, or an
+exception will be thrown.
+\emph{cs} contains a sealed code capability for the target subsystem, which
+will be unsealed and loaded into \PCC{}.
+\emph{cb} contains a sealed data capability for the target subsystem, which
+will be unsealed and loaded into \IDC{}.
+In the parlance of object-oriented programming, \emph{cb} is a capability for
+an \emph{object}'s instance data, and \emph{cs} is a capability for the
+methods of the object's class.
+
+With \insnmipsref{CInvoke}, a constrained form of non-monotonicity is supported in
+the architecture.
+Privilege is escalated by virtue of \insnmipsref{CInvoke}
+unsealing sealed operand capability registers during a controlled transfer of
+execution to the callee in a jump-style transfer of control.
+\insnmipsref{CInvoke} requires \emph{Permit\_CInvoke} to be present on both
+ sealed capability operands.
+
+\subsubsection*{Semantics}
+
+\sailMIPScode{CCallA}
+
+\noindent
+\note{rmn30}{XXX There is a test that CInvoke in branch delay slot of ordinary branch raises Reserved Instruction exception. This needs to be specified if desired. Does it apply to both version of CInvoke? }
+\insnmipsref{CInvoke} executes like a branch in the pipeline, but does
+not have a branch delay slot. This is due to the difficulty of allowing one
+instruction from the calling domain to execute in the new domain.
+See Section~\ref{sec:jump-based-domain-transition}.
+% XXXRW: Address note:
+%
+%\note{jdw57}{What is the formal notation for describing an exception condition
+%for the following instruction?}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\emph{cs} is not sealed.
+\item
+\emph{cb} is not sealed.
+\item
+\emph{cs}.\cotype{} $\ne$ \emph{cb}.\cotype{}
+\item
+\emph{cs}.\cperms{}.\emph{Permit\_Execute} is not set.
+\item
+\emph{cb}.\cperms{}.\emph{Permit\_Execute} is set.
+\item
+\emph{cs}.\coffset{} $\ge$ \emph{cs}.\clength{}.
+\item
+\emph{cs}.\cperms{}.\emph{Permit\_CInvoke} is not set
+\item
+\emph{cb}.\cperms{}.\emph{Permit\_CInvoke} is not set
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+From the point of view of security, \insnmipsref{CInvoke} needs to be an atomic
+operation (i.e.  the caller cannot decide to just do some of it, because
+partial execution could put the system
+into an insecure state).
+From a hardware perspective, more complex domain-transition implementations
+(e.g., to implement function-call semantics or message passing) may need to
+perform multiple memory reads and writes, which might take multiple cycles and
+complicate control logic.
+
+\item
+Implementations may choose to restrict the register numbers that may be passed as \emph{cs} and \emph{cb} in order to avoid the need to decode the instruction and identify the register arguments.
+\jhbnote{Is this still true of CInvoke (selector 1) compared to CCall
+  selector 0?}
+
+\item
+The unsealing of the capabilities stored to PCC and IDC may have implications
+beyond just the object type of these capabilities.
+When capability compression is in use, the
+microarchitectural bit representation of other fields within a capability
+may depend on the value of the \cotype{}, so this assignment may have the
+effect of changing the bit representation of the other fields. i.e., a
+hardware implementation may need to change the representation of the rest
+of the capability.
+(In the deprecated CHERI-128 of \cref{app:cheri-128},
+for example, which does not have a dedicated \cotype{} field,
+\insnmipsref{CInvoke} clears the sealed bits of the capabilities
+stored to PCC and IDC but must also zero
+the bits that held the \cotype{} values
+and are now part of the bounds metadata.)
+
+\end{itemize}
+
+\rwnote{Need to add notes on \insnmipsref{CSetCID} here, as well as examples
+  to pseudocode.}
+
+\subsubsection*{Expected Software Use}
+
+Higher-level software protection-domain transitions transform the capability
+register file to reduce or expand the set of code and data rights available to
+the executing thread of control.
+In CHERI-based software, these transitions can be usefully modeled as function
+invocation or message passing in which data and capability registers are
+passed as arguments or messsages, and in which callers and callees can be
+protected from undesired access to internal state from the other party (i.e.,
+encapsulation).
+Domain transitions may implement symmetric (mutual) or asymmetric distrust
+between caller and callee, depending on guarantees about limiting callee
+access to caller state, and vice versa.
+
+\insnmipsref{CInvoke} may be used to implement mutual distrust by entering a more
+privileged ``trusted intermediary'' able to perform capability and
+integer register clearing, saving, and restoring, as well as tracking
+properties of communications such as message passing or implementing a trusted
+stack for reliable call-return semantics and error recovery.
+The \insnmipsref{CInvoke} instruction performs a set of checks on sealed
+operand capabilities allowing
+domain transition to be more efficient.
+
+A number of use cases can be formulated, depending on trust
+model.
+To implement mutual distrust, sealed code capabilities must point to an
+intermediary that is trusted by the callee to implement escalation to
+callee privilege.
+With respect to capabilities, the caller can perform its own register
+clearing and encapsulation of (optional) return state passed via register
+arguments to the callee.
+\insnmipsref{CInvoke} does not implement a link register, allowing the
+calling convention
+to implement semantics not implying a leak of \PCC{} to the callee.
+In our CheriOS software prototype, sealed code capabilities refer to one of a
+set of message-passing implementations, with the sealed data capability
+describing the message ring and target domain's code and data capabilities.
+A second \insnmipsref{CJR} out of the message-passing implementation into the
+callee, combined with suitable register clearing, is suitable to deescalate
+privilege to the callee protection domain without a second use of
+\insnmipsref{CInvoke}.
+
+\subsubsection*{Sketch of the CheriBSD CInvoke Model}
+
+The CheriBSD \insnmipsref{CInvoke} model implements domain transition via
+privileged call and return handlers.
+Modeled on function invocation, the call handler performs various
+checks (such as of operand register accessibility, validity, sealing, types,
+and permissions) on argument registers.
+If the checks pass, the handler unseals the sealed operand capabilities,
+installing them in \PCC{} and \IDC{}.
+It also clears other non-argument registers to prevent data and capability
+leakage from caller to callee.
+In addition, CheriBSD implements a trusted stack that tracks caller \PCC{} and
+\IDC{} so that the return handler can restore control (and
+security state) one instruction after the original call site.
+Finally, the call handler also implements a form of capability flow
+control by preventing the passing of non-global capabilities between caller
+and callee.
+The return handler pops an entry from the trusted stack, suitably clears
+non-return registers, and performs capability flow-control on non-global return
+capabilities.
+If the return handler is invoked on an empty trusted stack,
+the handler raises an exception.
+If the call handler is invoked when the trusted stack is full,
+the call fails and returns an error to the caller.
+
+\subsubsection*{Sketch of the CheriOS CInvoke Model}
+
+In the CheriOS model, \insnmipsref{CInvoke} is used to implement an
+asynchronous message-passing semantic.
+The sealed code capability is directed to a software message-passing
+implementation that acts as a ``trusted intermediary'', and the sealed data
+capability refers to a description of the destination domain including message
+ring.
+The message-passing implementation adds argument registers to the ring, and
+will then either return control to the sender context, or continue in to the
+recipient context.
+This is accomplished by suitable register-file manipulation to give up any
+unnecessary privilege, and an ordinary capability jump to pass control to an
+appropriate unprivileged domain.
+As with the CheriBSD model, the message-passing routine must perform any
+necessary saving of caller context, checking and clearing of registers, and
+installation of callee context to support safe interactions.

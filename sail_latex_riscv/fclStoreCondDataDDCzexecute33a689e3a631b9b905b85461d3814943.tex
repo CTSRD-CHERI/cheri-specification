@@ -1,0 +1,14 @@
+if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == false then {
+  /* should only happen in rmem
+   * rmem: allow SC to fail very early
+   */
+  #\hyperref[sailRISCVzX]{X}#(rs2) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b1);
+  RETIRE_SUCCESS
+} else if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
+  let ddc_val = DDC;
+  let vaddr = ddc_val.address + #\hyperref[sailRISCVzX]{X}#(rs1);
+  #\hyperref[sailRISCVzhandlezystorezycondzydatazyviazycap]{handle\_store\_cond\_data\_via\_cap}#(rs2, DDC_IDX, ddc_val, vaddr, width)
+} else {
+  #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+  RETIRE_FAIL
+}

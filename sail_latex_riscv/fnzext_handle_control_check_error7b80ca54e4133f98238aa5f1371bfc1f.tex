@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzextzyhandlezycontrolzycheckzyerror]{ext\_handle\_control\_check\_error}#(err : ext_control_addr_error) -> unit = {
+  let (capEx, regnum) = err;
+  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(capEx, regnum)
+}

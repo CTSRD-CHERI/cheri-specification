@@ -1,0 +1,61 @@
+function #\hyperref[sailRISCVzexceptionzyhandler]{exception\_handler}#(cur_priv : Privilege, ctl : ctl_result,
+                           pc: xlenbits) -> xlenbits = {
+  match (cur_priv, ctl) {
+    (_, #\hyperref[sailRISCVzCTLzyTRAP]{CTL\_TRAP}#(e)) => {
+      let del_priv = #\hyperref[sailRISCVzexceptionzydelegatee]{exception\_delegatee}#(e.trap, cur_priv);
+      if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+      then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("trapping from " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(cur_priv) ^ " to " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(del_priv)
+                          ^ " to handle " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(e.trap));
+      #\hyperref[sailRISCVztrapzyhandler]{trap\_handler}#(del_priv, false, #\hyperref[sailRISCVzexceptionTypezytozybits]{exceptionType\_to\_bits}#(e.trap), pc, e.excinfo, e.ext)
+    },
+    (_, #\hyperref[sailRISCVzCTLzyMRET]{CTL\_MRET}#())  => {
+      let prev_priv   = cur_privilege;
+      mstatus->#\hyperref[sailRISCVzMIE]{MIE}#()  = mstatus.#\hyperref[sailRISCVzMPIE]{MPIE}#();
+      mstatus->#\hyperref[sailRISCVzMPIE]{MPIE}#() = 0b1;
+      cur_privilege   = #\hyperref[sailRISCVzprivLevelzyofzybits]{privLevel\_of\_bits}#(mstatus.#\hyperref[sailRISCVzMPP]{MPP}#());
+      mstatus->#\hyperref[sailRISCVzMPP]{MPP}#()  = #\hyperref[sailRISCVzprivLevelzytozybits]{privLevel\_to\_bits}#(if #\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#() then User else Machine);
+      if   cur_privilege != Machine
+      then mstatus->#\hyperref[sailRISCVzMPRV]{MPRV}#() = 0b0;
+
+      if   #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#()
+      then #\hyperref[sailRISCVzprintzyreg]{print\_reg}#("CSR mstatus <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mstatus.#\hyperref[sailRISCVzbits]{bits}#()));
+      if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+      then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("ret-ing from " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(prev_priv) ^ " to " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(cur_privilege));
+
+      #\hyperref[sailRISCVzcancelzyreservation]{cancel\_reservation}#();
+      #\hyperref[sailRISCVzpreparezyxretzytarget]{prepare\_xret\_target}#(Machine) & #\hyperref[sailRISCVzpczyalignmentzymask]{pc\_alignment\_mask}#()
+    },
+    (_, #\hyperref[sailRISCVzCTLzySRET]{CTL\_SRET}#())  => {
+      let prev_priv   = cur_privilege;
+      mstatus->#\hyperref[sailRISCVzSIE]{SIE}#()  = mstatus.#\hyperref[sailRISCVzSPIE]{SPIE}#();
+      mstatus->#\hyperref[sailRISCVzSPIE]{SPIE}#() = 0b1;
+      cur_privilege   = if mstatus.#\hyperref[sailRISCVzSPP]{SPP}#() == 0b1 then Supervisor else User;
+      mstatus->#\hyperref[sailRISCVzSPP]{SPP}#()  = 0b0;
+      if   cur_privilege != Machine
+      then mstatus->#\hyperref[sailRISCVzMPRV]{MPRV}#() = 0b0;
+
+      if   #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#()
+      then #\hyperref[sailRISCVzprintzyreg]{print\_reg}#("CSR mstatus <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mstatus.#\hyperref[sailRISCVzbits]{bits}#()));
+      if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+      then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("ret-ing from " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(prev_priv)
+                          ^ " to " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(cur_privilege));
+
+      #\hyperref[sailRISCVzcancelzyreservation]{cancel\_reservation}#();
+      #\hyperref[sailRISCVzpreparezyxretzytarget]{prepare\_xret\_target}#(Supervisor) & #\hyperref[sailRISCVzpczyalignmentzymask]{pc\_alignment\_mask}#()
+    },
+    (_, #\hyperref[sailRISCVzCTLzyURET]{CTL\_URET}#())  => {
+      let prev_priv   = cur_privilege;
+      mstatus->#\hyperref[sailRISCVzUIE]{UIE}#()  = mstatus.#\hyperref[sailRISCVzUPIE]{UPIE}#();
+      mstatus->#\hyperref[sailRISCVzUPIE]{UPIE}#() = 0b1;
+      cur_privilege   = User;
+
+      if   #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#()
+      then #\hyperref[sailRISCVzprintzyreg]{print\_reg}#("CSR mstatus <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mstatus.#\hyperref[sailRISCVzbits]{bits}#()));
+      if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+      then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("ret-ing from " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(prev_priv) ^ " to " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(cur_privilege));
+
+      #\hyperref[sailRISCVzcancelzyreservation]{cancel\_reservation}#();
+      #\hyperref[sailRISCVzpreparezyxretzytarget]{prepare\_xret\_target}#(User) & #\hyperref[sailRISCVzpczyalignmentzymask]{pc\_alignment\_mask}#()
+    }
+  }
+}

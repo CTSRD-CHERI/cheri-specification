@@ -1,0 +1,8 @@
+function bop_of_num arg# = match arg# {
+  0 => RISCV_BEQ,
+  1 => RISCV_BNE,
+  2 => RISCV_BLT,
+  3 => RISCV_BGE,
+  4 => RISCV_BLTU,
+  _ => RISCV_BGEU
+}

@@ -1,0 +1,19 @@
+let cs1_val = if #\hyperref[sailRISCVzunsigned]{unsigned}#(cs1) == 0 then DDC else #\hyperref[sailRISCVzC]{C}#(cs1);
+let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
+if rs2_val == #\hyperref[sailRISCVzzzeros]{zeros}#() then {
+  #\hyperref[sailRISCVzC]{C}#(cd) = null_cap;
+  RETIRE_SUCCESS
+} else if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_TagViolation, cs1);
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
+  RETIRE_FAIL
+} else {
+  let (success, newCap) = #\hyperref[sailRISCVzsetCapOffset]{setCapOffset}#(cs1_val, rs2_val);
+  if success then
+    #\hyperref[sailRISCVzC]{C}#(cd) = newCap
+  else
+    #\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzinvalidateCap]{invalidateCap}#(newCap);
+  RETIRE_SUCCESS
+}

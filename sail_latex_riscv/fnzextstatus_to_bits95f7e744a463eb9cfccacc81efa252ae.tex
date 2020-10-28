@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzextStatuszytozybits]{extStatus\_to\_bits}#(e) =
+  match (e) {
+    Off     => 0b00,
+    Initial => 0b01,
+    Clean   => 0b10,
+    Dirty   => 0b11
+  }

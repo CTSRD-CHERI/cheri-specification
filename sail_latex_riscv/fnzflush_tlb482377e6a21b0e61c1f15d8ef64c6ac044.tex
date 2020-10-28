@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzflushzyTLB48]{flush\_TLB48}#(asid, addr) =
+  match (tlb48) {
+    #\hyperref[sailRISCVzNone]{None}#()  => (),
+    #\hyperref[sailRISCVzSome]{Some}#(e) => if   #\hyperref[sailRISCVzflushzyTLBzyEntry]{flush\_TLB\_Entry}#(e, asid, addr)
+               then tlb48 = #\hyperref[sailRISCVzNone]{None}#()
+               else ()
+  }

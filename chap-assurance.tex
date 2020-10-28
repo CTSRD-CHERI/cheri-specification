@@ -1,0 +1,412 @@
+\chapter{CHERI in High-Assurance Systems}
+\label{chap:assurance}
+
+This chapter considers the roles of formal methods relating to the assurance
+of CHERI-MIPS hardware and software.  It gives an informal explanation of some
+features of the CHERI mechanism that may of interest to developers of
+high-assurance hardware, secure microkernels, and formal models of CHERI,
+including an initial security argument for a reference monitor.  Further
+work on proofs of properties of the CHERI ISA and were published in our
+IEEE Symposium on Security and Privacy in 2020~\cite{cheri-formal-SP2020}.
+
+\section{Unpredictable Behavior}
+
+In the semantics for the CHERI instructions in Chapter \ref{chap:isaref-mips},
+we try 
+to avoid defining behavior as ``unpredictable''. There were several reasons 
+for avoiding unpredictable behavior, including the difficulty it creates for
+formal verification.
+Although CHERI is based on the MIPS ISA, 
+the MIPS ISA specification (e.g., for the
+R4000) makes extensive use of ``unpredictable''. If ``unpredictable'' is
+modeled as ``anything could happen'', then clearly the system is not secure.
+As a 
+concrete example, imagine a hypothetical CHERI implementation that contains
+a Trojan horse such that when a sandboxed program executes an arithmetic
+instruction whose result is ``unpredictable'', it also changes the capability
+registers so that a capability granting access to the entire virtual address
+space is placed in a capability register. If ``unpredictable'' means that
+anything could happen, then this is compliant with the MIPS ISA; it is also 
+obviously insecure. Later versions of the MIPS ISA (e.g., MIPS64 volume I) make
+it clear that ``unpredictable'' is more restrictive than this, saying that
+``\emph{unpredictable} operations must not read, write, or modify the contents of
+memory or internal state that is inaccessible in the current processor mode''.
+However, that is clearly not strong enough.
+
+For the CHERI mechanism to be secure, we require that programs whose behavior
+is ``unpredictable'' according to the MIPS ISA do not modify memory or
+capability registers in a way that allows the capability mechanism to be bypassed.
+One easy way to achieve this is that the ``unpredictable'' case requires that
+neither memory nor capability registers are modified.
+
+The test suite for our CHERI1 FPGA implementation checks that the CPU follows
+known CHERI1-specific behavior in the ``unpredictable'' cases.
+
+\section{Bypassing the Capability Mechanism Using the TLB}
+
+If a program can modify the TLB (the status register has CU0 set, KSU not
+equal to 2, EXL set or IRL set), then it can bypass the capability mechanism
+by modifying the TLB. Although composition with the Memory Management Unit and
+virtual-addressing mechanism in this manner is a critical and intentional part
+of our design, it is worth considering the implications from the perspective
+of high-assurance design.
+The ``attack'' is as follows: Consider a location in memory
+whose virtual address is not accessible using the capability mechanism; take
+its physical address and change the TLB so that its new virtual address is one
+to which you have a capability, and then access the data through the new virtual
+address. There are several ways to prevent this attack:
+
+\begin{itemize}
+\item
+In CheriBSD, user-space programs are unable to modify the TLB (except through
+system calls such as \ccode{mmap}), and thus cannot carry out this attack.
+This  security argument makes it explicit that the security of the capability
+mechanism depends on the correctness of the underlying operating system. 
+However, this may not be adequate for high-assurance systems.
+\item
+Similarly, a high-assurance microkernel could run untrusted code in user
+space, with KSU=2, CU0 false, EXL false, and IRL false. A security proof
+for the combined hardware-software system could verify that untrusted code
+cannot cause this condition to become false except by reentering the microkernel
+via a system call or exception.
+\item
+A single-address-space microkernel that has no need for the TLB could run on
+a CHERI-enabled CPU without a TLB. Our CHERI1 FPGA prototype can be
+synthesized in a version without a TLB, and our formal model in the L3
+specification language includes a TLB-less variant. Removing the TLB for
+applications that don't need it saves chip area, and removes the risk that the
+TLB could be used as part of an attack.
+\item
+We are considering future extensions to CHERI that would allow the capability
+mechanism to be used for sandboxing in kernel mode; these would allow more control
+over access to the TLB when in kernel mode. As well as enabling sandboxing of
+device drivers in monolithic kernels such as that of CheriBSD, the same mechanism
+could also be used by microkernels.
+\end{itemize}
+
+\section{Malformed Capabilities}
+
+The encoding formats for capabilities can represent values that can never be
+created using the capability instructions while taking the initial contents of
+the capability registers as a starting point. For example, with compressed
+128-bit capabilities, there are bit patterns corresponding to \cbase{} $+$
+\clength{} $> 2^{64}$.
+The capability registers are initialized on reset, so there will
+never be malformed capabilities in the initial register contents, and 
+a CHERI instruction will never create malformed capabilities from
+well-formed ones. However, DRAM is not cleared on system reset, so that it is
+possible that the initial memory might contain malformed capabilities with the
+tag bit set.
+
+Operating systems or microkernels are expected to initialize memory before
+passing references to it to untrusted code. (If you give untrusted code a capability that
+has the \emph{Load\_Capability} permission and refers to uninitialized memory,
+you don't know what rights you are delegating to it.)
+This means that untrusted
+code should not be in a position to make use of malformed capabilities.
+
+There are (at least) two implementation choices. An implementation of the CHERI
+instructions could perform access-control checks in a way that would
+work on both well-formed and malformed capabilities.  
+Alternatively, the hardware could be
+slightly simplified by performing the checks in a way that might behave
+unexpectedly on malformed capabilities, and then rely on the capability
+mechanism (plus the operating system initializing memory) to guarantee that
+they will never become available to untrusted code.
+
+If the hardware is designed to guard against malformed capabilities, this
+presents special difficulties in testing. No program whose behavior
+is defined by the ISA specification will ever trigger the case of encountering
+a malformed capability. (Programs whose behavior is ``unpredictable'', because
+they access uninitialized memory, may encounter them). 
+However, some approaches to
+automatic test generation may have difficulty constructing such tests.
+
+More generally, however, uninitialized memory might also contain highly
+privileged and yet entirely well-formed capabilities, and hence references to
+that memory should be given to less trustworthy code only after suitable
+clearing.
+This requirement is present today for current hardware, as uncleared memory on
+boot might contain sensitive data from prior boots, but this requirement is
+reinforced in a capability-oriented environment.
+
+\section{Constants in the Formal Model}
+
+The L3 language that we used to specify CHERI does not have a notion of
+a named constant as distinct from a mutable variable. Fully machine-checked
+security proofs may need to prove that some of these constants are in fact
+constant. (For example, that it is not possible to bypass the capability
+mechanism by changing the CPU's endianness and hence the effect of a capability
+dereference, because there is no way to change the endianness).
+
+\section{Outline of Security Argument for a Reference Monitor}
+
+The CHERI ISA can be used to provide several different security properties (for
+example, control-flow integrity or sandboxing). This section provides the 
+outline of a security argument for how the CHERI instructions can be used
+to implement a reference monitor.
+
+The Trusted Computer System Evaluation Criteria (``Orange Book'')~\cite{TCSEC}
+expressed the requirement for a reference monitor as ``The TCB shall maintain
+a domain for its own execution that protects it from external interference or
+tampering''.
+
+The Common Criteria~\cite{CC2012-3} contain a similar requirement:
+
+\begin{quote}
+``ADV\_ARC.1.1D The developer shall design and implement the [target of
+evaluation] so that the security features of the [target of evaluation
+security functionality] cannot be bypassed.''
+
+``ADV\_ARC.1.2D The developer shall design and implement the [target of
+evaluation security functionality] so that it is able to protect itself from
+tampering by untrusted active entities.''
+\end{quote}
+
+In this section, we we explain how the CHERI mechanism can be used
+to provide this requirement(s), and provides a semi-formal outline of a
+proof of its correctness.
+
+We are assuming that the system operates in an environment where
+the attacker does not have physical access to the hardware, so that
+hardware-level attacks such as introducing memory errors~\cite{Govinda+03}
+are not applicable. 
+%%%% WE MIGHT ALSO MENTION the A2 best paper from IEEE SS&P 2016 on
+%%%% injecting analog circuit malware into the hardware.
+
+In this section, we do not consider covert channels. There are many
+applications where protection against covert channels is not a requirement.
+The CHERI1 FPGA implementation has memory caches, which probably could be
+exploited as a covert channel.
+
+The architecture we use to meet this requirement consists of
+(a) some trusted code that initializes the CPU and then calls the untrusted
+ code; and (b) some untrusted code. The CHERI capability mechanism is
+used to restrict which memory locations can be accessed by the untrusted
+code.
+Here, ``trusted'' means
+that, for the purpose of security analysis, we know what the code does. The
+``untrusted'' code, on the other hand, might do anything.
+
+The reference monitor consists of the trusted code and the CHERI hardware; and
+the ``security domain'' provided for the reference monitor consists of a set of
+memory addresses ($S_K$) for the data, code, and stack segments of the trusted
+code, together with the CHERI reserved registers.
+
+Our security requirement of the hardware is that the untrusted code will run 
+for a while, eventually returning control to the trusted code; and when the
+trusted code is re-entered, (a) it will be reentered at one of a small number
+of known entry points; (b) its code, data and stack will not have been modified
+by the untrusted code; and (c) the reserved capability registers will not have
+been modified by the untrusted code.
+
+This security property provided by the hardware allows us to reason that the
+trusted code is still trusted when it is reentered. If its code and data have
+not been modified. we can still know what it will do
+(to the extent that it is actually trustworthy -- not just ``trusted''),
+
+The ``cannot be bypassed'' and ``tamperproof'' requirements  are here
+interpreted as meaning that there is no way within the ISA to modify the
+reference monitor's reserved memory or the reserved registers. That is, all
+memory accesses are checked against a capability register, and do not succeed
+unless the capability permits them. The untrusted code can access memory without
+returning control to the trusted code; 
+however, all of its memory access are mediated
+by the capability hardware, which is considered to be part of the reference
+monitor. Tampering with the reference monitor by making physical modifications
+to the hardware is considered to be out of scope; the attacker is assumed
+not to have physical access.
+
+The proof of this security property proceeds by induction on states. Let the
+predicate \emph{SecureState} refer to the following set of conditions:
+
+\begin{itemize}
+\item
+CP0.Status.KSU $\neq$ 0
+\item
+CP0.Status.CU0 = \algorithmicfalse{}
+\item
+CP0.Status.EXL = \algorithmicfalse{}
+\item
+CP0.Status.ERL = \algorithmicfalse{}
+\item
+The TLB is initialized such that every entry has been initialized; every entry has
+a valid page mask; and there is no (ASID, virtual address) pair that matches multiple
+entries.
+\item
+Let $S_U$ be a set of (virtual) memory addresses allocated for use by the untrusted code,
+and $T_U$ a set of \cotype{} values allocated for use by the untrusted code.
+\item
+The set of virtual addresses $S_U$ does not contain an address that maps (under the
+TLB state mentioned above) into any of the memory addresses reserved for use
+by the trusted code's code, stack or data segments.
+\item
+The set of virtual addresses $S_U$ does not contain an address that maps (under the
+TLB state mentioned above) into the physical address used by a memory-mapped I/O
+device. (If this property is weakened to allow some I/O devices to be memory-mapped
+by untrusted code, then the security proof has to show that the I/O device can't
+be used to break the security property, e.g. by causing the I/O device to DMA
+into a region of memory outside of $S_U$).
+\item
+The set of virtual addresses $S_U$ are all mapped to cached memory. (A load-linked
+operation on uncached memory is defined as unpredictable in the MIPS ISA. While
+this probably can't be used to attack a real system, any unpredictable behavior
+has to prevent for provable security).
+\item
+All capability registers have \cbase{} $+$ \clength{} $\leq 2^{64}$ 
+\algorithmicor{} \ctag{} $=$ \algorithmicfalse{}.
+\item
+The above is also true of all capabilities contained within the set of memory
+addresses $S_U$.
+\item
+All capability registers are either (a) reserved registers; (b) have \ctag{} =
+\algorithmicfalse{}; (c) are sealed with an \cotype{} not in $T_U$; or do not
+grant \emph{Access\_System\_Registers} permission.
+\item
+The above is also true of all capabilities contained within the set of memory
+addresses $S_U$.
+\item
+All capability registers are either (a) reserved registers; (b) have \ctag{} =
+\algorithmicfalse{}; (c) are sealed with an \cotype{} not in $T_U$; or do not
+grant access to a region of virtual addresses outside of $S_U$.
+\item
+The above is also true of all capabilities contained within the set of memory
+addresses $S_U$.
+\item
+All capability registers are either (a) reserved registers; (b) have \ctag{} =
+\algorithmicfalse{}; (c) are sealed with an \cotype{} not in $T_U$; or do not
+grant access to a region of the \cotype{} space outside of $T_U$.
+\item
+The above is also true of all capabilities contained within the set of memory
+addresses $S_U$.
+\item
+If the current instruction is in a branch delay slot, then the above restrictions
+on capability registers also apply to the \PCC{} value that is the target of the
+branch. That is, \emph{SecureState} is not true if the trusted code does a
+\insnref{CJR} that grants privilege and then runs the first instruction of
+the untrusted code in the branch delay slot.
+\end{itemize}
+
+Let the predicate \emph{TCBEntryState} refer to a state in which the trusted code
+has been reentered at one of a small number of known entry points.
+
+We assume that \emph{SecureState} is true initially (i.e.,
+a requirement of
+the trusted code is that it puts the CPU into this state before calling the
+untrusted code). 
+We then wish to show that \emph{SecureState} $\Rightarrow$ \textbf{X}
+ (\emph{SecureState} \algorithmicor{} \emph{TCBEntryState}) (where \textbf{X} is
+the next operator in linear temporal logic). By induction on states, 
+\emph{SecureState} $\Rightarrow$ \emph{TCBEntryState} \textbf{R} \emph{SecureState}
+(where \textbf{R} is the release operator in linear temporal logic).
+
+The argument that \emph{SecureState} $\Rightarrow$ \textbf{X} (\emph{SecureState}
+\algorithmicor{} \emph{TCBEntryState}) can be summarized as:
+
+\begin{itemize}
+\item
+Given that CP0.Status.KSU $\neq$ 0, CP0.Status.CU0 = \algorithmicfalse{},
+CP0.Status.EXL = \algorithmicfalse{} and CP0.Status.ERL = \algorithmicfalse{},
+all instructions will either raise an exception (\textbf{X}
+\emph{TCBEntryState}) or leave CP0 registers unchanged, leaving this 
+part of the \emph{SecureState} invariant unchanged.
+\item
+Given that CP0.Status.KSU $\neq$ 0 (etc.), all instructions will
+either raise an exception or leave the TLB unchanged, preserving the parts of
+\emph{SecureState} relating to the TLB.
+\item
+Given that the TLB is in the state given by \emph{SecureState}, load and store
+operations will not result in ``undefined'' or ``unpredictable'' behavior due
+to multiple matches in the TLB.
+\item
+Given that CP0.Status.KSU $\neq$ 0 (etc.), and the TLB is in the state
+described above, no instruction can result in
+behavior that is ``undefined'' according to the MIPS ISA. (The MIPS ISA
+specification makes a distinction between ``undefined'' and ``unpredictable'',
+but our model in the L3 language combines the two).
+\item
+However, instructions can still result in behavior that is ``unpredictable''
+according to the MIPS ISA. These cases can be dealt with by providing a
+CHERI-specific refinement of the MIPS ISA (i.e. describing what CHERI does in
+these cases).
+\item
+The capability instructions preserve the part of \emph{SecureState} that
+relates to the capability registers and to capabilities within $S_U$.
+\item
+Given that the capability registers (apart from reserved registers) do not grant
+access to any memory addresses outside of $S_U$, store instructions might raise
+an exception (\textbf{X} \emph{TCBEntryState}), but they will not modify locations
+outside of $S_U$; thus, the trusted code's data, code and stack segments
+ will be unmodified.
+\item
+Given that the capability registers (apart from the reserved registers) do
+not grant \emph{Access\_System\_Registers} permission, the reserved
+registers will not be modified.
+\end{itemize}
+
+The theorem \emph{SecureState} $\Rightarrow$ \emph{TCBEntryState} \textbf{R}
+\emph{SecureState} uses the \textbf{R} operator, which is a weak form of
+``until'': the system might continue in \emph{SecureState} indefinitely.
+Sometimes it is desirable to have the stronger property that 
+\emph{TCBEntryState} is guaranteed to be reached eventually. This can be
+ensured by having the trusted code enable timer interrupts, and use a
+timer interrupt to force return to \emph{TCBEntryState} if the untrusted
+code takes too long.
+
+More formally, the following properties are added to \emph{SecureState}
+to make a new predicate, \emph{SecureStateTimer}:
+
+\begin{itemize}
+\item
+CP0.Status.IE = \algorithmictrue{}
+\item
+CP0.Status.IM(7) = \algorithmictrue{}
+\end{itemize}
+
+Given that CP0.Status.KSU $\neq$ 0 (etc.),  it follows that these properties
+are also preserved, i.e.
+\emph{SecureStateTimer} $\Rightarrow$ \emph{TCBEntryState} \textbf{R}
+\emph{SecureStateTimer}.
+
+As CP0.Count increases by at least one for every instruction, a timer interrupt
+will eventually be triggered. (If Compare is 2, for example, and Count
+increments from 1 to 3 without ever going through the intervening value of 2,
+a timer interrupt is still triggered). As CP0.KSU $\neq$ 0, CP0.Status.EXL
+= \algorithmicfalse{}, CP0.Status.ERL = \algorithmicfalse{}, CP0.Status.IE =
+\algorithmictrue{} and CP0.Status.IM(7) = \algorithmictrue{}, the interrupt
+will be enabled and return to \emph{TCBEntryState} will occur:
+
+\emph{SecureStateTimer} $\Rightarrow$ \textbf{F} \emph{TCBEntryState}
+
+It then follows that \emph{SecureStateTimer} $\Rightarrow$ 
+\emph{SecureStateTimer} \textbf{U} \emph{TCBEntryState}, where
+\textbf{U} is the until operator in linear temporal logic.
+
+\section*{Illicit Information Flows}
+
+Using an argument similar to the one in the preceding section, it ought
+to be possible to formally prove confidentiality properties of the CHERI ISA.
+However, proofs of confidentiality suffer from the ``refinement paradox'':
+confidentiality properties are not preserved by refinement. If there is
+any non-determinism in a specification, a refinement of it might leak
+secret information via values that were originally left unspecified.
+
+In more concrete terms, an implementation of the CHERI ISA might leak secret
+information due to security problems at the microarchitectural level.
+
+The Common Criteria~\cite{CC2017-1} uses the term ``covert channel'' (alternatively,
+``illicit information flow'') for cases where it is possible to use
+features of the implementation to signal information in a way that is
+prohibited by the security policy.
+
+The most obvious potential source of a covert channel in CHERI is using the
+memory caches as a timing channel. Meltdown~\cite{Lipp2018meltdown} and
+Spectre~\cite{Kocher2018spectre} are examples of realistic attacks against
+a CPU's memory protection using the cache as a timing channel.
+Subsequently, the related Foreshadow attacks have been reported~\cite{Foreshadow,Foreshadow-NG}.
+
+To reduce the risk of an attack similar to Meltdown, implementations of CHERI
+should perform MMU and capability permissions checks before a store or load,
+rather than speculatively executing the load and store before all capability
+checks have completed: tag violation, bounds check, permissions check, seal
+check, and so on.

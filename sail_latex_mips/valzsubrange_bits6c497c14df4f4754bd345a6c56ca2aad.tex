@@ -1,0 +1,2 @@
+subrange_bits : forall ('n 'm 'o : Int), (0 <= 'o & 'o <= 'm & 'm < 'n).
+  (bits('n), int('m), int('o)) -> bits('m - 'o + 1)

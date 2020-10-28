@@ -1,0 +1,5 @@
+function _set_htif_cmd_cmd (r_ref, v) = {
+    r = __bitfield_deref(r_ref);
+    r.htif_cmd_chunk_0 = update_subrange_bits(r.htif_cmd_chunk_0, 55, 48, subrange_bits(v, 7, 0));
+    (*r_ref) = r
+}

@@ -1,0 +1,10 @@
+function mmio_read forall 'n, 0 < 'n <= max_mem_access . (t : #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), paddr : xlenbits, width : atom('n)) -> #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(#\hyperref[sailRISCVzbits]{bits}#(8 * 'n)) =
+  if   #\hyperref[sailRISCVzwithinzyclint]{within\_clint}#(paddr, width)
+  then #\hyperref[sailRISCVzclintzyload]{clint\_load}#(t, paddr, width)
+  else if #\hyperref[sailRISCVzwithinzyhtifzyreadable]{within\_htif\_readable}#(paddr, width) & (1 <= 'n)
+  then #\hyperref[sailRISCVzhtifzyload]{htif\_load}#(t, paddr, width)
+  else match t {
+    #\hyperref[sailRISCVzExecute]{Execute}#()  => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyFetchzyAccesszyFault]{E\_Fetch\_Access\_Fault}#()),
+    #\hyperref[sailRISCVzRead]{Read}#(Data) => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyLoadzyAccesszyFault]{E\_Load\_Access\_Fault}#()),
+    _          => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#())
+  }

@@ -1,0 +1,4 @@
+function #\hyperref[sailMIPSzcapBoundsEqual]{capBoundsEqual}# (c1, c2) : (Capability, Capability) -> bool =
+    let (base1, top1) = #\hyperref[sailMIPSzgetCapBounds]{getCapBounds}#(c1) in
+    let (base2, top2) = #\hyperref[sailMIPSzgetCapBounds]{getCapBounds}#(c2) in
+    (base1 == base2) & (top1 == top2)

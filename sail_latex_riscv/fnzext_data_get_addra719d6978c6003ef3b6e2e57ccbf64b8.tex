@@ -1,0 +1,28 @@
+function #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(base_reg : regidx, offset : xlenbits, acc : #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), width : word_width)
+         -> #\hyperref[sailRISCVzExtzyDataAddrzyCheck]{Ext\_DataAddr\_Check}#(ext_data_addr_error) = {
+
+  let (auth_val, newAddr, auth_idx) = #\hyperref[sailRISCVzgetzycherizymodezycapzyaddr]{get\_cheri\_mode\_cap\_addr}#(base_reg, offset);
+
+  let (have_rqd_load_perm, have_rqd_store_perm) : (bool, bool) = match acc {
+    #\hyperref[sailRISCVzRead]{Read}#(Data)            => (auth_val.permit_load, true                 ),
+    #\hyperref[sailRISCVzWrite]{Write}#(Data)           => (true                , auth_val.permit_store),
+    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data) => (auth_val.permit_load, auth_val.permit_store),
+    #\hyperref[sailRISCVzExecute]{Execute}#()             => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("ext_data_get_addr for Execute"),
+    #\hyperref[sailRISCVzRead]{Read}#(_)               => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("ext_data_get_addr for #\hyperref[sailRISCVzRead]{Read}#(_)"),
+    #\hyperref[sailRISCVzWrite]{Write}#(_)              => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("ext_data_get_addr for #\hyperref[sailRISCVzWrite]{Write}#(_)"),
+    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _)       => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("ext_data_get_addr for #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _)")
+  };
+
+  if #\hyperref[sailRISCVznot]{not}#(auth_val.tag) then
+    #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(CapEx_TagViolation, auth_idx)
+  else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(auth_val) then
+    #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(CapEx_SealViolation, auth_idx)
+  else if #\hyperref[sailRISCVznot]{not}#(have_rqd_load_perm) then
+    #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(CapEx_PermitLoadViolation, auth_idx)
+  else if #\hyperref[sailRISCVznot]{not}#(have_rqd_store_perm) then
+    #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(CapEx_PermitStoreViolation, auth_idx)
+  else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(auth_val, newAddr, #\hyperref[sailRISCVzwordzywidthzybytes]{word\_width\_bytes}#(width))) then
+    #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(CapEx_LengthViolation, auth_idx)
+  else
+    #\hyperref[sailRISCVzExtzyDataAddrzyOK]{Ext\_DataAddr\_OK}#(newAddr)
+}

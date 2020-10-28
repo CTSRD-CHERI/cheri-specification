@@ -1,0 +1,110 @@
+CHERI's design focuses on the `main' CPU core(s), in which there is a single operating system, and capabilities are used within virtual address spaces, mediated via an MMU and a memory-coherency system.
+
+Many systems are composed of distributed compute elements that share memory.  In various contexts these are termed `peripherals', `DMA engines', `accelerators' or `remote DMA network cards'.  These may be on a single system-on-chip using fabrics such as AXI, or across interconnect such as PCI Express, Thunderbolt or Infiniband.
+
+When capabilities are used in such a system, there is a requirement to
+protect them from inappropriate modification by cores that might be outside the purview of the primary operating system.  Additionally, it would be advantageous for such cores to use capabilities for their own code and data, without having to mediate them from centralized authority.  Furthermore, such systems frequently use multiple levels of address translation -- not just a virtual address space (as capabilities in this document primarily refer to), but a patchwork of multiple physical address spaces (including the guest physical address spaces used by hypervisors), as well as virtual address spaces used by accelerators and other cores.
+
+There are two challenges: first, preventing a core from modifying a
+capability it does not own, and second, handling the case that capabilities
+can alias if they refer to an incorrect address space.
+
+To achieve these goals, we propose several architectural features.
+
+\subsection{Scope and threat model}
+This feature assumes that peripherals are capability-aware, in that they are able to load, store and manipulate capabilities and their tags.  A number of scenarios with trustworthy hardware and software, untrustworthy software on trustworthy hardware, or untrustworthy hardware and software may be envisaged.  Hardware that is not capability-aware and uses integers as pointers is out of scope for this extension, although it may be constrained or otherwise capability-wrapped by some other structure.
+
+\subsection{Address-space coloring}
+
+We deconstruct systems into regions of address-space colors (ASCs).  A region with a common color has addresses with a single unambiguous meaning.  Generalizing, a color could apply to an application's virtual address space, the system's hardware physical address space, the guest physical address space of a virtual machine, or a piece of memory on a peripheral.
+A Processing Element (PE -- processor, DMA engine or other core) is assigned a color based on its physical location in the system topography.
+
+Colors also represent single regions of authority.  Within a colored region, it is assumed that every device that can synthesize a capability has rights to do so.  If a device is untrustworthy, it should be segmented into a different colored region.
+
+An address space may be connected to a different address space via an Address Translation and Protection Unit (ATPU).  Examples of ATPUs might be MMUs, IOMMUs, and hypervisor page translation, but also more limited cases such as PCI BAR mapping or driving upper address bits from a page register.  An ATPU may provide no translation between mutually distrusting hardware that happens to share an address space, but still apply protection between them.
+
+We generalize an ATPU as a bridge by which requests come in from one address space and are dispatched into another.  The ATPU may itself make memory requests to determine the translation, such as when walking page tables.  These would potentially occur in an address space of a third color.
+
+\subsection{Capability coloring}
+Capabilities refer to addresses in particular address spaces, hence capabilities are given a color that is stored within the capability.  It is now possible to disambiguate the address within a capability with the address space to which it refers.
+
+\subsubsection{Representation}
+We describe architecturally the notion of address space color without specifying the specific representation.
+However microarchitecturally we expect that the \cotype{} field in a capability would be reused, based on a tagging scheme to distinguish them from a software-defined \cotype{}.  Given the limited number of bits available in the \cotype{} for the otype-color, it may be impossible to represent all the colors within these bits.  It is not necessary for the otype-color field to be unique, only that it is possible to disambiguate which address space region is referred by a capability.  For example, the upper bits of the address may be used to distinguish two regions with the same otype-color field which are each smaller than 64-bit addressing.  Architecturally such regions would be thought of as having different colors.
+
+\paragraph{otype reuse}
+\label{app:exp:otype-reuse}
+Since 128-bit capabilities are constrained by size, we propose using the \cotype{} field to represent some or all of the ASC.  To disambiguate from the softwaredefined \cotype{}, the data structure should be tagged.
+
+To avoid reducing the bits for the \cotype{}, we propose a variable-length tag.  This also allows embedding one instance of a variety of other metadata in the \cotype{} field.  For example:
+
+\begin{verbatim}
+0x_xxxx_xxxx_xxxx_xxxx: Software-defined otype (17 bits)
+10_xxxx_xxxx_xxxx_xxxx: Metadata type A (16 bits)
+11_0xxx_xxxx_xxxx_xxxx: Metadata type B (15 bits)
+...
+11_1110_cccx_xxxx_xxxx: Metadata type E (8 alternatives of 9 bits each)
+\end{verbatim}
+
+
+\subsection{Operations on colored capabilities}
+Colors are used to enforce policy by processing elements and ATPUs.  A processing element has, in its hardware, an awareness of the color of its local address space.
+
+In this area exist a number of possibilities, subject to further research.
+
+Most conservatively, a PE could deal only with capabilities of its own color.  A capability with another color is treated as if the tag is cleared.  This would allow PEs to use capabilities internally, without sharing between them.  A privileged process (boot loader, management processor, hypervisor, operating system on an application core) is used to generate initial colored capabilities for each PE, from where they are used internally.
+
+In this scenario, capability conversion between colors would be minimal or require a call to the privileged process.
+Conversion would require translation between address spaces, with a chance that a capability could not be directly represented in the target address space (if it represents disparate physical pages, for instance).
+
+Other approaches are possible.  For instance, colored capabilities could be treated as sealed.  This would enable devices to be given `handles' to memory in another address space that they cannot access, but can pass around to other data structures.  For instance, networking data structures might contain linked list pointers in network stack address space -- the NIC can build its own linked list, without the ability to access the data being pointed to.  Much care would be required here to avoid confused deputy attacks.
+
+%We consider the following operations by PEs:
+
+%\begin{description}
+%\item[Read of a capability, local color.] Allowed.  A PE can make free use of capabilities of its local color.  All the %regular operations on capabilities have their usual effect.
+%\item[Write of a capability, local color.] Allowed.  The capability is stored in memory with its color (potentially %transformed by ATPUs as described below).
+%\item[Read/write of a capability, non-local color.] Non-local capabilities are treated as sealed.  They can be stored in %memory and passed to other devices without modification.
+%\item[Unseal capability, non-local color.] The unseal operation transforms a capability from a foreign address space into %the current address space, converting it to the local color.  This may require a call-out to ATPU(s) to receive the %translation, potentially passing through several ATPUs.
+%\item[Seal capability, local color.]  Local use of sealing is still permitted, generating a sealed capability of a local %color.  Given microarchitectural constraints, a smaller \cotype{} space may be available.
+%\item[Seal capability, non-local color.] May change to the representation of a sealed capability with the target color.
+%\item[Change color on capability.] A local capability may be converted to a capability of a different color by passing it %through ATPU(s), which return the appropriate non-local capability.  The rights on the returned capability may be reduced %compared to the input.
+%\end{description}
+
+\subsection{Enforcement}
+Both PEs and system bridges are tasked with enforcing the capability model:
+
+\paragraph{Bridges} enforce operations on colored capabilities.  For example, a bridge may disallow capabilities of other colors to pass through it.  Bridges are viewed as more trustworthy than devices they connect, although a hierarchy exists -- bridges closer to DRAM are able to disallow capabilities that are accepted by bridges further away.  Bridges have an awareness of whether hardware might be untrustworthy (for instance, plugged in to a motherboard slot or external port) and apply external enforcement of properties where the hardware might be untrustworthy.
+
+ATPUs could also transform capabilities that pass through them according to their address space remapping -- e.g., allowing a PE to store capabilities with its local address space, but remap them to physical addresses when storing to DRAM.\tmnote{Does this make sense? Reversibility? Representability? Need to consider what happens when something looks at the integer address of such a transformed cap.}
+
+%\paragraph{PEs} are tasked with enforcing sealing of non-local capabilities.
+%\tmnote{What happens when malicious PE hardware violates the sealing of a non-local cap?  Can the bridge efficiently enforce that?}
+\paragraph{PEs} are tasked with enforcing the capability model within their local software.  Bridges enforce colors, but PEs enforce the remainder of the capability model (monotonicity, tagging, etc).  An untrustworthy PE may corrupt its own capabilities, but since the coloring is enforced by the bridge it will only have detrimental effects on its own software.
+
+\subsection{Implementation outline}
+For a minimalist implementation, the following might be done:
+
+\begin{enumerate}
+\item Choose a representation for the bits that indicate a color within a capability
+\item Implement a CSR that configures the current color of a processor core.  The
+permissions on this register are up for debate but access control might be
+similar to that of the IOMMU page table base register - potentially
+set externally rather than internal to a PE
+\item In user mode, loading or dereferencing capabilities checks the color
+matches the current one, and causes an exception if mismatched
+\item A privileged instruction takes two capabilities, an input capability
+and an authorization capability.  The output of the instruction is the input
+capability with the color changed to match the authorization capability. 
+\tmnote{Is this something that should be restricted by a permission? Or by
+a mode?}
+\item Checks may be necessary to verify the input capability is a subset of the
+authorization capability, bearing in mind they may be in different address
+spaces without a contiguous mapping.
+\item It may be necessary for a PE that wishes to change the color of its
+capability to call out to a more trustworthy component, such as a bridge or
+another processor with more authority.  This could be modeled by the PE not
+possessing a suitable authorization capability, and thus making an API call to
+another PE or ATPU.  ATPUs may implement such translation in hardware to
+make it efficient.
+\end{enumerate}

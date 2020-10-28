@@ -1,0 +1,9 @@
+function #\hyperref[sailRISCVzliftzysip]{lift\_sip}#(o : Minterrupts, d : Minterrupts, s : Sinterrupts) -> Minterrupts = {
+  let m : Minterrupts = o;
+  let m = #\hyperref[sailRISCVzupdatezySSI]{update\_SSI}#(m, s.#\hyperref[sailRISCVzSSI]{SSI}#() & d.#\hyperref[sailRISCVzSSI]{SSI}#());
+  if #\hyperref[sailRISCVzhaveNExt]{haveNExt}#() then {
+    let m = if d.#\hyperref[sailRISCVzUEI]{UEI}#() == 0b1 then #\hyperref[sailRISCVzupdatezyUEI]{update\_UEI}#(m, s.#\hyperref[sailRISCVzUEI]{UEI}#()) else m;
+    let m = if d.#\hyperref[sailRISCVzUSI]{USI}#() == 0b1 then #\hyperref[sailRISCVzupdatezyUSI]{update\_USI}#(m, s.#\hyperref[sailRISCVzUSI]{USI}#()) else m;
+    m
+  } else m
+}

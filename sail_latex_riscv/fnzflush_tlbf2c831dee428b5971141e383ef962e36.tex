@@ -1,0 +1,15 @@
+function #\hyperref[sailRISCVzflushzyTLB]{flush\_TLB}#(asid_xlen, addr_xlen) -> unit = {
+  /* Flush both Sv39 and Sv48 TLBs. */
+  let (addr39, addr48) : (#\hyperref[sailRISCVzoption]{option}#(vaddr39), #\hyperref[sailRISCVzoption]{option}#(vaddr48)) =
+    match addr_xlen {
+      #\hyperref[sailRISCVzNone]{None}#()  => (#\hyperref[sailRISCVzNone]{None}#(), #\hyperref[sailRISCVzNone]{None}#()),
+      #\hyperref[sailRISCVzSome]{Some}#(a) => (#\hyperref[sailRISCVzSome]{Some}#(a[38 .. 0]), #\hyperref[sailRISCVzSome]{Some}#(a[47 .. 0]))
+    };
+  let asid : #\hyperref[sailRISCVzoption]{option}#(asid64) =
+    match asid_xlen {
+      #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzNone]{None}#(),
+      #\hyperref[sailRISCVzSome]{Some}#(a) => #\hyperref[sailRISCVzSome]{Some}#(a[15 .. 0])
+  };
+  #\hyperref[sailRISCVzflushzyTLB39]{flush\_TLB39}#(asid, addr39);
+  #\hyperref[sailRISCVzflushzyTLB48]{flush\_TLB48}#(asid, addr48)
+}

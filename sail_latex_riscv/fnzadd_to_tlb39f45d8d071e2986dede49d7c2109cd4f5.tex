@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzaddzytozyTLB39]{add\_to\_TLB39}#(asid, vAddr, pAddr, pte, pteAddr, level, global) = {
+  let ent : TLB39_Entry = #\hyperref[sailRISCVzmakezyTLBzyEntry]{make\_TLB\_Entry}#(asid, global, vAddr, pAddr, pte.#\hyperref[sailRISCVzbits]{bits}#(), level, pteAddr, SV39_LEVEL_BITS);
+  tlb39 = #\hyperref[sailRISCVzSome]{Some}#(ent)
+}

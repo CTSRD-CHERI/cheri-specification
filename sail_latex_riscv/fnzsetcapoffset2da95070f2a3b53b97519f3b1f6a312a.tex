@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzsetCapOffset]{setCapOffset}#(c, offset) : (Capability, CapAddrBits) -> (bool, Capability) =
+    let base = #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(c) in
+    let newAddress = base + offset in
+    let newCap     = { c with address = newAddress } in
+    /* let representable = #\hyperref[sailRISCVzcapBoundsEqual]{capBoundsEqual}#(c, newCap) in */
+    let representable = #\hyperref[sailRISCVzfastRepCheck]{fastRepCheck}#(c, (newAddress - c.address)) in
+    (representable, newCap)

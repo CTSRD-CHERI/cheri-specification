@@ -1,0 +1,297 @@
+\chapter{The CHERI-RISC-V Instruction-Set Reference}
+\label{chap:isaref-riscv}
+
+\input{def-riscv-insns}
+\def\rvcheriasminsnref#1{#1}
+\def\rvcheriasminsnnoref#1{#1}
+\providecommand{\rvcheriasmfmt}{}
+\renewcommand{\rvcheriasmfmt}[2][]{%
+  #2%
+  \ifthenelse{\equal{#1}{}}{%
+  }{%
+    ~{\textit{\footnotesize{(#1)}}}%
+  }%
+}
+
+In this chapter, we specify each instruction via both informal descriptions
+and code in the Sail language.
+To allow for more succinct code descriptions, we rely on a number of
+common function definitions and constants also described in this chapter.
+
+\section{Sail language used in instruction descriptions}
+The instruction descriptions contained in this chapter are accompanied
+by code in the Sail language~\cite{sail-popl2019,sail-url} taken from the Sail
+CHERI-RISC-V implementation~\cite{sail-cheri-riscv}.
+Sail is a domain specific imperative language designed for describing
+processor architectures.  It has a compiler that can output executable
+code in OCaml or C for building executable models, and can also
+translate to various theorem prover languages for automated reasoning
+about the ISA.
+A brief description of the Sail language features used in this chapter can be
+found in \cref{sec:sail-language-description}.
+For a full description see the Sail language documentation~\cite{sail-url}.
+
+\section{Constant Definitions}
+The following constants are used in various type and function definitions throughout the specification.
+The concrete values listed here apply to the CHERI-RISC-V ISA with
+128-bit capabilities that extends the base 64-bit RISC-V ISA.
+The constants for with 64-bit CHERI capabilities (extending the 32-bit RISC-V ISA)
+can be found in the CHERI-RISC-V Sail model~\cite{sail-cheri-riscv}.
+\arnote{and are not listed here as they may change in the near future?}
+
+\medskip
+% Note: we can use \sailRISCVtype{foo\_bar} instead after rems-project/sail#100
+\phantomsection\label{sailRISCVzxlen}
+\sailRISCVtype{xlen}
+\sailRISCVtypecapAddrWidth{}
+\sailRISCVtypecapLenWidth{}
+\sailRISCVtypecapSizze{}
+\sailRISCVtypecapMantissaWidth{}
+
+% FIXME: These extra labels are required to allow markdown saildoc references such as [cap_uperms_width] to work correctly.
+\phantomsection\label{sailRISCVzcapzyhpermszywidth}
+\sailRISCVtypecapHpermsWidth{}
+\phantomsection\label{sailRISCVzcapzyupermszywidth}
+\sailRISCVtypecapUpermsWidth{}
+\phantomsection\label{sailRISCVzcapzyupermszyshift}
+\sailRISCVtypecapUpermsShift{}
+\phantomsection\label{sailRISCVzcapzyflagszywidth}
+\sailRISCVtypecapFlagsWidth{}
+\phantomsection\label{sailRISCVzcapzyotypezywidth}
+\sailRISCVtypecapOtypeWidth{}
+
+% Work around https://github.com/rems-project/sail/issues/101
+\begin{lstlisting}[language=sail,label=sailRISCVzmaxzyotype]
+let max_otype = MAX(cap_otype_width) - reserved_otypes
+\end{lstlisting}
+
+\section{Function Definitions}
+
+This section contains descriptions of convenience functions used by the Sail code featured in this chapter.
+
+\subsection*{Functions for integer and bit vector manipulation}
+
+The following functions convert between bit vectors and integers and manipulate bit vectors:
+
+\medskip
+\sailRISCVval{unsigned}
+\sailRISCVval{signed}
+\sailRISCVval{to\_bits}
+% Technically this is not a vector, but it seems appropriate to put these together
+\sailRISCVval{bool\_to\_bit}
+\sailRISCVval{bool\_to\_bits}
+\sailRISCVval{truncate}
+\sailRISCVval{pow2}
+
+% The following are overloads so we can't easily use the generated latex
+% Hacky hspace to get rid of unwanted hangindent
+
+\phantomsection
+\label{sailRISCVzEXTZ}
+\saildocval{Adds zeros in most significant bits of vector to obtain a vector of desired length.}{\hspace{-\parindent}\isail{EXTZ}}
+
+\label{sailRISCVzEXTS}
+\saildocval{Extends the most significant bits of vector preserving the sign bit.}{\hspace{-\parindent}\isail{EXTS}}
+
+\label{sailRISCVzzzeros}
+\saildocval{Produces a bit vector of all zeros}{\hspace{-\parindent}\isail{zeros}}
+
+\label{sailRISCVzzones}
+\saildocval{Produces a bit vector of all ones}{\hspace{-\parindent}\isail{ones}}
+
+\subsection*{Types used in function definitions}
+
+\sailRISCVtype{CapBits}
+\sailRISCVtype{CapAddrBits}
+\sailRISCVtype{CapLenBits}
+\sailRISCVtype{CapPermsBits}
+
+% Expanding this looks very ugly \sailRISCVtype{Capability}
+\medskip
+\noindent
+Many functions also use \isail{struct Capability}, a structure holding a
+partially-decompressed representation of CHERI capabilities.
+%
+The following functions can be used to convert between the structure
+representation and the raw capability bits:
+
+\medskip%
+\sailRISCVval{capBitsToCapability}
+\sailRISCVval{capToBits}
+
+\subsection*{Functions for reading and writing register and memory}
+
+\arnote{TODO: document X() and C()}
+%\label{sailRISCVzC}
+\begin{lstlisting}[language=sail,label=sailRISCVzC]
+C(n) : regno -> Capability
+C(n) : (regno, Capability) -> unit
+\end{lstlisting}
+The overloaded function \isail{C(n)} is used to read or write capability register \isail{n}.
+
+\begin{lstlisting}[language=sail,label=sailRISCVzX]
+X(n) : regno -> xlenbits
+X(n) : (regno, xlenbits) -> unit
+\end{lstlisting}
+The overloaded function \isail{X(n)} is used to read or write integer register \isail{n}.
+
+\begin{lstlisting}[language=sail,label=sailRISCVzF]
+F(n) : regno -> xlenbits
+F(n) : (regno, xlenbits) -> unit
+\end{lstlisting}
+The overloaded function \isail{F(n)} is used to read or write floating-point register \isail{n}.
+
+\medskip
+\sailRISCVval{memBitsToCapability}
+\sailRISCVval{capToMemBits}
+\sailRISCVval{int\_to\_cap}
+
+\medskip
+\sailRISCVval{get\_cheri\_mode\_cap\_addr}
+\sailRISCVval{handle\_load\_cap\_via\_cap}
+\sailRISCVval{handle\_load\_data\_via\_cap}
+\sailRISCVval{handle\_store\_cap\_via\_cap}
+\sailRISCVval{handle\_store\_data\_via\_cap}
+
+
+
+\subsection*{Functions for ISA exception behavior}
+\sailRISCVval{handle\_exception}
+\sailRISCVval{handle\_illegal}
+\sailRISCVval{handle\_mem\_exception}
+\sailRISCVval{handle\_cheri\_cap\_exception}
+\sailRISCVval{handle\_cheri\_reg\_exception}
+\sailRISCVval{handle\_cheri\_pcc\_exception}
+
+\medskip
+\sailRISCVval{pcc\_access\_system\_regs}
+\sailRISCVval{privLevel\_to\_bits}
+\sailRISCVval{min\_instruction\_bytes}
+
+\medskip
+\sailRISCVval{legalize\_epcc}
+\sailRISCVval{legalize\_tcc}
+
+% TODO: \subsection*{Functions for control flow}
+
+
+\subsection*{Functions for manipulating capabilities}
+
+The Sail code abstracts the capability representation using the following functions for getting and setting fields in the capability.
+The base of the capability is the address of the first byte of memory to which it grants access and the top is one greater than the last byte, so the set of dereferenceable addresses is:
+\[
+\{ a \in \mathbb{N} \mid \mathit{base} \leq a < \mathit{top}\}
+\]
+Note that for 128-bit capabilities $\mathit{top}$ can be up to $2^{64}$, meaning the entire 64-bit address space can be addressed.
+
+\medskip
+\sailRISCVval{getCapBounds}
+\sailRISCVval{getCapBaseBits}
+\sailRISCVval{getCapTop}
+\sailRISCVval{getCapLength}
+\sailRISCVval{inCapBounds}
+
+\noindent The capability's address (also known as cursor) and offset (relative to base) are related by:
+\[
+\mathit{base} + \mathit{offset}\ \mathbf{mod}\ 2^{64} = \mathit{cursor}
+\]
+The following functions return the cursor and offset of a capability respectively:
+\note{rmn30}{Re-name cursor to address here?}
+
+\medskip
+\sailRISCVval{getCapCursor}
+\sailRISCVval{getCapOffsetBits}
+\note{rmn30}{explain what happens when offset is negative? In fact it is computed modulo $2^{64}$ and always converted straight to a 64-bit vector so not important. Should maybe just return vector.}
+
+\noindent The following functions adjust the bounds and offset of capabilities.
+Not all combinations of bounds and offset are representable, so these functions return a boolean value indicating whether the requested operation was successful.
+Even in the case of failure a capability is still returned, although it may not preserve the bounds of the original capability.
+
+\medskip
+\sailRISCVval{setCapBounds}
+\sailRISCVval{setCapAddr}
+\sailRISCVval{setCapOffset}
+\sailRISCVval{incCapOffset}
+
+\medskip
+\sailRISCVval{getRepresentableAlignmentMask}
+\sailRISCVval{getRepresentableLength}
+
+\medskip
+\arnote{TODO: short description of sealing and unsealing}
+\sailRISCVval{sealCap}
+\sailRISCVval{unsealCap}
+\sailRISCVval{isCapSealed}
+\sailRISCVval{hasReservedOType}
+\sailRISCVval{invalidateCap}
+
+\noindent
+Capability permissions and flags are accessed using the following functions:
+
+\medskip
+\sailRISCVval{getCapPerms}
+\sailRISCVval{setCapPerms}
+\sailRISCVval{getCapFlags}
+\sailRISCVval{setCapFlags}
+
+\subsection*{Checking for availability of ISA features}
+\sailRISCVval{haveRVC}
+\sailRISCVval{haveFExt}
+\sailRISCVval{haveNExt}
+\sailRISCVval{haveSupMode}
+
+
+\section{CHERI-RISC-V Instructions}
+
+\input{insn-riscv/auipcc}
+\input{insn-riscv/candperm}
+\input{insn-riscv/cbuildcap}
+\input{insn-riscv/cclear}
+\input{insn-riscv/ccleartag}
+%\input{insn-riscv/ccleartags} % missing sail
+\input{insn-riscv/ccopytype}
+\input{insn-riscv/ccseal}
+\input{insn-riscv/cfromptr}
+\input{insn-riscv/cgetaddr}
+\input{insn-riscv/cgetbase}
+\input{insn-riscv/cgetflags}
+\input{insn-riscv/cgetlen}
+\input{insn-riscv/cgetoffset}
+\input{insn-riscv/cgetperm}
+\input{insn-riscv/cgetsealed}
+\input{insn-riscv/cgettag}
+\input{insn-riscv/cgettype}
+\input{insn-riscv/cincoffset}
+\input{insn-riscv/cincoffsetimm}
+\input{insn-riscv/cinvoke}
+\input{insn-riscv/cjalr}
+\input{insn-riscv/lc} % [c]lc
+\input{insn-riscv/clear}
+\input{insn-riscv/cloadtags}
+\input{insn-riscv/cmove}
+\input{insn-riscv/crepresentablealignmentmask}
+\input{insn-riscv/croundrepresentablelength}
+\input{insn-riscv/sc} % [c]sc
+\input{insn-riscv/cseal}
+\input{insn-riscv/csealentry}
+\input{insn-riscv/csetaddr}
+\input{insn-riscv/csetbounds}
+\input{insn-riscv/csetboundsexact}
+\input{insn-riscv/csetboundsimm}
+\input{insn-riscv/csetequalexact}
+\input{insn-riscv/csetflags}
+\input{insn-riscv/csetoffset}
+\input{insn-riscv/cspecialrw}
+\input{insn-riscv/csub}
+\input{insn-riscv/ctestsubset}
+\input{insn-riscv/ctoptr}
+\input{insn-riscv/cunseal}
+\input{insn-riscv/fpclear}
+\input{insn-riscv/loaddatacap} % l[bhwd][u].cap
+\input{insn-riscv/loaddataddc} % l[bhwd][u].ddc
+\input{insn-riscv/loadcapcap} % lc.cap
+\input{insn-riscv/loadcapddc} % lc.ddc
+\input{insn-riscv/storedatacap} % s[bhwd].cap
+\input{insn-riscv/storedataddc} % s[bhwd].ddc
+\input{insn-riscv/storecapcap} % sc.cap
+\input{insn-riscv/storecapddc} % sc.ddc

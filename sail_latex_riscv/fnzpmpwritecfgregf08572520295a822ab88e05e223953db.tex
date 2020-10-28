@@ -1,0 +1,46 @@
+function #\hyperref[sailRISCVzpmpWriteCfgReg]{pmpWriteCfgReg}#(n, v) = {
+  if   sizeof(xlen) == 32
+  then match n {
+         0 => { pmp0cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp0cfg,  v[7 ..0]);
+                pmp1cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp1cfg,  v[15..8]);
+                pmp2cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp2cfg,  v[23..16]);
+                pmp3cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp3cfg,  v[31..24]);
+              },
+         1 => { pmp4cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp4cfg,  v[7 ..0]);
+                pmp5cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp5cfg,  v[15..8]);
+                pmp6cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp6cfg,  v[23..16]);
+                pmp7cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp7cfg,  v[31..24]);
+              },
+         2 => { pmp8cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp8cfg,  v[7 ..0]);
+                pmp9cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp9cfg,  v[15..8]);
+                pmp10cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp10cfg, v[23..16]);
+                pmp11cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp11cfg, v[31..24]);
+              },
+         3 => { pmp12cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp12cfg, v[7 ..0]);
+                pmp13cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp13cfg, v[15..8]);
+                pmp14cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp14cfg, v[23..16]);
+                pmp15cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp15cfg, v[31..24]);
+              }
+       }
+  else if sizeof(xlen) == 64
+  then match n {
+         0 => { pmp0cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp0cfg,  v[7 ..0]);
+                pmp1cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp1cfg,  v[15..8]);
+                pmp2cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp2cfg,  v[23..16]);
+                pmp3cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp3cfg,  v[31..24]);
+                pmp4cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp4cfg,  v[39..32]);
+                pmp5cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp5cfg,  v[47..40]);
+                pmp6cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp6cfg,  v[55..48]);
+                pmp7cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp7cfg,  v[63..56])
+              },
+         2 => { pmp8cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp8cfg,  v[7 ..0]);
+                pmp9cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp9cfg,  v[15..8]);
+                pmp10cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp10cfg, v[23..16]);
+                pmp11cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp11cfg, v[31..24]);
+                pmp12cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp12cfg, v[39..32]);
+                pmp13cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp13cfg, v[47..40]);
+                pmp14cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp14cfg, v[55..48]);
+                pmp15cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp15cfg, v[63..56])
+              }
+       }
+}

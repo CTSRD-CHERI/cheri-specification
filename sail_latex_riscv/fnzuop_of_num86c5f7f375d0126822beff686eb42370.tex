@@ -1,0 +1,4 @@
+function uop_of_num arg# = match arg# {
+  0 => RISCV_LUI,
+  _ => RISCV_AUIPC
+}

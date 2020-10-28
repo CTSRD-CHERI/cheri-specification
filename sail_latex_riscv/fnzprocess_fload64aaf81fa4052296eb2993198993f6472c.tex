@@ -1,0 +1,10 @@
+function #\hyperref[sailRISCVzprocesszyfload64]{process\_fload64}#(rd, addr, value) =
+  if   sizeof(flen) == 64
+  then match value {
+         #\hyperref[sailRISCVzMemValue]{MemValue}#(result) => { #\hyperref[sailRISCVzF]{F}#(rd) = result; RETIRE_SUCCESS },
+         #\hyperref[sailRISCVzMemException]{MemException}#(e)  => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL }
+       }
+  else {
+    /* should not get here */
+    RETIRE_FAIL
+  }

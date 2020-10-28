@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzlegalizzezymedeleg]{legalize\_medeleg}#(o : Medeleg, v : xlenbits) -> Medeleg = {
+  let m = #\hyperref[sailRISCVzMkzyMedeleg]{Mk\_Medeleg}#(v);
+  /* M-EnvCalls delegation is not supported */
+  let m = #\hyperref[sailRISCVzupdatezyMEnvCall]{update\_MEnvCall}#(m, 0b0);
+  m
+}

@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzextzypostzydecodezyhook]{ext\_post\_decode\_hook}#(x) : ast -> ast = {
+  if (PCC.flag_cap_mode) then match(x) {
+    #\hyperref[sailRISCVzUTYPE]{UTYPE}#(imm, cd, RISCV_AUIPC) => #\hyperref[sailRISCVzAUIPCC]{AUIPCC}#(imm, cd),
+    OTHERS => OTHERS
+  } else
+    x
+}

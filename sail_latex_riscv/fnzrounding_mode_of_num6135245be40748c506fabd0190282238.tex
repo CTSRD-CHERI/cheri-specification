@@ -1,0 +1,8 @@
+function rounding_mode_of_num arg# = match arg# {
+  0 => RM_RNE,
+  1 => RM_RTZ,
+  2 => RM_RDN,
+  3 => RM_RUP,
+  4 => RM_RMM,
+  _ => RM_DYN
+}

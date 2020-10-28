@@ -1,0 +1,32 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let (needSup, needAccessSys) : (bool, bool) = match #\hyperref[sailMIPSzunsigned]{unsigned}#(sel) {
+  0  => (false, false), /* DDC   -- no access control */
+  1  => (false, false), /* CULR -- no access control */
+  8  => (false, true),  /* CPLR -- privileged TLS */
+  22 => (true, true),   /* KR1C */
+  23 => (true, true),   /* KR2C */
+  28 => (true, true),   /* ErrorEPCC */
+  29 => (true, true),   /* KCC */
+  30 => (true, true),   /* KDC */
+  31 => (true, true),   /* EPCC */
+  _  => #\hyperref[sailMIPSzSignalException]{SignalException}#(ResI)
+};
+if needAccessSys & not(#\hyperref[sailMIPSzpcczyaccesszysystemzyregs]{pcc\_access\_system\_regs}#()) then
+   #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_AccessSystemRegsViolation, sel)
+else if needSup & not(#\hyperref[sailMIPSzgrantsAccess]{grantsAccess}#(#\hyperref[sailMIPSzgetAccessLevel]{getAccessLevel}#(), Supervisor)) then
+   #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_AccessSystemRegsViolation, sel)
+else {
+  let capVal : Capability = match #\hyperref[sailMIPSzunsigned]{unsigned}#(sel) {
+    0  => DDC,
+    1  => CULR,
+    8  => CPLR,
+    22 => KR1C,
+    23 => KR2C,
+    28 => ErrorEPCC,
+    29 => KCC,
+    30 => KDC,
+    31 => EPCC,
+    _  => {assert(false, "CReadHwr: should be unreachable code"); undefined}
+  };
+  #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(cd, capVal);
+};

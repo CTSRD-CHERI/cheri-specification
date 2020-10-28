@@ -1,0 +1,33 @@
+let offset : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
+let (aq, rl, con) = (false, false, false);
+/* Get the address, #\hyperref[sailRISCVzX]{X}#(rs1) + offset.
+   Some extensions perform additional checks on address validity. */
+match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, offset, #\hyperref[sailRISCVzWrite]{Write}#(Data), width) {
+  #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(e)  => { #\hyperref[sailRISCVzextzyhandlezydatazycheckzyerror]{ext\_handle\_data\_check\_error}#(e); RETIRE_FAIL },
+  #\hyperref[sailRISCVzExtzyDataAddrzyOK]{Ext\_DataAddr\_OK}#(vaddr) =>
+    if   #\hyperref[sailRISCVzcheckzymisaligned]{check\_misaligned}#(vaddr, width)
+    then { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, #\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#()); RETIRE_FAIL }
+    else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddr, #\hyperref[sailRISCVzWrite]{Write}#(Data)) {
+      #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _)    => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
+      #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) => {
+        let eares : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(unit) = match width {
+          BYTE   => #\hyperref[sailRISCVzMemValue]{MemValue}# () /* bogus placeholder for illegal size */,
+          HALF   => #\hyperref[sailRISCVzMemValue]{MemValue}# () /* bogus placeholder for illegal size */,
+          WORD   => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 4, aq, rl, false),
+          DOUBLE => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 8, aq, rl, false)
+        };
+        match (eares) {
+          #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL },
+          #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
+            let rs2_val = #\hyperref[sailRISCVzF]{F}#(rs2);
+            match (width, sizeof(xlen)) {
+              (BYTE, _)    => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+              (HALF, _)    => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+              (WORD, _)    => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq, rl, con)),
+              (DOUBLE, 64) => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq, rl, con))
+            };
+          }
+        }
+      }
+    }
+}

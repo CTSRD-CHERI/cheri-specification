@@ -1,0 +1,6 @@
+match cur_privilege {
+  Machine    => { #\hyperref[sailRISCVzplatformzywfi]{platform\_wfi}#(); RETIRE_SUCCESS },
+  Supervisor => if   mstatus.#\hyperref[sailRISCVzTW]{TW}#() == 0b1
+                then { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL }
+                else { #\hyperref[sailRISCVzplatformzywfi]{platform\_wfi}#(); RETIRE_SUCCESS },
+  User       => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL }

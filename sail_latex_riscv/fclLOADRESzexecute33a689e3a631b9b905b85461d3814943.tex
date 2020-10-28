@@ -1,0 +1,37 @@
+if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
+  /* Get the address, #\hyperref[sailRISCVzX]{X}#(rs1) (no offset).
+   * Extensions might perform additional checks on address validity.
+   */
+  match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, #\hyperref[sailRISCVzzzeros]{zeros}#(), #\hyperref[sailRISCVzRead]{Read}#(Data), width) {
+    #\hyperref[sailRISCVzExtzyDataAddrzyError]{Ext\_DataAddr\_Error}#(e)  => { #\hyperref[sailRISCVzextzyhandlezydatazycheckzyerror]{ext\_handle\_data\_check\_error}#(e); RETIRE_FAIL },
+    #\hyperref[sailRISCVzExtzyDataAddrzyOK]{Ext\_DataAddr\_OK}#(vaddr) => {
+      let aligned : bool =
+         /* BYTE and HALF would only occur due to invalid decodes, but it doesn't hurt
+          * to treat them as valid here; otherwise we'd need to throw an internal_error.
+          */
+         match width {
+           BYTE   => true,
+           HALF   => vaddr[0..0] == 0b0,
+           WORD   => vaddr[1..0] == 0b00,
+           DOUBLE => vaddr[2..0] == 0b000
+         };
+      /* "LR faults like a normal load, even though it's in the AMO major opcode space."
+       * - Andrew Waterman, isa-dev, 10 Jul 2018.
+       */
+      if (~ (aligned))
+      then { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, #\hyperref[sailRISCVzEzyLoadzyAddrzyAlign]{E\_Load\_Addr\_Align}#()); RETIRE_FAIL }
+      else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddr, #\hyperref[sailRISCVzRead]{Read}#(Data)) {
+             #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _)    => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
+             #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) =>
+               match (width, sizeof(xlen)) {
+                 (WORD, _)    => #\hyperref[sailRISCVzprocesszyloadres]{process\_loadres}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 4, aq, rl, true), false),
+                 (DOUBLE, 64) => #\hyperref[sailRISCVzprocesszyloadres]{process\_loadres}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 8, aq, rl, true), false),
+                 _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("LOADRES expected WORD or DOUBLE")
+               }
+           }
+    }
+  }
+} else {
+  #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+  RETIRE_FAIL
+}

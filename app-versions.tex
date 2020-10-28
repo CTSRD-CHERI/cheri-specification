@@ -1,0 +1,1059 @@
+\chapter{CHERI ISA Version History}
+\label{app:versions}
+
+This appendix contains both a high-level summary of prior CHERI ISA versions
+(Section~\ref{sec:detailed-cheri-isa-version-change-history}),
+and also a detailed change log for each version
+(Section~\ref{sec:detailed-cheri-isa-version-change-history}).
+This report was previously made available as the {\em CHERI Architecture
+Document}, but is now the {\em CHERI Instruction-Set Architecture}.
+
+\section{CHERI ISA Specification Version Summary}
+\label{sec:cheri-isa-specification-version-summary}
+
+A short summary of key ISA versions is presented here:
+
+\begin{description}
+\item[CHERI ISAv1 - 1.0--1.4 - 2010--2012]
+  Early versions of the CHERI ISA explored the integration of capability
+  registers and tagged memory -- first in isolation from, and later in
+  composition with, MMU-based virtual memory.
+  CHERI-MIPS instructions were targeted only by an extended assembler, with an
+  initial microkernel (``Deimos'') able to create compartments on bare metal,
+  isolating small programs from one another.
+  Key early design choices included:
+  \begin{itemize}
+  \item to compose with the virtual-memory mechanism by being an
+    in-address-space protection feature, supporting complete MMU-based OSes,
+  \item to use capabilities to implement code and data pointers for C-language
+    TCBs, providing reference-oriented, fine-grained memory protection and
+    control-flow integrity,
+  \item to impose capability-oriented monotonic non-increase on pointers to
+    prevent privilege escalation,
+  \item to target capabilities with the compiler using explicit capability
+    instructions (including load, store, and jumping/branching),
+  \item to derive bounds on capabilities from existing code and data-structure
+    properties, OS policy, and the heap and stack allocators,
+  \item to have both in-register and in-memory capability storage,
+  \item to use a separate capability register file (to be consistent with the
+    MIPS coprocessor extension model),
+  \item to employ tagged memory to preserve capability integrity and
+    provenance outside of capability registers,
+  \item to enforce monotonicity through constrained manipulation instructions,
+  \item to provide software-defined (sealed) capabilities including a
+    ``sealed'' bit, user-defined permissions, and object types,
+  \item to support legacy integer pointers via a Default Data Capability
+    (\DDC{}),
+  \item to extend the program counter (\PC{}) to be the Program-Counter
+    Capability (\PCC{}),
+  \item to support not just fine-grained memory protection, but also
+    higher-level protection models such as software compartmentalization or
+    language-based encapsulation.
+  \end{itemize}
+
+\item[CHERI ISAv2 - 1.5 - August 2012]
+  This version of the CHERI ISA developed a number of aspects of capabilities
+  to better support C-language semantics, such as introducing tags on
+  capability registers to support capability-oblivious memory copying, as well
+  as improvements to support MMU-based operating systems.
+
+\item[UCAM-CL-TR-850 - 1.9 - June 2014]
+  This technical report accompanied publication of our ISCA 2014 paper on
+  CHERI memory protection.
+  Changes from CHERI ISAv2 were significant, supporting a complete
+  conventional OS (CheriBSD) and compiler suite (CHERI Clang/LLVM), a defined
+  \insnnoref{CCall}/\insnnoref{CReturn} mechanism
+  for software-defined
+  object capabilities, capability-based load-linked/store-conditional
+  instructions to support multi-threaded software, exception-handling
+  improvements such as a CP2 cause register, new instructions
+  \insnref{CToPtr} and \insnref{CFromPtr} to improve compiler
+  efficiency for hybrid compilation, and changes relating to object
+  capabilities, such as user-defined permission bits and instructions to check
+  permissions/types.
+
+\item[CHERI ISAv3 - 1.10 - September 2014]
+  CHERI ISAv3 further converges C-language pointers and capabilities, improves
+  exception-handling behavior, and continues to mature support for
+  object capabilities.
+  A key change is shifting from C-language pointers being represented by the
+  base of a capability to having an independent ``offset'' (implemented as a
+  ``cursor'') so that monotonicity is imposed only on bounds, and not on the
+  pointer itself.
+  Pointers are allowed to move outside of their defined bounds, but can be
+  dereferenced only within them.
+  There is also a new instruction for C-language pointer comparison
+  (\insnref{CPtrCmp}), and a NULL capability has been defined
+  as having
+  an in-memory representation of all zeroes without a tag, ensuring that BSS
+  (pre-zeroed memory) operates without change.
+  The offset behavior is also propagated into code capabilities, changing the
+  behavior of \PCC{}, \EPCC{}, \insnref{CJR}, \insnref{CJALR}, and
+  several aspects of exception handling.
+  The sealed bit was moved out of the permission mask to be a stand-alone bit
+  in the capability, and we went from independent \insnnoref{CSealCode}
+  and \insnnoref{CSealData} instructions to a single \insnref{CSeal}
+  instruction, and the \insnnoref{CSetType} instruction has been removed.
+  While the object type originates as a virtual address in an authorizing
+  capability, that interpretation is not mandatory due to use of a separate
+  hardware-defined permission for sealing.
+
+\item[UCAM-CL-TR-864 - 1.11 - January 2015]
+  This technical report refines CHERI ISAv3's convergence of C-language
+  pointers and capabilities; for example, it adds a \insnref{CIncOffset}
+  instruction that avoids read-modify-write accesses to adjust the offset
+  field, as well as exception-handling improvements.
+  TLB permission bits relating to capabilities now have modified semantics:
+  if the load-capability bit is not present, than capability tags are stripped
+  on capability loads from a page, whereas capability stores trigger an
+  exception, reflecting the practical semantics found most useful in our
+  CheriBSD prototype.
+
+\item[CHERI ISAv4 / UCAM-CL-TR-876 - 1.15 - November 2015]
+  This technical report describes \\
+  CHERI ISAv4, introducing concepts required
+  to support 128-bit compressed capabilities.
+  A new \insnref{CSetBounds} instruction is added, allowing adjustments
+  to both lower and upper bounds to be simultaneously exposed to the hardware,
+  providing more information when making compression choices.
+  Various instruction definitions were updated for the potential for
+  imprecision in bounds.
+  New chapters were added on the protection model, and how CHERI features
+  compose to provide stronger overall protection for secure software.
+  Fast register-clearing instructions are added to accelerate domain switches.
+  A full set of capability-based load-linked, store-conditional instructions
+  are added, to better support multi-threaded pure-capability programs.
+
+\item[CHERI ISAv5 / UCAM-CL-TR-891 - 1.18 - June 2016]
+  CHERI ISAv5 primarily serves to introduce the CHERI-128 compressed
+  capability model, which supersedes prior candidate models.
+  A new instruction, \insnref{CGetPCCSetOffset}, allows jump targets to
+  be more efficiently calculated relative to the current \PCC{}.
+  The previous multiple privileged capability permissions authorizing access
+  to exception-handling state has been reduced down to a single system
+  privilege to reduce bit consumption in capabilities, but also to recognize
+  their effective non-independence.
+  In order to reduce code-generation overhead, immediates to
+  capability-relative loads and stores are now scaled.
+
+\item[CHERI ISAv6 / UCAM-CL-TR-907 - 1.20 - April 2017]
+  CHERI ISAv6 introduces support for kernel-mode compartmentalization,
+  jump-based rather than exception-based domain transition,
+  architecture-abstracted and efficient tag restoration, and more efficient
+  generated code.
+  A new chapter addresses potential applications of the CHERI protection model
+  to the RISC-V and x86-64 ISAs, previously described relative only to the
+  64-bit MIPS ISA.
+  CHERI ISAv6 better explains our design rationale and research methodology.
+
+\item[CHERI ISAv7 / UCAM-CL-TR-927 - 7.0 - June 2019]
+  We more clearly differentiate an archi\-tecture-neutral CHERI protection
+  model vs. architecture-specific instantiations in 64-bit MIPS, 64-bit
+  RISC-V, and x86-64.
+  We have defined a new capability compression scheme, CHERI Concentrate, and
+  deprecated the previous CHERI-128 scheme.
+  CHERI-MIPS now supports special-purpose capability registers, which have
+  been moved out of the numbered general-purpose capability register space.
+  New special-purpose capability registers, including those for thread-local
+  storage, have been defined.
+  CHERI-RISC-V is more substantially elaborated.
+  A new compartment-ID register assists in resisting microarchitectural
+  side-channel attacks.
+  New optimized instructions with immediate fields improve the performance of
+  generated code.
+  Experimental 64-bit capabilities have been defined for 32-bit architectures,
+  as well as instructions to accelerate spatial and temporal memory safety.
+  The opcode reencoding begun in prior CHERI ISA specification versions has
+  now been completed.
+
+\item[CHERI ISAv8 / UCAM-CL-TR-951 - 8.0 - October 2020]
+  Capability compression is now part of the abstract model.
+  Both 32-bit and 64-bit architectural address sizes are supported.
+  Various previously experimental features, such as sentry capabilities and
+  CHERI-RISC-V, are now considered mature. We have defined a number of new
+  temporal memory-safety acceleration features including MMU assistance for a
+  load-side-barrier revocation model.
+  We have added a chapter on practical CHERI microarchitecture.
+  CHERI ISAv8 is synchronized with Arm Morello.
+
+\end{description}
+
+\section{Detailed CHERI ISA Version Change History}
+\label{sec:detailed-cheri-isa-version-change-history}
+
+\begin{description}
+\item[1.0] This first version of the CHERI architecture document was prepared
+  for a six-month deliverable to DARPA.
+  It included a high-level architectural description of CHERI, motivations
+  for our design choices, and an early version of the capability instruction
+  set.
+
+\item[1.1] The second version was prepared in preparation for a meeting of the
+  CTSRD External Oversight Group (EOG) in Cambridge during May 2011.
+  The update followed a week-long meeting in Cambridge, UK, in which many
+  aspects of the CHERI architecture were formalized, including
+  details of the capability instruction set.
+
+\item[1.2] The third version of the architecture document came as the first
+  annual reports from the CTSRD project were in preparation, including a
+  decision to break out formal-methods appendices into their own {\em CHERI
+  Formal Methods Report} for the first time.
+  With an in-progress prototype of the CHERI capability unit, we
+  significantly refined the CHERI ISA with respect to object capabilities, and
+  matured notions such as a trusted stack and the role of an
+  operating system supervisor.
+  The formal methods portions of the document was dramatically
+  expanded, with proofs of correctness for many basic security properties.
+  Satisfyingly, many `future work' items in earlier versions of the report
+  were becoming completed work in this version!
+
+\item[1.3] The fourth version of the architecture document was released 
+  while 
+  the first functional CHERI prototype was in testing.  It reflects on
+  initial experiences adapting a microkernel to exploit CHERI capability
+  features.
+  This led to minor architectural refinements, such as improvements to
+  instruction opcode layout, some additional instructions (such as allowing
+  \insnref{CGetPerm} retrieve the unsealed bit), and automated
+  generation of opcode descriptions based on our work in creating a
+  CHERI-enhanced MIPS assembler.
+
+\item[1.4] This version updated and clarified a number of aspects of CHERI
+  following a prototype implementation used to demonstrate CHERI in November
+  2011.
+  Changes include updates to the CHERI architecture diagram; replacement of
+  the \insnnoref{CDecLen} instruction with \insnnoref{CSetLen},
+  addition of a \insnref{CMove} instruction;
+  improved descriptions of exception generation; clarification of the
+  in-memory representation of capabilities and byte order of permissions;
+  modified instruction encodings for \insnref{CGetLen},
+  \insnref{CMove}, and \insnnoref{CSetLen};
+  specification of reset state for capability registers; and clarification of
+  the \insnnoref{CIncBase} instruction.
+
+\item[1.5] This version of the document was produced almost two years
+  into the CTSRD project.  It documented a significant revision (version 2) to
+  the CHERI ISA, which was motivated by our efforts to introduce
+  C-language extensions and compiler support for CHERI, with
+  improvements resulting from operating system-level work and
+  restructuring the BSV hardware specification to be more
+  amenable to formal analysis.  The ISA, programming language, and
+  operating system sections were significantly updated.
+
+\item[1.6] This version made incremental refinements to version 2 of the
+  CHERI ISA, and also introduced early discussion of the CHERI2 prototype.
+
+\item[1.7] Roughly two and a half years into the project, this version
+  clarified and extended documentation of CHERI ISA features such as
+  \insnnoref{CCall}/\insnnoref{CReturn} and its software emulation,
+  Permit\_Set\_Type, the \insnref{CMove}
+  pseudo-op, new load-linked and instructions for store-conditional relative
+  to capabilities, and several bug fixes such as corrections to sign extension
+  for several instructions.
+  A new capability-coprocessor {\pathname cause} register, retrieved using a new
+  \insnref{CGetCause}, was added to allow querying information on the
+  most recent
+  CP2 exception (e.g., bounds-check vs type-check violations); priorities were
+  provided, and also clarified with respect to coprocessor exceptions vs.
+  other MIPS ISA exceptions (e.g., unaligned access).
+  This was the first version of the {\em CHERI Architecture Document} released
+  to early adopters.
+
+\item[1.8] Less than three and a half years into the project, this version
+  refined the CHERI ISA based on experience with compiler, OS, and userspace
+  development using the CHERI model.
+  To improve C-language compatibility, new instructions \insnref{CToPtr}
+  and \insnref{CFromPtr} were defined.
+  The capability permissions mask was extended to add user-defined permissions.
+  Clarifications were made to the behavior of jump/branch instructions relating
+  to branch-delay slots and the program counter.
+  \insnref{CClearTag} simply cleared a register's tag, not its value.
+  A software-defined capability-cause register range was made available, with a
+  new \insnref{CSetCause} instruction letting software set the cause for
+  testing or control-flow reasons.
+  New \insnnoref{CCheckPerm} and \insnnoref{CCheckType} instructions
+  were added, letting software
+  object methods explicitly test for permissions and the types of arguments.
+  TLB permission bits were added to authorize use of loading and storing
+  tagged values from pages.
+  New \insnmipsref{CGetDefault} and \insnmipsref{CSetDefault} pseudo-ops
+  have become the preferred way to control MIPS ISA memory access.
+  \insnnoref{CCall}/\insnnoref{CReturn} calling conventions were
+  clarified; \insnnoref{CCall} now pushes the
+  incremented version of the program counter, as well as stack pointer, to the
+  trusted stack.
+
+\item[1.9 - UCAM-CL-TR-850]
+  The document was renamed from the {\em CHERI Architecture Document} to the
+  {\em CHERI Instruction-Set Architecture}.
+  This version of the document was made available as a University of Cambridge
+  Technical Report.
+  The high-level ISA description and ISA reference were broken out into
+  separate chapters.
+  A new rationale chapter was added, along with more detailed explanations
+  throughout about design choices.
+  Notes were added in a number of places regarding non-MIPS adaptations of
+  CHERI and 128-bit variants.
+  Potential future directions, such as capability cursors, are discussed in
+  more detail.
+  Further descriptions of the memory-protection model and its use by operating
+  systems and compilers was added.
+  Throughout, content has been updated to reflect more recent work on compiler
+  and operating-system support for CHERI.
+  Bugs have been fixed in the specification of the \insnref{CJR} and
+  \insnref{CJALR} instructions.
+  Definitions and behavior for user-defined permission bits and OS exception
+  handling have been clarified.
+
+\item[1.10]
+  This version of the Instruction-Set Architecture is timed for delivery at
+  the end of the fourth year of the CTSRD Project.  It reflects a significant
+  further revision to the ISA (version 3) focused on C-language compatibility,
+  better exception-handling semantics, and reworking of the object-capability
+  mechanism.
+
+  The definition of the NULL capability has been revised such that the memory
+  representation is now all zeroes, and with a zeroed tag.  This allows
+  zeroed memory (e.g., ELF BSS segments) to be interpreted as being filled
+  with NULL capabilities.  To this end, the tag is now defined as unset, and
+  the Unsealed bit has now been inverted to be a Sealed bit; the
+  \insnnoref{CGetUnsealed} instruction has been renamed to
+  \insnmipsref{CGetSealed}.
+
+  A new \coffset{} field has been added to the capability, which converts CHERI
+  from a simple base/length capability to blending capabilities and fat
+  pointers that associate a base and bounds with an offset.
+  This approach learns from the extensive fat-pointer research literature to
+  improve C-language compatibility.
+  The offset can take on any 64-bit value, and is added to the base on
+  dereference; if the resulting pointer does not fall within the base and
+  length, then an exception will be thrown.
+  New instructions are added to read (\insnref{CGetOffset}) and write
+  (\insnref{CSetOffset}) the
+  field, and the semantics of memory access and other CHERI instructions
+  (e.g., \insnnoref{CIncBase}) are updated for this new behavior.
+
+  A new \insnref{CPtrCmp} instruction has been added, which provides
+  C-friendly
+  comparison of capabilities; the instruction encoding supports various types
+  of comparisons including `equal to', `not equal to', and both signed and
+  unsigned `less than' and `less than or equal to' operators.
+
+  \insnref{CGetPCC} now returns \PC{} as the \coffset{} field of the
+  returned \PCC{} rather than storing it to a general-purpose integer register.
+  \insnref{CJR} and \insnref{CJALR} now accept target \PC{} values
+  via the offsets of their
+  jump-target capability arguments rather than via explicit general-purpose
+  integer registers.
+  \insnref{CJALR} now allows specification of the return-program-counter
+  capability register in a manner similar to return-address arguments to the
+  MIPS \insnnoref{JALR} instruction.
+
+  \insnnoref{CCall} and \insnnoref{CReturn} are updated to save and
+  restore the saved \PC{} in the
+  \coffset{} field of the saved \EPCC{} rather than separately.
+  \EPCC{} now incorporates the saved exception \PC{} in its \coffset{} field.
+  The behavior of \EPCC{} and expectations about software-supervisor behavior
+  are described in greater detail.
+  The security implications of exception cause-code precedence as relates to
+  alignment and the emulation of unaligned loads and stores are clarified.
+  The behavior of \insnref{CSetCause} has been clarified to indicate
+  that the instruction should not raise an exception unless the check for
+  \capperm*{Access\_EPCC} fails.
+  When an exception is raised due to the state of an argument register for
+  an instruction, it is now defined which register will be named as the source
+  of the exception in the capability cause register.
+
+  The object-capability type field is now 24-bit; while a relationship to
+  addresses is maintained in order to allow delegation of type allocation,
+  that relationship is deemphasized.
+  It is assumed that the software type manager will impose any required
+  semantics on the field, including any necessary uniqueness for the software
+  security model.
+  The \insnnoref{CSetType} instruction has been removed, and a single
+  \insnmipsref{CSeal} instruction
+  replaces the previous separate \insnnoref{CSealCode} and
+  \insnnoref{CSealData} instructions.
+
+  The validity of capability fields accessed via the ISA is now defined for
+  untagged capabilities; the undefinedness of the in-memory representation of
+  capabilities is now explicit in order to permit `non-portable'
+  micro-architectural optimizations.
+
+  There is now a structured description of the pseudocode language used in
+  defining instructions.
+  Format numbers have now been removed from instruction descriptions.
+
+  Ephemeral capabilities are renamed to `local capabilities,' and
+  non-ephemeral capabilities are renamed to `global capabilities'; the
+  semantics are unchanged.
+
+\item[1.11 - UCAM-CL-TR-864]
+  This version of the CHERI ISA has been prepared for publication as a
+  University of Cambridge technical report.
+  It includes a number of refinements to CHERI ISA version 3 based on further
+  practical implementation experience with both C-language memory protection
+  and software compartmentalization.
+
+  There are a number of updates to the specification reflecting introduction
+  of the \coffset{} field, including discussion of its semantics.
+  A new \insnref{CIncOffset} instruction has been added, which avoids the
+  need to read the offset into a general-purpose integer register for frequent
+  arithmetic operations on pointers.
+   
+  Interactions between \EPC{} and \EPCC{} are now better specified, including
+    that use of untagged capabilities has undefined behavior.
+  \insnref{CBTS} and \insnref{CBTU} are now defined to use
+    branch-delay slots, matching other MIPS-ISA branch instructions.
+  \insnref{CJALR} is defined as suitably incrementing the returned
+    program counter, along with branch-delay slot semantics.
+  Additional software-path pseudocode is present for \insnnoref{CCall} and
+    \insnnoref{CReturn}.
+
+  \insnref{CAndPerm} and \insnref{CGetPerm} use of argument-register
+    or return-register permission bits has been clarified.
+  Exception priorities and cause-code register values have been defined,
+    clarified, or corrected for \insnref{CClearTag},
+  \insnref{CGetPCC}, \insnref{CSC}, and \insnref{CSeal}.
+  Sign or zero extension for immediates and offsets are now defined
+    \insnmipsref[clbhwd]{CL}, \insnmipsref[clbhwd]{CS},
+    and other instructions.
+
+  Exceptions caused due to TLB bits controlling loading and storing of
+    capabilities are now CP2 rather than TLB exceptions, reducing code-path
+    changes for MIPS exception handlers.
+  These TLB bits now have modified semantics: {\bf LC} now discards tag bits
+    on the underlying line rather than throwing an exception; {\bf SC} will
+    throw an exception only if a tagged store would result, rather than
+    whenever a write occurs from a capability register.
+  These affect \insnref{CLC} and \insnref{CSC}.
+
+  Pseudocode definitions now appear earlier in the chapter, and have now been
+    extended to describe \EPCC{} behavior.
+  The ISA reference has been sorted alphabetically by instruction name.
+
+\item[1.12] This is an interim release as we begin to grapple with 128-bit
+  capabilities.
+  This requires us to better document architectural assumptions, but also
+  start to propose changes to the instruction set to reflect differing
+  semantics (e.g., exposing more information to potential capability
+  compression).
+  A new \insnref{CSetBounds} instruction is proposed, which allows both
+  the base and length of a capability to be set in a single instruction, which
+  may allow the micro-architecture to reduce potential loss of precision.
+  Pseudocode is now provided for both the pure-exception version of the
+  \insnnoref{CCall} instruction, and also hardware-accelerated permission
+  checking.
+
+\item[1.13] This is an interim release as our 128-bit capability format (and
+  general awareness of imprecision) evolves; this release also makes early
+  infrastructural changes to support an optional converging of capability and
+  general-purpose integer register files.
+
+  Named constants, rather than specific sizes (e.g., 256-bit vs. 128-bit) are
+  now used throughout the specification.
+  Reset state for permissions is now relative to available permissions.
+  Two variations on 128-bit capabilities are defined, employing two variations
+  on capability compression.
+  Throughout the specification, the notion of ``representable'' is now
+  explicitly defined, and non-representable values must now be handled.
+
+  The definitions of \insnref{CIncOffset}, \insnref{CSetOffset}, and
+  \insnref{CSeal} have been modified to reflect the potential for
+  imprecision.
+  In the event of a loss of precision, the capability base, rather than
+  offset, will be preserved, allowing the underlying memory object to continue
+  to be accurately represented.
+
+  Saturating behavior is now defined when a compressed capability's length
+  could represent a value greater than the maximum value for a 64-bit MIPS
+  integer register.
+
+  EPCC behavior is now defined when a jump or branch target might push the
+  offset of PCC outside of the representable range for EPCC.
+
+  \insnnoref{CIncBase} and \insnnoref{CSetLen} are deprecated in favor
+  of \insnref{CSetBounds}, which presents changes to base and bounds to
+  the hardware atomically.
+  The \insnref{CMove} pseudo-operation is now implemented using
+  \insnref{CIncOffset} rather than \insnnoref{CIncBase}.
+  \insnref{CFromPtr} has been modified to behave more like
+  \insnref{CSetOffset}: only the offset, not the base, is modified.
+  Bug fixes have been applied to the definitions of \insnref{CSetBounds}
+  and \insnref{CUnseal}.
+
+  Several bugs in the specification of \insnref{CLC}, \insnref{CLLD},
+  \insnref{CSC}, and \insnref[csbhwd]{CSD}, relating to omissions
+  during the update to capability offsets, have been fixed.
+  \insnref{CLC}'s description has been updated to properly reflect its
+  immediate argument.
+
+  New instructions \insnref{CClearHi} and \insnref{CClearLo} have
+  been added to accelerate register clearing during protection-domain
+  switches.
+
+  New pseudo-ops \insnref{CGetEPCC}, \insnref{CSetEPCC},
+  \insnref{CGetKCC}, \insnref{CSetKCC}, \insnref{CGetKDC}, and
+  \insnref{CSetKDC} have been defined, in the interests of better
+  supporting a migration of `special' registers out of the capability register
+  file -- which facilitates a convergence of capability and general-purpose
+  integer register files.
+
+\item[1.14]
+  Two new chapters have been added, one describing the abstract CHERI
+  protection model in greater detail (and independent from concrete ISA
+  changes), and the second exploring the composition of CHERI's ISA-level
+  features in supporting higher-level software protection models.
+
+  The value of the NULL capability is now centrally defined (all fields zero;
+  untagged).
+
+  \insnref{ClearLo} and \insnref{ClearHi} instructions are now
+  defined for clearing general-purpose integer registers, supplementing
+  \insnref{CClearHi} and \insnref{CClearLo}.
+  All four instructions are described together under \insnref{CClearRegs}.
+
+  A new \insnref{CSetBoundsExact} instruction is defined, allowing an
+  exception to be thrown if an attempt to narrow bounds cannot occur
+  precisely.
+  This is intended for use in memory allocators where it is a software
+  invariant that bounds are always exact.
+  A new exception code is defined for this case.
+
+  A full range of data widths are now support for capability-relative
+  load-linked, store conditional: \insnref{CLLB}, \insnref{CLLH},
+  \insnref{CLLW}, \insnref{CLLD}, \insnref{CSCB},
+  \insnref{CSCH}, \insnref{CSCW}, and \insnref{CSCD} (as well as
+  unsigned load-linked variations).
+  Previously, only a doubleword variation was defined, but cannot be used to
+  emulate the narrower widths as fine-grained bounds around a narrow type
+  would throw a bounds-check exception.
+  Existing load-linked, store-conditional variations for capabilities
+  (\insnref{CLLC}, \insnref{CSCC}) have been updated, including with
+  respect to opcode assignments.
+
+  A new `candidate three' variation on compressed capabilities has been
+  defined, which differentiates sealed and unsealed formats.
+  The unsealed variation invests greater numbers of bits in bounds accuracy,
+  and has a full 64-bit cursor, but does not contain a broader set of
+  software-defined permissions or an object-type field.
+  The sealed variation also has a full 64-bit cursor, but has reduced bounds
+  accuracy in return for a 20-bit object-type field and a set of
+  software-defined permissions.
+
+  `Candidate two' of compressed capabilities has been updated to reflect
+  changes in the hardware prototype by reducing toBase and toBound precision
+  by one bit each.
+
+  Explicit equations have been added explaining how bounds are calculated
+  from each of the 128-bit compressed capability candidates, as well as their
+  alignment requirements.
+
+  Exception priorities have been documented (or clarified) for a number of
+  instructions including \insnref{CJALR}, \insnref{CLC},
+  \insnref{CLLD}, \insnref{CSC}, \insnref{CSCC},
+  \insnnoref{CSetLen}, \insnref{CSeal}, \insnref{CUnSeal}, and
+  \insnref{CSetBounds}.
+
+  The behavior of \insnref{CPtrCmp} is now defined when an undefined
+  comparison type is used.
+
+  It is clarified that capability store failures due to TLB-enforced
+  limitations on capability stores trigger a TLB, rather than a CP2,
+  exception.
+
+  A new capability comparison instruction, \insnref{CEXEQ}, checks
+  whether all fields in the capability are equal; the previous
+  \insnref{CEQ} instruction checked only that their offsets pointed at the
+  same location.
+
+  A new capability instruction, \insnref{CSUB}, allows the implementation
+  of C-language pointer subtraction semantics with the atomicity properties
+  required for garbage collection.
+
+  The list of BERI- and CHERI-related publications, including peer-reviewed
+  conference publications and technical reports, has been updated.
+
+\item[1.15 - UCAM-CL-TR-876]
+  This version of the CHERI ISA, \textit{CHERI ISAv4}, has been prepared for
+  publication as a University of Cambridge technical report.
+
+  The instructions \insnnoref{CIncBase} and \insnnoref{CSetLen}
+  (deprecated in version 1.13 of the CHERI ISA) have now been removed in favor
+  of \insnref{CSetBounds} (added in version 1.12 of the CHERI ISA).
+  The new instruction was introduced in order to atomically expose changes to
+  both upper and lower bounds of a capability, rather than requiring them to
+  be updated separately, required to implement compressed capabilities.
+
+  The design rationale has been updated to better describe our ongoing
+  exploration of whether special registers (such as \KCC{}) should be in the
+  capability register file, and the potential implications of shifting to a
+  userspace exception handler for \insnnoref{CCall}/\insnnoref{CReturn}.
+
+\item[1.16] This is an interim update of the instruction-set specification in
+  which aspects of the 128-bit capability model are clarified and extended.
+
+  The ``candidate 3'' unsealed 128-bit compressed capability representation
+  has been to increase the exponent field (\cexponent{}) to 6 bits from 4, and
+  the \cbasebits{} and \ctopbits{} fields have been reduced to 20 bits each
+  from the 22 bits.
+  \cperms{} has been increased from 11 to 15 to allow for a larger set of
+  software-defined permissions.
+% XXX-BD: 2 - 4 + 4 != 0.  Presumably we consumed two reserved bits?
+  The sealed representation has also been updated similarly, with a total of
+  10 bits for \cotype{} (split over {\bf otypeLow} and {\bf otypeHigh}), 10
+  bits each for \cbasebits{} and \ctopbits{}, and a 6-bit exponent.
+  The algorithm for decompressing a compressed capability has been changed to
+  better utilize the encoding space, and to more clearly differentiate
+  representable from in-bounds values.
+  A variety of improvements and clarifications have been made to the
+  compression model and its description.
+
+  Differences between, and representations of, permissions for 128-bit and
+  256-bit capability are now better described.
+
+  Capability unrepresentable exceptions will now be thrown in various
+  situations where the result of a capability manipulation or operation cannot
+  be represented.
+  For manipulations such as \insnref{CSeal} and \insnref{CFromPtr},
+  an exception will be thrown.
+  For operations such as \insnref{CBTU} and \insnref{CBTS}, the
+  exception will be thrown on the first instruction fetch following a branch
+  to an unrepresentable target, rather than on the branch instruction itself.
+  CHERI1 and CHERI2 no longer differ on how out-of-bounds exceptions are
+  thrown for capability branches: it uniformly occurs on fetching the target
+  instruction.
+
+  The ISA specification makes it more clear that \insnmipsref{CEQ},
+  \insnmipsref{CNE}, \insnmipsref[cptrcmp]{CL[TE]U}, and \insnmipsref{CEXEQ} are
+  forms of the \insnref{CPtrCmp} instruction.
+
+  The ISA todo list has been updated to recommend a capability
+  conditional-move (\insnnoref{CCMove}) instruction.
+
+  There is now more explicit discussion of the MIPS n64 ABI, Hybrid ABI,
+  and Pure-Capability ABI.
+  Conventions for capability-register have been updated and clarified --
+  for example, register assignments for the stack capability, jump register,
+  and link register.
+  The definition that {\bf RCC}, the return code capability, is register
+  \creg{24} has been updated to reflect our use of \creg{17} in actual code
+  generation.
+
+  Erroneous references to an undefined instruction \insnnoref{CSetBase},
+  introduced during removal of the \insnnoref{CIncBase} instruction, have
+  been corrected to refer to \insnref{CSetBounds}.
+
+\item[1.17] This is an interim update of the instruction-set architecture
+  enhancing (and specifying in more detail) the CHERI-128 ``compressed''
+  128-bit capability format, better aligning the 128-bit and 256-bit models,
+  and adding capability-related instructions required for more efficient code
+  generation.
+  This is a draft release of what will be considered \textit{CHERI ISAv5}.
+
+  The chapter on ISA design now includes a section describing ``deep'' versus
+  ``surface'' aspects of the CHERI model as mapped into the ISA.
+  For example, use of tagged capabilities is a core aspect of the model, but
+  the particular choice to have a separate capability register file, rather
+  than extending general-purpose integer registers to optionally hold capabilities, is
+  a surface design choice in that the operating system and compiler can target
+  the same software-visible protection model against both.
+  Likewise, although CHERI-128 specifies a concrete compression model, a range
+  of compression approaches are accepted by the CHERI model.
+
+  A new chapter has been added describing some of our assumptions about how
+  capabilities will be used to build secure systems, for example, that
+  untrusted code will not be permitted to modify TLB state -- which permits
+  changing the interpretation of capabilities relative to virtual addresses.
+
+  The rationale chapter has been updated to more thoroughly describe our
+  capability compression design space.
+
+  A new CHERI ISA quick-reference appendix has been added to the
+  specification, documenting both current and proposed instruction
+  encodings.
+
+  Sections of the introduction on historical context have been shifted to a
+  stand-alone chapter.
+
+  Descriptions in the introduction have been updated relating to
+  our hardware and software prototypes.
+
+  References to PhD dissertations on CHERI have been added to the publications
+  section of the introduction.
+
+  A clarification has been added: the use of the term ``capability
+  coprocessor'' relates to CHERI's utilization of the MIPS ISA coprocessor
+  opcode space, and is not intended to suggest substantial decoupling of
+  capability-related processing from the processor design.
+
+  Compressed capability ``candidate 3'' is now CHERI-128. The \cbasebits{},
+  \ctopbits{} and
+  \ccursor{} fields have been renamed respectively \cB{}, \cT{} and \caddr{}
+  (following the terminology used in the micro paper). When sealed, only the
+  top 8 bits of the \cB{} and \cT{} fields are preserved, and the bottom 12
+  bits are zeroes, which implies stronger alignment requirements for sealed
+  capabilities. The exponent \cexponent{} field remains a 6-bit field, but its
+  bottom 2 bits are ignored, as it is believed that coarser granularity is
+  acceptable, and making the hardware simpler. The \cotype{} field benefits
+  from the shorter \cB{} and \cT{} fields and is now 24 bits -- which is the same
+  as the \cotype{} for 256-bit CHERI. Finally, the representable region
+  associated with a capability has changed from being centred around the
+  described object to an asymmetric region with more space above the object
+  than below. The full description is available in Section~\ref{compression}.
+
+  Alignment requirements for software allocators (such as stack and heap
+  allocators) in the presence of capability compression are now more
+  concisely described.
+
+  The immediate operands to load and store instructions, including
+  \insnmipsref{CLC}, \insnmipsref{CSC}, \insnmipsref[clbhwd]{CL[BHWD][U]}, and
+  \insnmipsref[csbhwd]{CS[BHWD]} are now ``scaled'' by the width of the data being
+  stored (with the exception of capability stores, where scaling is by 16
+  bytes regardless of in-memory capability size).
+  This extends the range of capability-relative loads and stores, permitting
+  a far greater proportion of stack spills to be expressed without additional
+  stack-pointer modification.
+  This is a binary-incompatible change to the ISA.
+
+  The textual description of the \insnref{CSeal} instruction has been
+  updated to match the pseudocode in using $>=$ rather than $>$ in selecting
+  an exception code.
+
+  A redundant check has been removed in the definition of the
+  \insnref{CUnseal} instruction, and an explanation added.
+
+  Opcodes have now been specified for the \insnref{CSetBoundsExact} and
+  \insnref{CSub} instructions.
+
+  To improve code generation when constructing a \PCC{}-relative capability as
+  a jump target, a new \insnref{CGetPCCSetOffset} instruction has been
+  added.
+  This instruction has the combined effects of performing sequential
+  \insnref{CGetPCC} and \insnref{CSetOffset} operations.
+
+  A broader set of opcode rationalizations and cleanups have been applied
+  across the ISA, to facilitate efficient decoding and future use of the
+  opcode space.
+  This includes changes to \insnref{CGetPCC}.
+
+  \creg{25} is no longer reserved for exception-handler use, as \creg{27} and
+  \creg{28} are already reserved for this purpose.
+  It is therefore available for ABI use.
+
+  The 256-bit architectural capability model has been updated to use a single
+  system permission, \cappermASR, to control access to
+  exception-handling and privileged ISA state, rather than splitting it over
+  multiple permissions.
+  This brings the permission models in 128-bit and 256-bit representations
+  back into full alignment from a software perspective.
+  This also simplifies permission checking for instructions such as
+  \insnref{CClearRegs}.
+  The permission numbering space has been rationalized as part of this change.
+  Similarly, the set of exceptions has been updated to reflect a single system
+  permission.
+  The descriptions of various instructions (such as \insnref{CClearRegs}
+  have been updated with respect to revised protections for special registers
+  and exception handling.
+
+  The descriptions of \insnnoref{CCall} and \insnnoref{CReturn} now
+  include an explanation of additional software-defined behavior such as
+  capability control-flow based on the local/global model.
+
+  The common definition of privileged registers (included in the definitions
+  of instructions) has been updated to explicitly include \EPCC{}.
+
+  Future ISA additions are proposed to add testing of branch instructions for
+  NULL and non-NULL capabilities.
+
+\item[1.18 - UCAM-CL-TR-891] This version of the CHERI ISA,
+  \textit{CHERI ISAv5}, has been prepared for publication as a University of
+  Cambridge technical report.
+
+  The chapter on the CHERI protection model has been refined and extending,
+  including adding more information on sealed capabilities, the link between
+  memory allocation and the setting of bounds and permissions, more detailed
+  coverage of capability flow control, and interactions with MMU-based models.
+
+  A new chapter has been added exploring assumptions that must be made when
+  building high-assurance software for CHERI.
+
+  The detailed ISA version history has shifted from the introduction to a new
+  appendix; a summary of key versions is maintained in the introduction, along
+  with changes in the current document version.
+
+  A glossary of key terms has been added.
+
+  The term ``coprocessor'' is deemphasized, as, while it refers correctly to
+  CHERI's use of the MIPS opcode extension space, some readers found it
+  suggestive of an independent hardware unit rather than tight integration into
+  the processor pipeline and memory subsystem.
+
+  A reference has been added to Robert Norton's PhD dissertation on optimized
+  CHERI domain switching.
+
+  A reference has been added to our PLDI 2016 paper on C-language semantics and
+  their interaction with the CHERI model.
+
+  The object-type field in both 128-bit and 256-bit capabilities is now 24 bits,
+  with Top and Bottom fields reduced to 8 bits for sealed capabilities.
+  This reflects a survey of current object-oriented software systems, suggesting
+  that 24 bits is a more reasonable upper bound than 20 bits.
+
+  The assembly arguments to \insnref{CJALR} have been swapped for greater
+  consistency with jump-and-link register instructions in the MIPS ISA.
+
+  We have reduced the number of privileged permissions in the 256-bit capability
+  model to a single privileged permission, \cappermASR, to match
+  128-bit CHERI.
+  This is a binary-incompatible change.
+
+  We have improved the description of the CHERI-128 model in a number of ways,
+  including a new section on the CHERI-128 representable bounds check.
+
+  The architecture chapter contains a more detailed discussion of potential ways
+  to reduce the overhead of CHERI by reducing the number of capability
+  registers, converging the general-purpose integer and capability register files,
+  capability compression, and so on.
+
+  We have extended our discussion of ``deep'' vs ``shallow'' aspects of the
+  CHERI model.
+
+  New sections describe potential non-pointer uses of capabilities, as well as
+  possible uses as primitives supporting higher-level languages.
+
+  Instructions that convert from integers to capabilities now share common
+  \ccode{int_to_cap} pseudocode.
+
+  The notes on \insnref{CBTS} have been synchronized to those on
+  \insnref{CBTU}.
+
+  Use of language has generally been improved to differentiate the
+  architectural 256-bit capability model (e.g., in which its fields are
+  64-bit) from the 128-bit and 256-bit in-memory representations.
+  This includes consideration of differing representations of capability
+  permissions in the architectural interface (via instructions) and the
+  microarchitectural implementation.
+
+  A number of descriptions of features of, and motivations for, the CHERI design
+  have been clarified, extended, or otherwise improved.
+
+  It is clarified that when combining immediate and register operands with
+  the base and offset, 64-bit wrap-around is permitted in capability-relative
+  load and store instructions -- rather than throwing an exception.
+  This is required to support sound optimizations in frequent
+  compiler-generated load/store sequences for C-language programs.
+
+\item[1.19] This release of the \textit{CHERI Instruction-Set Architecture
+  (ISA) Specification} is an interim version intended for submission to
+  DARPA/AFRL to meet the requirements of CTSRD deliverable A015.
+
+  The behavior of \insnref{CToPtr} in the event that the pointer of one
+  capability is to the base of the containing capability has been clarified.
+
+  The \cappermASR permission is extended to cover non-CHERI ISA
+  privileges, such as use of MIPS TLB-management, interrupt-control,
+  exception-handling, and cache-control instructions available in the kernel
+  ring.
+  The aim of these in-progress changes is to allow the compartmentalization of
+  kernel code.
+
+\item[1.20 - UCAM-CL-TR-907] This version of the CHERI ISA, \textit{CHERI
+  ISAv6}, has been prepared for publication as University of Cambridge
+  technical report UCAM-CL-TR-907.
+
+  Chapter~\ref{chap:introduction} has been substantially reformulated,
+  providing brief introductions to both the CHERI protection model and
+  CHERI-MIPS ISA, with much remaining content on our research methodology now
+  shifted to its own new chapter, Chapter~\ref{chap:research}.
+  Our architectural and application-level least-privilege motivations are now
+  more clearly described, as well as hybrid aspects of the CHERI approach.
+  Throughout, better distinction is made between the CHERI protection model and
+  the CHERI-MIPS ISA, which is a specific instantiation of the model with
+  respect to 64-bit MIPS.
+  The research methodology chapter now provides a discussion of our overall
+  approach, more detailed descriptions of various phases of our research and
+  development cycle, and describes major transitions in our approach as the
+  project proceeded.
+
+  Chapter~\ref{chap:model} on the software-facing CHERI protection model has
+  been improved to provide more clear explanations of our approach as well as
+  additional illustrations.
+  The chapter now more clearly enunciates two guiding principles
+  underlying the CHERI ISA design: the \textit{principle of least privilege},
+  and the \textit{principle of intentional use}.
+  The former has been widely considered in the security literature, and
+  motivates privilege reduction in the CHERI ISA.
+  The latter has not previously described, and is supports the use of explicitly
+  named rights, rather than implicitly selected ones, wherever possible in order
+  to avoid `confused deputy' problems.
+  Both contribute to vulnerability mitigation effects.
+  New sections have been added on revocation and garbage collection.
+  The role and implementation of monotonicity (and also non-monotonicity) in
+  the ISA are more clearly described.
+
+  A chapter on architectural sketches has been added, describing how the CHERI
+  protection model might be introduced in the RISC-V and x86-64 ISAs.
+  In doing so, we identify a number of key aspects of the CHERI model that are
+  required regardless of the underlying ISA.
+  We argue that the CHERI protection model is a \textit{portable} model that can
+  be implemented consistently across a broad range of underlying ISAs and
+  concrete integrations with those ISAs.
+  One implication of this argument is that portable CHERI-aware software can be
+  implemented across underlying architectural implementations.
+
+  Chapter~\ref{chap:architecture} now describes, at a high level, CHERI's
+  expectations for tagged memory.
+
+  We in general now prefer the phrase ``control-flow robustness'' to
+  ``control-flow integrity'' when talking about capability protection for code
+  pointers, in order to avoid confusion with conventional CFI.
+
+  The descriptions of software-defined aspects of the \insnnoref{CCall} and
+  \insnnoref{CReturn} instructions have been removed from the description and
+  pseudocode of each instruction.
+  They are instead part of an expanded set of notes on potential software use
+  for these instructions.
+
+  A new \insnnoref{CCall} selector 1 has been added that provides a jump-like
+  domain transition without use of an architectural exception.
+  In this mode of operation, \insnnoref{CCall} unseals the sealed code and
+  data capabilities to enter the new domain, offering a different set of 
+  hardware and software tradeoffs from the existing selector-0 semantics.
+  For example, complex exception-related mechanism is avoided in hardware for
+  domain switches, with the potential to substantially improve performance.
+  Software would most likely use this mechanism to branch into a trusted
+  intermediary capability of supporting safe and controlled switching to a new
+  object.
+
+  To support the new \insnnoref{CCall} selector 1, a new permission,
+  \emph{Permit\_CCall} is defined authorizing use of the selector on sealed
+  capabilities.
+  The permission must be present on both sealed code and data capabilities.
+
+  To support the new \insnnoref{CCall} selector 1, a new CP2 exception cause
+  code, Permit\_CCall Violation is defined to report a lack of the
+  \emph{Permit\_CCall} permission on sealed code or data capabilities passed to
+  \insnnoref{CCall}.
+
+  New experimental instructions \insnref{CBuildCap} (import a capability),
+  \insnref{CCopyType} (import the \cotype{} field of a capability), and
+  \insnref{CCSeal} (conditionally seal a capability) have been added
+  to the ISA to be used when re-internalizing capabilities that have been
+  written to non-capability-aware memory or storage.
+  This instruction is intended to satisfy use cases such as swapping to
+  disk, migrating processes, migrating virtual machines, and run-time linking.
+  A suitable authorizing capability is required in order to restore the
+  tag.
+  As these instructions are considered experimental, they are documented in
+  Appendix~\ref{app:experimental} rather than the main specification.
+
+  The \insnref{CGetType} instruction now returns $-1$ when used on an
+  unsealed capability, in order to allow it to be more easily used with
+  \insnref{CCSeal}.
+
+  Two new conditional-move instructions are added to the CHERI-MIPS ISA:
+  \insnref{CMOVN} (conditionally move capability on non-zero), and
+  \insnref{CMOVZ} (conditionally move capability on zero).
+  These complement existing conditional-move instructions in the 64-bit MIPS
+  ISA, allowing more efficient generated code.
+
+  The \insnref{CJR} (capability jump register) and \insnref{CJALR}
+  (capability jump and link register) have been changed to accept non-global
+  capability jump targets.
+
+  The \insnref{CLC} (capability load capability) and \insnref{CLLC}
+  (capability load-linked conditional) instructions will now strip loaded tags,
+  rather than throwing an exception, if the Permit\_Load\_Capability permission
+  is not present.
+
+  The \insnref{CToPtr} (capability to pointer) instruction now checks that
+  the source register is not sealed, and performs comparative range checks of
+  the two source capabilities.
+  More detailed rationale has been provided for the design of the
+  \insnref{CToPtr} instruction in Chapter~\ref{chap:rationale}.
+
+  The pseudocode for the \insnnoref{CCheckType} (capability check
+  type) instruction has been corrected to test uperm as well as perm.
+  The pseudocode for \insnnoref{CCheckType} has been corrected to test the
+  sealed bit on both source capabilities.
+  An encoding error for \insnnoref{CCheckType} in the ISA quick reference has
+  been corrected.
+
+  The pseudocode for the \insnref{CGetPerm} (capability get permissions)
+  instruction has been updated to match syntax used in the
+  \insnref{CGetType} and \insnref{CGetCause} instructions.
+
+  The pseudocode for the \insnref{CUnseal} (capability unseal) instruction
+  has been corrected to avoid an aliasing problem when the source and
+  destination register are the same.
+
+  The description of the \insnref{CSeal} (capability seal) instruction has
+  been clarified to explain that precision cannot be lost in the case where
+  bounds are no longer precisely representable, as an exception will be thrown.
+
+  The description of the fast representability check for compressed capabilities
+  has been improved.
+
+  CHERI-related exception handling behavior is now clarified with respect to the
+  MIPS EXL status bit, with the aim of ensuring consistent behavior.
+  Regardless of bounds set on \KCC{}, a suitable offset is selected so that the
+  standard MIPS exception vector will be executed via the exception \PCC{}.
+
+  The section on CHERI control in Chapter~\ref{chap:cheri-mips} has been
+  clarified to more specifically identify 64-bit MIPS privileged instructions,
+  KSU bits, and general operation modified by the \cappermASR
+  permission.
+  The section now also more specifically described privileged behaviors not
+  controlled by the permission, such as use of specific exception vectors.
+  A corresponding rationale section has been added to
+  Chapter~\ref{chap:rationale}.
+
+  A number of potential future instruction-set improvements relating to
+  capability compression, control flow, and instruction variants with immediates
+  have been added to the future ISA changes list in
+  Chapter~\ref{chap:architecture}.
+
+  Opcode-space reservations for the previously removed \insnnoref{CIncBase}
+  and \insnnoref{CSetLen} instructions have also been removed.
+
+  \creg{25}, which had its hard-coded ISA use removed in CHERI ISAv5, has now
+  been made a caller-save capability register in the ABI.
+
+  Citations to further CHERI research publications have been added.
+
+\item[1.21] This release of the \textit{CHERI Instruction-Set Architecture} is
+  an interim version intended for submission to DARPA/AFRL to meet the
+  requirements of CTSRD deliverable A001, and contains the following changes
+  relative to CHERI ISAv6:
+
+  The ISA encoding reference has been updated for new experimental
+  instructions.
+
+  A new \insnref{CNExEq} instruction has been added, which provides a
+  more efficient implementation of a test for negative exact inequality than
+  utilizing \insnref{CExEq} and inverting the result.
+
+  Specify that when a TLB exception results from attempting to store a
+  tagged capability via a TLB entry that does not authorize tagged store, the
+  MIPS EntryHi register will be set correspondingly.
+
+\item[7.0-ALPHA1]
+\input{app-versions-7-0-alpha1}
+
+\item[7.0-ALPHA2]
+\input{app-versions-7-0-alpha2}
+
+\item[7.0-ALPHA3]
+\input{app-versions-7-0-alpha3}
+
+\item[7.0-ALPHA4]
+\input{app-versions-7-0-alpha4}
+
+\item[7.0]
+\input{app-versions-7-0}
+
+\item[8.0]
+\input{app-versions-8-0}
+
+\end{description}

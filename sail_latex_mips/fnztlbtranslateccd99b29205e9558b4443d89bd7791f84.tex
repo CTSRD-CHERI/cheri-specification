@@ -1,0 +1,21 @@
+function #\hyperref[sailMIPSzTLBTranslateC]{TLBTranslateC}# (vAddr, accessType) =
+  {
+    let currentAccessLevel = #\hyperref[sailMIPSzgetAccessLevel]{getAccessLevel}#() in
+    let compat32 = (vAddr[61..31] == 0b1111111111111111111111111111111) in
+    let (requiredLevel, addr) : (AccessLevel, #\hyperref[sailMIPSzoption]{option}#(#\hyperref[sailMIPSzbits]{bits}#(64))) = #\hyperref[sailMIPSzMIPSSegmentOf]{MIPSSegmentOf}#(vAddr)
+    in
+    if not(#\hyperref[sailMIPSzgrantsAccess]{grantsAccess}#(currentAccessLevel, requiredLevel)) then
+      #\hyperref[sailMIPSzSignalExceptionBadAddr]{SignalExceptionBadAddr}#(if (accessType == StoreData) then AdES else AdEL, vAddr)
+    else
+      let (pa, c) : (#\hyperref[sailMIPSzbits]{bits}#(64), MemAccessCapRestriction) = match addr {
+        #\hyperref[sailMIPSzSome]{Some}#(a) => (a, Unrestricted),
+        #\hyperref[sailMIPSzNone]{None}#()  => if ((~(compat32)) & (#\hyperref[sailMIPSzunsigned]{unsigned}#(vAddr[61..0]) > MAX_VA)) then
+            #\hyperref[sailMIPSzSignalExceptionBadAddr]{SignalExceptionBadAddr}#(if (accessType == StoreData) then AdES else AdEL, vAddr)
+          else
+            #\hyperref[sailMIPSzTLBTranslate2]{TLBTranslate2}#(vAddr, accessType, requiredLevel)
+      }
+      in if (#\hyperref[sailMIPSzunsigned]{unsigned}#(pa) > MAX_PA) then
+          #\hyperref[sailMIPSzSignalExceptionBadAddr]{SignalExceptionBadAddr}#(if (accessType == StoreData) then AdES else AdEL, vAddr)
+        else
+          (pa, c)
+  }

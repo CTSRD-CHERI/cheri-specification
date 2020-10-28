@@ -1,0 +1,17 @@
+let rs1_val_S = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs1));
+let rs2_val_S = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs2));
+
+let is_quiet  = true;
+let (rs2_lt_rs1, fflags) = #\hyperref[sailRISCVzflezyS]{fle\_S}# (rs2_val_S, rs1_val_S, is_quiet);
+
+let rd_val_S  = if      (#\hyperref[sailRISCVzfzyiszyNaNzyS]{f\_is\_NaN\_S}#(rs1_val_S) & #\hyperref[sailRISCVzfzyiszyNaNzyS]{f\_is\_NaN\_S}#(rs2_val_S))           then #\hyperref[sailRISCVzcanonicalzyNaNzyS]{canonical\_NaN\_S}#()
+                else if #\hyperref[sailRISCVzfzyiszyNaNzyS]{f\_is\_NaN\_S}#(rs1_val_S)                                     then rs2_val_S
+                else if #\hyperref[sailRISCVzfzyiszyNaNzyS]{f\_is\_NaN\_S}#(rs2_val_S)                                     then rs1_val_S
+                else if (#\hyperref[sailRISCVzfzyiszynegzyzzerozyS]{f\_is\_neg\_zero\_S}#(rs1_val_S) & #\hyperref[sailRISCVzfzyiszyposzyzzerozyS]{f\_is\_pos\_zero\_S}#(rs2_val_S)) then rs2_val_S
+                else if (#\hyperref[sailRISCVzfzyiszynegzyzzerozyS]{f\_is\_neg\_zero\_S}#(rs2_val_S) & #\hyperref[sailRISCVzfzyiszyposzyzzerozyS]{f\_is\_pos\_zero\_S}#(rs1_val_S)) then rs1_val_S
+                else if rs2_lt_rs1                                                then rs1_val_S
+                else /* (not rs2_lt_rs1) */                                            rs2_val_S;
+
+#\hyperref[sailRISCVzaccruezyfflags]{accrue\_fflags}#(fflags);
+#\hyperref[sailRISCVzF]{F}#(rd) = #\hyperref[sailRISCVznanzybox]{nan\_box}# (rd_val_S);
+RETIRE_SUCCESS

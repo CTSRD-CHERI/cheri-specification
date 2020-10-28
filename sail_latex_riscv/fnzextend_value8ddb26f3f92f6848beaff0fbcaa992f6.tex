@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzextendzyvalue]{extend\_value}#(is_unsigned, value) = match (value) {
+  #\hyperref[sailRISCVzMemValue]{MemValue}#(v)     => #\hyperref[sailRISCVzMemValue]{MemValue}#(if is_unsigned then #\hyperref[sailRISCVzEXTZ]{EXTZ}#(v) else #\hyperref[sailRISCVzEXTS]{EXTS}#(v) : xlenbits),
+  #\hyperref[sailRISCVzMemException]{MemException}#(e) => #\hyperref[sailRISCVzMemException]{MemException}#(e)
+}

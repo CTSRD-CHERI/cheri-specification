@@ -1,0 +1,15 @@
+function #\hyperref[sailMIPSzMIPSSegmentOf]{MIPSSegmentOf}# (vAddr) = {
+ let compat32 = (vAddr[61..31] == 0b1111111111111111111111111111111) in
+ match (vAddr[63..62]) {
+  0b11  => match (compat32, vAddr[30..29]) { /* xkseg */
+   (true, 0b11)  => (Kernel, #\hyperref[sailMIPSzNone]{None}#() : #\hyperref[sailMIPSzoption]{option}#(#\hyperref[sailMIPSzbits]{bits}#(64))),               /* kseg3 mapped 32-bit compat */
+   (true, 0b10)  => (Supervisor, #\hyperref[sailMIPSzNone]{None}#() : #\hyperref[sailMIPSzoption]{option}#(#\hyperref[sailMIPSzbits]{bits}#(64))),           /* sseg  mapped 32-bit compat */
+   (true, 0b01)  => (Kernel, #\hyperref[sailMIPSzSome]{Some}#(0x00000000 @ 0b000 @ vAddr[28..0])), /* kseg1 unmapped uncached 32-bit compat */
+   (true, 0b00)  => (Kernel, #\hyperref[sailMIPSzSome]{Some}#(0x00000000 @ 0b000 @ vAddr[28..0])), /* kseg0 unmapped cached 32-bit compat */
+   (_, _)        => (Kernel, #\hyperref[sailMIPSzNone]{None}#() : #\hyperref[sailMIPSzoption]{option}#(#\hyperref[sailMIPSzbits]{bits}#(64))) /* xkseg mapped */
+  },
+  0b10  => (Kernel, #\hyperref[sailMIPSzSome]{Some}#(0b00000 @ vAddr[58..0])), /* xkphys bits 61-59 are cache #\hyperref[sailMIPSzmode]{mode}# (ignored) */
+  0b01  => (Supervisor, #\hyperref[sailMIPSzNone]{None}#() : #\hyperref[sailMIPSzoption]{option}#(#\hyperref[sailMIPSzbits]{bits}#(64))),  /* xsseg - supervisor mapped */
+  0b00  => (User, #\hyperref[sailMIPSzNone]{None}#() : #\hyperref[sailMIPSzoption]{option}#(#\hyperref[sailMIPSzbits]{bits}#(64)))         /* xuseg - user mapped */
+ }
+}

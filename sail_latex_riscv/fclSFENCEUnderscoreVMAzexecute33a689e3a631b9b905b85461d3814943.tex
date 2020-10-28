@@ -1,0 +1,11 @@
+let addr : #\hyperref[sailRISCVzoption]{option}#(xlenbits) = if rs1 == 0b00000 then #\hyperref[sailRISCVzNone]{None}#() else #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzX]{X}#(rs1));
+let asid : #\hyperref[sailRISCVzoption]{option}#(xlenbits) = if rs2 == 0b00000 then #\hyperref[sailRISCVzNone]{None}#() else #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzX]{X}#(rs2));
+match cur_privilege {
+  User       => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+  Supervisor => match (#\hyperref[sailRISCVzarchitecture]{architecture}#(#\hyperref[sailRISCVzgetzymstatuszySXL]{get\_mstatus\_SXL}#(mstatus)), mstatus.#\hyperref[sailRISCVzTVM]{TVM}#()) {
+                  (#\hyperref[sailRISCVzSome]{Some}#(_), 0b1)  => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+                  (#\hyperref[sailRISCVzSome]{Some}#(_), 0b0) => { #\hyperref[sailRISCVzflushzyTLB]{flush\_TLB}#(asid, addr); RETIRE_SUCCESS },
+                  (_, _)           => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unimplemented sfence architecture")
+                },
+  Machine    => { #\hyperref[sailRISCVzflushzyTLB]{flush\_TLB}#(asid, addr); RETIRE_SUCCESS }
+}

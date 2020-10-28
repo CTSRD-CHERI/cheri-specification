@@ -1,0 +1,17 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let cb_val = #\hyperref[sailMIPSzreadCapRegDDC]{readCapRegDDC}#(cb);
+let rt_val = #\hyperref[sailMIPSzrGPR]{rGPR}#(rt);
+if rt_val == 0x0000000000000000 then
+  #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(cd, null_cap)
+else if not (cb_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TagViolation, cb)
+else if cb_val.sealed then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, cb)
+else
+{
+  let (success, newCap) = #\hyperref[sailMIPSzsetCapOffset]{setCapOffset}#(cb_val, rt_val);
+  if success then
+      #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(cd, newCap)
+  else
+      #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(cd, #\hyperref[sailMIPSzunrepCap]{unrepCap}#(newCap))
+}

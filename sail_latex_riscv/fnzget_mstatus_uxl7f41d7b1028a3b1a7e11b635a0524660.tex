@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzgetzymstatuszyUXL]{get\_mstatus\_UXL}#(m : Mstatus) -> arch_xlen = {
+  if   sizeof(xlen) == 32
+  then #\hyperref[sailRISCVzarchzytozybits]{arch\_to\_bits}#(RV32)
+  else m.#\hyperref[sailRISCVzbits]{bits}#()[33 .. 32]
+}

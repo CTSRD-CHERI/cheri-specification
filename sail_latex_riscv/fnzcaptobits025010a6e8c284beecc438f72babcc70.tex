@@ -1,0 +1,22 @@
+function #\hyperref[sailRISCVzcapToBits]{capToBits}#(cap) : Capability -> CapBits = {
+  t_hi : #\hyperref[sailRISCVzbits]{bits}#(cap_mantissa_width - 5) = cap.T[cap_mantissa_width - 3..3];
+  t_lo : #\hyperref[sailRISCVzbits]{bits}#(3)  = cap.T[2..0];
+  b_hi : #\hyperref[sailRISCVzbits]{bits}#(cap_mantissa_width - 3) = cap.B[cap_mantissa_width - 1..3];
+  b_lo : #\hyperref[sailRISCVzbits]{bits}#(3)  = cap.B[2..0];
+  if cap.internal_e then {
+    t_lo = cap.E[5..3];
+    b_lo = cap.E[2..0];
+  };
+  return (cap.uperms
+    @ #\hyperref[sailRISCVzgetCapHardPerms]{getCapHardPerms}#(cap)
+    @ cap.reserved
+    @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.flag_cap_mode)
+    @ cap.otype
+    @ #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.internal_e)
+    @ t_hi
+    @ t_lo
+    @ b_hi
+    @ b_lo
+    @ cap.address
+  );
+}

@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzprivLevelzytozybits]{privLevel\_to\_bits}# (p) =
+  match (p) {
+    User       => 0b00,
+    Supervisor => 0b01,
+    Machine    => 0b11
+  }

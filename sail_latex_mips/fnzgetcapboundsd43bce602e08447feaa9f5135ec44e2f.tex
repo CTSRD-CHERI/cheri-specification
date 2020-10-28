@@ -1,0 +1,35 @@
+function #\hyperref[sailMIPSzgetCapBounds]{getCapBounds}#(c) : Capability -> (uint64, CapLen) =
+  let E = #\hyperref[sailMIPSzunsigned]{unsigned}#(c.E) in
+  let a : #\hyperref[sailMIPSzbits]{bits}#(64) = c.address in
+  /* Extract bits we need to make the top correction and calculate representable limit */
+  let a3 = #\hyperref[sailMIPSztruncate]{truncate}#(a >> (E + 11), 3) in
+  let B3 = #\hyperref[sailMIPSztruncateLSB]{truncateLSB}#(c.B, 3) in
+  let T3 = #\hyperref[sailMIPSztruncateLSB]{truncateLSB}#(c.T, 3) in
+  let R3 = B3 - 0b001 in /* wraps */
+  /* Do address, base and top lie in the R aligned region above the one containing R? */
+  let aHi = if a3 <_u R3 then 1 else 0 in
+  let bHi = if B3 <_u R3 then 1 else 0 in
+  let tHi = if T3 <_u R3 then 1 else 0 in
+  /* Compute region corrections for top and base relative to a */
+  let correction_base = bHi - aHi in
+  let correction_top  = tHi - aHi in
+  let a_top = (a >> (E + 14)) in {
+    base : #\hyperref[sailMIPSzbits]{bits}#(65) = #\hyperref[sailMIPSztruncate]{truncate}#((a_top + correction_base) @ c.B @ #\hyperref[sailMIPSzzzeros]{zeros}#(E), 65);
+    top  : #\hyperref[sailMIPSzbits]{bits}#(65) = #\hyperref[sailMIPSztruncate]{truncate}#((a_top + correction_top)  @ c.T @ #\hyperref[sailMIPSzzzeros]{zeros}#(E), 65);
+    if (base[64] == bitone) then {
+      /* If base[64] is set this indicates under or overflow i.e. a has
+         wrapped around the address space and been corrected. In this case
+         we need to correct top[64] because top is not quite modulo 2**64 due
+         to having max top == 2**64 in one particular case: */
+       top[64] = if (aHi == 1) & (tHi == 1) then bitone else bitzero;
+    };
+    /* The following is apparently equivalent to above and used by hw. */
+    /*
+    let base2 : #\hyperref[sailMIPSzbits]{bits}#(2) = bitzero @ base[63];
+    let top2  : #\hyperref[sailMIPSzbits]{bits}#(2) = top[64..63];
+    if (E < (#\hyperref[sailMIPSzunsigned]{unsigned}#(resetE) - 1)) & (#\hyperref[sailMIPSzunsigned]{unsigned}#(top2 - base2) > 1) then {
+      top[64] = ~(top[64]);
+    };
+    */
+    (#\hyperref[sailMIPSzunsigned]{unsigned}#(base[63..0]), #\hyperref[sailMIPSzunsigned]{unsigned}#(top))
+  }

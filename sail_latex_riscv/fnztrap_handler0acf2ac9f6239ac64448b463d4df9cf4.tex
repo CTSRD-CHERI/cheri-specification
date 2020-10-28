@@ -1,0 +1,77 @@
+function #\hyperref[sailRISCVztrapzyhandler]{trap\_handler}#(del_priv : Privilege, intr : bool, c : exc_code, pc : xlenbits, info : #\hyperref[sailRISCVzoption]{option}#(xlenbits), ext : #\hyperref[sailRISCVzoption]{option}#(ext_exception))
+                     -> xlenbits = {
+  #\hyperref[sailRISCVzrvfizytrap]{rvfi\_trap}#();
+  if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+  then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("handling " ^ (if intr then "int#" else "exc#")
+                      ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(c) ^ " at priv " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(del_priv)
+                      ^ " with tval " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVztval]{tval}#(info)));
+
+  #\hyperref[sailRISCVzcancelzyreservation]{cancel\_reservation}#();
+
+  match (del_priv) {
+    Machine => {
+       mcause->#\hyperref[sailRISCVzIsInterrupt]{IsInterrupt}#() = #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(intr);
+       mcause->#\hyperref[sailRISCVzCause]{Cause}#()       = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(c);
+
+       mstatus->#\hyperref[sailRISCVzMPIE]{MPIE}#() = mstatus.#\hyperref[sailRISCVzMIE]{MIE}#();
+       mstatus->#\hyperref[sailRISCVzMIE]{MIE}#()  = 0b0;
+       mstatus->#\hyperref[sailRISCVzMPP]{MPP}#()  = #\hyperref[sailRISCVzprivLevelzytozybits]{privLevel\_to\_bits}#(cur_privilege);
+       mtval           = #\hyperref[sailRISCVztval]{tval}#(info);
+       mepc            = pc;
+
+       cur_privilege   = del_priv;
+
+       #\hyperref[sailRISCVzhandlezytrapzyextension]{handle\_trap\_extension}#(del_priv, pc, ext);
+
+       if   #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#()
+       then #\hyperref[sailRISCVzprintzyreg]{print\_reg}#("CSR mstatus <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mstatus.#\hyperref[sailRISCVzbits]{bits}#()));
+
+       #\hyperref[sailRISCVzpreparezytrapzyvector]{prepare\_trap\_vector}#(del_priv, mcause)
+    },
+    Supervisor => {
+       assert (#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#(), "no supervisor mode present for delegation");
+
+       scause->#\hyperref[sailRISCVzIsInterrupt]{IsInterrupt}#() = #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(intr);
+       scause->#\hyperref[sailRISCVzCause]{Cause}#()       = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(c);
+
+       mstatus->#\hyperref[sailRISCVzSPIE]{SPIE}#() = mstatus.#\hyperref[sailRISCVzSIE]{SIE}#();
+       mstatus->#\hyperref[sailRISCVzSIE]{SIE}#()  = 0b0;
+       mstatus->#\hyperref[sailRISCVzSPP]{SPP}#()  = match cur_privilege {
+                           User => 0b0,
+                           Supervisor => 0b1,
+                           Machine => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("invalid privilege for s-mode trap")
+                         };
+       stval           = #\hyperref[sailRISCVztval]{tval}#(info);
+       sepc            = pc;
+
+       cur_privilege   = del_priv;
+
+       #\hyperref[sailRISCVzhandlezytrapzyextension]{handle\_trap\_extension}#(del_priv, pc, ext);
+
+       if   #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#()
+       then #\hyperref[sailRISCVzprintzyreg]{print\_reg}#("CSR mstatus <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mstatus.#\hyperref[sailRISCVzbits]{bits}#()));
+
+       #\hyperref[sailRISCVzpreparezytrapzyvector]{prepare\_trap\_vector}#(del_priv, scause)
+    },
+    User => {
+       assert(#\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#(), "no user mode present for delegation");
+
+       ucause->#\hyperref[sailRISCVzIsInterrupt]{IsInterrupt}#() = #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(intr);
+       ucause->#\hyperref[sailRISCVzCause]{Cause}#()       = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(c);
+
+       mstatus->#\hyperref[sailRISCVzUPIE]{UPIE}#() = mstatus.#\hyperref[sailRISCVzUIE]{UIE}#();
+       mstatus->#\hyperref[sailRISCVzUIE]{UIE}#()  = 0b0;
+       utval           = #\hyperref[sailRISCVztval]{tval}#(info);
+       uepc            = pc;
+
+       cur_privilege   = del_priv;
+
+       #\hyperref[sailRISCVzhandlezytrapzyextension]{handle\_trap\_extension}#(del_priv, pc, ext);
+
+       if   #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#()
+       then #\hyperref[sailRISCVzprintzyreg]{print\_reg}#("CSR mstatus <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mstatus.#\hyperref[sailRISCVzbits]{bits}#()));
+
+       #\hyperref[sailRISCVzpreparezytrapzyvector]{prepare\_trap\_vector}#(del_priv, ucause)
+    }
+  };
+}

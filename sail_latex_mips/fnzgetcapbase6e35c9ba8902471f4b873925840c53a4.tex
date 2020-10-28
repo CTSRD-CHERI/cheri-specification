@@ -1,0 +1,3 @@
+function #\hyperref[sailMIPSzgetCapBase]{getCapBase}#(c) : Capability -> uint64 =
+    let (base, _) = #\hyperref[sailMIPSzgetCapBounds]{getCapBounds}#(c) in
+    base

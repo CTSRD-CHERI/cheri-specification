@@ -1,0 +1,73 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CWriteHwr}
+\insnmipslabel{cwritehwr}
+\subsection*{CWriteHwr: Write a Special-Purpose Capability Register}
+
+\subsubsection*{Format}
+
+CWriteHwr cb, selector
+
+\begin{center}
+\cheritwoop[header]{0xe}{cb}{selector}
+\end{center}
+
+\subsubsection*{Description}
+
+The value of the capability register \emph{cb} is stored in the special-purpose
+capability register \emph{selector}.
+See \autoref{tab:cwritehwr-permissions} for the possible values of
+\emph{selector} and the permissions required in order to write to the register.
+
+\begin{table}[h]
+\centering
+\caption{Access permission required to write special-purpose capability registers}
+\label{tab:cwritehwr-permissions}
+\begin{tabular}{cll@{}}
+\toprule
+& \textbf{Register}                 & Required for write access                                                                                         \\
+\midrule
+\textbf{0}  & Default data capability (\DDC) & $\emptyset$  \\
+\textbf{1} & User TLS (\CULR) & $\emptyset$ \\
+%\textbf{2} & \ajnote{\PCC - make this CJR} & $\emptyset$ \\
+% \textbf{7}  & Program counter capability (\PCC)   & Never writeable \\
+
+
+\textbf{8}  & Privileged User TLS (\CPLR) & \PCC{}.\cperms{}.\emph{Access\_System\_Registers} \\
+
+\textbf{22} & Kernel scratch register 1 (\KRC)  & \KernelAndAccessSysRegs \\
+\textbf{23} & Kernel scratch register 2 (\KQC)  & \KernelAndAccessSysRegs \\
+
+\textbf{28} & Error exception program counter (\ErrorEPCC)  &  \KernelAndAccessSysRegs \\
+\textbf{29} & Kernel code capability (\KCC)     &  \KernelAndAccessSysRegs \\
+\textbf{30} & Kernel data capability (\KDC)    & \KernelAndAccessSysRegs \\
+\textbf{31} & Exception program counter (\EPCC) & \KernelAndAccessSysRegs \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\note{rmn30}{should we validate the written values, for example requiring that KCC and EPCC have tag set? otherwise we can get into weird states (I think this can happen on current hw).}
+
+\subsubsection*{Semantics}
+\sailMIPScode{CWriteHwr}
+
+\subsubsection*{Exceptions}
+
+
+A reserved Instruction exception is raised for unknown or
+unimplemented values of \emph{selector}.
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item the permission checks as specified in \autoref{tab:cwritehwr-permissions} above were not met for \emph{selector}
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item In the future we may decide to require \PCC{}.\cperms{}.\emph{Access\_System\_Registers} in order to modify \DDC
+\item We may decide to introduce a \insnnoref{CSwapHwr} instruction that
+ swaps special-purpose register \emph{selector} and a general-purpose register
+\end{itemize}
+

@@ -1,0 +1,10 @@
+function #\hyperref[sailRISCVzptwzyerrorzytozystr]{ptw\_error\_to\_str}#(e) =
+  match (e) {
+    #\hyperref[sailRISCVzPTWzyInvalidzyAddr]{PTW\_Invalid\_Addr}#()   => "invalid-source-addr",
+    #\hyperref[sailRISCVzPTWzyAccess]{PTW\_Access}#()         => "mem-access-error",
+    #\hyperref[sailRISCVzPTWzyInvalidzyPTE]{PTW\_Invalid\_PTE}#()    => "invalid-pte",
+    #\hyperref[sailRISCVzPTWzyNozyPermission]{PTW\_No\_Permission}#()  => "no-permission",
+    #\hyperref[sailRISCVzPTWzyMisaligned]{PTW\_Misaligned}#()     => "misaligned-superpage",
+    #\hyperref[sailRISCVzPTWzyPTEzyUpdate]{PTW\_PTE\_Update}#()     => "pte-update-needed",
+    #\hyperref[sailRISCVzPTWzyExtzyError]{PTW\_Ext\_Error}#(e)     => "extension-error"
+  }

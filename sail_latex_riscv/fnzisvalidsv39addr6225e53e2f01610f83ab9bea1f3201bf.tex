@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzisValidSv39Addr]{isValidSv39Addr}#(vAddr : xlenbits) -> bool = {
+  vAddr[63 .. 39] == (if   vAddr[38] == bitone
+                      then #\hyperref[sailRISCVzones]{ones}#()
+                      else #\hyperref[sailRISCVzzzeros]{zeros}#())
+}

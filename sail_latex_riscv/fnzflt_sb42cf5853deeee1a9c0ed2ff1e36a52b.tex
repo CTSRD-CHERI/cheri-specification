@@ -1,0 +1,29 @@
+function #\hyperref[sailRISCVzfltzyS]{flt\_S}#   (v1,       v2,        is_quiet) = {
+  let (s1, e1, m1) = #\hyperref[sailRISCVzfsplitzyS]{fsplit\_S}# (v1);
+  let (s2, e2, m2) = #\hyperref[sailRISCVzfsplitzyS]{fsplit\_S}# (v2);
+
+  let result : bool =
+    if (s1 == 0b0) & (s2 == 0b0) then
+      if   (e1 == e2)
+      then #\hyperref[sailRISCVzunsigned]{unsigned}# (m1) < #\hyperref[sailRISCVzunsigned]{unsigned}# (m2)
+      else #\hyperref[sailRISCVzunsigned]{unsigned}# (e1) < #\hyperref[sailRISCVzunsigned]{unsigned}# (e2)
+    else if (s1 == 0b0) & (s2 == 0b1)
+    then false
+    else if (s1 == 0b1) & (s2 == 0b0)
+    then true
+    else
+        if   (e1 == e2)
+        then #\hyperref[sailRISCVzunsigned]{unsigned}# (m1) > #\hyperref[sailRISCVzunsigned]{unsigned}# (m2)
+        else #\hyperref[sailRISCVzunsigned]{unsigned}# (e1) > #\hyperref[sailRISCVzunsigned]{unsigned}# (e2);
+
+  let fflags = if is_quiet then
+                 if   (#\hyperref[sailRISCVzfzyiszySNaNzyS]{f\_is\_SNaN\_S}#(v1) | #\hyperref[sailRISCVzfzyiszySNaNzyS]{f\_is\_SNaN\_S}#(v2))
+                 then #\hyperref[sailRISCVznvFlag]{nvFlag}#()
+                 else #\hyperref[sailRISCVzzzeros]{zeros}#()
+               else
+                 if   (#\hyperref[sailRISCVzfzyiszyNaNzyS]{f\_is\_NaN\_S}#(v1) | #\hyperref[sailRISCVzfzyiszyNaNzyS]{f\_is\_NaN\_S}#(v2))
+                 then #\hyperref[sailRISCVznvFlag]{nvFlag}#()
+                 else #\hyperref[sailRISCVzzzeros]{zeros}#();
+
+  (result, fflags)
+}

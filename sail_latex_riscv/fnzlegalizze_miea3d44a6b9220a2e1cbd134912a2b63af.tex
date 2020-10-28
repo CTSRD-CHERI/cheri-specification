@@ -1,0 +1,16 @@
+function #\hyperref[sailRISCVzlegalizzezymie]{legalize\_mie}#(o : Minterrupts, v : xlenbits) -> Minterrupts = {
+  let v = #\hyperref[sailRISCVzMkzyMinterrupts]{Mk\_Minterrupts}#(v);
+  let m = #\hyperref[sailRISCVzupdatezyMEI]{update\_MEI}#(o, v.#\hyperref[sailRISCVzMEI]{MEI}#());
+  let m = #\hyperref[sailRISCVzupdatezyMTI]{update\_MTI}#(m, v.#\hyperref[sailRISCVzMTI]{MTI}#());
+  let m = #\hyperref[sailRISCVzupdatezyMSI]{update\_MSI}#(m, v.#\hyperref[sailRISCVzMSI]{MSI}#());
+  let m = #\hyperref[sailRISCVzupdatezySEI]{update\_SEI}#(m, v.#\hyperref[sailRISCVzSEI]{SEI}#());
+  let m = #\hyperref[sailRISCVzupdatezySTI]{update\_STI}#(m, v.#\hyperref[sailRISCVzSTI]{STI}#());
+  let m = #\hyperref[sailRISCVzupdatezySSI]{update\_SSI}#(m, v.#\hyperref[sailRISCVzSSI]{SSI}#());
+  /* The U-mode bits will be modified if we have the 'N' extension. */
+  if #\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#() & #\hyperref[sailRISCVzhaveNExt]{haveNExt}#() then {
+    let m = #\hyperref[sailRISCVzupdatezyUEI]{update\_UEI}#(m, v.#\hyperref[sailRISCVzUEI]{UEI}#());
+    let m = #\hyperref[sailRISCVzupdatezyUTI]{update\_UTI}#(m, v.#\hyperref[sailRISCVzUTI]{UTI}#());
+    let m = #\hyperref[sailRISCVzupdatezyUSI]{update\_USI}#(m, v.#\hyperref[sailRISCVzUSI]{USI}#());
+    m
+  } else m
+}

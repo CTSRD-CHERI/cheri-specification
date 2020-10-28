@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzlegalizzezyxepc]{legalize\_xepc}#(v : xlenbits) -> xlenbits =
+  /* allow writing xepc[1] only if misa.C is enabled or could be enabled 
+     XXX specification says this legalization should be done on read */
+  if   (#\hyperref[sailRISCVzsyszyenablezywritablezymisa]{sys\_enable\_writable\_misa}#() & #\hyperref[sailRISCVzsyszyenablezyrvc]{sys\_enable\_rvc}#()) | misa.#\hyperref[sailRISCVzC]{C}#() == 0b1
+  then [v with 0 = bitzero]
+  else v & #\hyperref[sailRISCVzEXTS]{EXTS}#(0b100)

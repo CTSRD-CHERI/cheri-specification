@@ -1,0 +1,78 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CLShC}
+\insnmipslabel{clshc}
+\insnmipslabel{clshci}
+\insnmipslabel{clshcr}
+\subsection*{CLShC: Load Short Capability via Capability}
+
+\subsubsection*{Format}
+
+CLShC cd, rt, offset(cb) \\
+CLShCR cd, rt(cb) \\
+CLShCI cd, offset(cb)
+
+\usesDDCinsteadofNULL{cb}
+
+\subsubsection*{Description}
+
+Capability register \emph{cd} is loaded with the decoded form of the short
+capability located at the memory location specified by
+%
+\emph{addr} $\stackrel{\Delta}{=}$ \emph{cb.\cbase{}} $+$
+\emph{cb.\coffset{}} $+$ \emph{rt} $+$ 8 $*$ \emph{offset},
+%
+provided this address is suitably aligned for short capabilities.
+%
+Capability register \emph{cb} must contain a capability that grants
+permission to load capabilities.
+
+The tag bit associated with \emph{cd} is set if the tag bits associated with
+\emph{addr} indicate that this address contain a short capability and
+\emph{cb} bears Permit\_Load\_Capability.  See
+\cref{sec:windowedshortcaps} for possible tag representations.
+
+% \subsubsection*{Semantics}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception is raised if:
+
+\begin{itemize}
+\item
+\cchecktag{}
+\item
+\emph{cb} is sealed.
+\item
+\emph{cb}.\cperms.\emph{Permit\_Load} is not set.
+\item
+\emph{addr} + \emph{short\_capability\_size} $>$ \emph{cb}.\cbase{} $+$ \emph{cb}.\clength{}.
+\item
+\emph{addr} $<$ \emph{cb}.\cbase{}.
+\end{itemize}
+
+An address error during load (AdEL) exception is raised if:
+
+\begin{itemize}
+\item
+The virtual address \emph{addr} is not \emph{capability\_size} aligned.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+\emph{offset} is interpreted as a signed integer.
+\item
+The \insnmipsref{CLShCI} mnemonic is equivalent to \insnmipsref{CLShC} with
+\emph{cb} being the zero register (\$zero). The \insnmipsref{CLShCR} mnemonic
+is equivalent to \insnmipsref{CLShC} with \emph{offset} set to
+zero.
+\item
+Although the \emph{short\_capability\_size} may vary, the offset is always in
+multiples of 8 bytes (64 bits).
+\item
+See \cref{sec:windowedshortcaps} for details of short capabilities.  In
+particular, note that several permissions are not transported in short
+capabilities.
+\end{itemize}

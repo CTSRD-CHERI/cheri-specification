@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVztickzyclock]{tick\_clock}#() = {
+  if   mcountinhibit.#\hyperref[sailRISCVzCY]{CY}#() == 0b0
+  then mcycle = mcycle + 1;
+
+  mtime  = mtime  + 1;
+  #\hyperref[sailRISCVzclintzydispatch]{clint\_dispatch}#()
+}

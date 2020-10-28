@@ -1,0 +1,13 @@
+function #\hyperref[sailMIPSzsetzyCP0EPC]{set\_CP0EPC}# (newEPC) = {
+  let (representable, newEPCC) = #\hyperref[sailMIPSzsetCapOffset]{setCapOffset}#(EPCC, newEPC);
+  /* Unrepresentable EPCC should only happen if CP0EPC is
+    written with something far outside bounds of EPCC. Exceptions should
+    not cause an unrepresentable EPCC because the PC of the faulting
+    instruction is necessarily in-#\hyperref[sailMIPSzbounds]{bounds}# (or nearly in-bounds). For jumps
+    that take the PC out-of-bounds the CP2 exception occurs on the jump,
+    not the target. */
+  EPCC = if representable then
+      {newEPCC with tag = newEPCC.tag & not(newEPCC.sealed)}
+    else
+      #\hyperref[sailMIPSzunrepCap]{unrepCap}#(newEPCC);
+}

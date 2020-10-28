@@ -1,0 +1,4 @@
+function #\hyperref[sailMIPSzcheckCP0AccessHook]{checkCP0AccessHook}# () : unit -> unit = {
+  if not(#\hyperref[sailMIPSzpcczyaccesszysystemzyregs]{pcc\_access\_system\_regs}#()) then
+    #\hyperref[sailMIPSzraisezyc2zyexceptionzynoreg]{raise\_c2\_exception\_noreg}#(CapEx_AccessSystemRegsViolation)
+}

@@ -1,0 +1,8 @@
+function #\hyperref[sailRISCVzlegalizzezytvec]{legalize\_tvec}#(o : Mtvec, v : xlenbits) -> Mtvec = {
+ let v = #\hyperref[sailRISCVzMkzyMtvec]{Mk\_Mtvec}#(v);
+ match (#\hyperref[sailRISCVztrapVectorModezyofzybits]{trapVectorMode\_of\_bits}#(v.#\hyperref[sailRISCVzMode]{Mode}#())) {
+   TV_Direct => v,
+   TV_Vector => v,
+   _         => #\hyperref[sailRISCVzupdatezyMode]{update\_Mode}#(v, o.#\hyperref[sailRISCVzMode]{Mode}#())
+ }
+}

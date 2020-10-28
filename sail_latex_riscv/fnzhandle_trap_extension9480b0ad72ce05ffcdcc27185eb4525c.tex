@@ -1,0 +1,34 @@
+function #\hyperref[sailRISCVzhandlezytrapzyextension]{handle\_trap\_extension}#(p : Privilege, pc : xlenbits, ccause : #\hyperref[sailRISCVzoption]{option}#(cheri_cause)) -> unit = {
+  match p {
+    Machine => {
+      match ccause {
+        #\hyperref[sailRISCVzSome]{Some}#(c) => { mccsr->#\hyperref[sailRISCVzcapzyidx]{cap\_idx}#() = c.cap_idx;
+                     mccsr->#\hyperref[sailRISCVzcause]{cause}#()   = #\hyperref[sailRISCVzCapExCode]{CapExCode}#(c.capEx) },
+        _       => ()
+      };
+      let (representable, mepcc) = #\hyperref[sailRISCVzsetCapAddr]{setCapAddr}#(PCC, pc);
+      assert(representable, "mepcc should always be representable");
+      MEPCC   = mepcc
+    },
+    Supervisor => {
+      match ccause {
+        #\hyperref[sailRISCVzSome]{Some}#(c) => { sccsr->#\hyperref[sailRISCVzcapzyidx]{cap\_idx}#() = c.cap_idx;
+                     sccsr->#\hyperref[sailRISCVzcause]{cause}#()   = #\hyperref[sailRISCVzCapExCode]{CapExCode}#(c.capEx) },
+        _       => ()
+      };
+      let (representable, sepcc) = #\hyperref[sailRISCVzsetCapAddr]{setCapAddr}#(PCC, pc);
+      assert(representable, "sepcc should always be representable");
+      SEPCC   = sepcc
+    },
+    User => {
+      match ccause {
+        #\hyperref[sailRISCVzSome]{Some}#(c) => { uccsr->#\hyperref[sailRISCVzcapzyidx]{cap\_idx}#() = c.cap_idx;
+                     uccsr->#\hyperref[sailRISCVzcause]{cause}#()   = #\hyperref[sailRISCVzCapExCode]{CapExCode}#(c.capEx) },
+        _       => ()
+      };
+      let (representable, uepcc) = #\hyperref[sailRISCVzsetCapAddr]{setCapAddr}#(PCC, pc);
+      assert(representable, "uepcc should always be representable");
+      UEPCC   = uepcc
+    }
+  }
+}

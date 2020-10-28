@@ -1,0 +1,7 @@
+function phys_mem_write forall 'n, 0 < 'n <= max_mem_access . (wk : write_kind, paddr : xlenbits, width : atom('n), data : #\hyperref[sailRISCVzbits]{bits}#(8 * 'n), meta : mem_meta) -> #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) = {
+  #\hyperref[sailRISCVzrvfizywrite]{rvfi\_write}#(paddr, width, data);
+  let result = #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzwritezyram]{write\_ram}#(wk, paddr, width, data, meta));
+  if   #\hyperref[sailRISCVzgetzyconfigzyprintzymem]{get\_config\_print\_mem}#()
+  then #\hyperref[sailRISCVzprintzymem]{print\_mem}#("mem[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(paddr) ^ "] <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data));
+  result
+}

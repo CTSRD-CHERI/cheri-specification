@@ -1,0 +1,1211 @@
+\chapter{Introduction}
+\label{chap:introduction}
+
+CHERI (Capability Hardware Enhanced RISC Instructions) extends
+Instruction-Set Architectures (ISAs) with new capability-based primitives that
+improve software robustness to security vulnerabilities.
+The CHERI model is motivated by the \textit{principle of least privilege},
+which argues that greater security can be obtained by minimizing the
+privileges accessible to running software.
+A second guiding principle is the \textit{principle of intentional use}, which
+argues that, where many privileges are available to a piece of software, the
+privilege to use should be explicitly named rather than implicitly selected.
+While CHERI does not prevent the expression of vulnerable software designs, it
+provides strong \textit{vulnerability mitigation}: attackers have a more
+limited vocabulary for attacks, and should a vulnerability be successfully
+exploited, they gain fewer rights, and have reduced access to further attack
+surfaces.
+CHERI allows software privilege to be minimized at two granularities:
+
+\begin{description}
+\item[Fine-grained code protection]
+CHERI enables \textit{fine-grain protection} and \textit{intentional
+use} by introducing in-address-space \textit{memory capabilities}, which
+replace integer virtual-address representations of code and data pointers.
+The aim here is to minimize the rights available to be exercised on an
+instruction-by-instruction basis, limiting the scope of damage from inevitable
+software bugs.
+
+CHERI capabilities protect the integrity and valid provenance of pointers
+themselves, as well as allowing fine-grained protection of the in-memory data
+and code that pointers refer to.
+These protection
+%
+policies
+% properties
+can, to a large extent, be based on information
+already present in program descriptions -- e.g., from C- and C++-language types, memory
+allocators, and run-time linking.
+
+This application of least privilege and intentional use provides strong,
+non-probabilistic
+protection against a broad range of memory- and pointer-based vulnerabilities
+and exploit techniques -- buffer overflows, format-string attacks, pointer
+injection, data-pointer-corruption attacks, control-flow attacks, and so on.
+Many of these goals can be achieved through code recompilation on CHERI.
+
+\item[Secure encapsulation]
+At a coarser granularity, CHERI also supports
+\textit{secure encapsulation} and \textit{intentional use}
+through the robust and efficient implementation of highly scalable
+in-address-space \textit{software compartmentalization} -- for example,
+implementing \textit{object capabilities}.
+
+The aim here is to minimize the set of rights available to
+larger isolated software components, building on efficient architectural
+support for strong software encapsulation.
+These protections are grounded in explicit descriptions of isolation and
+communication provided by software authors, such as through explicit software
+sandboxing.
+There is also the potential to direct compartmentalization through
+language- or linker-level structures and annotations, such as class or module
+definitions.
+
+This application of least privilege and intentional use mitigates
+application-level vulnerabilities, such as logical errors,
+downloaded malicious code, or software Trojans inserted in the software supply
+chain.
+
+Effective software compartmentalization depends on explicit software
+structure, and can require significant code change.
+Where compartmentalization already exists in software, CHERI can be used to
+significantly improve compartmentalization performance and granularity.
+Where that structure is not yet present, CHERI can improve the adoption path
+for compartmantalization due to supporting in-address-space
+compartmentalization models.
+\end{description}
+
+CHERI is designed to support incremental adoption within current
+security-critical, C- and C++-language \textit{Trusted Computing Bases (TCBs)}:
+operating-system (OS) kernels, key system libraries and services, language
+runtimes supporting higher-level type-safe languages, and applications such as
+web browsers and office suites.
+While CHERI builds on many historic ideas about capability systems (see
+Chapter~\ref{chap:historical}), one of the key contributions of this work is
+CHERI's \textit{hybrid capability-system architecture}.
+In this context, \textit{hybrid} refers to combining aspects from conventional
+architectures, system software, and language/compiler choices with
+capability-oriented design.
+Key forms of hybridization in the CHERI design include:
+
+\begin{description}
+\item[A RISC capability system] A capability-system model is blended with a
+  conventional RISC user-mode architecture without disrupting the majority of
+  key RISC design choices.
+
+\item[An MMU-enabled capability system] A capability-system model is cleanly
+  and usefully composed with conventional ring-based privilege and
+  virtual memory implemented by processor MMUs (Memory Management Units).
+
+\item[A C-language capability system] CHERI can be targeted by a
+  C/C++-language compiler with strong compatibility, performance, and
+  protection properties.
+
+\item[Hybrid system software] CHERI supports a range of OS models including
+  conventional MMU-based virtual-memory designs, hybridized designs that
+  host capability-based software within multiple virtual address spaces, and
+  pure single-address-space capability systems.
+
+\item[Incremental adoptability] Within pieces of software, capability-aware
+  design can be disregarded, partially adopted, or fully adopted with useful
+  and predictable semantics.
+  This allows incremental adoption within large software bases, from OS
+  kernels to application programs.
+\end{description}
+
+We hope that these hybrid aspects of the design will support gradual
+deployment of CHERI features in existing software, rather than obliging a
+clean-slate software design, thereby offering a more gentle hardware-software
+adoption path.
+
+In the remainder of this chapter, we describe  our high-level design goals
+for CHERI, the notion that CHERI is an architecture-neutral protection model
+with architecture-specific mappings (such as CHERI-MIPS and CHERI-RISC-V)%
+\psnote{(the CHERI-MIPS and CHERI-RISC-V mappings detailed here, Arm's experimental Morello architecture~\cite{arm-morello}, and the sketch mapping for x86 described in Chapter~\ref{chap:cheri-x86-64})}, an
+introduction to the CHERI-MIPS concrete instantiation, a brief version
+history, an outline of the remainder of this report, and our publications to
+date on CHERI.
+A more detailed discussion of our research methodology, including motivations,
+threat model, and evolving approach from ISA-centered prototyping to a broader
+architecture-neutral protection model may be found in
+Chapter~\ref{chap:research}.
+Historical context and related work for CHERI may be found in
+Chapter~\ref{chap:historical}.
+The \hyperref[glossary]{Glossary} at the end of the report contains
+stand-alone definitions of many key ideas and terms, and may be useful
+reference material when reading the report.
+
+\section{CHERI Design Goals}
+
+CHERI has three central design goals aimed at dramatically improving the
+security of contemporary C-language TCBs, through processor support for
+fine-grained memory protection and scalable software compartmentalization,
+whose (at times) conflicting requirements have required careful negotiation in
+our design:
+
+\begin{description}
+\item[Fine-grained memory protection]
+improves software resilience to escalation paths
+that allow low-level software bugs involving individual data
+structures and data-structure manipulations to be coerced into more powerful
+software vulnerabilities;
+e.g., through remote code injection via buffer overflows, control-flow and
+data-pointer corruption, and other memory-based techniques.
+Unlike MMU-based memory protection, CHERI memory protection is intended to
+be driven by the compiler in protecting programmer-described data structures
+and references, rather than via coarse page-granularity protections.
+When C and C++ pointers are implemented using capabilities, capability
+protections constrain the the ranges of memory (via bounds) and operations
+that can be performed (via permissions).
+They also protect the integrity, provenance, and monotonicity of pointers in
+order to prevent inadvertent or inappropriate manipulation
+that might otherwise lead to privilege escalation.
+
+Capabilities can be used to implement a variety of language-level pointer
+types including heap, stack, global, thread-local, and function pointers.
+These protect against application-level mismanipulation and misuse of
+source-visible pointers, including out-of-range accesses to explicit or
+implied memory allocations, and corruption of pointers within those
+allocations.
+Capability can also be used to implement sub-language pointers created and
+maintained by the compiler, runtime, and operating system, such as the stack
+pointer, control-flow pointers such as return addresses, and the pointers to
+internal linkage structures such as Procedure Linkage Tables (PLTs) and the
+Global Offset Table (GOT).
+Collectively, strong pointer integrity, pointer provenance validity, bounds,
+permissions, monotonicity, and encapsulation prevent corrupted pointers from
+allowing a range of vulnerable behaviors (e.g., buffer overflows) and also
+directly impede common exploit techniques (e.g., pointer injection).
+
+Fine-grained protection also provides the foundation for expressing
+compartmentalization within application instances.
+We draw on, and extend, ideas from recent work in C-language {\em software
+bounds checking} by combining {\em fat pointers} with capabilities, allowing
+capabilities to be substituted for C pointers with only limited changes to
+program semantics.
+
+CHERI permits efficient implementation of dialects of C and C++ in
+which various invalid accesses, deemed to be undefined behavior in
+those languages, and potentially giving arbitrary behavior in
+their implementations, are instead guaranteed to throw an exception.
+While CHERI has not been specifically designed with other languages in mind,
+there appear to be many potential applications of CHERI within the language
+runtimes for higher-level and managed languages.
+
+\item[Software compartmentalization]
+involves the decomposition of software (at present, primarily
+application software)
+into isolated components to
+mitigate the effects of security vulnerabilities by applying
+sound principles of security, such as abstraction, encapsulation,
+type safety, and especially least privilege and the minimization of
+what must be trustworthy (and therefore sensibly trusted!).
+
+Previously, it seems that the
+adoption of compartmentalization has been limited by a conflation of hardware
+primitives for virtual addressing and separation, leading to inherent performance and
+programmability problems when implementing fine-grained separation.
+With CHERI, we seek to decouple the virtualization from separation to avoid
+scalability problems imposed by MMUs based on translation look-aside buffers
+(TLBs), which impose a very high performance penalty as the number of
+protection domains increases, as well as complicating the writing of compartmentalized software.
+
+As with an MMU, CHERI enables a variety of \textit{software operational
+models} for compartmentalization.
+Taking advantage of CHERI's strong in-address-space protection, we have
+explored both intra-process sandboxing models, providing robust encapsulation
+for dynamic libraries, and also acceleration of the traditional process model
+(\textit{co-processes}) by colocating multiple separated processes within the
+same virtual address space.
+
+\item[Formal modeling and verification]
+We draw on {\it formal methodologies} wherever feasible, to improve our confidence in the design and implementation of CHERI.
+This use is necessarily subject to real-world constraints of timeline, budget, design process,
+and prototyping, but it has helped increase our confidence that CHERI meets our
+functional and security requirements.
+Formal methods can also help to avoid many of
+the characteristic design flaws that are common in both hardware and software.
+This desire requires us not only to perform research into CPU and software design, but also to
+develop new formal methodologies, and adaptations and extensions of existing ones.
+To this end, we have produced formal models of our instruction-set extensions
+for multiple architectures, and used both pragmatic SMT-based validation and
+formal proof to validate that the models satisfy essential security
+properties such as provenance validity and monotonicity.
+
+\item[A viable transition path] must be applicable to current software and
+hardware designs.
+CHERI hardware must be able to run most current software without significant
+modification, and allow incremental deployment of security
+improvements starting with the most critical software components: the TCB
+foundations on which the remainder of the system rests, and software with the
+greatest exposure to risk.
+CHERI's features must significantly improve security, to create demand for
+upstream processor manufacturers from their downstream mobile and embedded
+device vendors.
+These CHERI features must at the same time conform to vendor expectations
+for performance, energy use, and compatibility in order to compete with less
+secure alternatives.
+
+CHERI is therefore necessarily disruptive, but its architectural,
+microarchitectural, and software interventions are bounded in scope, and
+constrained in their implications.
+Introducing architectural capabilities and tagged memory has significant
+implications for instruction-set design and maintainability, as well as
+microarchitectural implications for the processor design and memory subsystem.
+On the other hand, the general computational, operating-system, and software
+compilation models are largely retained, and most existing architectural,
+microarchitectural, and software implementation choices are preserved.
+
+For example, although tagged capabilities are used instead of unadorned
+integers in the instruction-level descriptions of loads and stores, once
+checks are performed capabilities are largely reduced to integer addresses
+for processing by the MMU and memory subsystem.
+Compilers must use capability-relative loads and stores for capability-aware
+code, but the structure (and often format) of those instructions remain the
+same, and although code is generated to use capabilities rather than integers
+for pointers, the vast majority of source code remains the same.
+Running native capability-unaware binary code is specifically designed for and
+supported, allowing conventional OS compatibility ABI techniques (such as used
+in the 32-bit to 64-bit transition) to be used.
+
+\end{description}
+
+We are concerned with satisfying the need for
+trustworthy systems and networks, where {\it
+trustworthiness} is a multidimensional measure of how well a system or
+other entity satisfies its various requirements -- such as those for
+security, system integrity, and reliability, as well as human safety,
+and total-system survivability,
+robustness, and resilience, notably in the presence of a wide range of
+adversities such as hardware failures, software flaws, malware,
+accidental and intentional misuse, and so on.  Our approach to
+trustworthiness encompasses hardware and software architecture,
+dynamic and static evaluation, formal and non-formal analyses, good
+software-engineering practices, and much more.
+
+\section{Architecture Neutrality and Architectural Instantiations}
+\label{sec:archneut}
+
+CHERI consists of an architectural-neutral protection model, and a set of
+instantiations of that model across multiple ISAs.
+Our initial mapping into the 64-bit MIPS ISA has allowed us to develop the
+CHERI approach.
+We have now expanded to include a more elaborated mapping into
+the 64-bit RISC-V ISA, and a sketch mapping into the x86-64 ISA.
+We have collaborated with Arm as they have developed the experimental Morello
+architecture, an application of CHERI to the ARMv8-A
+architecture~\cite{arm-morello}.
+
+Over the course of this evolution, we have attempted to maximize the degree to
+which specification is architecture neutral, and minimize the degree to which
+it is architecture specific.
+Even within a single ISA, there are multiple potential instantiations of the
+CHERI protection model, which offer different design tradeoffs -- for example,
+decisions about whether to have separate integer and capability register files
+or to merge them into a single register file.
+
+The successful mapping into multiple ISAs has led us to believe that the CHERI
+protection model is a portable protection model, that supports portable
+software stacks in much the same way that portable virtual-memory-based
+operating systems can be implemented across a variety of architectural MMUs.
+Unlike MMUs, whose software interactions are primarily with the operating
+system, CHERI interacts directly with compiler-generated code, key system
+libraries, compartmentalization libraries, and applications; across all of
+these, we have found that an architecture-neutral approach can be highly
+effective, offering portability to the vast majority of CHERI-aware C/C++
+code.
+In this report, we first consider the architecture-neutral model, and then
+applications of our approach in specific ISAs.
+
+\subsection{The Architecture-Neutral CHERI Protection Model}
+\label{sec:cheri-protection-model}
+
+The aim of the CHERI protection model, as embodied in both the software stack
+(see Chapter~\ref{chap:model}) and architecture (see
+Chapter~\ref{chap:architecture}), is to support two vulnerability mitigation
+objectives: first,
+fine-grained pointer and memory protection within address spaces, and second,
+primitives to support both scalable and programmer-friendly
+compartmentalization within address spaces.
+The CHERI model is designed to support low-level TCBs, typically implemented
+in C or a C-like language, in workstations, servers, mobile devices, and
+embedded devices.
+In contrast to MMU-based protection, this is done by protecting
+\textit{references to code and data} (pointers), rather than the
+\textit{location of code and data} (virtual addresses).
+This is accomplished via an \textit{in-address-space capability-system model}:
+the architecture provides a new primitive, the \textit{capability}, that
+software components (such as the OS, compiler, run-time linker,
+compartmentalization runtime, heap allocator, etc.) can use to implement
+strongly protected pointers within virtual address spaces.
+
+%Simultaneously, it will provide reasonable assurance of correctness and a
+%realistic technology transition path from existing hardware and software
+%platforms.
+
+In the security literature, capabilities are tokens of authority that are
+unforgeable and delegatable.
+\textit{CHERI capabilities} are integer virtual addresses that have been
+extended with metadata to protect their integrity, limit how they are
+manipulated,  and control their use.
+This metadata includes a \textit{tag} implementing strong integrity
+protection (differentiating valid and invalid capabilities), \textit{bounds}
+limiting the range of addresses that may be
+dereferenced, \textit{permissions} controlling the specific operations that
+may be performed, and also
+\textit{sealing}, used to support higher-level software encapsulation.
+Protection properties for capabilities include the ISA ensuring that
+capabilities are always derived via valid manipulations of other capabilities
+(\textit{provenance}), that corrupted in-memory capabilities cannot be
+dereferenced (\textit{integrity}), and that rights associated with
+capabilities are non-increasing (\textit{monotonicity}).
+
+CHERI capabilities may be held in registers or in memories, and are loaded,
+stored, and dereferenced using CHERI-aware instructions that expect
+capability operands rather than integer virtual addresses.
+On hardware reset, initial capabilities are made available to software via
+special and general-purpose capability registers.
+All other capabilities will be derived from these initial valid capabilities
+through valid capability transformations.
+
+In order to continue to support non-CHERI-aware code, dereference of integer
+virtual addresses via legacy instruction is transparently indirected via a
+\textit{default data capability} (\DDC{}) for loads and stores, or a
+\textit{program-counter capability} (\PCC{}) for instruction fetch.
+
+A variety of programming-language and code-generation models can be used with
+a CHERI-extended ISA.
+As integer virtual addresses continue to be supported, C or C++ compilers
+might choose to always implement pointers via integers, selectively implement
+certain pointers as capabilities based on annotations or type information
+(i.e., a \text{hybrid C} interpretation), or
+alternatively
+always implement pointers as
+capabilities except where explicitly annotated (i.e., a
+\textit{pure-capability} interpretation).
+Programming languages may also employ capabilities internal to their
+implementation: for example, to protect return addresses, vtable pointers, and
+other virtual addresses for which capability protection can provide enhanced
+vulnerability mitigation.
+
+When capabilities are being used to implement pointers (e.g., to code or data)
+or internal addresses (e.g., for return addresses), they must be
+constructed with suitably restricted rights, to accomplish effective protection.
+This is a run-time operation performed using explicit instructions (e.g., to
+set bounds, mask permissions, or seal capabilities) by the operating system,
+run-time linker, language runtime and libraries, and application code itself:
+
+\begin{description}
+\item[The operating-system kernel] may narrow bounds and permissions on
+  pointers provided as part of the start-up environment when executing a
+  program binary (e.g., to arguments or environmental variables), or when
+  returning pointers from system calls (e.g., to new memory mappings).
+
+\item[The run-time linker] may narrow bounds and permissions when setting up
+  code pointers or pointers to global variables.
+
+\item[The system library] may narrow bounds and permissions when returning a
+  pointer to newly allocated heap memory.
+
+\item[The compartmentalization runtime] may narrow bounds and permissions,
+  as well as seal capabilities, enforcing compartment isolation (e.g., to act
+  as sandboxes).
+
+\item[The compiler] may insert instructions to narrow bounds and permissions
+  when generating code to take a pointer to a stack allocation, or when taking
+  a pointer to a field of a larger structure allocated as a global, on the
+  stack, or on the heap.
+
+\item[The language runtime] may narrow bounds and permissions when returning
+  pointers to newly allocated objects, or when setting up internal linkage, as
+  well as seal capabilities to non-dereferenceable types.
+
+\item[The application] may request changes to permissions, bounds, and other
+  properties on pointers, in order to further subset memory allocations and
+  control their use.
+\end{description}
+
+The CHERI model can also be used to implement other higher-level protection
+properties.
+For example, tags on capabilities in memory can be used to support accurate
+C/C++-language temporal safety via revocation or garbage collection, and
+sealed capabilities can be used to enforce language-level encapsulation and
+type-checking features.
+The CHERI protection model and its implications for software security are
+described in detail in Chapter~\ref{chap:model}.
+
+\psnote{this is the third time (at least) that we've talked about arch-neutral.  Suggest merging the following into the intro to Section~\ref{sec:archneut}.}
+CHERI is an \textit{architecture-neutral protection model} in that, like
+virtual memory, it can be deployed within multiple ISAs.
+In developing CHERI, we initially considered it as a concrete extension to the
+64-bit MIPS ISA; using it, we could explore the implications downwards into
+the microarchitecture, and upwards into the software stack.
+Having developed a mature hardware-software protection model, we used this as
+the baseline in deriving an architecture-neutral CHERI protection model.
+This architecture-neutral model is discussed in detail in
+Chapter~\ref{chap:architecture}.
+We have demonstrated the possibility of adding CHERI protection to more than
+one base ISA by providing a detailed concrete
+instantiation for the 64-bit MIPS ISA (Chapter~\ref{chap:cheri-mips}), a
+draft instantiation in the RISC-V ISA (Chapter~\ref{chap:cheri-riscv}), and a
+lightweight
+architectural sketch for the x86-64 ISA (Chapter~\ref{chap:cheri-x86-64}).
+
+\subsection{An Architecture-Specific Mapping into 64-bit MIPS}
+\label{sec:cheri-isa-design}
+
+\psnote{much of the following, eg tagged memory and the notion of capability instructions, seems arch-neutral to me.  I'd move all that into the previous section, and then present the four architectures more symmetrically}
+
+The CHERI-MIPS ISA (see Chapter~\ref{chap:cheri-mips}) is an instantiation of
+the CHERI protection model as an
+extension to the 64-bit MIPS ISA~\cite{Heinrich:1993:MRU:154056}.
+CHERI adds the following features to the MIPS ISA\footnote{Formally,
+CHERI instructions are added to MIPS as a \textit{MIPS coprocessor} -- a reservation
+of opcode space intended for third-party use.
+Despite the suggestive term ``coprocessor'', CHERI support will typically be
+integrated tightly into the processor pipeline, memory subsystem, and so on.
+We therefore eschew use of the term.} to support granular memory protection
+and compartmentalization within address spaces:
+
+
+\begin{description}
+\item[Capability registers] describe the rights ({\em protection domain}) of
+the executing thread to
+access memory, and to invoke object references
+to transition between protection domains.
+We model these registers as a separate {\em capability register file},
+supplementing the general-purpose integer register file.
+
+Capability registers contain a tag, object type, permission mask, base, length, and offset (allowing the description of not just a bounded region, but also a pointer into that region, improving C-language compatibility).
+Capability registers are suitable for describing both data and code, and can hence protect both data integrity/confidentiality and control flow.
+Certain registers are reserved for use in exception handling; all others are available to be managed by the compiler using the same techniques used with conventional registers.
+Over time, we imagine that software will increasingly use capabilities rather
+than integers to describe data and object references.
+
+Another potential integration into the ISA (which would maintain the same
+CHERI protection semantics) would be to extend the existing general-purpose
+integer registers so that they could also hold capabilities.
+This might reduce the hardware resources required to implement CHERI support.
+However, we selected our current approach to maintain consistency with the
+MIPS ISA extension model (in which coprocessors have independent register
+files), and to minimize \textit{Application Binary Interface (ABI)} disruption
+on boundaries between legacy and CHERI-aware code for the purposes of rapid
+architectural and software iteration.
+We explore the potential space of mappings from the CHERI model into the ISA
+in greater detail in Section~\ref{sec:deep-vs-surface}, as well as in
+Chapters~\ref{chap:cheri-riscv} and~\ref{chap:cheri-x86-64} where we consider
+alternative mappings into non-MIPS ISAs.
+
+\item[Capability instructions] allow executing code to create, constrain (e.g., by reducing bounds or permissions), manage, and inspect capability register values.  Both unsealed (memory) and sealed (object) capabilities can be loaded and stored via memory capability registers (i.e., dereferencing).
+Object capabilities can be invoked, via special instructions, allowing a transition between protection domains, but are {\em immutable} and {\em non-dereferenceable}, providing encapsulation of the code or data that they refer to.
+  Capability instructions implement {\em guarded manipulation}: invalid capability manipulations (e.g., to increase rights or length) and invalid capability dereferences (e.g., to access outside of a bounds-checked region) result in an exception that can be handled by the supervisor or language runtime.
+A key aspect of the instruction-set design is \textit{intentional use of
+  capabilities}: explicit capability registers, rather than ambient
+authority, are used to indicate exactly which rights should be exercised, to
+limit the damage that can be caused by exploiting bugs.
+Tradeoffs exist around intentional use, and in some cases compatibility or
+opcode utilization may dictate implicit capability selection; for example,
+legacy MIPS load and store instructions implicitly dereference a Default
+Data Capability as they are unable to explicitly name a capability register.
+Most capability instructions are part of the user-mode ISA, rather than the privileged ISA, and will be generated by the compiler to describe application data structures and protection properties.
+
+\item[Tagged memory] associates a 1-bit tag with each capability-aligned and capability-sized word in physical memory, which allows capabilities to be safely loaded and stored in memory without loss of integrity.
+  Writes to capability values in memory that do not originate from a valid capability in the capability register file will clear the tag bit associated with that memory, preventing accidental (or malicious) dereferencing
+  of invalid capabilities.
+
+This functionality expands a thread's effective protection domain to include the transitive closure of capability values that can be loaded via capabilities via those present in its register file.  For example, a capability register representing a C pointer to a data structure can be used to load further capabilities from that structure, referring to further data structures, which could not be accessed without suitable capabilities.
+
+Non-bypassable tagging of unforgeable capabilities enables not only reliable
+and secure enforcement of capability properties, but also reliable and secure
+identification of capabilities in memory for the purposes of implementing
+other higher-level protection properties such as temporal safety.
+\end{description}
+
+\psnote{The first sentence is a bit arch -- does anyone in the last couple of decades really think x86 instructions are intended for use directly by the programmer?  Probably better to de-RISC the discussion.}
+In keeping with the RISC philosophy, CHERI instructions are intended for use
+primarily
+by the operating system and compiler rather than directly by the programmer, and consist of relatively simple instructions that avoid (for example) combining memory access and register value manipulation in a single instruction.
+In our current software prototypes, there are direct mappings from programmer-visible C-language pointers to capabilities in much the same way that conventional code generation translates pointers into general-purpose integer register values; this allows CHERI to continuously enforce bounds checking, pointer integrity, and so on.
+There is likewise a strong synergy between the capability-system
+model, which espouses a separation of policy and mechanism\psnote{does
+  it really? that's not very clear to me, for CHERI, esp. for the
+  fine-grain-protection case (it seems more true for the sealed
+  capability stuff)}, and RISC: CHERI's features make possible
+the implementation of a wide variety of OS, compiler, and application-originated policies on a common protection substrate that optimizes fast paths through hardware support.
+
+%
+% Comment out this text in order to de-emphasize a coprocessor interpretation
+% of CHERI.  However, we might want to lift some ideas from this paragraph and
+% weave them back into the overall text here at some point.
+%
+%The capability coprocessor is a coprocessor in two senses.
+%First, the capability coprocessor occupies a portion of the existing ISA
+%encoding dedicated to extensions (typically referred to as coprocessor
+%instructions).
+%Second, the capability coprocessor supplements the general-purpose integer register
+%file with its own ISA-managed registers, as well as performing (and
+%transforming) memory access, and delivering exceptions to the main pipeline,
+%requiring hardware resources that interact with the primary processor
+%pipeline.  This behavior is comparable in many ways to system,
+%floating-point, vector, or cryptographic coprocessors that will similarly
+%supplement the base ISA and processor features.
+
+
+%\psnote{rephrasing, as we've already introduced the fact that we're
+%prototyping on MIPS}
+%In order to prototype this approach, we have instantiated our ideas about CHERI
+%capability access to a specific instruction set: the 64-bit MIPS ISA.
+%This
+Our prototype of this approach,  instantiating our ideas about CHERI
+capability access to a specific instruction set (the 64-bit MIPS ISA)
+has necessarily led to a set of congruent implementation decisions about
+register-file size, selection of specific instructions, exception handling,
+memory alignment requirements, and so on, that reflect that starting-point
+ISA.
+These decisions might be made differently with another starting-point ISA as
+they are simply surface features of the underlying approach; we anticipate that
+adaptations to ISAs such as ARM, RISC-V, and x86-64 would adopt
+instruction-encoding conventions, and so on, more in keeping with their
+specific flavor and design (see Chapters~\ref{chap:cheri-riscv}
+and~\ref{chap:cheri-x86-64}).
+
+Other design decisions reflect the goal of creating a platform for prototyping
+and exploring the design space itself.
+In our initial work on CHERI, we utilized an uncompressed capability format
+in which each capability was 256 bits in size.
+This gave us significant flexibility to experiment with capability contents
+and semantics for bounds checking and capability behaviors.
+As our protection and software models matured, we turned our attention to the
+performance implications of large capability sizes, including potentially
+substantial data-cache overhead for pointer-intensive applications.
+We adapted an approach explored in fat-pointer research -- bounds compression
+exploiting redundancy between a pointer value and its bounds -- to implement
+128-bit compressed capabilities.
+As of CHERI ISAv8, capabilities are assumed to use compressed bounds whether
+based on a 32-bit or 64-bit base address size.
+
+\psnote{This is getting very MIPS-implementation-specific -- it's ok,
+  but possibly gives the wrong emphasis for people now reading the
+  document from the top?}
+In our CHERI-MIPS prototype implementation of the CHERI model, capability
+support is tightly coupled with the existing processor pipeline: instructions
+propagate values between general-purpose integer registers and capability registers; capabilities
+transform interpretation of virtual addresses generated by capability-unaware
+instructions including by transforming the program counter; capability
+instructions perform direct memory stores and loads both to and from
+general-purpose integer registers and capability registers; and capability-related behaviors
+deliver exceptions to the main pipeline.
+By virtue of having selected the MIPS-centric design choice of exposing
+capabilities as a separate set of registers, we maintain a separate capability
+register file as an independent hardware unit -- in a manner comparable to
+vector or floating-point units in current processor designs.
+The impacts of this integration include additional control logic due to
+maintaining a separate register file, and a potentially greater occupation of
+opcode space, whereas
+combining register files might permit existing instructions
+to be reused (with care) across integer and capability operations.
+%In many ways, these are surface design choices that do not affect the majority
+%of programmer-visible protection semantics (aside from small quantities of OS,
+%runtime, and compiler-visible code generation and assembly).
+
+Wherever possible, CHERI systems make use of existing hardware designs: processor pipelines and register files, cache memory,
+system buses, commodity DRAM, and commodity peripheral devices such as
+NICs and display cards.
+We are currently focusing on enforcement of CHERI security properties on applications
+running on a general-purpose processor; in future work, we hope to consider the effects of
+implementing CHERI in peripheral processors, such as those found in Network Interface Cards (NICs) or Graphical Processing Units (GPUs).
+
+\subsection{CHERI-RISC-V, CHERI-x86-64, and Arm Morello}
+
+The abstract CHERI memory protection and security models described above have
+been applied to three other architectures:
+
+\begin{description}
+\item[CHERI-RISC-V] is an increasingly mature application of CHERI to the
+  32-bit and 64-bit variants of the open-source RISC-V architecture
+  (Chapter~\ref{chap:cheri-riscv}).
+  RISC-V is a more contemporary architecture than MIPS, and includes features
+  such as a hardware page-table walker.
+  We have fully elaborated these ISA extensions, implemented multiple
+  microarchitectures on FPGA, and ported our complete CHERI software stack to
+  CHERI-RISC-V.
+
+\item[CHERI-x86-64] is a sketch application of CHERI to the Intel x86-64
+  architecture (Chapter~\ref{chap:cheri-x86-64}).
+  It is not fully elaborated, and has not been implemented, but serves to
+  demonstrate how CHERI could be applied to a CISC architecture.
+
+\item[Arm Morello] is an experimental application of CHERI to the ARMv8-A
+  architecture~\cite{arm-morello}.  Developed by Arm, Morello is a complete
+  integration into
+  a rich commercially used load-store architecture that includes features
+  such as vector instructions and virtualization support.
+  We have ported our complete CHERI software stack to Morello.
+\end{description}
+
+Even when targeting a specific architecture, there are multiple ways to
+express CHERI's higher-level memory-protection and security-model goals.
+For example, the CHERI model can be implemented using a \textit{split
+capability register file}, similar to floating point, in which capability
+values are stored in a separate register file, or using a \textit{merged
+register file}, in which capabilities extend existing integer registers.
+CHERI provenance validity and monotonicity properties can be maintained by
+throwing an exception on attempted violation (e.g., an attempt to broaden
+bounds), or by clearing the tag and allowing a future attempted dereference
+to throw an exception.
+
+These three architectural adaptations reflect substantially improved
+understanding of the CHERI model and its potential architecture application
+and microarchitectural implementation.
+For example, all architectures now use a merged register files rather than
+a split register file as was the case in CHERI-MIPS.\footnote{CHERI-RISC-V can
+  in fact be parameterized to use a split register file, for experimental
+  purposes, but this is not fully supported by our hardware and software
+  implementations at the time of writing.}
+
+There is a high degree of source-level compatibility between software across
+these architectures.
+Compilers and low-level operating-system components necessarily have modest
+amounts of architecture-specific code generation, assembly code, and status
+or control registers.
+However, high-level CHERI-aware systems C/C++ code is entirely portable across
+the multiple architectures.
+This is comparable to the portability of architecture-neutral virtual-memory
+abstractions and APIs despite architecture-specific interfaces to MMUs and
+TLB management.
+
+\section{Deterministic Protection}
+
+CHERI has been designed to provide strong, non-probabilistic protection rather
+than depending on short random numbers or truncated cryptographic hashes that
+can be leaked and reinjected, or that could be brute forced.
+Essential to this approach is using out-of-band memory tags that prevent
+confusion between data and capabilities.
+Software stacks can use these features to construct higher-level protection
+properties, such as preventing the transmission of pointers via Inter-Process
+Communication (IPC) or network communications.
+They are also an essential foundation to strong compartmentalization, which
+assumes a local adversary.
+
+\section{Formal Modeling and Provable Protection}
+
+The design process for CHERI has used formal semantic models as an
+important tool  in
+various ways.
+%
+Our
+goal here has been to understand how we can support the CHERI design
+and engineering process with judicious use of mathematically rigorous
+methods, both in lightweight ways (providing engineering and assurance
+benefits without the costs of full formal verification), and using
+machine-checked proof to establish high confidence that the
+architecture design provides specific security properties.
+
+The basis for all this has been use of formal specifications of the
+ISA instruction behavior as a fundamental design tool, initially for
+CHERI-MIPS in L3~\cite{Fox2015}, and now for CHERI-MIPS and
+CHERI-RISC-V in Sail~\cite{sail-popl2019}.  L3 and Sail are
+domain-specific languages specifically designed for expressing
+instruction behavior, encoding data, etc.
+Simply moving from the informal pseudocode commonly used to describe
+instruction behavior to parsed and type-checked
+artifacts already helps maintain clear specifications.
+The CHERI-MIPS instruction descriptions in Chapter~\ref{chap:isaref-mips}
+are automatically included from the Sail model, keeping documentation
+and model in sync.
+\psnote{Robert: do we want to include pointers to the model repos somewhere?}
+
+Both L3 and Sail support automatic generation of executable models
+(variously in SML, OCaml, or C) from these specifications.  These
+executable models have been invaluable, both as golden models for
+testing our hardware prototypes, and as emulators for testing CHERI
+software above.  The fact that they are automatically generated from
+the specifications again helps keep things in sync, enabling
+regression testing on any change to the specification, and makes for
+easy experimentation with design alternatives.
+The generated emulators run fast enough to boot FreeBSD in a few minutes (booting
+cheribsd
+%128-bit cheri-mips model and it
+%80e6 instructions
+currently takes around 250s, roughly 320kips).
+
+We have also used the models to automatically generate ISA test cases,
+both via simple random instruction generation, and using
+theorem-prover and SMT approaches~\cite{DBLP:journals/scp/CampbellS16}.
+
+
+Finally, the models support formal verification, with mechanised
+proof, of key architectural security properties.
+L3 and Sail support automatic generation of versions of the models in
+the definition languages of (variously) the
+HOL4, Isabelle, and Coq theorem provers, which we have used as a basis
+for proofs.
+Key architectural verification goals including proving not just low-level
+properties, such as the monotonicity of each individual instruction
+and properties of the CHERI Concentrate compression scheme, but also
+higher-level goals such as compartment monotonicity, in which arbitrary code
+sequences isolated within a compartment are unable to construct additional
+rights beyond those reachable either directly via the register file or
+indirectly via loadable capabilities.
+We have proven a number of such properties about the CHERI-MIPS ISA~\cite{cheri-formal-SP2020,UCAM-CL-TR-940}.
+
+The CHERI design process has also benefitted from an interplay with
+our work on rigorous semantics for C~\cite{Cerberus-PLDI16,cerberus-popl2019}.
+
+
+\section{CHERI ISA Version History}
+
+\psnote{the following describes the history in \emph{four} different ways.  Surely at least one of those can go?}
+
+\begin{table}[th!]
+\begin{center}
+\caption{CHERI ISA revisions and major development phases}
+\input{cheri-version-table}
+\end{center}
+\label{table:intro-cheri-isa-versions}
+\end{table}
+
+This is the eighth version of the CHERI ISA specification.
+A high-level summary of CHERI ISA versions and their corresponding
+contributions can be found in Table~\ref{table:intro-cheri-isa-versions}.
+A much more detailed version summary and complete change log can be found in
+Appendix~\ref{app:versions}.
+A more narrative exploration of the research and development cycle leading to
+our current specification can be found in Chapter~\ref{chap:research}.
+
+\subsection{Changes in CHERI ISA 8.0}
+
+This release of the \textit{CHERI Instruction-Set Architecture (ISA)
+Specification} is an interim draft release, and contains the following
+changes relative to CHERI ISAv7:
+
+\input{app-versions-8-0}
+
+\section{Experimental Features}
+\label{sec:intro:experimental}
+
+\rwnote{Ensure this is updated for ISAv8}
+
+Appendix~\ref{app:experimental} describes a number of experimental features
+that extend CHERI with new functionality.
+These include several architectural features:
+
+\begin{itemize}
+\item Efficient tag rederivation for use with swapping, memory compression,
+  memory encryption, and virtual-machine migration
+\item A number of architectural features to accelerate temporal memory safety
+  and capability revocation: fast capability subset testing, non-temporal
+  tag loading, and non-temporal capability loading.
+\item A recursive mutable load permission that limits the store rights
+  via future capability loads
+\item More efficient capability permission representations
+\item Memory versioning for use with capabilities
+\item Linear capabilities
+\item Indirect capabilities
+\item Indirect sealed entry capabilities
+\item Capability coloring for capability flow control
+\item Sealing with large object type fields in memory
+\item A system for mixing 64-bit and 128-bit capabilities
+\item Capabilities referencing physical addresses
+\item Use of capabilities across a system for peripherals and accelerators
+\end{itemize}
+
+We believe that these represent interesting, and in some cases promising,
+portions of the design space beyond the baseline CHERI.
+However, they appear in an appendix because: (1) we do not yet recommend their
+use; (2) they have not been thoroughly evaluated across architecture,
+hardware, and software with respect to utility, security, compatibility,
+microarchitectural realism, nor performance; and/or (3) their preservation of
+essential CHERI security properties has not been formally proven.
+They are therefore included to provide insight into potential future
+directions or interesting potential alternative points in the overall design
+space.
+
+\section{Document Structure}
+
+This document is an introduction to, and a reference manual for, the CHERI
+protection model and instruction-set architecture.
+
+\medskip
+\noindent
+Chapter~\ref{chap:introduction} introduces the CHERI protection model, our
+architecture-neutral approach, and specific CHERI-MIPS and CHERI-RISC-V ISAs.
+
+\medskip
+\noindent
+Chapter~\ref{chap:model} describes the high-level model for the CHERI approach
+in terms of architectural features, software protection objectives, and
+software mechanism.
+
+\medskip
+\noindent
+Chapter~\ref{chap:architecture} provides a detailed description of
+architecture-neutral aspects of the CHERI protection model, including
+capability and tagged-memory models, categories of new instructions, etc.
+
+\medskip
+\noindent
+Chapter~\ref{chap:cheri-mips} describes an architecture-specific mapping of
+the CHERI protection model into the 64-bit MIPS architecture.
+This includes specification of the CHERI-MIPS capability coprocessor, register
+file, Translation Look-aside Buffer (TLB), privilege model, and other
+ISA-specific semantics.
+
+\medskip
+\noindent
+Chapter~\ref{chap:cheri-riscv} describes \psnote{do we really still want to regard and label this as a ``draft''?} a draft architecture-specific mapping
+of the CHERI protection model into the 64-bit RISC-V architecture.
+This includes specification of the CHERI-RISC-V architecture extension,
+register file, Memory Management Unit (MMU), privilege models, and other
+ISA-specific semantics.
+
+\medskip
+\noindent
+Chapter~\ref{chap:cheri-x86-64} provides an ``architectural sketch'' of how
+the CHERI protection model might be mapped into the x86-64 ISA, a decidedly
+non-RISC instruction set.
+
+\medskip
+\noindent
+Chapter~\ref{chap:isaref-mips} provides a detailed description of each
+CHERI-MIPS instruction, and also how compilers should handle floating-point
+loads and stores via capabilities.
+
+\medskip
+\noindent
+Chapter~\ref{chap:isaref-riscv} provides a detailed description of each
+CHERI-RISC-V instruction.
+
+\medskip
+\noindent
+Chapter~\ref{chap:rationale} discusses the design rationale for many aspects
+of the CHERI-MIPS ISA, as well as our thoughts on future refinements based on
+lessons learned to date.
+\psnote{The following doesn't belong with this chapter description, so
+  I'd just delete it.  And that draft
+  seems never to have made it to an actual UCAM technical report, so
+  we shouldn't cite it as such in any case.   We mention the early PVS
+  work in Chapter~\ref{chap:research}.
+``A broader document on our use of formal methods
+relating to the CHERI total-system architecture is in draft
+form~\cite{CHERI-FM15}.''}
+
+\medskip
+\noindent
+Chapter~\ref{chap:assurance} outlines a detailed (but not formally
+proved) argument for
+why a reference monitor above CHERI provides certain security
+properties, and touches on some issues in the specification that
+formal proof has to deal with.
+\psnote{I've rewritten this, because that chapter is no longer ``how we have used formal
+methodology to ensure correctness of aspects of the CHERI ISA.''}
+
+\medskip
+\noindent
+Chapter~\ref{chap:microarchitecture} provides a high-level summary of how
+CHERI can be integrated into RISC pipelines and the memory subsystem.
+
+\medskip
+\noindent
+Chapter~\ref{chap:research} describes the motivations and hardware-software
+co-design research approach taken in developing CHERI, including major phases of
+the research.
+\psnote{TODO: do we want to include the hardware-software co-design to hardware-software-formal
+  co-design narrative, in brief, in the intro chapter?  And/or in
+  detail in Chapter~\ref{chap:research}?}
+
+\medskip
+\noindent
+Chapter~\ref{chap:historical} describes the historical context for this work,
+including past systems that have influenced our approach.
+
+\medskip
+\noindent
+Chapter~\ref{chap:conclusion} discusses our short- and long-term plans for the
+CHERI protection model and CHERI-MIPS ISA, considering both our specific plans
+and open research questions that must be answered as we proceed.
+
+\medskip
+\noindent
+Appendix~\ref{app:versions} provides a more detailed version history of the
+CHERI protection model and CHERI-MIPS ISA.
+
+\medskip
+\noindent
+Appendix~\ref{app:isaquick-mips} is a quick reference for CHERI-MIPS
+instructions and encodings.
+
+\medskip
+\noindent
+Appendix~\ref{app:isaquick-riscv} is a quick reference for CHERI-RISC-V
+instructions and encodings.
+
+\medskip
+\noindent
+Appendix~\ref{app:experimental} specifies a number of CHERI-MIPS instructions
+that we still consider experimental, and hence are not included in the main
+specification.
+
+\medskip
+\noindent
+Appended~\ref{app:cheri-128} describes our prior (now deprecated) CHERI-128
+compression scheme, which has been superseded by CHERI Concentrate.
+
+\medskip
+\noindent
+The report also includes a \hyperref[glossary]{Glossary} defining many key
+CHERI-related terms.
+
+\medskip
+
+Future versions of this document will continue to expand our
+consideration of the CHERI model and CHERI-MIPS instruction-set architecture,
+its impact on software, and evaluation strategies and results.
+Additional information on our prototype CHERI hardware and software
+implementations, as well as formal methods work, can be found in accompanying
+reports.
+
+\section{Publications}
+\label{sec:publications}
+
+As our approach has evolved, and project developed, we have published a number
+of papers and reports describing aspects of the work.
+Our conference papers contain greater detail on the rationale for various
+aspects of our hardware-software approach, along with evaluations of
+micro-architectural impact, software performance, compatibility, and security:
+\psnote{It'd be useful to add links here to the pdfs of these}
+
+\begin{itemize}
+\item In the International Symposium on Computer Architecture (ISCA 2014), we
+  published \citetitleit{woodruff:cheriisca2014}~\cite{woodruff:cheriisca2014}.
+  This paper describes our architectural and micro-architectural approaches
+  with respect to capability registers and tagged memory, hybridization with a
+  conventional Memory Management Unit (MMU), and our high-level software
+  compatibility strategy with respect to operating systems.
+
+\item In the International Conference on Architectural Support for Programming
+  Languages and Operating Systems (ASPLOS 2015), we published
+  \citetitleit{ChisnallCPDP11}~\cite{ChisnallCPDP11}, which extends our architectural approach to
+  better support convergence of pointers and capabilities, as well as to
+  further explore the C-language compatibility and performance impacts of
+  CHERI in larger software corpora.
+
+\item In the IEEE Symposium on Security and Privacy (IEEE S\&P, or
+  ``Oakland'', 2015), we
+  published \citetitleit{watson15:cheri}~\cite{watson15:cheri}, which
+  describes a hardware-software architecture for mapping compartmentalized
+  software into the CHERI capability model, as well as extends our explanation
+  of hybrid operating-system support for CHERI.
+
+\item In the ACM Conference on Computer and Communications Security (CCS
+  2015), we published \citetitleit{gudka15:soaap}~\cite{gudka15:soaap},
+  which describes our higher-level design
+  approach to software compartmentalization as a a form of vulnerability
+  mitigation, including static and dynamic analysis techniques to validate the
+  performance and effectiveness of compartmentalization.
+
+\item In the ACM SIGPLAN Conference on Programming Language Design and
+  Implementation (PLDI 2016), we published
+  \citetitleit{Cerberus-PLDI16}~\cite{Cerberus-PLDI16}, which develops a
+  formal semantics for the C programming language.
+  As part of that investigation, we explore the effect of CHERI on C
+  semantics, which led us to refine a number of aspects of CHERI code
+  generation, as well as refine the CHERI ISA.  In the other
+  direction, understanding the changes needed to port existing
+  software to CHERI has informed our views on what C semantics should be.
+
+\item In the September-October 2017 issue of IEEE Micro, we published
+  \citetitleit{watson2016:microjournal}~\cite{watson2016:microjournal},
+  expanding on architectural
+  and microarchitectural aspects of the CHERI object-capability
+  compartmentalization model described in our Oakland 2015 paper.
+
+\item In the International Conference on Architectural Support for Programming
+  Languages and Operating Systems (ASPLOS 2017), we published
+  \citetitleit{chisnall2017:cherijni}~\cite{chisnall2017:cherijni}.
+  This paper describes how to use CHERI memory safety and compartmentalization
+  to isolate Java Native Interface (JNI) code from the Java Virtual Machine,
+  imposing the Java memory and security model on native code.
+
+\item In the MIT Press book, \textit{New Solutions for Cybersecurity}, we
+  published two chapters on CHERI. \citetitleit{watson2017:cheri-deployability}
+  discusses our research and development approach, and how
+  CHERI hybridizes conventional architecture, microarchitecture, operating
+  systems, programming languages, and general-purpose software designs with
+  a capability-system model~\cite{watson2017:cheri-deployability}.
+  \textit{Fundamental Trustworthiness Principles in CHERI} discusses how CHERI
+  fulfills a number of critical trustworthiness
+  principles~\cite{neumann2017:cheri-principles}.
+
+\item In the International Conference on Computer Design (ICCD 2017), we
+  published \citetitleit{joannou2017:tagged-memory}~\cite{joannou2017:tagged-memory}.
+  This paper describes how awareness of the architectural semantics of tagged
+  pointers can be used to improve performance and reduce DRAM access overheads
+  for tagging implemented over DRAM without innate tag storage.
+
+\item In the International Conference on Computer Design (ICCD 2018), we
+  published \citetitleit{xia:cherirtos}~\cite{xia:cherirtos}.
+  This paper describes an embedded variant on CHERI using 64-bit capabilities
+  for 32-bit addresses, and how embedded real-time operating systems might
+  utilize CHERI features.
+
+\item In the ACM SIGPLAN Symposium on Principles of Programming Languages
+  (POPL 2019), we published \citetitleit{sail-popl2019}, which describes
+  a formal modeling approach and formal models
+  for several instruction sets including CHERI-MIPS~\cite{sail-popl2019}.
+
+\item In the ACM SIGPLAN Symposium on Principles of Programming Languages
+  (POPL 2019), we published \citetitleit{cerberus-popl2019}, describing a
+  formal model for C pointer provenance and its
+  practical evaluation, including via pure-capability C code on the CHERI
+  architecture~\cite{cerberus-popl2019}.
+
+\item In the International Conference on Architectural Support for
+  Programming Languages and Operating Systems (ASPLOS 2019), we published
+  \citetitleit{davis2019:cheriabi}~\cite{davis2019:cheriabi}.
+  This paper describes how to adapt a full MMU-based OS design to support
+  ubiquitous use of capabilities to implement C and C++ pointers in userspace.
+
+\item In IEEE Transactions on Computers, we published \citetitleit{Woodruff2019}~\cite{Woodruff2019}.
+  This paper describes our compressed 128-bit and 64-bit capability formats,
+  evaluating the effects of precision loss in bounds, and the potential
+  performance impact of the approach.
+
+\item In the IEEE/ACM International Symposium on Microarchitecture (IEEE
+  MICRO 2019), we published \citetitleit{Xia_CHERIvokeCharacterisingPointer_2019}~\cite{Xia_CHERIvokeCharacterisingPointer_2019}.
+  This paper performs a simulation study of a potential approach to temporal
+  memory safety using CHERI.
+
+\item In the IEEE Symposium on Security and Privacy (Oakland 2020), we
+  published \citetitleit{cheri-formal-SP2020}~\cite{cheri-formal-SP2020}.
+  This paper describes formal modeling and proof of isolation properties for
+  the CHERI-MIPS ISA.
+
+\item In the IEEE Symposium on Security and Privacy (Oakland 2020), we
+  published \citetitleit{cornucopia}~\cite{cornucopia}.
+  This paper describes a full hardware-software implementation of temporal
+  memory safety for CHERI, including architectural accelerations.
+\end{itemize}
+
+We have additionally released several technical reports, including this
+document, describing our approach and prototypes.
+Each has had multiple versions reflecting evolution of our approach:
+
+\begin{itemize}
+\item This report, the \citetitleit{UCAM-CL-TR-951}~\cite{UCAM-CL-TR-850, UCAM-CL-TR-864,
+  UCAM-CL-TR-876, UCAM-CL-TR-891, UCAM-CL-TR-907, UCAM-CL-TR-927,
+  UCAM-CL-TR-951},
+  describes the CHERI ISA, both as a high-level, software-facing
+  model and the specific mapping into the 64-bit MIPS instruction set.
+  Successive versions have introduced improved C-language support, support for
+  scalable compartmentalization, and compressed capabilities.
+
+\item The \citetitleit{UCAM-CL-TR-877}~\cite{UCAM-CL-TR-877} describes in greater detail our
+  mapping of software into instruction-set primitives in both the compiler and
+  operating system; earlier versions of the document were released as the
+  \textit{Capability Hardware Enhanced RISC Instructions: CHERI User's
+  Guide}~\cite{UCAM-CL-TR-851}.
+
+\item The \citetitleit{UCAM-CL-TR-852}~\cite{UCAM-CL-TR-852, UCAM-CL-TR-868} describes hardware aspects
+  of our prototyping platform, including physical platform and practical user
+  concerns.
+
+\item The \citetitleit{UCAM-CL-TR-853}~\cite{UCAM-CL-TR-853, UCAM-CL-TR-869} describes
+  non-CHERI-specific software aspects of our prototyping platform, including
+  software build and practical user concerns.
+
+\item The technical report, \citetitleit{UCAM-CL-TR-873}~\cite{UCAM-CL-TR-873}, provides a more
+  detailed accounting of the impact of software compartmentalization on
+  software structure and security using conventional designs, with potential
+  applicability to CHERI-based designs as well.
+
+\item The technical report, \citetitleit{UCAM-CL-TR-916}~\cite{UCAM-CL-TR-916},
+  explores the potential interactions between
+  CHERI, a fundamentally architectural protection technique, and the recently
+  announced Spectre and Meltdown microarchitectural side-channel attacks.
+  The report describes a modest architecture extension identifying CHERI
+  compartment identifiers to the microarchitecture, and also explores
+  opportunities for Spectre mitigation arising from performing capability
+  checks in speculation.
+
+\item The technical report, \citetitleit{UCAM-CL-TR-940}~\cite{UCAM-CL-TR-940},
+  is a preprint version of our similarly named
+  paper published at Oakland 2020~\cite{cheri-formal-SP2020}.
+
+\item \citetitleit{UCAM-CL-TR-941}~\cite{UCAM-CL-TR-941} provides a
+  high-level introduction to CHERI: the abstract protection model,
+  architectural instantiations, formal modeling, microarchitectural
+  implementation, and software stack.
+  It was released alongside the announcement of the Arm Morello
+  board~\cite{arm-morello}.
+
+\item The \citetitleit{UCAM-CL-TR-947}~\cite{UCAM-CL-TR-947} is an
+  introduction to pure-capability C/C++, variants of the C and C++ programming
+  languages targeting implementation of all pointers using CHERI architectural
+  capabilities.
+\end{itemize}
+
+The following technical reports are PhD dissertations that describe both CHERI
+and our path to our current design:
+
+\begin{itemize}
+\item Robert Watson's PhD dissertation, \citetitleit{UCAM-CL-TR-818},
+  describes the operating-system
+  access-control and compartmentalization approaches, including FreeBSD's
+  MAC Framework and Capsicum,
+  which motivated our work on CHERI~\cite{Watson10a,UCAM-CL-TR-818}.
+
+\item Jonathan Woodruff's PhD dissertation, \textit{CHERI: A RISC capability
+  machine for practical memory safety}, describes our CHERI1 prototype
+  implementation~\cite{UCAM-CL-TR-858}.
+
+\item Robert Norton's PhD dissertation, \citetitleit{UCAM-CL-TR-887},
+  describes how hardware support is provided for
+  optimized domain transition using the CHERI2 prototype
+  implementation~\cite{UCAM-CL-TR-887}.
+
+\item Alexandre Joannou's PhD dissertation, \citetitleit{UCAM-CL-TR-936},
+  describes hardware
+  optimizations for efficient implementation of CHERI capabilities such as
+  capability compression for a 128-bit capability format and a hierarchical tag
+  cache for efficient tagged memory~\cite{UCAM-CL-TR-936}.
+
+\item Alexander Richardson's PhD dissertation, \citetitleit{UCAM-CL-TR-949},
+  describes the implementation
+  of C/C++ compilation and linkage using CHERI capabilities for spatial memory
+  safety~\cite{UCAM-CL-TR-949}.
+\end{itemize}
+
+As our research proceeded, and prior to our conference and journal articles,
+we published a number of workshop papers laying out early aspects of our
+approach:
+
+\begin{itemize}
+\item Our philosophy in revisiting of capability-based approaches is described
+  in {\em Capabilities Revisited: A Holistic Approach to Bottom-to-Top
+  Assurance of Trustworthy Systems}, published at the Layered Assurance
+  Workshop (LAW 2010)~\cite{NeumannWatson10LAW}, shortly after the inception
+  of the project.
+
+\item Mid-way through creation of both the BERI prototyping platform, and
+  CHERI protection model and CHERI-MIPS ISA, we published {\em CHERI: A
+  Research Platform Deconflating Hardware Virtualization and Protection} at
+  the Workshop on Runtime Environments, Systems, Layering and Virtualized
+  Environments (RESoLVE 2012)~\cite{watson:cheriresolve2012}.
+
+\item Jonathan Woodruff, whose PhD dissertation describes our initial CHERI
+  prototype, published a workshop paper on this work at the CEUR Workshop's
+  Doctoral Symposium on Engineering Secure Software and Systems (ESSoS 2013):
+  \textit{Memory Segmentation to Support Secure
+  Applications}~\cite{NeumannWatson10LAW}.
+
+\item In the USENIX Workshop on the Theory and Practice of Provenance (TaPP),
+  we published {\em Pointer Provenance in a Capability
+  Architecture}~\cite{mazzinghi:pointer-provenance}.
+  This paper describes how architectural traces of pointer behavior, visible
+  through the CHERI instruction set, can be analyzed to understand software
+  structure and security.
+\end{itemize}
+
+\noindent
+Further research publications and technical reports will be forthcoming.

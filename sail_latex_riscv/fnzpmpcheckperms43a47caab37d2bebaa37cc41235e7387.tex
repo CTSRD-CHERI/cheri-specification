@@ -1,0 +1,8 @@
+function #\hyperref[sailRISCVzpmpCheckPerms]{pmpCheckPerms}#(ent, acc, priv) = {
+  match priv {
+    Machine => if   #\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(ent)
+               then #\hyperref[sailRISCVzpmpCheckRWX]{pmpCheckRWX}#(ent, acc)
+               else true,
+    _       => #\hyperref[sailRISCVzpmpCheckRWX]{pmpCheckRWX}#(ent, acc)
+  }
+}

@@ -1,0 +1,82 @@
+function pmpCheck forall 'n, 'n > 0. (addr: xlenbits, width: atom('n), acc: #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), priv: Privilege)
+                  -> #\hyperref[sailRISCVzoption]{option}#(ExceptionType) = {
+  let width : xlenbits = #\hyperref[sailRISCVztozybits]{to\_bits}#(sizeof(xlen), width);
+  let check : bool =
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp0cfg, pmpaddr0, #\hyperref[sailRISCVzzzeros]{zeros}#()) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp1cfg, pmpaddr1, pmpaddr0) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp2cfg, pmpaddr2, pmpaddr1) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp3cfg, pmpaddr3, pmpaddr2) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp4cfg, pmpaddr4, pmpaddr3) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp5cfg, pmpaddr5, pmpaddr4) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp6cfg, pmpaddr6, pmpaddr5) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp7cfg, pmpaddr7, pmpaddr6) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp8cfg, pmpaddr8, pmpaddr7) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp9cfg, pmpaddr9, pmpaddr8) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp10cfg, pmpaddr10, pmpaddr9) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp11cfg, pmpaddr11, pmpaddr10) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp12cfg, pmpaddr12, pmpaddr11) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp13cfg, pmpaddr13, pmpaddr12) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp14cfg, pmpaddr14, pmpaddr13) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue =>
+  match #\hyperref[sailRISCVzpmpMatchEntry]{pmpMatchEntry}#(addr, width, acc, priv, pmp15cfg, pmpaddr15, pmpaddr14) {
+    PMP_Success  => true,
+    PMP_Fail     => false,
+    PMP_Continue => match priv {
+                      Machine => true,
+                      _       => false
+                    }
+  }}}}}}}}}}}}}}}};
+
+  if   check
+  then #\hyperref[sailRISCVzNone]{None}#()
+  else match acc {
+    #\hyperref[sailRISCVzRead]{Read}#(_)      => #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEzyLoadzyAccesszyFault]{E\_Load\_Access\_Fault}#()),
+    #\hyperref[sailRISCVzWrite]{Write}#(_)     => #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#()),
+    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_) => #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#()),
+    #\hyperref[sailRISCVzExecute]{Execute}#()    => #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEzyFetchzyAccesszyFault]{E\_Fetch\_Access\_Fault}#())
+  }
+}

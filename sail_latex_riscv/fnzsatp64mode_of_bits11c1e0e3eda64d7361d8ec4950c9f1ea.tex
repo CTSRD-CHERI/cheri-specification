@@ -1,0 +1,8 @@
+function #\hyperref[sailRISCVzsatp64Modezyofzybits]{satp64Mode\_of\_bits}#(a : Architecture, m : satp_mode) -> #\hyperref[sailRISCVzoption]{option}#(SATPMode) =
+  match (a, m) {
+    (_,    0x0) => #\hyperref[sailRISCVzSome]{Some}#(Sbare),
+    (RV32, 0x1) => #\hyperref[sailRISCVzSome]{Some}#(Sv32),
+    (RV64, 0x8) => #\hyperref[sailRISCVzSome]{Some}#(Sv39),
+    (RV64, 0x9) => #\hyperref[sailRISCVzSome]{Some}#(Sv48),
+    (_, _)      => #\hyperref[sailRISCVzNone]{None}#()
+  }

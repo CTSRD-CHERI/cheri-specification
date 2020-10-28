@@ -1,0 +1,5 @@
+function MemAccessCapRestriction_of_num arg# = match arg# {
+  0 => Unrestricted,
+  1 => Trap,
+  _ => Clear
+}

@@ -1,0 +1,17 @@
+function #\hyperref[sailRISCVzliftzysstatus]{lift\_sstatus}#(m : Mstatus, s : Sstatus) -> Mstatus = {
+  let m = #\hyperref[sailRISCVzupdatezyMXR]{update\_MXR}#(m, s.#\hyperref[sailRISCVzMXR]{MXR}#());
+  let m = #\hyperref[sailRISCVzupdatezySUM]{update\_SUM}#(m, s.#\hyperref[sailRISCVzSUM]{SUM}#());
+
+  let m = #\hyperref[sailRISCVzupdatezyXS]{update\_XS}#(m, s.#\hyperref[sailRISCVzXS]{XS}#());
+  // See comment for mstatus.FS.
+  let m = #\hyperref[sailRISCVzupdatezyFS]{update\_FS}#(m, s.#\hyperref[sailRISCVzFS]{FS}#());
+  let dirty = #\hyperref[sailRISCVzextStatuszyofzybits]{extStatus\_of\_bits}#(m.#\hyperref[sailRISCVzFS]{FS}#()) == Dirty | #\hyperref[sailRISCVzextStatuszyofzybits]{extStatus\_of\_bits}#(m.#\hyperref[sailRISCVzXS]{XS}#()) == Dirty;
+  let m = #\hyperref[sailRISCVzupdatezySD]{update\_SD}#(m, #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(dirty));
+
+  let m = #\hyperref[sailRISCVzupdatezySPP]{update\_SPP}#(m, s.#\hyperref[sailRISCVzSPP]{SPP}#());
+  let m = #\hyperref[sailRISCVzupdatezySPIE]{update\_SPIE}#(m, s.#\hyperref[sailRISCVzSPIE]{SPIE}#());
+  let m = #\hyperref[sailRISCVzupdatezyUPIE]{update\_UPIE}#(m, s.#\hyperref[sailRISCVzUPIE]{UPIE}#());
+  let m = #\hyperref[sailRISCVzupdatezySIE]{update\_SIE}#(m, s.#\hyperref[sailRISCVzSIE]{SIE}#());
+  let m = #\hyperref[sailRISCVzupdatezyUIE]{update\_UIE}#(m, s.#\hyperref[sailRISCVzUIE]{UIE}#());
+  m
+}

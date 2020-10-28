@@ -1,0 +1,5 @@
+function trans_kind_of_num arg# = match arg# {
+  0 => Transaction_start,
+  1 => Transaction_commit,
+  _ => Transaction_abort
+}

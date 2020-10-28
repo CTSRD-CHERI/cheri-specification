@@ -1,0 +1,62 @@
+function #\hyperref[sailMIPSzsetCapBounds]{setCapBounds}#(cap, base, top) : (Capability, #\hyperref[sailMIPSzbits]{bits}#(64), #\hyperref[sailMIPSzbits]{bits}#(65)) -> (bool, Capability) = {
+  /* {cap with base=base; length=(#\hyperref[sailMIPSzbits]{bits}#(64)) length; offset=0} */
+  let base65 = 0b0 @ base;
+  let length = top - base65;
+  /* Find an exponent that will put the most significant bit of length
+     second from the top as assumed during decoding. We ignore the bottom
+     MW - 1 bits because those are handled by the ie = 0 format. */
+  let e = 52 - #\hyperref[sailMIPSzcountzyleadingzyzzeros]{count\_leading\_zeros}#(length[64..13]);
+  // Use use internal exponent if e is non-zero or if e is zero but
+  // but the implied bit of length is not #\hyperref[sailMIPSzzzero]{zero}# (denormal vs. normal case)
+  let ie = (e != 0) | length[12];
+
+  /* The non-ie e == 0 case is easy. It is exact so just extract relevant bits. */
+  Bbits = #\hyperref[sailMIPSztruncate]{truncate}#(base, 14);
+  Tbits = #\hyperref[sailMIPSztruncate]{truncate}#(top, 14);
+  lostSignificantTop  : bool = false;
+  lostSignificantBase : bool = false;
+  incE : bool = false;
+
+  if ie then {
+    /* the internal exponent case is trickier */
+
+    /* Extract B and T #\hyperref[sailMIPSzbits]{bits}# (we lose 3 bits of each to store the exponent) */
+    B_ie = #\hyperref[sailMIPSztruncate]{truncate}#(base >> (e + 3), 11);
+    T_ie = #\hyperref[sailMIPSztruncate]{truncate}#(top >> (e + 3), 11);
+
+    /* Find out whether we have lost significant bits of base and top using a
+       mask of bits that we will #\hyperref[sailMIPSzlose]{lose}# (including 3 extra for exp). */
+    maskLo : #\hyperref[sailMIPSzbits]{bits}#(65) = #\hyperref[sailMIPSzzzerozyextend]{zero\_extend}#(#\hyperref[sailMIPSzones]{ones}#(e + 3));
+    z65    : #\hyperref[sailMIPSzbits]{bits}#(65) = #\hyperref[sailMIPSzzzeros]{zeros}#();
+    lostSignificantBase = (base65 & maskLo) != z65;
+    lostSignificantTop = (top & maskLo) != z65;
+
+    if lostSignificantTop then {
+      /* we must increment T to make sure it is still above top even with lost bits.
+         It might wrap around but if that makes B<T then decoding will compensate. */
+      T_ie = T_ie + 1;
+    };
+
+    /* Has the length overflowed? We chose e so that the top two bits of len would be 0b01,
+       but either because of incrementing T or losing bits of base it might have grown. */
+    len_ie = T_ie - B_ie;
+    if len_ie[10] then {
+      /* length overflow -- increment E by one and then recalculate
+         T, B etc accordingly */
+      incE = true;
+
+      lostSignificantBase = lostSignificantBase | B_ie[0];
+      lostSignificantTop  = lostSignificantTop | T_ie[0];
+
+      B_ie = #\hyperref[sailMIPSztruncate]{truncate}#(base >> (e + 4), 11);
+      let incT : range(0,1) = if lostSignificantTop then 1 else 0;
+      T_ie = #\hyperref[sailMIPSztruncate]{truncate}#(top >> (e + 4), 11) + incT;
+    };
+
+    Bbits = B_ie @ 0b000;
+    Tbits = T_ie @ 0b000;
+  };
+  let newCap = {cap with address=base, E=#\hyperref[sailMIPSztozybits]{to\_bits}#(6, if incE then e + 1 else e), B=Bbits, T=Tbits, internal_e=ie};
+  let exact = not(lostSignificantBase | lostSignificantTop);
+  (exact, newCap)
+}

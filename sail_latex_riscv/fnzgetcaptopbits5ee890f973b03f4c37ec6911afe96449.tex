@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzgetCapTopBits]{getCapTopBits}#(c) : Capability -> CapLenBits =
+    let (_, top) = #\hyperref[sailRISCVzgetCapBoundsBits]{getCapBoundsBits}#(c) in
+    top

@@ -1,0 +1,14 @@
+let rs1_val_32b = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs1));
+let rs2_val_32b = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs2));
+let rs3_val_32b = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs3));
+let rm_3b       = #\hyperref[sailRISCVzencdeczyroundingzymode]{encdec\_rounding\_mode}# (#\hyperref[sailRISCVzselectzyinstrzyorzyfcsrzyrm]{select\_instr\_or\_fcsr\_rm}#  (rm));
+let (fflags, rd_val_32b) : (#\hyperref[sailRISCVzbits]{bits}#(5), #\hyperref[sailRISCVzbits]{bits}#(32)) =
+  match op {
+    FMADD_S  => #\hyperref[sailRISCVzriscvzyf32MulAdd]{riscv\_f32MulAdd}# (rm_3b, rs1_val_32b, rs2_val_32b, rs3_val_32b),
+    FMSUB_S  => #\hyperref[sailRISCVzriscvzyf32MulAdd]{riscv\_f32MulAdd}# (rm_3b, rs1_val_32b, rs2_val_32b, #\hyperref[sailRISCVznegatezyS]{negate\_S}# (rs3_val_32b)),
+    FNMSUB_S => #\hyperref[sailRISCVzriscvzyf32MulAdd]{riscv\_f32MulAdd}# (rm_3b, #\hyperref[sailRISCVznegatezyS]{negate\_S}# (rs1_val_32b), rs2_val_32b, rs3_val_32b),
+    FNMADD_S => #\hyperref[sailRISCVzriscvzyf32MulAdd]{riscv\_f32MulAdd}# (rm_3b, #\hyperref[sailRISCVznegatezyS]{negate\_S}# (rs1_val_32b), rs2_val_32b, #\hyperref[sailRISCVznegatezyS]{negate\_S}# (rs3_val_32b))
+  };
+#\hyperref[sailRISCVzwritezyfflags]{write\_fflags}#(fflags);
+#\hyperref[sailRISCVzF]{F}#(rd) = #\hyperref[sailRISCVznanzybox]{nan\_box}# (rd_val_32b);
+RETIRE_SUCCESS

@@ -1,0 +1,30 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let cs_val = #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(cs);
+let ct_val = #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(ct);
+let ct_cursor = #\hyperref[sailMIPSzgetCapCursor]{getCapCursor}#(ct_val);
+let ct_top    = #\hyperref[sailMIPSzgetCapTop]{getCapTop}#(ct_val);
+let ct_base   = #\hyperref[sailMIPSzgetCapBase]{getCapBase}#(ct_val);
+if not (cs_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TagViolation, cs)
+else if not (ct_val.tag) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_TagViolation, ct)
+else if cs_val.sealed then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, cs)
+else if ct_val.sealed then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_SealViolation, ct)
+else if not (ct_val.permit_seal) then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_PermitSealViolation, ct)
+else if ct_cursor < ct_base then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_LengthViolation, ct)
+else if ct_cursor >= ct_top then
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_LengthViolation, ct)
+else if ct_cursor > max_otype then /* prevents sealing with reserved or invalid otypes */
+  #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_LengthViolation, ct)
+else
+{
+  let (success, newCap) = #\hyperref[sailMIPSzsealCap]{sealCap}#(cs_val, #\hyperref[sailMIPSztozybits]{to\_bits}#(24, ct_cursor));
+  if not (success) then
+      #\hyperref[sailMIPSzraisezyc2zyexception]{raise\_c2\_exception}#(CapEx_InexactBounds, cs)
+  else
+      #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(cd, newCap)
+}

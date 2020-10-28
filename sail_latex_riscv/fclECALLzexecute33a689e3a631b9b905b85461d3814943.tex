@@ -1,0 +1,10 @@
+let t : sync_exception =
+  struct { trap = match (cur_privilege) {
+                    User       => #\hyperref[sailRISCVzEzyUzyEnvCall]{E\_U\_EnvCall}#(),
+                    Supervisor => #\hyperref[sailRISCVzEzySzyEnvCall]{E\_S\_EnvCall}#(),
+                    Machine    => #\hyperref[sailRISCVzEzyMzyEnvCall]{E\_M\_EnvCall}#()
+                  },
+           excinfo = (#\hyperref[sailRISCVzNone]{None}#() : #\hyperref[sailRISCVzoption]{option}#(xlenbits)),
+           ext     = #\hyperref[sailRISCVzNone]{None}#() };
+#\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(#\hyperref[sailRISCVzexceptionzyhandler]{exception\_handler}#(cur_privilege, #\hyperref[sailRISCVzCTLzyTRAP]{CTL\_TRAP}#(t), PC));
+RETIRE_FAIL

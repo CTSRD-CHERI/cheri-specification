@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzextzyptwzylczyjoin]{ext\_ptw\_lc\_join}#(e : ext_ptw, l : ext_ptw_lc) -> ext_ptw =
+  { e with ptw_lc =
+      match l {
+        PTW_LC_OK => e.ptw_lc,
+        PTW_LC_CLEAR => l
+      }
+  }

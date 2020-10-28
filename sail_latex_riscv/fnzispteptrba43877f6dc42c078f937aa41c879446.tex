@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzisPTEPtr]{isPTEPtr}#(p : pteAttribs, ext : extPte) -> bool = {
+  let a = #\hyperref[sailRISCVzMkzyPTEzyBits]{Mk\_PTE\_Bits}#(p);
+  a.#\hyperref[sailRISCVzR]{R}#() == 0b0 & a.#\hyperref[sailRISCVzW]{W}#() == 0b0 & a.#\hyperref[sailRISCVzX]{X}#() == 0b0
+}

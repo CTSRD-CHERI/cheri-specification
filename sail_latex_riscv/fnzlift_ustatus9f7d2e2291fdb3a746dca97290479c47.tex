@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzliftzyustatus]{lift\_ustatus}#(s : Sstatus, u : Ustatus) -> Sstatus = {
+  let s = #\hyperref[sailRISCVzupdatezyUPIE]{update\_UPIE}#(s, u.#\hyperref[sailRISCVzUPIE]{UPIE}#());
+  let s = #\hyperref[sailRISCVzupdatezyUIE]{update\_UIE}#(s, u.#\hyperref[sailRISCVzUIE]{UIE}#());
+  s
+}

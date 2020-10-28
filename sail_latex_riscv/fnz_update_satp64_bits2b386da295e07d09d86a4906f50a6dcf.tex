@@ -1,0 +1,2 @@
+function _update_Satp64_bits (v, x) = let v = { v with Satp64_chunk_0 = update_subrange_bits(v.Satp64_chunk_0, 63, 0, subrange_bits(x, 63, 0)) } in
+  v

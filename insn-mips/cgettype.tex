@@ -1,0 +1,32 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CGetType}
+\insnmipslabel{cgettype}
+\subsection*{CGetType: Move Object Type to an Integer Register}
+
+\subsubsection*{Format}
+
+CGetType rd, cb
+
+\begin{center}
+\cheritwoop[header]{0x1}{rd}{cb}
+\end{center}
+
+\subsubsection*{Description}
+
+Integer register \textit{rd} is set equal to the \cotype{} field of capability
+register \textit{cb}.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CGetType}
+
+\subsection*{Notes}
+
+\begin{itemize}
+\item
+If the capability is unsealed, a value of -1 is returned.
+For hardware-interpreted \cotype{}s (see \cref{tab:archotypes}) a sign-extended
+(negative) value is returned; for software-defined \cotype{}s
+(see \cref{sec:model-sealedcapabilities}) \insnmipsref{CGetType} returns
+a zero-extended value.
+\end{itemize}

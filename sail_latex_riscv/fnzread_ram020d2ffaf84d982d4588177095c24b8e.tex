@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzreadzyram]{read\_ram}#(rk, addr, width, read_meta) =
+  let meta = if read_meta then #\hyperref[sailRISCVzzyzyReadRAMzyMeta]{\_\_ReadRAM\_Meta}#(addr, width) else default_meta in
+  (#\hyperref[sailRISCVzzyzyreadzymem]{\_\_read\_mem}#(rk, sizeof(xlen), addr, width), meta)

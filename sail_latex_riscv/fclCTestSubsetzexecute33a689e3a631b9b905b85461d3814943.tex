@@ -1,0 +1,18 @@
+let cs1_val = if #\hyperref[sailRISCVzunsigned]{unsigned}#(cs1) == 0 then DDC else #\hyperref[sailRISCVzC]{C}#(cs1);
+let cs2_val = #\hyperref[sailRISCVzC]{C}#(cs2);
+let (cs2_base, cs2_top) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(cs2_val);
+let (cs1_base, cs1_top) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(cs1_val);
+let cs2_perms = #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cs2_val);
+let cs1_perms = #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cs1_val);
+let result = if cs1_val.tag != cs2_val.tag then
+               0b0
+             else if cs2_base < cs1_base then
+               0b0
+             else if cs2_top > cs1_top then
+               0b0
+             else if (cs2_perms & cs1_perms) != cs2_perms then
+               0b0
+             else
+               0b1;
+#\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(result);
+RETIRE_SUCCESS

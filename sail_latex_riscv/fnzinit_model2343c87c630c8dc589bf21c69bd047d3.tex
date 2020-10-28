@@ -1,0 +1,9 @@
+function #\hyperref[sailRISCVzinitzymodel]{init\_model}# () -> unit = {
+  #\hyperref[sailRISCVzinitzyplatform]{init\_platform}# (); /* devices */
+  #\hyperref[sailRISCVzinitzysys]{init\_sys}# ();      /* processor */
+  #\hyperref[sailRISCVzinitzyvmem]{init\_vmem}# ();     /* virtual memory */
+
+  /* initialize extensions last */
+  #\hyperref[sailRISCVzextzyinit]{ext\_init}# ();
+  #\hyperref[sailRISCVzextzyinitzyregs]{ext\_init\_regs}# ();
+}

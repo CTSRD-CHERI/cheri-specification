@@ -1,0 +1,5 @@
+function _set_TLBEntry_pfn1 (r_ref, v) = {
+    r = __bitfield_deref(r_ref);
+    r.TLBEntry_chunk_0 = update_subrange_bits(r.TLBEntry_chunk_0, 60, 37, subrange_bits(v, 23, 0));
+    (*r_ref) = r
+}

@@ -1,0 +1,5 @@
+function _set_ContextReg_BadVPN2 (r_ref, v) = {
+    r = __bitfield_deref(r_ref);
+    r.ContextReg_chunk_0 = update_subrange_bits(r.ContextReg_chunk_0, 22, 4, subrange_bits(v, 18, 0));
+    (*r_ref) = r
+}

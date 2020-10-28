@@ -1,0 +1,386 @@
+\chapter{CHERI Concentrate Listings}
+\label{app:cheri-128-listings}
+
+The cheri-cap-lib~\cite{CHERI-cheri-cap-lib} open-source library has been used in all of our open-source~\cite{CHERI-cheri-cpu,CHERI-Piccolo,CHERI-Flute,CHERI-Toooba} implementations and contains certain notable algorithms which have been highly optimised and verified to a significant degree.
+These algorithms are well documented by their contents, so several are reproduced in their current form here to serve as reference to anyone implementing CHERI Concentrate compression in any model or microarchitecture.
+
+\section{GetTop}
+\label{sec:cheri-128-listings-gettop}
+
+This \emph{GetTop} function for compressed capabilities is very similar to the \emph{GetBase} function which uses \emph{baseBits} rather than \emph{topBits}.
+There is a significant divergence from line 12 where we discern between a top of 0 and a top of $2^{64}$.
+It has been non-trivial to develop an algorithm that is both correct and fast enough for all uses in our implementations.
+
+\begin{lstlisting}[language=bluespec]
+function LCapAddress getTopFat(CapFat cap, TempFields tf);
+    // First, construct a full length value with the top bits and the
+    // correction bits above, and shift that value to the appropriate spot.
+    LCapAddress addTop = signExtend({pack(tf.topCorrection), cap.bounds.topBits}) << cap.bounds.exp;
+    // Build a mask on the high bits of a full length value to extract the high
+    // bits of the address.
+    Bit#(TSub#(SizeOf#(LCapAddress),MW)) mask = ~0 << cap.bounds.exp;
+    // Extract the high bits of the address (and append the implied zeros at the
+    // bottom), and add with the previously prepared value.
+    LCapAddress ret = {truncateLSB(cap.address)&mask,0} + addTop;
+    // If the bottom and top are more than an address space away from eachother, invert
+    // the 64th/32nd bit of Top.  This corrects for errors that happen when the representable
+    // space wraps the address space.
+    Integer msbp = valueOf(CapAddressW) - 1;
+    ret[msbp+2] = 0;
+    Bit#(2) topTip = ret[msbp+1:msbp];
+    // Calculate the msb of the base.
+    CapAddress adr = truncate(cap.address);
+    // First assume that only the address and correction are involved...
+    Bit#(TSub#(SizeOf#(CapAddress),MW)) bot = truncateLSB(adr) + (signExtend(pack(tf.baseCorrection)) << cap.bounds.exp);
+    Bit#(1) botTip = msb(bot);
+    // If the bit we're interested in are actually coming from baseBits, select the correct one from there.
+    //             exp == (resetExp - 1) doesn't matter since we will not flip unless exp < resetExp-1.
+    if (cap.bounds.exp == (resetExp - 2)) botTip = cap.bounds.baseBits[valueOf(MW)-1];
+    // Do the final check.
+    // If exp >= resetExp - 1, the bits we're looking at are coming directly from topBits and baseBits, are not being inferred,
+    // and therefore do not need correction. If we are below this range, check that the difference between the resulting top and
+    // bottom is less than one address space.  If not, flip the msb of the top.
+    if (cap.bounds.exp<(resetExp-1) && (topTip - zeroExtend(botTip)) > 1) ret[msbp+1] = ~ret[msbp+1];
+    return ret;
+endfunction
+\end{lstlisting}
+
+\section{CapInBounds}
+\label{sec:cheri-128-listings-capinbounds}
+
+\emph{CapInBounds} detects if the current address of a capability is within its bounds.
+This function does not decode the Top and Base of the capability,
+but operates directly on compressed fields saving both time and logic.
+
+\begin{lstlisting}[language=bluespec]
+function Bool capInBounds(CapFat cap, TempFields tf, Bool inclusive);
+    // Check that the pointer of a capability is currently within the bounds
+    // of the capability
+    Bool ptrVStop = (inclusive) ? (cap.addrBits<=cap.bounds.topBits) : (cap.addrBits<cap.bounds.topBits);
+    // Top is ok if the pointer and top are in the same alignment region
+    // and the pointer is less than the top.  If they are not in the same
+    // alignment region, it's ok if the top is in Hi and the bottom in Low.
+    Bool topOk  = (tf.topHi == tf.addrHi)  ? (ptrVStop) : tf.topHi;
+    Bool baseOk = (tf.baseHi == tf.addrHi) ? (cap.addrBits >= cap.bounds.baseBits) : tf.addrHi;
+    return topOk && baseOk;
+endfunction
+\end{lstlisting}
+
+\section{IncOffset}
+\label{sec:cheri-128-listings-incoffset}
+
+The IncOffset function from cheri-cap-lib is shared between the IncOffset operation and the SetOffset operation as these two can be made to largely share logic.
+The IncOffset function is almost entirely composed of the \emph{fast representable check}~\cite{Woodruff2019}, as the only change to the capability in a non-faulting case is to add the increment to the address.
+This check determines if the resulting capability will decode as having the same bounds after the address modification, invalidating the capability if this might not be the case.
+As this check is conservative, the boundary conditions are specified in the CHERI architecture in Section~\ref{sec:cheri-concentrate-fast-representable-limit-checking}.
+This check is intended to run alongside the add of the address in execute unit.
+
+
+\begin{lstlisting}[language=bluespec]
+function VnD#(CapFat) incOffsetFat(CapFat cap, LCapAddress pointer, Bit#(CapAddressW) offset/*this is the increment in inc offset, and the offset in set offset*/, TempFields tf, Bool setOffset);
+// NOTE:
+// The 'offset' argument is the "increment" value when setOffset is false,
+// and the actual "offset" value when setOffset is true.
+//
+// For this function to work correctly, we must have 'offset' = 'pointer'-'cap.address'.
+// In the most critical case we have both available and picking one or the other
+// is less efficient than passing both.  If the 'setOffset' flag is set, this function will
+// ignore the 'pointer' argument and use 'offset' to set the offset of 'cap' by adding it to
+// the capability base. If the 'setOffset' flag is not set, this function will increment the
+// offset of 'cap' by replacing the 'cap.address' field with the 'pointer' argument (with
+// the assumption that the 'pointer' argument is indeed equal to 'cap.address'+'offset'.
+// The 'cap.addrBits' field is also updated accordingly.
+        CapFat ret = cap;
+        Exp e = cap.bounds.exp;
+        // Updating the address of a capability requires checking that the new address
+        // is still within representable bounds. For capabilities with big representable
+        // regions (with exponents >= resetExp-2), there is no representability issue.
+        // For the other capabilities, the check consists of two steps:
+        // - A "inRange" test
+        // - A "inLimits" test
+
+        // The inRange test
+        // ----------------
+        // Conceptually, the inRange test checks the magnitude of 'offset' is less then
+        // the representable region's size S. This ensures that the inLimits test result
+        // is meaningful. The test succeeds if the absolute value of 'offset' is less than S,
+        // that is -S < 'offset' < S. This test reduces to a check that there are no
+        // significant bits in the high bits of 'offset', that is they are all ones or all
+        // zeros.
+        CapAddress offsetAddr = truncate(offset);
+        Bit#(TSub#(CapAddressW,MW)) signBits       = signExtend(offset[valueOf(TSub#(CapAddressW,1))]);
+        Bit#(TSub#(CapAddressW,MW)) highOffsetBits = unpack(truncateLSB(offsetAddr));
+        Bit#(TSub#(CapAddressW,MW)) highBitsfilter = -1 << e;
+        highOffsetBits = (highOffsetBits ^ signBits) & highBitsfilter;
+        Bool inRange = (highOffsetBits == 0);
+
+        // The inLimits test
+        // -----------------
+        // Conceptually, the inLimits test ensures that neither the of the edges of the
+        // representable region have been crossed with the new address. In essence, it
+        // compares the distance 'offsetBits' added (on MW bits) with the distance 'toBounds'
+        // to the edge of the representable space (on MW bits).
+        // - For a positive or null increment
+        //   inLimits = offsetBits < toBounds - 1
+        // - For a negative increment:
+        //   inLimits = (offsetBits >= toBounds) and ('we were not already on the bottom edge')
+        //   (when already on the bottom edge of the representable space, the relevant
+        //   bits of the address and those of the representable edge are the same, leading
+        //   to a false positive on the i >= toBounds comparison)
+
+        // The sign of the increment
+        Bool posInc = offsetAddr[valueOf(CapAddressW)-1] == 1'b0;
+
+        // The offsetBits value corresponds to the appropriate slice of the 'offsetAddr' argument
+        Bit#(MW) offsetBits  = truncate(offsetAddr >> e);
+
+        // The toBounds value is given by substracting the address of the capability from the
+        // address of the edge of the representable region (on MW bits) when the 'setOffset'
+        // flag is not set. When it is set, it is given by substracting the base address of
+        // the capability from the edge of the representable region (on MW bits).
+        // This value is both the distance to the representable top and the distance to the
+        // representable bottom (when appended to a one for negative sign), a convenience of
+        // the two's complement representation.
+
+        // NOTE: When the setOffset flag is set, toBounds should be the distance from the base
+        // to the representable edge. This can be computed efficiently, and without relying on
+        // the temporary fields, as follows:
+        // equivalent to (repBoundBits - cap.bounds.baseBits):
+        Bit#(MW) toBounds_A   = {3'b111,0} - {3'b000,truncate(cap.bounds.baseBits)};
+        // equivalent to (repBoundBits - cap.bounds.baseBits - 1):
+        Bit#(MW) toBoundsM1_A = {3'b110,~truncate(cap.bounds.baseBits)};
+        /*
+        XXX not sure if we still care about that
+        if (toBoundsM1_A != (toBounds_A-1)) $display("error %x", toBounds_A[15:13]);
+        */
+        // When the setOffset flag is not set, we need to use the temporary fields with the
+        // upper bits of the representable bounds
+        Bit#(MW) repBoundBits = {tf.repBoundTopBits,0};
+        Bit#(MW) toBounds_B   = repBoundBits - cap.addrBits;
+        Bit#(MW) toBoundsM1_B = repBoundBits + ~cap.addrBits;
+        // Select the appropriate toBounds value
+        Bit#(MW) toBounds   = (setOffset) ? toBounds_A   : toBounds_B;
+        Bit#(MW) toBoundsM1 = (setOffset) ? toBoundsM1_A : toBoundsM1_B;
+        Bool addrAtRepBound = !setOffset && (repBoundBits == cap.addrBits);
+
+        // Implement the inLimit test
+        Bool inLimits = False;
+        if (posInc) begin
+            // For a positive or null increment
+            // SetOffset is offsetting against base, which has 0 in the lower bits, so we don't need to be conservative.
+            inLimits = (setOffset) ? offsetBits <= toBoundsM1 : offsetBits < toBoundsM1;
+        end else begin
+            // For a negative increment
+            inLimits = (offsetBits >= toBounds) && !addrAtRepBound;
+        end
+
+        // Complete representable bounds check
+        // -----------------------------------
+        Bool inBounds = (inRange && inLimits) || (e >= (resetExp - 2));
+
+        // Updating the return capability
+        // ------------------------------
+        if (setOffset) begin
+            // Get the base and add the offsetAddr. This could be slow, but seems to pass timing.
+            ret.address = getBotFat(cap,tf) + zeroExtend(offsetAddr);
+            // TODO write comments on this
+            Bit#(TAdd#(MW,2)) newAddrBits = zeroExtend(cap.bounds.baseBits) + zeroExtend(offsetBits);
+            ret.addrBits = (e == resetExp) ? {1'b0,truncate(newAddrBits)}:truncate(newAddrBits);
+        end else begin
+            // In the incOffset case, the 'pointer' argument already contains the new address
+            CapAddress tmpAddr = truncate(pointer);
+            ret.address  = zeroExtend(tmpAddr);
+            ret.addrBits = truncate(pointer >> e);
+        end
+        // Nullify the capability if the representable bounds check has failed
+        if (!inBounds) ret.isCapability = False;//nullifyCap(ret);
+
+        // return updated / invalid capability
+        return VnD {v: inBounds, d: ret};
+endfunction
+\end{lstlisting}
+
+\section{SetAddress}
+\label{sec:cheri-128-listings-setaddress}
+
+This \emph{SetAddress} function assigns a new address to the address field
+of a capability.
+It is almost entirely composed of a \emph{fast representable check} which asserts
+that the bounds will continue to decode to the same value after the assignment
+without actually decoding either of the bounds, which is slow.
+If the bounds would change, the capability is invalidated.
+
+\begin{lstlisting}[language=bluespec]
+function VnD#(CapFat) setAddress(CapFat cap, LCapAddress address, TempFields tf);
+        CapFat ret = setCapPointer(cap, address);
+        Exp e = cap.bounds.exp;
+        // Calculate what the upper bits of the new address must be if it is to be in representable bounds.
+        Bool newAddrHi  = truncateLSB(ret.addrBits) < tf.repBoundTopBits;
+        // Shift amount needed to look at only the bits above the mantissa.
+        Exp toUpperBits = e + fromInteger(valueOf(MW));
+        CapAddress mask = -1 << toUpperBits;
+        CapAddress newAddrDiff = (truncate(cap.address)&mask) - (truncate(address)&mask);
+        // Assert that the bits above the mantissa are all equal.
+        Bool inRepBounds = True;
+        // If the difference between the upper bits of the new address and the current
+        // address does not match the expected difference, call it outside of representable bounds.
+        // We construct the "actual" diff assuming that the inRepBounds check above succeeded.
+        Int#(2) diff = ?;
+        if (newAddrDiff == 0) diff = 0;
+        else if (newAddrDiff == mask) diff = -1;
+        else if (newAddrDiff == (mask^(mask<<1))) diff = 1;
+        else inRepBounds = False;
+        let t2 = tuple2;
+        Int#(2) expectedDiff = case (t2(tf.addrHi,newAddrHi))
+                                  t2(True,  True):  return  0;
+                                  t2(True,  False): return  1;
+                                  t2(False, True):  return -1;
+                                  t2(False, False): return  0;
+                              endcase;
+        if (diff != expectedDiff) inRepBounds = False;
+        if (e >= resetExp - 2) inRepBounds = True;
+        if (!inRepBounds) ret.isCapability = False;
+        return VnD {v: inRepBounds, d: ret};
+endfunction
+\end{lstlisting}
+
+\section{SetBounds}
+\label{sec:cheri-128-listings-setbounds}
+
+The \emph{SetBounds} function sets a new base and length of a capability, performing
+and necessary rounding.
+This function actually returns a data structure which includes not only the new capability,
+but a flag indicating if rounding was necessary (to facilitate \emph{CSetBoundsExact}),
+a mask that could be applied to a pointer to align it with the supplied length (to facilitate \emph{CRepresentableAlignmentMask}),
+as well as the length that was actually achieved after rounding (to facilitate \emph{CRoundRepresentableLength}).
+
+\begin{lstlisting}[language=bluespec]
+function SetBoundsReturn#(CapFat, CapAddressW) setBoundsFat(CapFat cap, Address lengthFull);
+        CapFat ret = cap;
+        // Find new exponent by finding the index of the most significant bit of the
+        // length, or counting leading zeros in the high bits of the length, and
+        // substracting them to the CapAddress width (taking away the bottom MW-1 bits:
+        // trim (MW-1) bits from the bottom of length since any length with a significance
+        // that small will yield an exponent of zero).
+        CapAddress length = truncate(lengthFull);
+        Bit#(TSub#(CapAddressW,TSub#(MW,1))) lengthMSBs = truncateLSB(length);
+        Exp zeros = zeroExtend(countZerosMSB(lengthMSBs));
+        // Adjust resetExp by one since it's scale reaches 1-bit greater than a 64-bit length
+        // can express.
+        Bool maxZero = (zeros==(resetExp-1));
+        Bool intExp = !(maxZero && length[fromInteger(valueOf(TSub#(MW,2)))]==1'b0);
+        // Do this without subtraction
+        //fromInteger(valueof(TSub#(SizeOf#(Address),TSub#(MW,1)))) - zeros;
+        Exp e = (resetExp-1) - zeros;
+        // Force otype to unsealed.
+        ret.otype = otype_unsealed;
+        // Derive new base bits by extracting MW bits from the capability
+        // address starting at the new exponent's position.
+        CapAddress tmpAddr = truncate(cap.address);
+        LCapAddress base = zeroExtend(tmpAddr);
+        Bit#(TAdd#(MW,1)) newBaseBits = truncate(base>>e);
+
+        // Derive new top bits by extracting MW bits from the capability
+        // address + requested length, starting at the new exponent's position,
+        // and rounding up if significant bits are lost in the process.
+        LCapAddress len = zeroExtend(length);
+        LCapAddress top = base + len;
+
+        // Create a mask with all bits set below the MSB of length and then masking all bits
+        // below the mantissa bits.
+        LCapAddress lmask = smearMSBRight(len);
+        // The shift amount required to put the most significant set bit of the
+        // len just above the bottom HalfExpW bits that are taken by the exp.
+        Integer shiftAmount = valueOf(TSub#(TSub#(MW,2),HalfExpW));
+
+        // Calculate all values associated with E=e (e not rounding up)
+        // Round up considering the stolen HalfExpW exponent bits if required
+        Bit#(TAdd#(MW,1)) newTopBits = truncate(top>>e);
+        // Check if non-zero bits were lost in the low bits of top, either in the 'e'
+        // shifted out bits or in the HalfExpW bits stolen for the exponent
+        // Shift by MW-1 to move MSB of mask just below the mantissa, then up HalfExpW
+        // more to take in the bits that will be lost for the exponent when it is non-zero.
+        LCapAddress lmaskLor = lmask>>fromInteger(shiftAmount+1);
+        LCapAddress lmaskLo  = lmask>>fromInteger(shiftAmount);
+        // For the len, we're not actually losing significance since we're not storing it,
+        // we just want to know if any low bits are non-zero so that we will know if it will
+        // cause the total length to round up.
+        Bool lostSignificantLen  = (len&lmaskLor)!=0 && intExp;
+        Bool lostSignificantTop  = (top&lmaskLor)!=0 && intExp;
+        // Check if non-zero bits were lost in the low bits of base, either in the 'e'
+        // shifted out bits or in the HalfExpW bits stolen for the exponent
+        Bool lostSignificantBase = (base&lmaskLor)!=0 && intExp;
+
+        // Calculate all values associated with E=e+1 (e rounding up due to msb of L increasing by 1)
+        // This value is just to avoid adding later.
+        Bit#(MW) newTopBitsHigher = truncateLSB(newTopBits);
+        // Check if non-zero bits were lost in the low bits of top, either in the 'e'
+        // shifted out bits or in the HalfExpW bits stolen for the exponent
+        // Shift by MW-1 to move MSB of mask just below the mantissa, then up HalfExpW
+        // more to take in the bits that will be lost for the exponent when it is non-zero.
+        Bool lostSignificantTopHigher  = (top&lmaskLo)!=0 && intExp;
+        // Check if non-zero bits were lost in the low bits of base, either in the 'e'
+        // shifted out bits or in the HalfExpW bits stolen for the exponent
+        Bool lostSignificantBaseHigher = (base&lmaskLo)!=0 && intExp;
+        // If either base or top lost significant bits and we wanted an exact setBounds,
+        // void the return capability
+
+        // We need to round up Exp if the msb of length will increase.
+        // We can check how much the length will increase without looking at the result of adding the
+        // length to the base.  We do this by adding the lower bits of the length to the base and then
+        // comparing both halves (above and below the mask) to zero.  Either side that is non-zero indicates
+        // an extra "1" that will be added to the "mantissa" bits of the length, potentially causing overflow.
+        // Finally check how close the requested length is to overflow, and test in relation to how much the
+        // length will increase.
+        LCapAddress topLo = (lmaskLor & len) + (lmaskLor & base);
+        LCapAddress mwLsbMask = lmaskLor ^ lmaskLo;
+        // If the first bit of the mantissa of the top is not the sum of the corrosponding bits of base and length, there was a carry in.
+        Bool lengthCarryIn = (mwLsbMask & top) != ((mwLsbMask & base)^(mwLsbMask & len));
+        Bool lengthRoundUp = lostSignificantTop;
+        Bool lengthIsMax        = (len & (~lmaskLor)) == (lmask ^ lmaskLor);
+        Bool lengthIsMaxLessOne = (len & (~lmaskLor)) == (lmask ^ lmaskLo);
+
+        Bool lengthOverflow = False;
+        if (lengthIsMax && (lengthCarryIn || lengthRoundUp)) lengthOverflow = True;
+        if (lengthIsMaxLessOne && lengthCarryIn && lengthRoundUp) lengthOverflow = True;
+
+        if(lengthOverflow && intExp) begin
+            e = e+1;
+            ret.bounds.topBits = (lostSignificantTopHigher) ? (newTopBitsHigher+'b1000):newTopBitsHigher;
+            ret.bounds.baseBits = truncateLSB(newBaseBits);
+        end else begin
+            ret.bounds.topBits = (lostSignificantTop) ? truncate(newTopBits+'b1000):truncate(newTopBits);
+            ret.bounds.baseBits = truncate(newBaseBits);
+        end
+        Bool exact = !(lostSignificantBase || lostSignificantTop);
+
+        ret.bounds.exp = e;
+        // Update the addrBits fields
+        ret.addrBits = ret.bounds.baseBits;
+        // Derive new format from newly computed exponent value, and round top up if
+        // necessary
+        if (!intExp) begin // If we have an Exp of 0 and no implied MSB of L.
+            ret.format = Exp0;
+        end else begin
+            ret.format = EmbeddedExp;
+            Bit#(HalfExpW) botZeroes = 0;
+            ret.bounds.baseBits = {truncateLSB(ret.bounds.baseBits), botZeroes};
+            ret.bounds.topBits  = {truncateLSB(ret.bounds.topBits), botZeroes};
+        end
+
+        // Begin calculate newLength in case this is a request just for a representable length:
+        LCapAddress newLength = zeroExtend(length);
+        LCapAddress baseMask = -1; // Override the result from the previous line if we represent everything.
+        if (intExp) begin
+            LCapAddress oneInLsb = (lmask ^ (lmask>>1)) >> shiftAmount;
+            LCapAddress newLengthRounded = newLength + oneInLsb;
+            newLength        = (newLength        & (~lmaskLor));
+            newLengthRounded = (newLengthRounded & (~lmaskLor));
+            if (lostSignificantLen) newLength = newLengthRounded;
+            baseMask = (lengthIsMax && lostSignificantTop) ? ~lmaskLo:~lmaskLor;
+        end
+
+        // Return derived capability
+        return SetBoundsReturn{cap: ret, exact: exact, length: truncate(newLength), mask: truncate(baseMask)};
+endfunction
+\end{lstlisting}

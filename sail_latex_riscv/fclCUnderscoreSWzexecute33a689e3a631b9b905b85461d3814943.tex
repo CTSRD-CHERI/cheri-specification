@@ -1,0 +1,4 @@
+let imm : #\hyperref[sailRISCVzbits]{bits}#(12) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(uimm @ 0b00);
+let rs1 = #\hyperref[sailRISCVzcreg2regzyidx]{creg2reg\_idx}#(rsc1);
+let rs2 = #\hyperref[sailRISCVzcreg2regzyidx]{creg2reg\_idx}#(rsc2);
+#\hyperref[sailRISCVzexecute]{execute}#(#\hyperref[sailRISCVzSTORE]{STORE}#(imm, rs2, rs1, WORD, false, false))

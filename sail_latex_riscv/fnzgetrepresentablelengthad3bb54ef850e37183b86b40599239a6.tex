@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzgetRepresentableLength]{getRepresentableLength}#(len) : xlenbits -> xlenbits = {
+  let m = #\hyperref[sailRISCVzgetRepresentableAlignmentMask]{getRepresentableAlignmentMask}#(len);
+  (len + ~(m)) & m
+}

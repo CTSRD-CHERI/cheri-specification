@@ -1,0 +1,13 @@
+function #\hyperref[sailRISCVzpmpReadCfgReg]{pmpReadCfgReg}#(n) = {
+  if   sizeof(xlen) == 32
+  then match n {
+         0 => #\hyperref[sailRISCVzappend]{append}#(pmp3cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp2cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp1cfg.#\hyperref[sailRISCVzbits]{bits}#(),  pmp0cfg.#\hyperref[sailRISCVzbits]{bits}#()))),
+         1 => #\hyperref[sailRISCVzappend]{append}#(pmp7cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp6cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp5cfg.#\hyperref[sailRISCVzbits]{bits}#(),  pmp4cfg.#\hyperref[sailRISCVzbits]{bits}#()))),
+         2 => #\hyperref[sailRISCVzappend]{append}#(pmp11cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp10cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp9cfg.#\hyperref[sailRISCVzbits]{bits}#(),  pmp8cfg.#\hyperref[sailRISCVzbits]{bits}#()))),
+         3 => #\hyperref[sailRISCVzappend]{append}#(pmp15cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp14cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp13cfg.#\hyperref[sailRISCVzbits]{bits}#(), pmp12cfg.#\hyperref[sailRISCVzbits]{bits}#())))
+       }
+  else match n { //  sizeof(xlen) == 64
+         0 => #\hyperref[sailRISCVzappend]{append}#(pmp7cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp6cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp5cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp4cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp3cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp2cfg.#\hyperref[sailRISCVzbits]{bits}#(),  #\hyperref[sailRISCVzappend]{append}#(pmp1cfg.#\hyperref[sailRISCVzbits]{bits}#(),  pmp0cfg.#\hyperref[sailRISCVzbits]{bits}#()))))))),
+         2 => #\hyperref[sailRISCVzappend]{append}#(pmp15cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp14cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp13cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp12cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp11cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp10cfg.#\hyperref[sailRISCVzbits]{bits}#(), #\hyperref[sailRISCVzappend]{append}#(pmp9cfg.#\hyperref[sailRISCVzbits]{bits}#(),  pmp8cfg.#\hyperref[sailRISCVzbits]{bits}#())))))))
+       }
+}

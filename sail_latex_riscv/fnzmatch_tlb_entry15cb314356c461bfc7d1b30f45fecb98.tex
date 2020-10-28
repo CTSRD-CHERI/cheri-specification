@@ -1,0 +1,2 @@
+function #\hyperref[sailRISCVzmatchzyTLBzyEntry]{match\_TLB\_Entry}#(ent, asid, vaddr) =
+  (ent.global | (ent.asid == asid)) & (ent.vAddr == (ent.vMatchMask & vaddr))

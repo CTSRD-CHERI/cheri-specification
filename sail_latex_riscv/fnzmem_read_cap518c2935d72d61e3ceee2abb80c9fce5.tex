@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzmemzyreadzycap]{mem\_read\_cap}# (addr, aq, rl, res) = {
+  let result : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#((CapBits, bool)) = #\hyperref[sailRISCVzmemzyreadzymeta]{mem\_read\_meta}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, cap_size, aq, rl, res, true);
+  match result {
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(v, tag) => #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzmemBitsToCapability]{memBitsToCapability}#(tag, v)),
+    #\hyperref[sailRISCVzMemException]{MemException}#(e)  => #\hyperref[sailRISCVzMemException]{MemException}#(e) : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(Capability)
+  }
+}

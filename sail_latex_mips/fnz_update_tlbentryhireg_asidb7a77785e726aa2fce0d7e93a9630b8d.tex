@@ -1,0 +1,2 @@
+function _update_TLBEntryHiReg_ASID (v, x) = let v = { v with TLBEntryHiReg_chunk_0 = update_subrange_bits(v.TLBEntryHiReg_chunk_0, 7, 0, subrange_bits(x, 7, 0)) } in
+  v

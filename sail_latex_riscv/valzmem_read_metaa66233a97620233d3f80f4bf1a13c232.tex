@@ -1,0 +1,2 @@
+mem_read_meta : forall ('n : Int), (0 < 'n & 'n <= max_mem_access).
+  (AccessType(ext_access_type), xlenbits, int('n), bool, bool, bool, bool) -> MemoryOpResult((bits(8 * 'n), mem_meta))

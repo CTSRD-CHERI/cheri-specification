@@ -1,0 +1,15 @@
+function #\hyperref[sailRISCVzlowerzymstatus]{lower\_mstatus}#(m : Mstatus) -> Sstatus = {
+  let s = #\hyperref[sailRISCVzMkzySstatus]{Mk\_Sstatus}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0));
+  let s = #\hyperref[sailRISCVzupdatezySD]{update\_SD}#(s, m.#\hyperref[sailRISCVzSD]{SD}#());
+  let s = #\hyperref[sailRISCVzsetzysstatuszyUXL]{set\_sstatus\_UXL}#(s, #\hyperref[sailRISCVzgetzymstatuszyUXL]{get\_mstatus\_UXL}#(m));
+  let s = #\hyperref[sailRISCVzupdatezyMXR]{update\_MXR}#(s, m.#\hyperref[sailRISCVzMXR]{MXR}#());
+  let s = #\hyperref[sailRISCVzupdatezySUM]{update\_SUM}#(s, m.#\hyperref[sailRISCVzSUM]{SUM}#());
+  let s = #\hyperref[sailRISCVzupdatezyXS]{update\_XS}#(s, m.#\hyperref[sailRISCVzXS]{XS}#());
+  let s = #\hyperref[sailRISCVzupdatezyFS]{update\_FS}#(s, m.#\hyperref[sailRISCVzFS]{FS}#());
+  let s = #\hyperref[sailRISCVzupdatezySPP]{update\_SPP}#(s, m.#\hyperref[sailRISCVzSPP]{SPP}#());
+  let s = #\hyperref[sailRISCVzupdatezySPIE]{update\_SPIE}#(s, m.#\hyperref[sailRISCVzSPIE]{SPIE}#());
+  let s = #\hyperref[sailRISCVzupdatezyUPIE]{update\_UPIE}#(s, m.#\hyperref[sailRISCVzUPIE]{UPIE}#());
+  let s = #\hyperref[sailRISCVzupdatezySIE]{update\_SIE}#(s, m.#\hyperref[sailRISCVzSIE]{SIE}#());
+  let s = #\hyperref[sailRISCVzupdatezyUIE]{update\_UIE}#(s, m.#\hyperref[sailRISCVzUIE]{UIE}#());
+  s
+}

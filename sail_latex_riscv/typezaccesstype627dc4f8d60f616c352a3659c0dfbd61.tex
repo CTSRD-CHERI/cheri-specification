@@ -1,0 +1,6 @@
+union #\hyperref[sailRISCVzAccessType]{AccessType}# ('a : Type) = {
+  Read      : 'a,
+  Write     : 'a,
+  ReadWrite : ('a, 'a),
+  Execute   : unit
+}

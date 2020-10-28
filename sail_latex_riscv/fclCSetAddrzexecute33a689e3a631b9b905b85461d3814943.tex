@@ -1,0 +1,13 @@
+let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
+let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
+if cs1_val.tag & #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
+  RETIRE_FAIL
+} else {
+  let (representable, newCap) = #\hyperref[sailRISCVzsetCapAddr]{setCapAddr}#(cs1_val, rs2_val);
+  if representable then
+    #\hyperref[sailRISCVzC]{C}#(cd) = newCap
+  else
+    #\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzinvalidateCap]{invalidateCap}#(newCap);
+  RETIRE_SUCCESS
+}

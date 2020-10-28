@@ -1,0 +1,29 @@
+let rs1_val = #\hyperref[sailRISCVzX]{X}#(rs1);
+let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
+let taken : bool = match op {
+  RISCV_BEQ  => rs1_val == rs2_val,
+  RISCV_BNE  => rs1_val != rs2_val,
+  RISCV_BLT  => rs1_val <_s rs2_val,
+  RISCV_BGE  => rs1_val >=_s rs2_val,
+  RISCV_BLTU => rs1_val <_u rs2_val,
+  RISCV_BGEU => rs1_val >=_u rs2_val
+};
+let t : xlenbits = PC + #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
+if taken then {
+  /* Extensions get the first checks on the prospective target address. */
+  match #\hyperref[sailRISCVzextzycontrolzycheckzypc]{ext\_control\_check\_pc}#(t) {
+    #\hyperref[sailRISCVzExtzyControlAddrzyError]{Ext\_ControlAddr\_Error}#(e) => {
+      #\hyperref[sailRISCVzextzyhandlezycontrolzycheckzyerror]{ext\_handle\_control\_check\_error}#(e);
+      RETIRE_FAIL
+    },
+    #\hyperref[sailRISCVzExtzyControlAddrzyOK]{Ext\_ControlAddr\_OK}#(target) => {
+      if #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(target[1]) & (~ (#\hyperref[sailRISCVzhaveRVC]{haveRVC}#())) then {
+        #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(target, #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#());
+        RETIRE_FAIL;
+      } else {
+        #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(target);
+        RETIRE_SUCCESS
+      }
+    }
+  }
+} else RETIRE_SUCCESS

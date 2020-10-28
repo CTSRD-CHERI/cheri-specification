@@ -1,0 +1,88 @@
+This version of the \textit{CHERI Instruction-Set Architecture} is an interim
+version distributed for review by DARPA and our collaborators:
+
+\begin{itemize}
+\item We have removed the range check from the \insnref{CToPtr}
+  specification, as this has proven microarchitecturally challenging.
+  We anticipate that current consumers requiring this range check can use the
+  new \insnref{CTestSubset} instruction alongside \insnref{CToPtr}.
+
+\item Use of a branch-delay slot with \insnnoref{CCall} Selector
+  1 has been removed.
+
+\item With the addition of \insnref{CReadHwr} and \insnref{CWriteHwr}
+  and shifting of special capability registers out of the
+  general-purpose capability register file, we have now removed the check for
+  the \cappermASR permission for all registers in the
+  general-purpose capability register file.
+
+\item A new \insnref{CCheckTag} instruction is added, which
+  throws an exception if the tag is not set on the operand capability.
+  This instruction could be used by a compiler to shift capability-related
+  exception behavior from invalid dereference to calculation of an invalid
+  capability via a non-exception-throwing manipulation.
+
+\item We have added a new \insnref{CLCBI} instruction that
+  allows capability-relative loads of capabilities to be performed using a
+  substantially larger immediate (but without a general-purpose
+  integer-register operand).
+  This substantially accelerates performance in the presence of CHERI-aware
+  linkage by avoiding multi-instruction sequences to load capabilities for
+  global variables.
+
+\item We have added new discussion relating to microarchitectural side
+  channels such as Spectre and Meltdown
+  (Section~\ref{section:microarchitectural-sidechannels}).
+
+\item We have added a reference to our ASPLOS 2019 paper, \textit{CheriABI:
+  Enforcing Valid Pointer Provenance and Minimizing Pointer Privilege in the
+  POSIX C Run-time Environment}, which describes how to adapt a full MMU-based
+  OS design to support ubiquitous use of capabilities to implement C and C++
+  pointers in userspace~\cite{davis2019:cheriabi}.
+
+\item We have added a reference to our POPL 2019 paper, \textit{ISA Semantics
+  for ARMv8-A, RISC-V, and CHERI-MIPS}, which describes a formal modeling
+  approach for instruction-set architectures, as well as a formal model of the
+  CHERI-MIPS ISA~\cite{sail-popl2019}.
+
+\item We have added a reference to our POPL 2019 paper, \textit{Exploring C
+  Semantics and Pointer Provenance}, which describes a formal model for C
+  pointer provenance, and is evaluated in part using pure-capability CHERI
+  code~\cite{cerberus-popl2019}.
+
+\item We have added a description of an experimental compact capability
+  coloring scheme, a possible candidate to replace our Local-Global capability
+  flow-control model (Section~\ref{sec:compactcolors}).
+  In the proposed scheme, a series of orthogonal ``colors'' can be set or
+  cleared on capabilities, authorized by a color space implemented in a
+  style similar to the sealed-capability object-type space using a single
+  permission.
+  For a single color implementing the Local-Global model, two bits are still
+  used.
+  However, for further colors, only a single bit is used.
+  This could make available further colors to use for kernel-user separation,
+  inter-process isolation, and so on.
+
+\item An experimental Permit\_Recursive\_Mutable\_Load permission is
+  described, which, if not present, causes further capabilities loaded via
+  that capability to be loaded without store permissions
+  (see Section~\ref{app:exp:recmutload}).
+
+\item We have added a new experimental \insnref{CLoadTags}
+  instruction that allows tags to be loaded for a cache line without pulling
+  data into the cache.
+
+\item A new experimental \textit{sealed entry capability} feature is
+  described, which permits entry via jump but otherwise do not allow
+  dereferencing (later editions considered these no longer experimental, and
+  so they are described in \cref{sec:arch-sentry}).
+  These are similar to enter capabilities from the
+  M-Machine~\cite{carter:mmachine94}, and could provide utility in providing
+  further constraints on capability use for the purposes of memory protection
+  -- e.g., in the implementation of C++ v-tables.
+
+\item A new experimental \textit{memory type token} feature is described,
+  which provides an alternative mechanism to object types within pairs of
+  sealed capabilities (Section~\ref{app:exp:typetoken}).
+
+\end{itemize}

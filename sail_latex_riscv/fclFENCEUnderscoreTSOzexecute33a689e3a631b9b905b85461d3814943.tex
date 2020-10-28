@@ -1,0 +1,8 @@
+match (pred, succ) {
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzytso]{Barrier\_RISCV\_tso}#()),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00) => (),
+
+  _ => { #\hyperref[sailRISCVzprint]{print}#("FIXME: unsupported fence");
+         () }
+};
+RETIRE_SUCCESS

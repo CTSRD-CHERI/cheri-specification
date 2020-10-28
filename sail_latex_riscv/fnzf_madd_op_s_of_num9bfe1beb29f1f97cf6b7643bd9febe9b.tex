@@ -1,0 +1,6 @@
+function f_madd_op_S_of_num arg# = match arg# {
+  0 => FMADD_S,
+  1 => FMSUB_S,
+  2 => FNMSUB_S,
+  _ => FNMADD_S
+}

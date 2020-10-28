@@ -1,0 +1,8 @@
+function #\hyperref[sailRISCVzsetzymstatuszyUXL]{set\_mstatus\_UXL}#(m : Mstatus, a : arch_xlen) -> Mstatus = {
+  if   sizeof(xlen) == 32
+  then m
+  else {
+    let m = #\hyperref[sailRISCVzvectorzyupdatezysubrange]{vector\_update\_subrange}#(m.#\hyperref[sailRISCVzbits]{bits}#(), 33, 32,  a);
+    #\hyperref[sailRISCVzMkzyMstatus]{Mk\_Mstatus}#(m)
+  }
+}

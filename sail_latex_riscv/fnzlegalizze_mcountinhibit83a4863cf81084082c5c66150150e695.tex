@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzlegalizzezymcountinhibit]{legalize\_mcountinhibit}#(c : Counterin, v : xlenbits) -> Counterin = {
+  let c = #\hyperref[sailRISCVzupdatezyIR]{update\_IR}#(c, [v[2]]);
+  let c = #\hyperref[sailRISCVzupdatezyCY]{update\_CY}#(c, [v[0]]);
+  c
+}

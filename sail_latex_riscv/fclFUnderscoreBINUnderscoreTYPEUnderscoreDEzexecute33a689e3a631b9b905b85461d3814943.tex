@@ -1,0 +1,9 @@
+let rs1_val_D = #\hyperref[sailRISCVzF]{F}#(rs1);
+let rs2_val_D = #\hyperref[sailRISCVzF]{F}#(rs2);
+
+let (fflags, rd_val) : (bits_fflags, bits_LU) =
+    #\hyperref[sailRISCVzriscvzyf64Eq]{riscv\_f64Eq}# (rs1_val_D, rs2_val_D);
+
+#\hyperref[sailRISCVzwritezyfflags]{write\_fflags}#(fflags);
+#\hyperref[sailRISCVzX]{X}#(rd) = rd_val;
+RETIRE_SUCCESS

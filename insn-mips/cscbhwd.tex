@@ -1,0 +1,38 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CSC[BHWD]}
+\insnmipslabel{cscbhwd}
+\insnmipslabel{cscb}
+\insnmipslabel{csch}
+\insnmipslabel{cscw}
+\insnmipslabel{cscd}
+\subsection*{CSC[BHWD]: Store Conditional Integer via Capability}
+
+\subsubsection*{Format}
+
+CSCB rd, rs, cb \\
+CSCH rd, rs, cb \\
+CSCW rd, rs, cb \\
+CSCD rd, rs, cb
+
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader[endianness=big]{0,1,2,3,4,5,6,10,11,15,16,20,21,25,26,31}\\
+\bitbox{6}{0x12}
+\bitbox{5}{0x10}
+\bitbox{5}{rs}
+\bitbox{5}{cb}
+\bitbox{5}{rd}
+\bitbox{2}{\color{lightgray}\rule{\width}{\height}}
+\bitbox{2}{00}
+\bitbox{2}{t}
+\end{bytefield}
+\end{center}
+
+\usesDDCinsteadofNULL{cb}
+
+\subsubsection*{Semantics}
+\sailMIPScode{CStoreConditional}
+
+

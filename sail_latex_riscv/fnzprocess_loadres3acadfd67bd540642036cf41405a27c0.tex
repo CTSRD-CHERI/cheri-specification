@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzprocesszyloadres]{process\_loadres}#(rd, addr, value, is_unsigned) =
+  match #\hyperref[sailRISCVzextendzyvalue]{extend\_value}#(is_unsigned, value) {
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(result) => { #\hyperref[sailRISCVzloadzyreservation]{load\_reservation}#(addr); #\hyperref[sailRISCVzX]{X}#(rd) = result; RETIRE_SUCCESS },
+    #\hyperref[sailRISCVzMemException]{MemException}#(e)  => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL }
+  }

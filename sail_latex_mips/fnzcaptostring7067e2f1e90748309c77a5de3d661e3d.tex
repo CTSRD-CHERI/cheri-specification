@@ -1,0 +1,21 @@
+function #\hyperref[sailMIPSzcapToString]{capToString}# (cap, fixlen) = {
+         #\hyperref[sailMIPSzskipzyescape]{skip\_escape}#(); /* because cheri128 getCapX functions contain asserts but cheri256 ones do not */
+         len = #\hyperref[sailMIPSzgetCapLength]{getCapLength}#(cap);
+         /* When dumping caps at end of test we cap length at 64 bits for compatibility with test suite, when tracing we print the actual value */
+         len_str = if fixlen then #\hyperref[sailMIPSzBitStr]{BitStr}#(#\hyperref[sailMIPSztozybits]{to\_bits}#(64, #\hyperref[sailMIPSzmin]{min}#(len, #\hyperref[sailMIPSzMAX]{MAX}#(64)))) else #\hyperref[sailMIPSzBitStr]{BitStr}#(#\hyperref[sailMIPSztozybits]{to\_bits}#(68, len));
+         /* Print architectural type which is -1 for unsealed caps */
+         let otype64 : #\hyperref[sailMIPSzbits]{bits}#(64) = if #\hyperref[sailMIPSzhasReservedOType]{hasReservedOType}#(cap) then #\hyperref[sailMIPSzsignzyextend]{sign\_extend}#(cap.otype) else #\hyperref[sailMIPSzzzerozyextend]{zero\_extend}#(cap.otype);
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(" t:",
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(if cap.tag then "1" else "0",
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(" s:",
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(if cap.sealed then "1" else "0",
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(" perms:",
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(#\hyperref[sailMIPSzBitStr]{BitStr}#(0b0 @ #\hyperref[sailMIPSzgetCapPerms]{getCapPerms}#(cap)),
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(" type:",
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(#\hyperref[sailMIPSzBitStr]{BitStr}#(otype64),
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(" offset:",
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(#\hyperref[sailMIPSzBitStr]{BitStr}#(#\hyperref[sailMIPSztozybits]{to\_bits}#(64, #\hyperref[sailMIPSzgetCapOffset]{getCapOffset}#(cap))),
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(" base:",
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(#\hyperref[sailMIPSzBitStr]{BitStr}#(#\hyperref[sailMIPSztozybits]{to\_bits}#(64, #\hyperref[sailMIPSzgetCapBase]{getCapBase}#(cap))),
+         #\hyperref[sailMIPSzconcatzystr]{concat\_str}#(" length:", len_str)))))))))))))
+         }

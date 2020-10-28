@@ -1,0 +1,15 @@
+function #\hyperref[sailMIPSzraisezyc2zyexception8]{raise\_c2\_exception8}#(capEx, regnum) =
+  {
+    if trace then {
+      #\hyperref[sailMIPSzprerr]{prerr}#(" C2Ex ");
+      #\hyperref[sailMIPSzprerr]{prerr}#(#\hyperref[sailMIPSzstringzyofzycapex]{string\_of\_capex}#(capEx));
+      #\hyperref[sailMIPSzprerr]{prerr}#(" reg: ");
+      #\hyperref[sailMIPSzprerrzyendline]{prerr\_endline}#(#\hyperref[sailMIPSzBitStr]{BitStr}#(regnum));
+    };
+    CapCause->#\hyperref[sailMIPSzExcCode]{ExcCode}#() = #\hyperref[sailMIPSzCapExCode]{CapExCode}#(capEx);
+    CapCause->#\hyperref[sailMIPSzRegNum]{RegNum}#()  = regnum;
+    let mipsEx =
+      if ((capEx == CapEx_CallTrap) | (capEx == CapEx_ReturnTrap))
+      then C2Trap else C2E in
+    #\hyperref[sailMIPSzSignalException]{SignalException}#(mipsEx);
+  }

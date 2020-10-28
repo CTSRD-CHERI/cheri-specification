@@ -1,0 +1,45 @@
+function #\hyperref[sailRISCVzwF]{wF}# (r, in_v) = {
+  let v = #\hyperref[sailRISCVzfregvalzyintozyfreg]{fregval\_into\_freg}#(in_v);
+  match r {
+    0  => f0 = v,
+    1  => f1 = v,
+    2  => f2 = v,
+    3  => f3 = v,
+    4  => f4 = v,
+    5  => f5 = v,
+    6  => f6 = v,
+    7  => f7 = v,
+    8  => f8 = v,
+    9  => f9 = v,
+    10 => f10 = v,
+    11 => f11 = v,
+    12 => f12 = v,
+    13 => f13 = v,
+    14 => f14 = v,
+    15 => f15 = v,
+    16 => f16 = v,
+    17 => f17 = v,
+    18 => f18 = v,
+    19 => f19 = v,
+    20 => f20 = v,
+    21 => f21 = v,
+    22 => f22 = v,
+    23 => f23 = v,
+    24 => f24 = v,
+    25 => f25 = v,
+    26 => f26 = v,
+    27 => f27 = v,
+    28 => f28 = v,
+    29 => f29 = v,
+    30 => f30 = v,
+    31 => f31 = v,
+    _  => assert(false, "invalid floating point register number")
+  };
+
+  #\hyperref[sailRISCVzdirtyzyfdzycontext]{dirty\_fd\_context}#();
+
+  if   #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#()
+  then
+      /* TODO: will only print bits; should we print in floating point format? */
+      #\hyperref[sailRISCVzprintzyreg]{print\_reg}#("f" ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(r) ^ " <- " ^ #\hyperref[sailRISCVzFRegStr]{FRegStr}#(v));
+}

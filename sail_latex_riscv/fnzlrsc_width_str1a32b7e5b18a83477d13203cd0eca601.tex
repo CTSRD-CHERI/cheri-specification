@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzlrsczywidthzystr]{lrsc\_width\_str}#(width : word_width) -> string =
+  match (width) {
+    BYTE   => ".b",
+    HALF   => ".h",
+    WORD   => ".w",
+    DOUBLE => ".d"
+  }

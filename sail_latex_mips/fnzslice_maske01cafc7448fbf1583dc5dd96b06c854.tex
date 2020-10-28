@@ -1,0 +1,7 @@
+function #\hyperref[sailMIPSzslicezymask]{slice\_mask}#(n,i,l) =
+  if l >= n then {
+    #\hyperref[sailMIPSzsailzyshiftleft]{sail\_shiftleft}#(#\hyperref[sailMIPSzsailzyones]{sail\_ones}#(n), i)
+  } else {
+    let one : #\hyperref[sailMIPSzbits]{bits}#('n) = #\hyperref[sailMIPSzsailzymask]{sail\_mask}#(n, [bitone] : #\hyperref[sailMIPSzbits]{bits}#(1)) in
+    #\hyperref[sailMIPSzsailzyshiftleft]{sail\_shiftleft}#(#\hyperref[sailMIPSzsubzybits]{sub\_bits}#(#\hyperref[sailMIPSzsailzyshiftleft]{sail\_shiftleft}#(one, l), one), i)
+  }

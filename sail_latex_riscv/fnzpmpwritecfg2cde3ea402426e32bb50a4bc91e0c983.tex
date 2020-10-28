@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(cfg: Pmpcfg_ent, v: #\hyperref[sailRISCVzbits]{bits}#(8)) -> Pmpcfg_ent =
+  if #\hyperref[sailRISCVzpmpLocked]{pmpLocked}#(cfg) then cfg
+  else #\hyperref[sailRISCVzMkzyPmpcfgzyent]{Mk\_Pmpcfg\_ent}#(v & 0x9f)  // Bits 5 and 6 are zero.

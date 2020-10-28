@@ -1,0 +1,7 @@
+let off : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm @ 0x000);
+let ret : xlenbits = match op {
+  RISCV_LUI   => off,
+  RISCV_AUIPC => #\hyperref[sailRISCVzgetzyarchzypc]{get\_arch\_pc}#() + off
+};
+#\hyperref[sailRISCVzX]{X}#(rd) = ret;
+RETIRE_SUCCESS

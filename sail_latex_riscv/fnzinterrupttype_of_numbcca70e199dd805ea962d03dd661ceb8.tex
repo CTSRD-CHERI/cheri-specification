@@ -1,0 +1,11 @@
+function InterruptType_of_num arg# = match arg# {
+  0 => I_U_Software,
+  1 => I_S_Software,
+  2 => I_M_Software,
+  3 => I_U_Timer,
+  4 => I_S_Timer,
+  5 => I_M_Timer,
+  6 => I_U_External,
+  7 => I_S_External,
+  _ => I_M_External
+}

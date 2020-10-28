@@ -1,0 +1,7 @@
+function ropw_of_num arg# = match arg# {
+  0 => RISCV_ADDW,
+  1 => RISCV_SUBW,
+  2 => RISCV_SLLW,
+  3 => RISCV_SRLW,
+  _ => RISCV_SRAW
+}

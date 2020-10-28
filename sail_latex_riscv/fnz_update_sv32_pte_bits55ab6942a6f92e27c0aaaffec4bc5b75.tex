@@ -1,0 +1,2 @@
+function _update_SV32_PTE_BITS (v, x) = let v = { v with SV32_PTE_chunk_0 = update_subrange_bits(v.SV32_PTE_chunk_0, 7, 0, subrange_bits(x, 7, 0)) } in
+  v

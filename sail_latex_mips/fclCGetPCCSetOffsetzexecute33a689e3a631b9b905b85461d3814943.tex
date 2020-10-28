@@ -1,0 +1,7 @@
+#\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}#();
+let rs_val = #\hyperref[sailMIPSzrGPR]{rGPR}#(rs);
+let (success, newPCC) = #\hyperref[sailMIPSzsetCapOffset]{setCapOffset}#(PCC, rs_val);
+if (success) then
+  #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(cd, newPCC)
+else
+  #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(cd, #\hyperref[sailMIPSzunrepCap]{unrepCap}#(newPCC));

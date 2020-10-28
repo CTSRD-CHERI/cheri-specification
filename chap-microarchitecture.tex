@@ -1,0 +1,319 @@
+\chapter{Microarchitectural Techniques for CHERI}
+\label{chap:microarchitecture}
+
+The CHERI architecture has been designed to fit into modern RISC pipelines without disturbing existing control-flow or data paths.
+As a result, microarchitectural concerns are simpler than they could otherwise be, but there are nevertheless several innovations that have been developed for prototype implementations that should be considered in any microarchitecture that supports the CHERI model.
+
+The following repositories hold open-source CHERI implementations or libraries, and are referenced in the sections below.
+\begin{description}
+    \item[CHERI-MIPS~\cite{CHERI-cheri-cpu}] Original reference implementation of the CHERI-MIPS instruction set
+    \item[cheri-cap-lib~\cite{CHERI-cheri-cap-lib}] A library of reference capability algorithms developed for CHERI-MIPS and adapted for CHERI-RISC-V implementations
+    \item[TagController~\cite{CHERI-TagController}] Tag controller for emulating a tagged memory using an hierarchical in-memory table developed for CHERI-MIPS and adapted for CHERI-RISC-V implementations
+    \item[Piccolo~\cite{CHERI-Piccolo}] CHERI-RISC-V CPU with a simple 3-stage pipeline, for low-end applications (e.g., embedded, IoT)
+    \item[Flute~\cite{CHERI-Flute}] CHERI-RISC-V CPU with a simple 5-stage in-order pipeline, for low-end applications needing MMUs and some performance
+    \item[Toooba~\cite{CHERI-Toooba}] CHERI-RISC-V CPU with a superscalar, out-of-order pipeline and multi-core capable; based on RISCY-OOO from MIT
+\end{description}
+
+\section{Capabilities in the Pipeline}
+Capability instructions in the CHERI architecture are modeled after integer operations and are almost entirely single-cycle in the open-source implementations.
+This makes it possible for a CHERI architecture to unify integer and capability registers and execution paths.
+
+\subsubsection{Register File}
+Capabilities may be stored in an extended, integer register file, or may use a separate, dedicated register file.
+
+The CHERI-MIPS architecture and microarchitecture use a separate capability register file, enabling instructions to access capability operands in addition to two integer operands.
+CHERI-MIPS uses a dedicated module to perform CHERI operations, but this runs in lock-step with the main pipeline as many capability instructions have integer operands or results, and all legacy memory operations implicitly have \DDC{} as a capability operand.
+This microarchitecture is described in ~\cite{woodruff:cheriisca2014}.
+A superscalar and out-of-order implementation in this style would dedicate execution units to capability operations with ports into the capability register file which would not be necessary in integer execution units, similar to specializations used for floating point execution units.
+
+Our CHERI-RISC-V architecture and microarchitectures use a unified register file for both integers and capabilities.
+All integer execution units are extended to implement capability manipulation operations.
+
+It should also be possible to implement a unified register-file architecture with a microarchitecturally split register file.
+One such option would split the physical register file between the lower half, which is used by integer operations, and the upper half which is consumed (and produced) exclusively by capability operations.
+This division could enable specialization of execution units to reduce the cost of capabilities to integer paths.
+This would also reduce total register file storage, as all integer operands and results would not require an entry in the capability register file, while complicating renaming due to operands being split between two renamed register files.
+
+\subsection{Capability Decoding}
+
+CHERI capabilities are compressed (see Section~\ref{comp-cap}) and various microarchitectures may choose to decode
+capabilities in stages when there is opportunity in the pipeline.
+The open-source CHERI implementations, including CHERI-MIPS, Piccolo, Flute, and Toooba,
+use 3 stages of decompression.
+The first is the fully-compressed, architectural \textbf{in-memory} format.
+The second is a lightly-decoded \textbf{in-register} format that is produced on load from memory.
+The third is a \textbf{pipeline} format that is consumed by high-performance functions in the pipeline and is decoded on read from the register file.
+
+The open-source cheri-cap-lib library (summarised in Appendix~\ref{app:cheri-128-listings}) used in our open-source CHERI implementations expresses these three levels of compression using a typeclass; a microarchitectural ``API'' to capabilities
+which includes capability manipulation operations for each level of decompression.
+The in-register view extracts $E$ (the exponent) into a dedicated field, reconstitutes the top two bits of the $T$ field, and also extracts $a_\text{mid}$ from the address into a dedicated field.
+This decompression is fast enough to be performed parallel to the byte-select in the general-purpose loads in the CHERI-MIPS pipeline~\cite{Woodruff2019}.
+In turn, this format is further decoded into the in-pipeline format by adding a few booleans and 2-bit offsets that locate the top and base with respect to the address.
+These fields are used to perform capability operations such as computing a full top or base, or fast
+representability checks.
+
+While many variations of the capability typeclass could be useful for
+a CHERI implementation, these
+three design points provided in the library have enabled sufficient flexibility to
+implement an array of optimised hardware microarchitectures.
+
+\subsection{Program Counter Capability (\PCC{})}
+CHERI extends the program counter (PC) with bounds and permissions, which are together called \PCC{}.
+PC is very performance sensitive and is predicted in most microarchitectures.
+
+A processor requires the address of \PCC{} at the earliest stage of the pipeline to initiate instruction fetch, but the bounds and permissions of \PCC{} are needed only to decide exception conditions and can therefore be checked at any point in the pipeline.
+The CHERI-MIPS microarchitecture takes advantage of this distinction to speculate on only the address of \PCC{} (\textit{i.e.}\ the address of the instruction to be fetched) using the branch predictor, but forwards updates to \PCC{} bounds to the execute stage of the pipeline.
+This microarchitecture is described in ~\cite{woodruff:cheriisca2014}.
+The in-order Piccolo and Flute microarchitectures share this design.
+
+Forwarding in superscalar and out-of-order pipelines is more complex so we chose to predict the entirety of \PCC{} in the Toooba microarchitecture.
+The BTB delivers both bounds and address, allowing the bounds to be checked early in the pipeline, with a branch misprediction resulting from a mismatch in either the address bits or the bounds and permissions.
+The Arm implementers of the Morello prototype observe that predicting the bounds, as is done in Toooba, is the optimal performance solution, though it is expensive microarchitecturally.
+In order to optimise prediction state, a microarchitecture may choose to predict the bounds separately from the address to take advantage of shared bounds and permissions between branch targets.
+
+The Arm Morello design chose to predict the PC address but forward the bounds in the context of the superscalar, out-of-order Ares microarchitecture.
+In its base Ares design, any readers of the PC track which PC register file (PCrf) entry has their base address.
+For Morello, the PCrf also has a pointer to which \PCC{} register file (PCCrf) entry has its bounds and permissions information.
+For commit-time bounds checking, Morello walks and broadcasts the PCrf entries that have a “resolved” (known) PCCrf entry so that we can resolve any \PCC{} bounds exceptions.
+The issue queues can also use this broadcast PCrf to release any \PCC{} readers who have dependencies without having to rename the PC or track any extra information.
+
+Another way of handling the PC/\PCC{} interlock would be to rename PC/\PCC{} and do physical tag tracking for dependencies, as is done with any other renamed register.
+
+\subsection{Default Data Capability (\DDC{})}
+CHERI defines a \DDC{} register which provides both an offset and bounds for non-capability-aware loads and stores such that the capability mechanism can constrain legacy executables.
+Both the offset and the bounds for integer addresses require special handling in the microarchitecture.
+
+The CHERI-MIPS architecture added register-offset addressing to the base MIPS instruction set such that a capability-address store has two integer register operands (data and offset) as well as a capability register address operand.
+This path in the CHERI-MIPS microarchitecture was used to implement standard MIPS loads and stores which also offset through \DDC{}.
+
+The CHERI-RISC-V architecture does not introduce a new addressing mode and therefore does not require an additional register operand for addressing in any common case.
+Our CHERI-RISC-V microarchitectures implement \DDC{} as a special, non-forwarded capability register.
+That is, CSpecialRW modifications of \DDC{} traverse the back end of the pipeline alone to avoid consistency issues.
+\DDC{} is then read directly in any place in the pipeline where it is needed directly from the register without forwarding.
+
+In many implementations it may be desirable to optimise the address offset of \DDC{}, as an extra add on the address-generation path may be problematic.
+
+For memory operations with an immediate offset, microarchitectures without \DDC{} forwarding can add the \DDC{} offset to the immediate operand before the Execute stage so that we preserve two-operand address calculation on the critical path.
+As RISC-V and MIPS exclusively provide immediate-offset addressing, this optimization resolves the issue for these architectures where \DDC{} forwarding is not implemented.
+
+For register-offset addressing or for microarchitectures that forward \DDC{}, the \DDC{}-offset performance might be optimised by an architectural change that limits allowed alignments and possibly sizes of \DDC{}.
+For example, if \DDC{} were constrained to be aligned and sized to the same power of two, we may simply OR the \DDC{} offset with the resulting address.
+If the access is in-bounds, the OR will be exactly equivalent to an ADD, and if not the instruction will be cancelled due to the exception.
+One could also imagine implementations that perform this optimization microarchitecturally such that power-of-two aligned-and-sized \DDC{}s operate at full speed and other values of \DDC{} fall back to a lower performance mode.
+
+\subsection{Capability Mode Bit}
+A CHERI ISA may choose to implement a capability \emph{mode} bit in order to reuse legacy load and store encodings for capability-based loads and stores.
+This mode bit affects the decoding of instructions, determining the source of bounds for memory access and may also determine alternate decodings of other repurposed instructions.
+
+CHERI-RISC-V specifies a mode bit that is defined in \PCC{}.
+Our in-order open-source implementations, Piccolo and Flute, forward the mode bit along with the bounds to the Execute stage such that mode-bit-dependant decoding does not take place before Execute, which surprisingly fits well into these microarchitectures.
+
+Our Toooba implementation predicts the mode bit with the entirety of \PCC{} so that the mode bit is available anywhere in the pipeline including Decode.
+
+If the mode bit is specified in a special register rather than being attached to \PCC{}, the same design options should be available.
+The mode bit might cause a pipeline flush on modification so that the current mode might be accessed anywhere in the pipeline, might be forwarded to allow rapid mode switching, or might be predicted along with \PCC{} to optimise repeated mode switches.
+
+\subsection{Bounds Checking}
+Many CHERI instructions must check bounds, including all memory-access instructions and many capability-manipulation instructions.
+The CHERI-MIPS microarchitecture implements all instructions with a single general-purpose bounds-check unit in the pipeline which is never used more than once by any instruction.
+In addition to this general-purpose bounds-check, there is a bounds-check on \PCC{}.
+
+The general-purpose bounds check generally produces exceptions and does not affect destination register values, so the bounds-check in CHERI-MIPS is set up in the Execute stage but is performed during Memory Access.
+
+The general-purpose bounds-check unit must support not only less-than comparison for the top (the common case), but also less-than-or-equal-to for \insnref{CSetBounds}.
+\insnref{CSetBounds} also requires extended precision for the upper bound rather than wrap-around arithmetic used by addresses.
+The bounds check unit supports separate upper and lower address comparisons against the upper and lower bounds respectively in order to validate the highest and lowest byte accessed by a memory transaction, and also to support the TestSubset operation.
+This shared-bounds-check strategy is also used in the Piccolo and Flute microarchitectures, and the Toooba superscalar microarchitecture has one set of bounds-check logic per integer pipe and memory access pipe with some specialization to the two cases.
+
+The \PCC{} bounds check can be optimised in a number of ways.
+
+The CHERI-MIPS and CHERI-RISC-V architectures are designed to remove the need to ever perform a \emph{representable check} on \PCC{} modification.
+While any legacy branch or jump to an integer register could be considered an add to the address of \PCC{}, potentially requiring a representability check, the MIPS and RISC-V CHERI architectures avoid this condition by throwing an out-of-bounds exception on the branch using the general-purpose bounds-check for control flow instructions.
+
+All of our open-source CHERI microarchitectures bounds check \PCC{} for every instruction executed.
+As branch targets are guaranteed to be in-bounds, it should be possible for the bounds check on \PCC{} to be elided for the majority of instructions, possibly checking \PCC{} bounds in batches.
+Alternatively, we might calculate the number of instructions to the bound on each jump and assert that the distance-to-the-bound counter does not reach zero.
+
+\subsection{Special Capability Registers}
+The set of \emph{Special Capability Registers} (SCRs) contain registers with special pipeline implications (such as \DDC{} and \PCC{}) and also registers to allow simplified privilege escalation which are gated by privilege ring.
+These registers are accessible only through explicit move-from and move-to GPR instructions.
+
+The CHERI-MIPS implementation implements all SCRs besides \PCC{}, \KCC{}, and \EPCC{} as forwarded general-purpose capability registers.
+\PCC{} is predicted, and \KCC{} and \EPCC{} are used for swapping with \PCC{} on exception and are broken out into dedicated registers without forwarding to enable single-cycle exceptions without the need to access the forwarded register file.
+
+Piccolo, Flute, and Toooba implement all SCRs as non-forwarded registers, blocking the pipeline for the duration of the execution of any SCR modification.
+
+\section{Compressed Capability Optimizations}
+\label{comp-cap}
+
+The compression scheme used in CHERI-128 and CHERI-64 is partially described in ~\cite{Woodruff2019} and its key algorithms are implemented in the \emph{cheri-cap-lib} repository.
+The key algorithms are reproduced in the Appendix~\ref{app:cheri-128-listings}.
+These algorithms are a significant contributions to the community as they enable reasonably efficient microarchitectural implementations of CHERI.
+
+\subsection{Decompressing Bounds}
+Decompressing the bounds of capabilities is highly optimised.
+Bounds decompression requires detecting the relative positioning between the top and bottom with respect to the address, as described in ~\cite{Woodruff2019}.
+
+The \emph{GetTop} function is more complex than the \emph{GetBase} function, as described in Section~\ref{sec:cheri-128-listings-gettop}, due to the requirement to discern between top being $0$ or $2^{64}$.
+This algorithm is a noted contribution as it is non-trivial to develop a correct algorithm that is fast enough for common use in pipelines.
+
+\subsection{Bounds Checking}
+There are two types of bounds check in CHERI microarchitectures: precise and representable.
+Precise bounds checks assert that an address is between the bounds of the capability,
+but a representable check asserts that a transformation on the address of a compressed capability
+does not change its bounds due to the limitations of compression.
+\subsubsection{Precise Bounds Check}
+Cheri-cap-lib provides \emph{CapInBounds} (listed in Section~\ref{sec:cheri-128-listings-capinbounds}) which is an algorithm to check that an encoded capability is within bounds without
+decompressing the bounds of the capability.
+
+We have not required an optimised bounds check which integrates an offset to the address (\textit{e.g.} for offset addressing) as these
+bounds checks are not on the critical path in our designs, but generally produce exceptions.
+Precise bounds checks with an offset are usually checked against fully decoded bounds (usually in the next pipeline stage),
+but could use the \emph{IncOffset} function discussed below followed by \emph{CapInBounds}.
+
+\subsubsection{Fast Representability Checks}
+When the address of a capability is being modified, the algorithm must assert that the resulting capability will still decode the same bounds as the original capability.
+Custom \emph{fast representability checks} that operate directly on the compressed fields of the encoding are required for each single-cycle operation that modifies the address to avoid dependance on decompressed values which generally require the majority of a cycle to calculate.
+
+The \emph{IncOffset} and \emph{SetOffset} operations are supported by a single function listed in Section~\ref{sec:cheri-128-listings-incoffset} and implement the function described in Section~\ref{sec:cheri-concentrate-fast-representable-limit-checking}.
+This shared function allows a single circuit to support both operations.
+
+The \emph{SetAddress} operation must detect if an arbitrary new address is within the representable limits of the capability, and has a distinct implementation listed in Section~\ref{sec:cheri-128-listings-setaddress}.
+
+\subsection{Setting Bounds}
+The \emph{SetBounds} function listed in Section~\ref{sec:cheri-128-listings-setbounds} and described in Section~\ref{sec:cheri-concentrate-encoding-set-bounds} provides a single, shared, high-speed function that returns a single data structure containing a capability with the new bounds (to implement \insnref{CSetBounds}),
+a flag indicating if rounding was necessary (to facilitate \insnref{CSetBoundsExact}),
+a mask that could be applied to a pointer to align it with the supplied length (to facilitate \insnref{CRepresentableAlignmentMask}),
+as well as the length that was actually achieved after rounding (to facilitate \insnref{CRoundRepresentableLength}).
+
+It is a challenge to implement a \emph{SetBounds} circuit that rounds only when precisely necessary while achieving single-cycle execution.
+The example algorithm is described in detail in the comments of the listing, and includes pre-computing all fields for both the rounded and unrounded cases while simultaneously detecting if rounding will occur, followed by a select of the correct return values.
+The rounding detection logic is sophisticated and uses a \emph{smear-right} technique to generate a mask to select bits in the address and length relative to the most significant set bit of the length without waiting for the result of \emph{CountLeadingZeros}.
+A case matrix is then constructed to detect carry ins to an arbitrary region of the new top based on masked values rather than waiting for the result of full adds.
+
+\section{Loading and Storing Capabilities}
+CHERI requires atomic memory access to capability-wide words (\textit{e.g.} 129-bit words).
+
+\subsection{Capability Width}
+All open-source CHERI implementations have widened the memory interface between the core and the caches to the capability width.
+The CHERI-MIPS microarchitecture required that all memory paths were at least capability-width at least to the TagController.
+For Flute and Piccolo we allow memory paths past the L1 to be half the width of a capability, but never split a capability between bursts.
+These implementations duplicate the tag bit on the two flits of the capability.
+The \emph{tag} bit is added to the USER fields of the data channels of AXI (RDATA/WDATA) in these implementations, so it was not possible to transfer less than one tag bit with each flit.
+
+In addition to the cache interfaces, the Toooba microarchitecture enlarged all load and store buffers to at least 129 bits along with all other memory forwarding paths.
+
+The Arm Morello architecture defines store capability pair instructions (\emph{ST\{L\}XP}) which perform a 32-byte store.
+Morello implements this in a 16-byte store buffer design which required cracking the operation into two store $\mu$ops.
+This adds complexity to handle correct success or failure for two $\mu$ops instead of one to ensure that the result is atomic such that both succeed or both fail.
+New logic was required to handle one tag/address for both stores, to handle translation atomically, and to handle writing data from both or none at all.
+Morello associates adjacent pairs of merge buffer entries so that they atomically retire and write together or fail together.
+
+Alternative solutions to store pairs of capabilities may be preferable in other microarchitectures.
+To simplify, a design could make the entire store data path 32 bytes wide within the processor including the store buffers and writes to the cache or memory subsystem.
+Other solutions are highly dependent on individual microarchitectures including how and where they track pass or fail of exclusive instructions, how they write to the data cache and memory subsystem, or how they preserve store order for release semantics.
+
+\subsection{Capability Permission Complexity}
+The CHERI architecture requires data-dependent faults such that the address and data must be available for inspection before a store can be issued.
+Specifically, the architecture defines a \cappermSLC bit on an address that may trigger a fault if the \cappermG bit is not set on capability data that is being stored.
+
+The open-source CHERI implementations are based on microarchitectures that do not issue stores unless both operands are available, and so are able to trivially inspect both operands and mark a store for exception if necessary.
+Most high performance processors will separate address and data issue to release the store address as soon as possible, but might need to delay the store address issue until store data is available in order to capture both the tag and global bit for fault detection.
+A few other options could be considered if the \cappermSLC is no longer required in the architecture.
+
+\section{Tagged Memory}
+The CHERI capability model requires one extra bit per capability word, \textit{e.g.} CHERI-128 requires 129-bit memory words.
+This requires changes to the microarchitecture of the memory subsystem to widen structures where possible, or emulate wider memory where it is not.
+
+\subsection{Tagging Data Caches}
+Data banks and interfaces of caches can simply be widened to accommodate tagged words.
+The capability tags can either be stored in the data banks, or the capability tags for a line might be aggregated and stored separately, \textit{e.g} into the record for that line in the cache-tag bank.
+We have used both approaches in open-source implementations, with the second facilitating \insnref{CLoadTags}.
+
+Alternatively, tags could be stored in a separate cache structure that could reduce on-chip storage using compression.
+This design point would need to solve problems with coherency and would need to integrate into the pipeline such that tag and data pairs are always accessed atomically.
+
+Efficient Tagged Memory~\cite{joannou2017:tagged-memory} discusses each of the above design points in detail.
+
+\subsection{Tagging Memory}
+
+External memory has become a commodity, so there are strong pressures to build systems that support industry-standard interfaces.
+
+\subsubsection{Tag Controller with Cache}
+Our primary approach, described in ~\cite{joannou2017:tagged-memory}, is a tag controller that allows an external memory controller to emulate a memory holding tagged words.
+This tag controller maintains a tag table in the external memory and provides the tag bits for each line requested from the remainder of external memory.
+The tag controller contains a cache of lines from the tag table to reduce tag table accesses.
+Furthermore, the tag table can be hierarchical such that each bit of a root level indicates whether any bits are set in a block of the leaf table.
+This structure significantly reduces cache pressure, as a single line of the root table can potentially replace many lines of the leaf (or flat) table.
+
+We have implemented this approach in the open-source TagController project which is used in all of our open-source implementations.
+This tag controller is parametrisable for arbitrary hierarchy depths and arbitrary block sizes at each level of the hierarchy.
+
+\subsubsection{Wide Memory}
+Commodity external memory may hold memory words wider than its processor word size (\textit{e.g.} ECC memory).
+A capability system may choose such a memory type and use these bits to hold capability tags alongside data in external memory.
+As ECC bits typically provide more storage than necessary to hold capability tags, a CHERI system using ECC memory should be able to support in-word capability tags and as well as error detection and correction at a some level.
+
+\subsubsection{Dedicated Memory}
+It is also possible to design a system with a dedicated memory channel for tags.
+For example, a system with a 1024-bit memory interface (\textit{e.g.} HBM) might add an 8-bit memory interface for accessing tags.
+
+\subsection{Loading Tags}
+The CHERI architecture includes a \insnref{CLoadTags} instruction to load the tags for a cache line into a register.
+\insnref{CLoadTags} is expected to be cache coherent, so it is not possible to bypass data caches completely, and it is complex to allow greater-than-cache-line granularity.
+
+The CHERI-MIPS implementation will opportunistically return tags from the cache if the line is present, but will not trigger a cache fill based on a miss due to \insnref{CLoadTags}, but will forward the request to the next level of cache hierarchy, ultimately hitting the TagController if all caches miss.  If the request hits the TagController, it will respond to the request directly, performing an ordinary tag table lookup and caching any results.
+
+The Arm Morello project found that the implementation of \insnref{CLoadTags} (\emph{LDCT}) that triggers a cache fill requires special care to wait for all the data to return before responding.
+This is of concern if the tag bits are stored in the same banks as the data they are associated with and if the data returned is sent in multiple beats (\textit{e.g.} 2).
+One way to do this is to force the access to be in the middle of the cache line, forcing the load operation to wait until the entire cache line is returned.
+
+Performance for the Arm design would be more ideal if tag loading were tracked separately from data lines to avoid special handling.
+An alternative, simpler design of LDCT would be to crack the instruction into one microarchitectural tag load for each capability word (\textit{e.g.} 4 tag load $\mu$ops) and merge their results.
+
+\section{Speculative Side-channel Precautions}
+We recommend that CHERI implementations take reasonable precautions to prevent data access through speculative side channels.
+Many of these observations are explored in~\cite{UCAM-CL-TR-916}.
+CHERI microarchitectures should reasonably be expected to constrain memory access in speculation to capabilities that are architecturally available to the program.
+That is, no capability should exist in registers and forwarding paths beyond capabilities in the latest committed architectural state of the register file, those transitively reachable through them, and less-powerful capabilities derived from these.
+This property, which we may call Speculative Capability Constraint (\emph{SCC}), requires a few microarchitectural features.
+
+\subsection{Capability-Guarded Cache Access}
+Permissions and bounds of a memory access should be verified before any cache access is initiated.
+This is generally reasonable, as these checks are simpler than TLB translation which must also occur before the cache can take action on behalf of a memory access.
+This property is necessary to support \emph{SCC} by preventing unreachable capabilities from being introduced into the pipeline from memory.
+All of our open-source implementations have this behavior.
+
+\subsection{\PCC{} Bounds Forwarding (Not Prediction)}
+\emph{SCC} may be violated by a design that predicts the bounds of \PCC{}.
+For example, the Toooba implementation predicts the bounds of \PCC{}, storing the entire \PCC{} in the branch target buffer.
+On any jump, it is possible for a powerful \PCC{} to be predicted, introducing read rights to new addresses that were not implied by the latest-committed state of the register file.
+The Morello implementation chooses to forward the bounds of \PCC{} rather than predict them, so the \PCC{} capability cannot be used in a data memory access unless it is legally sourced form another register in the pipeline.
+CHERI-MIPS, Piccolo, and Flute share this design choice, though they are of less note as their simple pipelines do not allow speculative read gadgets.
+
+\subsection{Speculative Forgery Prevention}
+\emph{SCC} may also be violated if capabilities can be forged in speculation.
+CHERI capability manipulation instructions should not speculatively produce capabilities with privilege greater than their operands provide.
+For example, \insnref{CBuildCap} should not forward tagged bits to its consumers while waiting for the result of its bounds check.
+\insnref{CSetBounds} and \insnref{CUnseal} share similar concerns.
+It is believed that all open-source CHERI implementations may currently forward unsafe values for these instructions, and the Toooba microarchitecture is likely vulnerable to speculative execution attacks through this vector.
+This concern might be more Systematically alleviated by an architecture that clears tags rather than throws exceptions for operations that manipulate the privilege of a capability. The ARM Morello architecture generally clears tags rather than throws exceptions for capability manipulation instructions, and we expect the Morello microarchitecture to be immune to this class of attacks for this reason.
+
+In addition, any speculation in a microarchitecture that could synthesise a value rather than deriving it from architecturally-defined bits (\textit{e.g.} value speculation) should not produce valid capability values.
+This could include not only a capability predicted to be loaded from a memory location, but also a predicted integer value that is used to bound a capability.
+
+If these restrictions become performance-limiting, one could imagine deploying Speculative Taint Tracking~\cite{yu2019speculative} to ensure that speculatively-forged capabilities do not affect cache state.
+
+\subsection{Compartment ID (\emph{CID}) Enforcement}
+Even if \emph{SCC} is enforced, we may have code paths that manipulate powerful capabilities that must be protected from speculative execution attacks.
+The CID is described in Section~\ref{section:microarchitectural-sidechannels} to provide an architectural means to convey trust boundaries to the microarchitecture.
+The CID should be used to tag microarchitectural state to prevent instructions in disparate compartments influencing each other's execution in much the same way as we might hope a modern microarchitecture might prevent user space speculative state influencing kernel execution.
+For example, the branch target buffer should tag entries with the CID such that targets learned in one compartment would not be used when speculating in another compartment, allowing an attacker to redirect branches that expose powerful capabilities to side-channel gadgets.
+The branch history table may also be tagged, as well as prefetchers and any other structure that holds state that influences prediction.
+
+The CID itself may be large and require compression in the microarchitecture.
+For example, a microarchitecture may introduce a table that holds several active CIDs while attaching table indices to all state used for speculation.
+Such a microarchitecture requires a means to flush state belonging to old table values before installing a new value at an index.
+
+If domain crossing is to be highly optimised, the application of the CID may be imprecise (\textit{e.g.} allowing use of old CID state until the new CID install commits) or the CID itself may be predicted.
+Either of these may be very difficult to allow without introducing speculative-side-channel vulnerabilities.

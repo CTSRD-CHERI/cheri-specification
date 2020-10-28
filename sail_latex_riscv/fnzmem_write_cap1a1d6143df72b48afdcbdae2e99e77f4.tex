@@ -1,0 +1,8 @@
+function #\hyperref[sailRISCVzmemzywritezycap]{mem\_write\_cap}# (addr, cap, aq, rl, con) = {
+  let cap_bits = #\hyperref[sailRISCVzcapToMemBits]{capToMemBits}#(cap);
+  /* Assume that conversion to bits and back does not change the capability.
+     TODO: State closed-form normalised-ness criterion that implies this,
+     and prove it as an invariant of capabilities in the system. */
+  assert(#\hyperref[sailRISCVzmemBitsToCapability]{memBitsToCapability}#(cap.tag, cap_bits) == cap);
+  #\hyperref[sailRISCVzmemzywritezyvaluezymeta]{mem\_write\_value\_meta}#(addr, cap_size, cap_bits, Cap, cap.tag, aq, rl, con)
+}

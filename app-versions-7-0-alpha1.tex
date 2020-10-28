@@ -1,0 +1,250 @@
+This release of the \textit{CHERI Instruction-Set Architecture} is an
+interim version intended for submission to DARPA/AFRL to meet the requirements
+of CTSRD deliverable A001:
+
+\begin{itemize}
+\item The CHERI ISA specification version numbering scheme has changed to
+include the target major version in the draft version number.
+
+\item A significant refactoring of early chapters in the report has taken place:
+there is now a more clear distinction between architecture-neutral aspects
+of CHERI, and those that are architecture specific.
+The CHERI-MIPS ISA is now its own chapter distinct from architecture-neutral
+material.
+We have aimed to maximize architecture-neutral content -- e.g., capability
+semantics and contents, in-memory representation, compression, etc. -- using
+the architecture-specific chapters to address only architecture-specific
+aspects of the mapping of CHERI into the specific architecture -- e.g., as
+relates to register-file integration, exception handling, and the Memory
+Management Unit (MMU).
+In some areas, content must be split between architecture-neutral and
+architecture-specific chapters, such as behavior on reset, handling of the
+\cappermASR permission and its role in controlling
+architecture-specific behavior, and the integration of CHERI with virtual
+memory, where the goals are largely architecture neutral but mechanism is
+architecture specific.
+
+\item There are now dedicated chapters for each of our applications of CHERI
+to each of three ISAs: 64-bit MIPS (Chapter~\ref{chap:cheri-mips}), 64-bit
+RISC-V (Chapter~\ref{chap:cheri-riscv}), and x86-64
+(Chapter~\ref{chap:cheri-x86-64}).
+
+\item Our CHERI-RISC-V prototype has been substantially elaborated, and now
+includes an experimental encoding in Appendix~\ref{app:isaquick-riscv}.
+We have somewhat further elaborated our x86-64 model, including addressing
+topics such as new page-table bits for CHERI, including a hardware-managed
+capability dirty bit.
+We also consider potential implications for RISC-V compressed instructions.
+
+\item We have completed an opcode renumbering for CHERI-MIPS.
+The ``proposed new encoding'' from CHERI ISAv6 has now become the
+established encodings; the prior encodings are now documented as
+``deprecated encodings''.
+
+\item Substantial improvements have been made to descriptive text around memory
+protection, with the concept of ``pointer protection'' -- i.e., as
+implemented via tags -- more clearly differentiated from memory protection.
+
+\item We now more clearly describe how terms like ``lower bound'' and ``upper
+bound'' relate to the base, offset, and length fields.
+
+\item We now more clearly differentiate language-level capability semantics
+from capability use in code generation and the ABI, considering
+pure-capability and hybrid C as distinct from pure-capability and hybrid code
+generation.
+We explain that different language-level integer interpretations of
+capabilities are supportable by the architecture, depending on compiler
+code-generation choices.
+
+\item Potential software policies for revocation, garbage collection, and
+capability flow control based on CHERI primitives are described in greater
+detail.
+
+\item Monotonicity is more clearly described, as are the explicit
+opportunities for non-monotonicity around exception handling and
+\insnnoref{CCall} Selector 1.
+Handling of disallowed requests for non-monotonicity or bypass of guarded
+manipulation by software is more explicitly discussed, including the
+opportunities for both exception throwing and tag stripping to maintain
+CHERI's invariants.
+
+\item Further notes have been added regarding the in-memory representation of
+capabilities, including the storage of NULL capabilities, virtual addresses
+for non-NULL capabilities, and how to store integer values in untagged
+capability registers.
+These values now appear in the bottom 64 bits of the in-memory
+representation.
+Topics such as endianness are also considered.
+
+\item NULL capabilities are now defined as having a base of 0x0, the maximum
+length supported in a particular representation ($2^{64}$ for 128-bit
+capabilities, and $2^{64} - 1$ for 256-bit capabilities), and no granted
+permissions.
+NULL capabilities continue to have an all zeros in-memory representation.
+This allows integers to be stored in the offset of an untagged capability
+without concern that they may hold values that are unrepresentable with
+respect to capability bounds.
+
+\item New instructions \insnref{CReadHwr} and \insnref{CWriteHwr} have
+been added.
+These have allowed us to migrate special capability registers (SCRs) out of
+the general-purpose capability register file, including \DDC{}, the new user
+TLS register (\CULR{}), the new privileged TLS register (\CPLR{}), \KRC{},
+\KQC{}, \KCC{}, \KDC{}, and \EPCC{}.
+Access to privileged special registers continues to be authorized by the
+\cappermASR permission on \PCC{}.
+
+\item With this migration, \creg{0} is now available to use as a NULL
+capability register, which is more consistent with the baseline MIPS ISA in
+which \reg{0} is the zero register.
+The only exception to this is in capability-relative load and store
+instructions, and the \insnref{CTestSubset} instruction, in
+which an operand of \creg{0} specifies that \DDC{} should be used.
+
+\item Various instruction pseudo-ops to access special registers, such as
+\insnmipsref{CGetDefault}, now expand to special capability register access
+instructions instead of capability move instructions.
+
+\item With consideration of merged rather than split integer and capability
+register files for RISC-V and x86-64, and a separation between
+general-purpose capability registers and special capability registers (SCRs) on 64-bit MIPS, we
+avoid describing the integer register file as the ``general-purpose register
+file''.
+We describe a number of tradeoffs around ISA design relating to using a
+split vs. merged register file; avoiding the use of specific capability
+registers as special registers assists in supporting both register-file
+approaches.
+
+\item The CPU reset state of various capability registers is now more clearly
+defined.
+Most capability registers are initialized to NULL on reset, with the
+exception of \DDC{}, \PCC{}, \KCC{}, and \EPCC{}.
+These defaults authorize initial access to memory for the boot process, and
+are designed to allow CHERI-unaware code to operate oblivious to the
+capability-system feature set.
+
+\item We more clearly describe design choices around failure-mode choices,
+including throwing exceptions and clearing tag bits.
+Here, concerns in conclude stylistic consistency with the host architecture,
+potential use cases, and interactions with the compiler and operating
+system.
+
+\item In general, we now refer to software-defined permissions rather than
+user-defined permissions, as these permissions without an architectural
+interpretation may be used in any ring.
+
+\item Permission numbering has been rationalized so that 128-bit and 256-bit
+microarchitectural permission numbers consistently start at 15.
+
+\item The existing permission \cappermSeal, which authorized sealing and
+explicit unsealing of sealed capabilities, has now been broken out into two
+separate permissions: \cappermSeal, which authorizes sealing, and
+\cappermUnseal, which authorizes explicit unsealing.
+This will allow privilege to be reduced where unsealing is desirable (e.g.,
+within object implementations, or in C++ vtable use) by not requiring that
+permission to seal for the object type is also granted.
+
+\item The ISA quick reference has been updated to reflect new instructions, as
+well as to more correctly reflect endianness.
+
+\item We have added a reference to our recently released technical report, \textit{Capability
+Hardware Enhanced RISC Instructions (CHERI): Notes on the Meltdown and
+Spectre Attacks}~\cite{UCAM-CL-TR-916}, which considers the potential
+interactions between CHERI and the recently announced Spectre and Meltdown
+microarchitectural side-channel attacks.
+CHERI offers substantial potential to assist in mitigating aspects of these
+attacks, as long as the microarchitecture performs required capability
+checks before performing any speculative memory accesses.
+
+\item We have added two new instructions, Get the architectural Compartment ID
+(\insnref{CGetCID}) and Set the architectural Compartment ID
+(\insnref{CSetCID}), which allow information on compartments to
+be passed to via architecture to microarchitecture in order to support
+mitigation of side-channel attacks.
+This could be used to tag branch-predictor entries to control the
+compartments in which they can be used, for example.
+A new Permit\_Set\_CID permission allows capabilities to delegate use of
+ranges of CIDs.
+
+\item Bugs have been fixed in the definitions of various capability-relative
+load and store instructions, in which permission checks involving the
+Permit\_Load, Permit\_Load\_Cap, Permit\_Store, and Permit\_Store\_Cap
+permissions were not properly updated from our shift from an untagged
+capability register file to a tagged register file.
+All loads now require Permit\_Load.
+If Permit\_Load\_Cap is also present, then tags will not be stripped when
+loading into a capability register.
+All stores now require Permit\_Store.
+If Permit\_Store\_Cap is also present, then storing a tagged capability will
+not generate an exception.
+
+\item New Capability Set Bounds From Immediate
+(\insnref{CSetBoundsImm}) and Capability Increment Offset From Immediate
+(\insnref{CIncOffsetImm}) instructions have been added.
+These instructions optimize global-variable setup and stack allocations by
+reducing the number of instructions and registers required to adjust pointer
+values and set bounds.
+
+\item New Capability Branch if Not NULL (\insnref{CBNZ}) and
+Capability Branch if NULL (\insnref{CBEZ}) instructions have
+been added, which optimize pointer comparisons to NULL.
+
+\item A new Capability to Address (\insnref{CGetAddr})
+instruction allows the direct retrieval of a capability's virtual address,
+rather than requiring the base and offset to be separately retrieved and added
+together.
+This facilitates efficient implementation of a CHERI C variant in which all
+casts of capabilities to integers have virtual-address rather than offset
+interpretation.
+A capability's virtual address is now more directly defined when we specify
+capability fields.
+
+\item We more clearly describe \insnnoref{CCall} Selector 1 as
+``exception-free domain transition'' rather than ``userspace domain
+transition'', as it is also intended to be used in more privileged rings.
+
+\item We have shifted to more consistently throwing an exception at jump
+instructions (e.g., \insnref{CJR}) that go out of bounds,
+rather than throwing the exception when fetching the first instruction at
+the target address.
+This provides more debugging information when using compressed
+capabilities, as otherwise \EPCC{} might have unrepresentable bounds in the
+event that the jump target is outside of the representable region.
+
+\item The exception vectors use during failures of Selector 0 and Selector 1
+\insnnoref{CCall} have been clarified.
+The general-purpose exception vector is used for all failure modes with
+\insnnoref{CCall} Selector 1.
+
+\item We have added a new experimental instruction, Test that Capability is a Subset of Another
+(\insnref{CTestSubset}).
+This instruction is intended to be used by garbage collectors that need to
+rapidly test whether a capability points into the range of another
+capability.
+
+\item A new experimental 64-bit capability format for 32-bit virtual addresses
+has been added.
+
+\item A description of an experimental {\it linear capability} model has been
+added (Section~\ref{section:linear-capabilities}).
+This model introduces the concept that a capability may be linear -- i.e.,
+that it can only be moved rather copied in memory-to-register,
+register-to-register, and register-to-memory operations.
+This introduces two new instructions, Linear Load Capability Register
+(\insnnoref{LLCR}) and Linear Store Capability Register
+(\insnnoref{LSCR}).
+This functionality has not yet been fully specified.
+
+\item An experimental appendix considers possible implementations of {\it
+indirect capabilities}, in which a capability value points at an actual
+capability to utilize, allowing table-based capability lookups
+(Section~\ref{section:indirect-capabilities}).
+
+\item An experimental appendix considering potential forms of compression for
+capability permissions has been added (Section~\ref{app:exp:compressperm}).
+
+\item We have added a reference to our ICCD 2017 paper, \textit{Efficient
+Tagged Memory}, which describes how to efficiently implement tagged memory in
+memory subsystems not supporting inline tags directly in
+  DRAM~\cite{joannou2017:tagged-memory}.
+\end{itemize}

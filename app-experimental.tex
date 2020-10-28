@@ -1,0 +1,2459 @@
+\chapter{Experimental Features and Instructions}
+\label{app:experimental}
+
+This appendix describes experimental features and instructions proposed for
+possible inclusion in later versions of the CHERI ISA.
+These items for consideration include optimizations, new permissions, new
+compression formats, and overhauls of existing CHERI mechanisms.
+Some are relatively mature, and we anticipate their achieving a
+non-experimental status in the next version of the CHERI ISA specification
+(e.g., capability flags and temporal memory safety).
+Others arose as part of our more general design-space exploration, and we
+document these alternative approaches (e.g., indirect capabilities) or
+potential future avenues of investigation (e.g., linear capabilities).
+We present them here in roughly increasing order of complexity.
+The body of the appendix describes the rationale and approach for each
+experimental feature; specific instruction encodings and semantics may be
+found in Section~\ref{app:exp:insns}.
+\pgnnote{roughly increasing order of complexity?
+  might they instead be grouped
+  more structurally as major sections, and then roughly increasing
+  order within those major sections?}
+
+% >>>
+\section{Capability Reconstruction} % <<<
+\label{section:capability-reconstruction}
+
+These additional experimental instructions can be used to efficiently
+reconstruct capabilities (e.g., when a program has been paged out to disk
+and then paged back in, and the operating system needs to reconstruct the
+capabilities that were originally in its address space).
+They also reduce the need for software to inspect the in-memory representation
+of capabilities, making software more robust to format changes.
+
+Software should store or transit tags separately from the corresponding
+capa\-bility-sized, capa\-bility-aligned memory via a trustworthy medium.
+The ISA requires that tags be restored using a suitable authorizing capability
+through which it should have been possible to derive the same resulting tagged
+capability -- that is, without violating capability monotonicity.
+A security review of these instructions is still in progress, and so they
+should not yet be considered part of the ISA or safe to implement.
+These instructions serve two purposes:
+
+\begin{enumerate}
+\item They allow efficient internalization of capabilities that have been
+  stored or transferred via media that do not preserve tags.
+  This functionality might be utilized when tags must be restored by the
+  kernel's swap or compressed-memory pager, when migrating the memory of a
+  virtual machine, when restoring a process snapshot, or by an
+  in-address-space run-time linker.
+
+\item They allow tags to be restored on capabilities in a manner that
+  maintains architectural abstraction: software restoring tags need not encode
+  the specifics of the in-memory capability representation, making that
+  software less fragile in the presence of future use of reserved fields or
+  changed semantics.
+\end{enumerate}
+
+Capabilities can also be reconstructed using the current
+\insnref{CGetBase}, \insnref{CGetLen}, etc., instructions, examining
+those fields and then recreating them utilizing the corresponding
+\insnref{CSetBounds} instruction, and so on, but with reduced abstraction
+and substantially less efficiency.
+
+Details of the proposed \insnref{CBuildCap}, \insnref{CCopyType},
+and \insnref{CCSeal} instructions are deferred to \cref{app:exp:insns}.
+
+\note{It has also been proposed that something much like capability
+reconstruction be allowed to reconstruct an \emph{unsealed} capability from
+a sealed one, again, guarded by needing a superset.}{nwf}
+
+% >>>
+\section{Additional Architectural Assistance For Revocation} % <<<
+
+\subsection{Fast Capability Subset Testing} % <<<
+\label{subsection:fast-capability-subset-testing}
+
+When implementing revocation or garbage collection requiring fast scanning
+of memory for matching capabilities, significant numbers of instructions
+would be used to check whether a tested capability is a subset of a reference
+capability.  We propose a new \insnref{CTestSubset}
+instruction that reduces this instruction count substantially; see
+\cref{app:exp:insns} for details.
+
+\subsection{CClearTags} % <<<
+
+Typically, allocators allow for the return of ``uninitialized'' memory
+(e.g., \texttt{malloc} vs.\@ \texttt{calloc}).  In the context of temporal
+safety, this proves to be problematic unless the allocator is type- and
+use-specicialized: data and pointers may unintentionally flow into the
+possession of the holder of a new allocation, violating both confidentality
+and, in a non-architectural sense, provenance integrity.  Most treatments of
+security-conscious allocators therefore always zero memory.  CHERI can
+directly probe at the difference between confidentality of data and
+provenance integrity of pointers.  Towards this end, we introduce a
+\insnref{CClearTags} instruction, which permits bulk zeroing of
+capabilities within a cacheline (i.e., at the same granularity as
+\insnref{CLoadTags}).
+
+While \insnref{CClearTags} may be a useful alternative to
+\texttt{bzero}-ing memory when confidentiality is not required, it has at
+least one additional use in the context of revocation specifically.
+\insnref{CClearTags} should accelerate sweeping by allowing allocators
+to optimistically, even if not perfectly, remove capabilities within freed
+regions, removing comparatively expensive look-aside checks of validity
+during sweeps, at a lower cost than zeroing.
+
+\insnref{CClearTags} is intended to be \emph{non-allocating} in the caches,
+as with its counterpart \insnref{CLoadTags}.  If a cacheline is not present
+in the cache fabric, the induced store should always transit to the tag cache
+rather than pulling the line data into the caches.
+
+\nwfnote{We could also introduce a \insnnoref{CAndTags} instruction
+that took a bitmask of which entries in the line to zero; this would make it
+useful for small allocations, but it's not clear that that's actually
+worthwhile.  Small allocations seem like they might be likely to be in the
+cache already.}
+
+% >>>
+\subsection{Non-Temporal (Streaming) CLC} % <<<
+\label{app:exp:clcnt}
+
+During revocation, whenever a capability is identified via
+\insnref{CLoadTags}, it is fetched from memory for analysis.  A large
+fraction of these capabilities are expected to be valid, and so will not
+cause additional activity within their cache line.%
+%
+\footnote{Those capabilities that are found to be revoked are then subjected
+to a \insnref{CLLC}/\insnref{CSCC} sequence for atomic replacement
+with their revoked image.}
+%
+Being able to hint to the cache that the revoker is \emph{streaming} through
+memory, and so should not pave over the caches, seems like a worth-while
+objective.  We therefore introduce a non-temporal, streaming
+\insnref{CLC} analogue, \insnref{CLCNT} with architectural semantics
+exactly matching those of \insnref{CLC}, but as a separate opcode to
+hint to the microarchitecture.  To preserve encoding space,
+\insnref{CLCNT} jettisons the immediate and assumes it to be zero.
+
+\nwfnote{It may make sense to unroll the revoker loop to some presumed
+cacheline stride, in which case perhaps we should jettison the index
+register rather than the immediate.  But keeping the index register seems
+the friendlier of the options.}
+
+While one implementation of such a streaming CLC would be to never promote
+lines in the cache hierarchy (i.e., leave them in place, in DRAM or the LLC
+when loading), analysis done as part of the Efficient Tagged Memory \cite[\S
+VI.B]{joannou2017:tagged-memory} suggests that if a cacheline has one
+capability, it is relatively likely to have another.%
+%
+\footnote{Specifically, the ratio of the probability of a capability being
+found in memory with a ``grouping factor 8'' (corresponding to our FPGA's
+caches for CHERI Concentrate capabilities) to an independent sampling of
+eight ``grouping factor 1'' binomials (analysing on a word-by-word basis) is
+between $0.97$ and $0.32$, implying clustering of capabilities.}
+%
+This suggests that \insnref{CLCNT} should be caching, but restrictedly
+so.  Na\"ively, we suggest that ensuring misses usually allocate below some
+top $k$ lines of the MRU queue for the cache ``way'' activated will result
+in it being evicted relatively soon and without introducing too much
+contention with the application.  When a \insnref{CLCNT} hits in the
+cache, it should not trigger promotion to the front of the MRU queue.
+Whether this policy is a good one, and, if so, what the correct values of
+$k$ and ``usually'' are, remain open questions.
+
+% >>>
+
+\nwfnote{We may also be able to offer stronger guarantees to lock-free data
+structures by adding a ``conditional CLC'' instruction which gates its operation
+on the LL/SC link flag.  In some toy examples, this seems to make full SMR
+hazards unnecessary.  Unclear that it is worth pursuing.}
+
+% >>>
+\section{Recursive Mutable Load Permission} % <<<
+\label{app:exp:recmutload}
+
+\makecapperm{RML}{Recursive\_Mutable\_Load}
+
+Several software capability systems have exploited the use of immutable data
+structured to facilitate safe sharing (e.g., Joe-E~\cite{mettler:joee}).
+CHERI capabilities can provide references through which stores are not
+permitted; however, because they can be refined and distributed throughout the
+system, simply holding a read-only reference is not sufficient to allow a
+consumer to ensure that no simultaneous access can occur to the same memory
+via another capability.
+Further, passing a read-only reference to memory does not ensure that further
+loads of capabilities from within that memory provide only read-only access to
+`deep' data structures -- e.g., linked lists.
+
+Various software-level invariants could be used to improve confidence for both
+callers and callees.
+For example, the software runtime might make use of read-only MMU mappings for
+immutable data, and provide capabilities that clearly provide an indication
+that they refer to those read-only mappings -- e.g., via use of a
+software-defined permission bit set only for such references, via use of
+reserved portions of the address space, sealed via a certain type, or
+checkable via a dynamic service operating in a trustworthy protection domain.
+In addition, memory could be allocated as mutable and its MMU mapping later
+modified to `freeze' the contents, or by performing a revocation-like sweep
+to convert any extant store-enabled capabilities into load-only capabilities.
+
+However, providing strong architectural invariants to software offers
+significant value.  One idea we have considered is a new permission,
+\cappermRML, which if not present, clears store
+permissions and the recursive mutable load permission, on any capability
+loaded via a capability with this permission present.%
+%
+\footnote{The concept of such \emph{transitively} read-only capabilities
+appears to have been first developed in KeyKOS, where such capabilities were
+termed `sensory keys'~\cite{hardy:keykos}.  While sensory keys were
+necessarily read-only, the descendent notion of the `weak' access modifier
+in EROS could be applied to both read and write operations.  When modifying
+reads, it behaves as described so far; attempts to store some input
+capability through a weak write-permitting capability resulted in a
+weakened version of the input capability being stored~\cite{shapiro:eros}.
+In the successor system Coyotos, `weak' was once again made to imply
+read-only access~\cite{doerrie2015:confinement,shapiro:coyotosspec}.}
+%
+A module may clear the store permissions and also clear
+\cappermRML on a capability before passing it to another
+module.  Having done so, the originator is guaranteed that this passed
+capability could not then be used to mutate memory it directly describes
+(lacking store permissions) or memory transitively referenced therefrom, even
+if the latter capabilities, authorizing transitive access, bear some store
+permissions.
+%
+This would not prevent temporal vulnerabilities
+associated with reallocation of the memory; subject to other invariants
+and safety properties, it might make it easier to construct safe references.
+In particular, this mechanism is likely to be of great utility to systems
+wishing to enforce the `*-property' (`no write down') of the model of
+Bell and La Padula~\cite{B+LP76}.%
+%
+\footnote{Readers may be familiar with the infamous proof of
+Boebert~\cite{boebert:inabilitystar} that ``an unmodified capability machine''
+is unable to enforce this property.  As CHERI distinguishes between
+capabilities and data, the proof is not directly
+applicable~\cite{miller:capmyths}, and, indeed, one could imagine using trusted
+intermediate software to emulate the effects of
+\cappermRML, as proposed by
+Miller~\cite{miller:paradigmregained}.  Despite that,
+\cappermRML is still of practical utility, as it is a
+light-weight, architecturally enforceable mechanism that avoids indirection.}
+
+\paragraph{Interaction With Sealed Capabilities}
+%
+A question arises about loads of \emph{sealed} capabilities bearing (for
+example) \cappermS through a capability lacking \cappermRML: in some sense,
+this sealed capability is authorizing mutation; are we to clear its \cappermS,
+despite the seal?  We view the immutability of sealed capabilities as taking
+precence, and so preserve \cappermS under seal even in this scenario.  Beyond
+aesthetics, we conjecture that this interpretation is convenient for software:
+\cappermRML can be cleared to create read-only collections of sealed handles to
+software objects.%
+%
+\footnote{By way of example, software can create an immutable collection $c$ of
+\emph{arbitrary} unsealed capabilities by sealing each capability logically
+held in $c$ to a type with an \emph{ambiently available} unsealing right and
+referencing $c$ itself through \cappermRML-clear capabilities.  A layer of
+indirection suffices to permit arbitrary \emph{sealed} capabilities within $c$
+as well.  Software can restrict this model by using compartmentalized unsealers
+rather than ambient authority.}
+%
+Nevertheless, software must be aware that mutation authority under seal is not
+stripped by \cappermRML.
+
+\let\cappermRML\undefined
+
+% >>>
+\section{Hierarchical Revocation From Ephemeral Capabilities} % <<<
+\label{app:exp:hierarchal-evocation}
+
+The ``revocation'' work atop CHERI to date has been about revoking all
+(non-TCB) access to resources (usually, virtual address space).  However,
+``Capability Revocation'' more typically means the ability for any agent,
+which has delegated access to some resource, to revoke some (or all) of its
+delegations while retaining access and the ability to further delegate
+access \cite{Redell74}.
+%
+Efforts to develop such capacity atop CHERI would likely rely upon sealed
+capabilities or domain transitions (with or without exceptions) to mediate
+delegation, as these are the most apparent mechanisms available to us to
+prevent unchecked duplication of usable authority.  However, these come with
+somewhat large costs: domain transitions impose cycle overheads, and either
+strategy would seem to require that the set of \emph{operations} on the
+delegated resource be fixed by its constructor.  For example, the original
+source of a revokably delegated data resource would likely have to provide
+specialized \texttt{memcpy} implementations for moving data out of or in to
+the resource's memory.
+In this section, we explore the implementation of directly-accessible
+revokable delegation assuming the existence of \emph{ephemeral}
+capabilities, which cannot be stored to memory once loaded into a register
+file.
+
+\subsection{Ephemeral Capabilities} % <<<
+
+The basic primitive of an ephemeral capability is a degenerate
+generalization of the \cappermG* / \cappermSLC* mechanism of CHERI (recall
+\cref{sect:capability-permission-bits}) and the ``capability coloring''
+proposal of \cref{sec:compactcolors}.  Ephemeral capabilities are
+constructed via a new \emph{store} instruction,
+\insnnoref{CStoreEphemeral} which, given a non-ephemeral capability
+in a register, places an ephemeral version in memory, which may thereafter
+be loaded with \insnref{CLC}.%
+%
+\footnote{We propose the use of a reserved \cotype{} value, rather than a new
+permission bit, to designate capabilities of this form (but without
+interpreting this value as \emph{sealed}).  As we intend these non-storable
+capabilities to be ephemeral, there will not be enough of them present in
+the system at any moment to justify the use of a permission bit.  Moreover,
+while the use of an \cotype{} means that we cannot seal these non-storable
+capabilities, even in registers, this does not seem to be a loss.}
+%
+If an attempt is made to store, via \insnref{CSC}, an ephemeral
+capability to memory, an un-tagged version is stored instead.  Thus, once
+loaded, an ephemeral capability is confined to the register file and even a
+context switch will destroy it.  Similarly, a (transitive) callee's attempt
+to spill such a capability to the stack will instead detag it, and so these
+ephemeral capabilities must be considered lost across general procedure
+calls.  (While ephemeral capabilities can still be passed in registers as
+arguments, in general, we suggest passing a non-ephemeral capability to the
+ephemeral one instead.)
+
+Software consuming these ephemeral capabilities must be prepared to deal
+with revocation and the \emph{appearance} of revocation, by attempting to
+reload a tagged ephemeral capability from memory.  Software must be careful
+to preserve access to the memory locus of the ephemeral capability loaded to
+the register file.  Operations done against such revokably delegated
+resources should be idempotent (which may just mean that they are precisely
+resumable).%
+%
+\footnote{It is possible to imagine architectural assistance beyond trapping
+on untagged capabilities, should the ``trap-and-reload'' approach sketched
+here be unduely onerous.}
+
+% >>>
+\subsection{Revocation} % <<<
+
+Armed with such a primitive capability form, resource revocation still needs
+to remove (a hierarchy of) ephemeral capabilities from memory, but the
+issuing authority has ensured that access to the delegated resource has not
+spread unchecked in memory.  Having removed all the targeted ephemeral
+capabilities from memory, a single context switch on all cores suffices to
+ensure that there is no retained access.  These context switches may be
+actively driven (with IPIs) or passively observed (as with epoch-revocation
+schemes).  We propose that a \emph{compartment} within the TCB oversee the
+construction and (hierarchical) delegation of revokable delegate
+intermediaries.
+
+In order to efficiently revoke a subtree of the delegation relationship, we
+will need to construct that relationship explicitly in memory in a way that
+its subtrees are easily enumerated.  The design we propose herein makes
+heavy use of sealed capabilities to small regions of memory, directly
+storing the delegation relationship metadata with the delegated, ephemeral
+capabilities themselves.  These small regions of memory are used once and so
+may be reclaimed by the existing \emph{global} revocation mechanisms after
+their purpose has been served.%
+%
+\footnote{Users of this mechanism must therefore be prepared for faults
+while using the ephemeral capability as well as when attempting to reload
+it.  Fortunately, this seems straightforward.}
+%
+Such a \emph{delegation box} contains:
+%
+\begin{itemize}
+%
+  \item An ephemeral capability to the delegated resource
+%
+  \item A capability to the progenitor delegation box, if any.
+%
+  \item A pair of capabilities forming a doubly-linked list of this box's
+delegation \emph{siblings}.
+%
+  \item A capability to one of its child delegation boxes, if any.
+%
+\end{itemize}
+%
+Straightforward rose tree \cite{skillicorn:partreeskel} operations suffice
+to maintain the hierarchical delegation structure using these boxes, and
+sealing ensures that we can safely give out the rights to manipulate a box
+(constructing a new child or revoking the subtree of which it is the root).
+A separate grant of access directly to the ephemeral capability allows the
+direct use of the delegated resource until the delegation box's revocation.
+
+% >>>
+\section{Compressed Permission Representations} % <<<
+\label{app:exp:compressperm}
+
+The model of Section~\ref{sect:capability-permission-bits} describes each
+permission as a separate bit.  This has certain advantages, including the
+ability to describe {\em the} all-powerful capability, a uniform
+presentation, wherein the monotonic non-increase of rights is directly
+encoded by the monotonic operation of bitwise \emph{and}, and a fast operational
+test for a given permission.  However, in use and interpretation, the
+permission bits are not orthogonal, so one could aim for a compressed
+representation, freeing up bits for use as user permissions, or reserving
+them for future expansion of the ISA.  We do not fully develop this story;
+instead, we merely indicate examples of redundancy in the abstract model,
+which may be useful to architects wishing to squeeze every last bit out of
+any particular representation.
+
+The \cappermG attribute, despite being enumerated as a permission, does not
+describe permissions to the memory or objects designated by a capability.
+Instead, it interacts with data storage permissions of other capabilities
+(via \cappermSLC).  As such, it truly is orthogonal to
+the rest of the permission bits (though it remains `monotonic' in the
+sense that clearing the \cappermG permission results in a capability capable of
+participating in fewer operations).
+
+Broadly speaking, there are three spaces of identifiers described within the
+CHERI capability system: virtual addresses, object types, and compartment
+identifiers.  Rights concerning executability, loads, and stores apply only
+to capabilities describing virtual addresses, while the rights to (un)seal
+an object apply only to capabilities describing object types.  The
+\cappermCid permission applies only to capabilities describing
+compartment identifiers.  This permits some reduction of encoding space.
+
+Similar reduction in encoding space may be realized if one mandates that
+certain {\em user} permission bits are similarly applicable only to novel
+non-architectural spaces of identifiers (e.g., UNIX file descriptors).
+However, at
+present we consider the sealing mechanism more useful and flexible
+for the construction of such spaces of identifiers, as typically such
+identifiers are ultimately given meaning by some bytes in virtual memory, to
+which one may gain access by unsealing an object capability used as a
+reference.%
+%
+\footnote{Sadly, while sealed capabilities are almost exactly what one wants
+for file descriptors, because UNIX chose to type file descriptors as
+\texttt{int}, the conversion to use sealed capabilities will be broadly
+invasive, even if most of the changes will simply be to change the types.}
+%
+However, the notion of other spaces is not entirely out of the question; {\em
+physical} addresses may prove to be a compelling example on some systems.
+
+While \cappermCInvoke* is {\em checked} only as part of \insnref{CInvoke}'s
+operation on sealed (i.e., object) capabilities, it is inherited from these
+sealed capabilities' precursors.  That is, the present CHERI architecture
+permits the creation of regions of virtual address space that can be
+(subdivided and) sealed, but for which these derived object capabilities are
+not useful with \insnref{CInvoke} (just with \insnref{CUnseal}).
+The utility of such regions is perhaps not readily apparent, but any shift
+to make \cappermCInvoke* apply only to object capabilities would require
+modification of the \insnref{CSeal} instruction and would slightly
+change the capability ontology.
+
+Within the virtual-address-specific permissions, one finds several
+opportunities for compressing representations.  First, many architectures
+consider writable-and-executable to be too dangerous to permit; applying
+this to CHERI's taxonomy would mean that the presence of \cappermX* implied
+the absence of \cappermS*, \cappermSC*, and \cappermSLC* (see
+\cref{app:exp:compressperm:wxorx}).  Further, granting \cappermLC*
+effectively implies granting \cappermL*:  CLC and CLLC would trap without
+the latter, but more substantially, a capability load of an un-tagged (in
+memory or via the paging hardware) `should' result in a load of data
+transferred in to a capability register, albeit with the tag cleared.  On
+the store side, \cappermSLC* implies \cappermSC*, which, in turn, implies
+\cappermS*.  Taking all of these implications into consideration, one finds
+that there are $15$ consistent states of the six virtual-address-space
+rights (\cappermX*, \cappermL*, \cappermLC*, \cappermS*, \cappermSC*,
+\cappermSLC*) considered, enabling a four-bit compressed representation.%
+%
+\footnote{If one restricts consideration to just the five bits of
+\cappermL*, \cappermLC*, \cappermS*, \cappermSC*, and \cappermSLC*, one finds 12
+valid states, requiring four bits.  A straightforward reduced encoding then
+leaves \cappermL* and \cappermLC* unaltered but can use two bits to indicate
+which of $\emptyset$, \{\cappermS*{}\}, \{\cappermSC*, \cappermS*{}\}, or
+\{\cappermSLC*, \cappermSC*, \cappermS*{}\} is present.}
+
+Consider the powerful \cappermASR permission.  Because this
+bit is meaningful only on capabilities used as a program counter, at the
+very least its presence rather directly implies \cappermX.  Moreover,
+because this bit gates access to other architectural protection mechanisms,
+including those, such as the paging hardware, involved in {\em interpreting}
+(other) capabilities, it seems likely that this bit implies the ability to
+at least read, and likely mutate (or cause the mutation of), any other
+capability present in the system.  (Admittedly, perhaps the ability to
+synthesize new capabilities from whole cloth would remain beyond the reach
+of code executing with \cappermASR*, but given the far-reaching
+powers potentially conveyed, this hardly seems worth nitpicking.)  As such,
+one may be justified in considering \cappermASR* to be a single
+value in one's encoding of capability permissions, rather than an orthogonal
+bit.
+
+\subsection{A Worked Example of Type Segregation} % <<<
+
+Pushing a bit further on the `spaces of identifiers' concept above, we can
+describe an alternative use of the 15 bits of {\cmuperms} available in the
+128-bit encoding scheme of Section~\ref{subsec:cheri-128-implementation}.  We
+continue to leave the 18-bit \cotype{} field where it stands, and we claim no
+new use of any reserved bits.  Diagrams of the bit representations may be found
+in Figure~\ref{fig:app:comprperm:typeseg}.
+
+In all capabilities, we reserve three bits for uninterpreted user
+permissions, and four bits for the flow control detailed in
+Section~\ref{sec:compactcolors}.%
+%
+\footnote{Absent the use of this experimental coloring scheme, these
+reserved bits can instead be used to carry the \cappermG* and \cappermSLC*
+bits, with two bits remaining reserved.}
+%
+One more bit distinguishes between virtual-address capabilities and all
+other types.  We have thus far consumed 8 of the 15 permission bits.
+
+For virtual-address capabilities
+(subsequently to be abbreviated as `VA capabilities'),
+the remaining seven bits correspond
+one-to-one with memory-specific permissions.  Specifically, they are:
+\cappermX* (Ex), \cappermL* (L), \cappermS* (St),
+\cappermLC* (LC), \cappermSC* (SC), \cappermCInvoke* (CC),%
+%
+\footnote{While any capability type can, in principle, be sealed and could be
+unsealed at \insnref{CInvoke} time, \insnref{CInvoke} unseals only two
+capabilities, installing them as PCC and IDC.  As such, it seems sensible to
+restrict \insnref{CInvoke} to operating only on VA capabilities, and so \cappermCInvoke is
+defined only therein.}
+%
+and \cappermASR* (ASR).  We have made no effort to
+eliminate redundancy in this particular segment of the encoding, but all the
+observations made above about these bits continue to hold.
+
+For non-virtual-address capabilities, we take one bit to distinguish
+\emph{architectural control} capabilities from \emph{guarded-word}
+capabilities.  The latter are as might be expected: they are simply bounded (as
+per usual with CHERI capabilities) \emph{integers}, protected by architectural
+provenance, monotonicity, and nonforgeability.  Guarded-word capabilities confer
+no architectural authority, but may be of use to system software (e.g., for
+describing file descriptors).  The remaining six bits are all permission-like
+(and are subject to manipulation via \insnref{CAndPerm}), but are
+otherwise uninterpreted by the hardware.%
+%
+\footnote{It may seem odd to deliberately create architecturally `useless'
+tagged integers; it may seem as though they could simply be VA capabilities
+with all permission bits cleared.  However, just because an agent has some
+rights to memory address 0x1234 does not imply that they have rights to the
+\emph{integer} 0x1234, but monotonic action on a capability authorizing the
+former could result in one authorizing the latter in this hypothetical
+`all-permission-bits-zero' encoding.  The \emph{separate provenance tree}
+of guarded-word capabilities distinguishes these: there is no monotonic
+mechanism to transmute one into the other.}
+
+Architectural control capabilities include the ability to seal and unseal
+particular object types, set the compartment identifier, and manipulate colors
+(again, as detailed in Section~\ref{sec:compactcolors}).  The remaining
+six bits are, again, all permission-like.  Three are reserved for future use
+(not currently interpreted), while the other three correspond to the current
+\cappermUnseal (U), \cappermSeal (Se), and \cappermCid (CID).  No attempt
+has been made to further refine the type space, so we continue to
+architecturally conflate object types and compartment identifiers and rely on
+system software to maintain proper partitioning.
+
+In this scheme, three primordial architectural roots should be created at
+system reset: one for virtual addresses, one for architectural control, and
+one for guarded words.  All primordial capabilities should be unsealed, have
+all defined and user permission bits asserted, and cover the full space of
+their respective identifiers.
+
+
+\begin{figure}
+\small\centering\begin{tabular}{cl}
+
+\textbf{Type} & \textbf{Bit layout} \\
+
+\raiseforbf{Virtual Address} &
+{\begin{bytefield}[bitwidth=21pt]{15}
+  \bitbox{1}{1} & \bitbox{1}{ASR} & \bitbox{1}{CC} & \bitbox{1}{SC} & \bitbox{1}{LC} & \bitbox{1}{St} & \bitbox{1}{L} & \bitbox{1}{Ex} & \bitbox{3}{user perms'3}
+ \end{bytefield}} \\
+
+\raiseforbf{Architectural Control} &
+{\begin{bytefield}[bitwidth=21pt]{15}
+  \bitbox{1}{0} & \bitbox{1}{1} & \bitbox{3}{\color{lightgray}\rule{\width}{\height}} & \bitbox{1}{CID} & \bitbox{1}{Se} & \bitbox{1}{U} & \bitbox{3}{user perms'3}
+ \end{bytefield}} \\
+
+\raiseforbf{Guarded word} &
+{\begin{bytefield}[bitwidth=21pt]{15}
+  \bitbox{1}{0} & \bitbox{1}{0} & \bitbox{9}{user perms'9}
+ \end{bytefield}} \\
+
+\end{tabular}
+
+\caption{Bit-level representations of a type-segregated metadata-bit-packing scheme.}
+\label{fig:app:comprperm:typeseg}
+
+\end{figure}
+
+% >>>
+\subsection{Type-segregation and Multiple Sealed Forms} % <<<
+
+\begin{figure}
+\small\centering\begin{tabular}{cl}
+
+\textbf{Type} & \textbf{Bit layout} \\
+
+\raiseforbf{Unsealed VA} &
+{\begin{bytefield}[bitwidth=21pt]{15}
+  \bitbox{1}{1} & \bitbox{1}{0} & \bitbox{1}{0} & \bitbox{1}{ASR} & \bitbox{1}{CC} & \bitbox{1}{SC} & \bitbox{1}{LC} & \bitbox{1}{St} & \bitbox{1}{L} & \bitbox{1}{Ex} & \bitbox{3}{user perms'3}
+ \end{bytefield}} \\
+
+\raiseforbf{Sealed VA} &
+{\begin{bytefield}[bitwidth=21pt]{15}
+  \bitbox{1}{1} & \bitbox{1}{1} & \bitbox{1}{SV} & \bitbox{1}{ASR} & \bitbox{1}{CC} & \bitbox{1}{SC} & \bitbox{1}{LC} & \bitbox{1}{St} & \bitbox{1}{L} & \bitbox{1}{Ex} & \bitbox{3}{user perms'3}
+ \end{bytefield}} \\
+
+\raiseforbf{Architectural Control} &
+{\begin{bytefield}[bitwidth=21pt]{15}
+  \bitbox{1}{1} & \bitbox{1}{0} & \bitbox{1}{1} & \bitbox{4}{\color{lightgray}\rule{\width}{\height}} & \bitbox{1}{CID} & \bitbox{1}{Se} & \bitbox{1}{U} & \bitbox{3}{user perms'3}
+ \end{bytefield}} \\
+
+\raiseforbf{Unsealed guarded word} &
+{\begin{bytefield}[bitwidth=21pt]{15}
+  \bitbox{1}{0} & \bitbox{1}{0} & \bitbox{1}{0} & \bitbox{10}{user perms'10}
+ \end{bytefield}} \\
+
+\raiseforbf{Sealed guarded word} &
+{\begin{bytefield}[bitwidth=21pt]{15}
+  \bitbox{1}{0} & \bitbox{1}{1} & \bitbox{1}{0} & \bitbox{10}{user perms'10}
+ \end{bytefield}} \\
+
+\raiseforbf{Reserved} &
+{\begin{bytefield}[bitwidth=21pt]{15}
+  \bitbox{1}{0} & \bitbox{1}{\color{lightgray}\rule{\width}{\height}} & \bitbox{1}{1} & \bitbox{10}{\color{lightgray}\rule{\width}{\height}}
+ \end{bytefield}} \\
+
+\end{tabular}
+
+\caption{A variant of packed metadata including multiple sealed forms.}
+\label{fig:app:comprperm:typeseg2}
+
+\end{figure}
+
+\pgnnote{I would like to declare war on the gratuitous comma
+`adjective, adjective noun' as in `small, sealed memory objects' --
+  `small' can refer only to `memory objects', not to `sealed'}
+Experiments with CheriOS have found that the increased alignment requirements
+for sealed capabilities induced by the original 128-bit compressed format are
+awkward (recall Section~\ref{subsec:cheri-128-implementation}).  In particular,
+there is a desire to pass small sealed memory objects, with size (and so,
+ideal alignment) well below the requisite alignment size for sealing.
+Subsequent work has defined a different CHERI Concentrate form with a dedicated
+\cotype{} field, no need of a sealed bit, and no increased alignment
+requirements to make room or the \cotype{} bits.  And so, the remainder of this
+subsection is largely mooted: all capabilities may be sealed in the new CHERI
+Concentrate format.  We retain it in this document for interest and its
+possible applicability to implementers considering different capability
+encoding options.
+
+The small objects passed by CheriOS are never sealed as interior pointers.
+That is, the sealed forms are guaranteed to have offset zero (i.e., equal
+cursor and base addresses).  This permits 10 bits of the B field to be
+transferred to the T field, offering much smaller alignment requirements.
+(Byte alignment remains possible until objects approach 1 mibibyte in length.
+Offsets need not be zero, but must be small, in the sense that they must be
+below $2^{\mathbf{e}}$.)  The experimental architectural encoding presently
+requires stealing one of the two bits described in this document as reserved
+within a capability representation.  Given the possible utility of this
+additional sealed form to the other provenance trees discussed above, it seems
+worthwhile to present a possible unified story.
+
+For this example, we drop the ability to seal architectural control
+capabilities, as we do not think these will be passed as tokens; instead, we
+believe, should system programmers desire similar policies, they are free to
+indirect, i.e., to place architectural control capabilities into small
+regions of memory, seal the rights thereto, and pass that sealed capability
+instead of a sealed architectural control capability.
+This further removes concerns around the encoding of \cotype{}s and capability
+color changing permissions (to be discussed).
+
+This illustrative
+encoding uses 17 bits: 15 from the former \cmuperms{}, 1 from the
+former sealed flag, and 1 formerly reserved.  Bit-field representations are
+shown in Figure~\ref{fig:app:comprperm:typeseg2}.  For VA capabilities, the new
+`Sealed Variant' (SV) flag, which is not a permission bit (and so not subject
+to manipulation by \insnref{CAndPerm}), distinguishes between the form with
+both T and B specified and the form with only T specified.  We expect an
+architecture using this form to have two \insnref{CSeal}-like instructions,
+each generating one of the variants.  For sealed guarded-word capabilities, we
+permit only the latter form, as we believe sealed guarded words are more likely
+to be used as tokens than as regions of integers.  One-fourth of our type
+encoding values are reserved for future expansion.
+
+% >>>
+\subsection{\texttt{W\textasciicircum{}X} Saves A Bit} % <<<
+\label{app:exp:compressperm:wxorx}
+
+\texttt{W\textasciicircum{}X} (`W xor X') is a shorthand for the notion
+that no block of memory should be, at the same time, both writable and
+executable.  Most implementations in hardware work within the MMU, and rely
+on the operating system to enforce the exclusivity of write and execute
+permissions.  From the view of application software, this means that a given
+pointer value has additional hidden state beyond its being mapped or
+unmapped.  Applications on CHERI could, instead, structure the permissions
+within capabilities to enforce exclusivity of write and execute permissions,
+trading the stateful MMU protection for having multiple capabilities
+representing the two different rights.
+
+Were we to push \texttt{W\textasciicircum{}X} on CHERI to an extreme,
+it could become a property of the capability encoding itself and, thereby,
+allow for more compact encoding of permissions.  The existing eight-bit
+architectural permission field,
+
+\begin{center}
+%
+{\begin{bytefield}[bitwidth=25pt]{8}
+  \bitbox{1}{ASR} & \bitbox{1}{CC} & \bitbox{1}{SLC} & \bitbox{1}{SC} & \bitbox{1}{LC} & \bitbox{1}{St} & \bitbox{1}{L} & \bitbox{1}{Ex}
+ \end{bytefield}}
+%
+\end{center}
+
+\noindent could instead be re-coded as a 7-bit field, making the
+\texttt{W\textasciicircum{}X} explicit:
+
+\begin{center}\begin{tabular}{rl}
+%
+\raiseforbf{RX capability:} &
+{\begin{bytefield}[bitwidth=25pt]{8}
+  \bitbox{1}{0} & \bitbox{1}{CC} & \bitbox{1}{\color{lightgray}\rule{\width}{\height}} & \bitbox{1}{ASR} & \bitbox{1}{LC} & \bitbox{1}{Ex} & \bitbox{1}{L} \\
+ \end{bytefield}} \\
+%
+\raiseforbf{RW capability:} &
+{\begin{bytefield}[bitwidth=25pt]{8}
+  \bitbox{1}{1} & \bitbox{1}{CC} & \bitbox{1}{SLC} & \bitbox{1}{SC} & \bitbox{1}{LC} & \bitbox{1}{St} & \bitbox{1}{L}
+ \end{bytefield}}
+%
+\end{tabular}\end{center}
+
+As in the type-segregation proposals, this design creates yet another split
+of architectural provenance roots: there must be two capabilities present at
+system startup, granting separate read-write and read-execute regions.
+Similarly, a single capability then could not express the total set of
+permissions that may be granted by, e.g., the *nix \texttt{mmap()} call; the
+API and consumers must be revised.  (One hopes that relatively few consumers
+initially request (or later transition, via \texttt{mprotect()}, to having)
+both write and execute permissions.)  It is not yet clear what additional
+challenges this split imposes on our goal of C compatibility.
+
+There is some redundancy yet in this encoding, in that either RX or RW
+capabilities can be monotonically turned into read-only capabilities.  One
+could imagine further segregation into a
+\texttt{R\textasciicircum{}W\textasciicircum{}X} taxonomy, but this seems
+especially likely to complicate C compatibility.  Moreover, the obvious
+utility of RW capabilities and popularity of data constants adjacent to
+executable code (and thereby reachable using relative offsets from the
+instruction pointer) argue for permitting read permissions in both write and
+execute forms.
+
+When and if combined with the compact coloring proposal below, the
+\cappermSLC (SLC) bit and its unused slot in the RX form
+would vanish.
+
+% >>>
+% >>>
+\section{Memory-Capability Versioning} % <<<
+\label{app:exp:versioning}
+
+Several existing architectures have responded to temporal safety issues in
+software by proposing to `version' memory, embed versions into pointers,
+and require that the versions of the pointer and target match on each
+dereference.  Two prominent examples are Oracle's SPARC's ADI/SSM
+\cite{sparc-m7-adi} and Arm's MTE~\cite{arm-a64-v8-a-beta}.  We conjecture
+that the combination of these ideas with CHERI would enhance both and continue
+to have reasonable performance overheads.  Between these mechanisms, we can
+offer an attractive secure mitigation of temporal safety violations in
+untrusted code.
+
+Specifically, we propose to embed a four-bit version field%
+%
+\footnote{There is nothing special about the value four; even a one-bit
+versioning scheme has practical utility, while more bits reduce likelihood of
+collision in stochastic schemes and delay revocation in deterministic schemes
+(see \cref{app:exp:versioning:syssoft}).  Four simply seems to be a popularly
+acceptable value.}
+%
+in every memory-authorizing capability, either using reserved bits or by
+shrinking the address field from 64 to 60 bits.%
+%
+\footnote{Practically, most modern systems do not make use of their entire
+64-bit virtual address space and require that all such addresses be
+sign-extended values derived from (typically) 40-bit to 57-bit values,
+depending on the architecture.  We can therefore repurpose some of these bits
+with only modest, localized changes to system software.}
+%
+Further, we pair the same number of bits of version with each `granule' of
+physical memory, which we suggest to be roughly 64 bytes.  (The proposed values
+give a spatial overhead equivalent to CHERI's capability tags: one bit per 16
+bytes.)  To ensure that untrusted code cannot inappropriately re-version memory
+granules, we provide a simple model of authorization that does not require the
+intervention of supervisor software.
+
+We divide memory-authorizing capabilities into two classes, versioned and
+unversioned, and introduce an instruction that derives a versioned capability
+from an unversioned one.  The core of this protection mechanism is this: if a
+versioned capability is used to access a granule, the access succeeds only if
+(in addition to passing the existing CHERI permissions and bounds checks as
+well as any MMU permissions checks) the granule and intra-capability versions
+are equal.  In the case of mismatch, an implementation must, at a minimum,
+cause data fetches to return $0$, capability fetches to return untagged NULLs,
+stores to fail silently, and instruction fetches to trap.  To improve the
+debugging experience, implementations may provide optional or mandatory traps
+on these fetch and stores as well.
+
+Only unversioned capabilities can authorize the re-versioning of memory
+granules.  Additionally, unversioned capabilities authorize access regardless
+of the version of the granule being accessed.  We expect that these will become
+closely held within subsystems that then exchange derived versioned
+capabilities with other subsystems; the canonical example is, of course, memory
+allocators, which will hold unversioned capabilities internally and give out
+(and take back) versioned capabilities.
+
+Versions are `sticky,' in that any capability monotonically derived from a
+versioned progenitor will have the same version.  Dually, derivations from
+unversioned capabilities are unversioned, unless the version is explicitly
+branded into the progeny.
+
+\subsection{Legacy Memory Versioning Behaviors} % <<<
+
+When adding CHERI to an architecture that already has memory versioning support
+(e.g., SPARC or Arm), it may be desirable to retain compatibility with existing
+mechanism in hybrid or legacy code.  That is, we may wish, assuming the system
+has enabled memory versioning and has provided a non-NULL DDC, for legacy
+(i.e., integer pointer using) load and store instructions to continue to
+specify the intended memory version and legacy version manipulation
+instructions to continue to function.  (Recall that all such legacy
+instructions have their integer addresses interposed by DDC.)
+
+We therefore propose that the interposed integer offsets arising from legacy
+instructions be interpreted subject to existing architectural address handling
+rules.  Arm's MTE, for example, requires the use of Top Byte Ignore (TBI),
+which partitions the 64-bit address into an 8-bit metadata field and a 56-bit
+address; we propose that Arm processors with CHERI and MTE continue to claim
+the top 8 bits of any integer offset within a capability as a metadata field.%
+%
+\footnote{Because integer offsets often come about through arithmetic, which
+may not be aware of the 8+56 partition in the semantics of the bits being
+manipulated, it may be useful to slightly tweak the encoding of versions.
+Instead of directly taking the top 8 bits as the source of the version value,
+it may be useful to XOR them with the top bit of the remaining 56-bit offset.
+Thus, the 64-bit 2's-complement values of 1 and -1 would be interpreted as
+56-bit 1 and -1, respectively, but both with a version field of zero.}
+%
+When combined with an \emph{unversioned} capability, the integer offset
+specifies the memory version used for a memory transaction; a \emph{versioned}
+capability instead overrides the requested version from the offset.%
+%
+\footnote{As memory transactions are already opportunities for traps in most
+architectures, it may be worth trapping if the integer offset calls for a
+non-zero version field in combination with a versioned capability.  On the
+other hand, it is likely acceptable from a security policy perspective if the
+discrepancy is ignored.}
+%
+This policy may also be applicable to \emph{capability-authorized} instructions
+with integer offset register operands, which may simplify capability-aware
+supervisory software that must operate on versioned integer addresses.  (It
+seems unlikely that there is utility to permitting offset \emph{immediate}
+operands to influence memory version fields.)
+
+% >>>
+\subsection{Instructions} % <<<
+
+\begin{itemize}
+
+	\item \insnnoref{CStoreVersion} sets the version bits of a memory
+granule to the value given in a register operand; the authorizing capability
+must be unversioned and must authorize stores of both data and capabilities
+to the entire target granule.  Setting the granule's version to $0$ will
+cause it to be accessible only to unversioned capabilities.
+
+	\item \insnnoref{CFetchVersion} fetches the version bits of a memory
+granule; the authorizing capability must be unversioned, and must authorize
+data fetches from the entire target granule.  A return of $0$ indicates that
+the granule is accessible only via unversioned capabilities.
+
+	\item \insnnoref{CGetVersion} copies the version field of a
+capability into a register.  It is useful mostly for debugging and for
+maintaining an abstract interface to capabilities despite the encoded form
+bits' being accessible to software.
+
+	\item \insnnoref{CSetVersion} derives a versioned capability from an
+unversioned capability and a version value from a register operand.
+Attempting to set the version to $0$ will trap.  No other fields are
+modified in the derived copy.  Attempting to make a versioned capability
+from a versioned one may succeed only if the desired and existing versions are
+equal, otherwise the result will have its tag cleared.%
+%
+\footnote{It may be sensible to always clear the tag or always trap, as
+well.  We do not have a use case for the tagged result when-equal case.}
+
+	\item \insnnoref{CLoadVersions} loads version fields for an
+entire cache-line of memory granules into an integer register, akin to
+\insnref{CLoadTags}.  It is intended as an optimization for system software
+paging virtual memory.
+
+\end{itemize}
+
+\subsubsection{Atomics} % <<<
+
+In addition to the above, we desire a means for \emph{atomic} update of the
+version of a memory granule (as well as up to a capability-sized word within
+it).  Unfortunately, our desires brush up against (micro)architectural limits.
+A version-manipulating, capability-sized (and -aligned) store-conditional
+instruction, for example, should take four operands:
+%
+\begin{inenum}
+
+  \item an unversioned capability authorizing access to the target,
+
+  \item the data/capability to store to memory,
+
+  \item the desired new version, and
+
+  \item the destination register indicating success or failure of the store.
+
+\end{inenum}
+%
+However, it is challenging to fit so many register indices into a single
+instruction and this may also exceed the port availability of the processor's
+register file.  (A general compare-and-swap instruction is even worse, adding
+both the expected value of memory and the expected memory version.)
+%
+With these constraints in mind, we propose two possibly feasible subsets:
+%
+\begin{itemize}
+
+  \item \insnnoref{CSCAndUnversion} takes an unversioned memory
+capability authorizing the store, a capability register to store, and the
+output register.  (It is, therefore, rather like an ordinary
+\insnref{CSC}.)  It fixes the desired new version to the unversioned value.
+Thus, on successful store, the memory version granule is inaccessible to any
+versioned capability, and the same authority used with this instruction can be
+used with \insnnoref{CStoreVersion} to subsequently update the target
+granule's version.
+
+  \item \insnnoref{CSCWithVersion} is similar, but reads the desired
+version \emph{from the output register} before storing back the success
+indication.  This works around the encoding space problem, but may still
+require an excess of access to the register file.
+%
+\nwfnote{Cross-reference the behavior of \insnnoref{SC.C.CAP} and
+friends, which store back to one of their inputs.  I didn't find a convenient
+chunk of prose to point at.}
+
+\end{itemize}
+
+% >>>
+% >>>
+\subsection{Use With System Software} % <<<
+\label{app:exp:versioning:syssoft}
+
+We envision that software will make use of memory versions
+\emph{monotonically}.  That is, versions of memory granules will be altered to
+revoke \emph{all} access by any existing versioned capability inclusive of that
+granule rather than to \emph{restore} access at some earlier version.  Thus, we
+believe that \insnnoref{CSCAndUnversion} is sufficiently atomic for
+software's needs.  Despite the observable transition of the granule to an
+unversioned state before any subsequent transition to a version not yet held
+anywhere in the system, the net authority in the system remains the same.
+
+Because there are only finitely many versions available, we further envision
+that the \emph{system software} will provide a \emph{revocation} mechanism (in
+the style of Cornucopia \cite{cornucopia}) to de-tag or otherwise remove
+authority from all capabilities with mismatching versions.  To minimize the
+testing required by this facility, it will test only the granule containing the
+\emph{base} of each versioned capability it encounters; software engaging in
+version-based revocation should, nevertheless, re-version all (partially)
+contained granules so that derived capabilities with offset bases are also
+revoked.  In a sense, granules exist because they are a sufficient and
+straightforward mechanism to capture spans of version information, not because
+we expect individual granules within a single segment authorized by a
+capability to be changed.  Dually, objects with different lifetimes should not
+share granules; this results in much stronger alignment requirements for
+allocators, but the practical impact remains to be measured.
+
+We do not specify the shape of the interface exposed for this facility; a
+traditional system call to the (privileged) kernel is one possibility for
+implementation, but more `autonomic' approaches are feasible as well.  We
+envision a global `epoch' counter maintained by the kernel, stepping after
+every revocation pass.  If software remembered the counter's value at the time
+each allocation came to have its current version, that software would know when
+all capabilities with their base in that allocation and of the wrong version
+had necessarily been destroyed: in the second epoch after re-versioning.  Such
+a scheme would permit sharing work across many allocators desiring revocation
+within the same address space.
+
+Because revocation may be done in the background, versions are intended to
+be used once between revocations. That is, software should not assume that
+it can restore an earlier version to re-authorize an existing capability,
+because at any moment the mismatched capability may have become de-tagged.
+
+Whereas we conjecture that the minimum requirements given above for mismatched
+versions for loads and stores are sufficient to eliminate temporal safety
+issues, there remains the possibility of apparently \emph{inducing} bugs in
+programs running under our new semantics.  For example, if software attempts
+to (re)initialize an object using a stale capability, the memory will not be
+updated and may be reused in inconsistent state.  Trapping on version
+mismatch would better expose such issues.
+
+% >>>
+\subsection{Microarchitectural Impact} % <<<
+
+The cache fabric must now store the version of each granule in each cache line
+(which, in the proposal above, is one, given 64-byte cache lines).
+Dereference operations must forward the capability's version field down to
+the cache fabric as well.  The minimum requirements for version mismatch
+are, however, intended to remove the need to track store requests through
+the memory hierarchy.  While precise traps on stores would require
+essentially a full read-modify-write cycle, the cache fabric may be able to
+raise \emph{imprecise} traps well after accepting a store by tracking the
+tentative version bits until they can be checked against the authoritative version
+table.
+
+% >>>
+% >>>
+\section{Linear Capabilities} % <<<
+\label{section:linear-capabilities}
+
+Linear capabilities are intended to support the implementation of
+operating-system and language-level linearity features, which ensure that at
+most one reference to an object is held at a time.
+This feature might be used to help support efficient memory reuse -- e.g., by
+requiring that a reference to stack memory be `returned' before a caller is
+able to reuse the memory.
+Architectural linearity does not prevent destruction of the reference, which
+may require slow-path behavior such as garbage collection, but can support
+strong invariants that would help avoid that behavior in the presence of
+compliant software.
+This architectural proposal has not yet been validated through
+implementation in architecture, microarchitecture, or software.
+
+\subsection{Capability Linearity in Architecture}
+
+We propose to add a new bit to the capability format marking a capability as
+\textit{linear}.
+%
+\note{Because the ISA permits overwrites of linear capabilities (in both
+registers and memory), the more appropriate moniker
+from substructural logic would be `affine', rather than `linear'.  It
+may be worth calling this out in the prose, but not worth renaming
+everything.}{nwf}
+%
+It could be that this is a permission (e.g., Permit\_Non\_Linear).
+However, as this
+feature changes a number of other aspects of capability behavior, we recommend
+not conflating this behavior with the permission mechanism, instead adding a
+new field.
+
+Two new \textit{linear move} instructions would be added:
+
+\begin{description}
+\item[Linear Load Capability Register (\insnnoref{LLCR})]
+This instruction loads a capability from memory into a register, atomically
+clearing the memory location [regardless of whether it loaded a linear
+capability?].
+\note{Clear the whole word or just the tag?}{nwf}
+
+\item[Linear Store Capability Register (\insnnoref{LSCR})]
+This instruction stores a capability from a register into memory, atomically
+clearing the register when a successful store takes place (e.g., if it does
+not trigger a page fault) [regardless of whether it stored a linear
+capability?].
+\end{description}
+
+The reason to introduce an explicit
+linear
+load is to avoid taking the cost of an
+atomic operation for every capability load dependent on whether the loaded
+capability is linear.
+%
+\note{A non-linear load of a linear capability results in an untagged
+register?}{nwf}
+%
+A separate linear store instruction is not motivated by this concern, but
+would add
+symmetry, avoiding the need for store instructions to vary their behavior
+based on capability type.
+
+A new Permit\_Linear\_Override permission is added, which controls how
+existing capability load and store instructions (e.g., \insnref{CLC} and
+\insnref{CSC}) interact with linear capabilities.
+If the permission is not present, then loaded linear capabilities will have
+their tag cleared when written into a register, and stored linear
+capabilities will have their tag cleared when written to memory.
+This behavior maintains linearity without changing the register or memory
+write-back behaviors of these instructions.
+
+If Permit\_Linear\_Override is present on the capability being used to load or
+store non-linear capabilities, then linearity is violated, allowing both the
+in-register and in-memory capabilities to continue to be valid and marked as
+linear.
+This permission allows for privileged system software to violate linearity
+when, for example, implementing mechanisms such as Copy-on-Write (COW) in the
+the OS virtual-memory subsystem or debugging features.
+
+To save instruction encoding space, we might limit these memory access
+instructions to be R-type with only a register-specified offset.  This
+may be adequate if the instructions are infrequently used.
+
+For register-to-register instructions, there are several options -- in
+particular, when implementing capability-manipulation instructions such as
+\insnref{CIncOffset} and \insnref{CSetOffset}:
+
+\begin{itemize}
+\item We might make existing instructions remove the tag in register write
+  back for linear capabilities, enforcing linearity by preventing duplication
+  of linear capabilities.
+
+\item We might require that, when existing instructions operate on linear
+  capabilities, they write back to their source register, enforcing linearity
+  by avoiding duplication to a second register.  This might be
+  simplest microarchitecturally.
+
+\item We might add new explicitly linear variants of some existing
+  instructions, which would enforce linearity by clearing the source register,
+  preventing duplication.
+\end{itemize}
+
+In general, ensuring write-back to the same register is easy and cheap to
+check dynamically; it avoids the need to introduce a large number of new
+instructions offering near-identical behavior.
+It also avoids increasing the number of registers that must be written back
+by instructions.
+
+Additional concerns exist around the implementation of \PCC{} as relates to
+\insnref{CGetPCC}, which normally duplicates a capability.
+Although undesirable, the natural design choice is to strip the tag when
+writing to the target register, if \PCC{} is linear.
+
+\subsection{Capability Linearity in Software}
+
+The above architectural behavior means that, on the whole, software must
+be aware when handling linear capabilities; code must be generated
+specifically to use new linear load and store instructions, and to utilize
+other register-to-register instructions in a manner consistent with linearity.
+There are several specific implications that must be taken into account
+when writing system software or compilers:
+
+\begin{itemize}
+\item Linear capabilities must be explicitly identified via the source
+  language -- e.g., via types or qualifiers -- so as to guide code generation.
+  It might be desirable to utilize techniques such as symbol mangling to
+  prevent accidents.
+
+\item Linear values cannot be properly preserved by ordinary stack loads and
+  spills, so the compiler must take explicit action to prevent this from being
+  necessary.
+  This might also require static limitations on use of capabilities in the
+  language.
+
+\item When linear capabilities are used and manipulated as pointers, it may be
+  necessary to generate code quite differently, or to limit expressiveness.
+  For example, implied pointer arithmetic when iterating using a pointer
+  requires that the original pointer be destroyed, or that the pointer be
+  left unmodified but accessed using an integer-register index.
+  It is not yet clear to what extent this would interact with common C-language
+  idioms.
+
+\item Some systems code must be linearity-oblivious, such as context-switching
+  or VM code, and can employ Permit\_Linear\_Override to load and store
+  ordinary and linear capabilities using non-linear loads and stores.
+  However, it must assuredly not violate invariants of affected software, or
+  else linearity may not be enforced.
+
+\item Many current C-language OS and library APIs may be linearity-unfriendly,
+  as they frequently accept an existing pointer as an argument, but do not
+  `return' it to the caller.
+  It may be desirable to have a specific set of extended APIs that are
+  linearity-friendly -- e.g., variants of \ccode{memcpy} that copy data into
+  and out of linearly referenced memory.
+  It is unclear
+  whether this would extend to a broader suite of APIs, such as OS \ccode{read}
+  and \ccode{write} system calls --  and perhaps would imply polyinstantiation.
+
+\item Debugging tools would need to become aware of linearity so as to
+  accurately display information about linear capabilities found in registers
+  or memory.
+  They might use Permit\_Linear\_Override to gain access to the full contents
+  of the register with tag, but must still inspect capability fields suitably,
+  and avoid the need to spill values.
+  It is not clear how this would interact with current debugger internals.
+\end{itemize}
+
+In general, when linearity is violated, it will lead to loss of tags,
+preventing dereferences that violate invariants.
+It is not clear to what extent this would be easily debuggable.
+We can imagine having non-linear sequences generate an exception,
+but in some cases this may be microarchitecturally awkward.
+
+Overall, it is not clear to what extent this proposal can interact well with
+real-world software designs, or to what extent it usefully supports new
+software behaviors.
+Key use cases motivating this design typically involve garbage collection
+avoidance: e.g., passing an stack pointer across protection-domain boundaries
+and checking that it is `returned' before continuing, avoiding the need for
+a GC to sweep the recipient domain.
+But this does not necessarily alleviate the need to implement more complex
+behaviors such as GC in the event that the invariant is violated.
+
+\subsection{Related Work in Linear Capabilities}
+
+Skorstengaard et al.~have concurrently developed ideas about linear
+capabilities~\cite{Skorstengaard:2019:stktokens}, which focus on how to
+produce a memory-safe execution substrate over a CHERI-derived abstract
+capability instruction set. They are able to use linear capabilities to
+construct a temporally safe stack calling convention against the model.
+This allows formal proof of well-bracketed control flow and stack-frame
+encapsulation.  However, their approach also relies on two further
+instructions not present in our current sketch: capability split and splice
+instructions allowing linear capabilities for stack subsets to be separated,
+delegated, returned, and rejoined.  It is not yet clear to us whether these
+additional instructions are microarchitecturally realistic, especially in
+the presence of compressed capabilities.
+
+\nwfnote{The `splice' instruction of~\cite{Skorstengaard:2019:stktokens} has
+potential interactions with sweeping revocation.  The latter depends on a
+strict hierarchical partitioning of memory, in which the allocator/revoker
+can be certain that there are no capabilities that partially overlap the
+regions it revokes.  Permitting splicing of arbitrary linear capabilities
+violates this assumption: splice a linear capability at the upper end of one
+allocation
+together with
+one at the lower end of the adjacent, successive allocation.
+Allocators
+could prevent this by ensuring gaps between
+allocations,
+or the system can enforce restricted joins of linear capabilities via a
+single architectural bit to indicate that a capability is the lowest result
+of a series of splits.  When splitting, if this bit is clear in the input,
+then leave it clear only in the lower result; if it is set in the input,
+leave it set in both outputs.  When splicing, enforce that either both bits
+are set (and leave it set in the result) or that the lower is clear and the
+upper is set (and leave it clear in the result).  When initially allocating
+a segment, clear the bit.  The effect is to enforce the tracking of the
+lowermost capability arising from a series of splits and preventing it from
+being spliced with a yet-lower linear capability, which will either be an
+initial allocation (bit clear) or the upper result of a split (bit
+set).}
+\pgnnote{This seems REALLY PIGGY.}
+\nwfnote{I am not sure what that means.}
+
+The creators of the SAFE architecture~\cite{chiricescu2013safe} also propose
+that \textit{linear pointers} could contribute to reasoning about concurrent
+memory use.
+
+% >>>
+\section{Indirect Capabilities} % <<<
+\label{section:indirect-capabilities}
+
+Indirect capabilities could support revocable or relocatable objects without
+modification of application executables.
+An indirect capability would be identified by the hardware as a pointer to the pointer
+to the data.
+That is, a load that takes as an address a capability that is marked as an
+indirect capability would load a capability from the base address of the
+indirect capability, and then would apply any offset to the loaded capability
+before dereferencing and placing the returned data in the destination register.
+Therefore, a single load that finds an indirect capability as its address would
+perform two loads, a pointer access, and then a data access.
+
+\subsection{Indirect Capabilities in Architecture}
+
+We propose to add a new bit to the capability format, marking a capability as
+\textit{indirect}.
+We recommend
+not conflating this behavior with the permission mechanism, instead adding a
+new field.
+
+One new instruction would be added:
+
+\begin{description}
+\item[Make Indirect (\insnnoref{CMI})]
+This instruction makes an ordinary capability into an indirect capability
+such that any future dereference will effectively dereference the capability
+pointed to by this indirect capability.
+The bounds of the capability must be at least the size of one capability,
+and will be effectively truncated to this length by \insnnoref{CMI},
+though the original bounds will be preserved and applied to the
+pointer on data access.
+
+\end{description}
+
+The \insnnoref{CMI} instruction makes a capability indirect, but no
+instruction can make an indirect capability direct again.
+As a result, delegating
+an indirect capability does not
+delegate access to the pointer that is dereferenced, but only to the data being
+pointed to.
+
+Capability-manipulation instructions such as
+\insnref{CIncOffset} and \insnref{CSetOffset}
+would transform the offset of the indirect capability,
+but this offset would be applied to the pointer on data access.
+The pointer access will always use the base of the indirect capability.
+In addition, \insnref{CSetBounds} will transform the bounds of the indirect
+capability, but these bounds will be applied to the pointer on data access.
+The final access must be both within the length of the indirect capability,
+which may contain program-narrowed bounds, and the bounds of the object pointer.
+The bounds of the indirect capability would be implicitly the size of one
+capability, and would not need to be stored.
+This behavior allows pointer arithmetic to work as expected on indirect
+capabilities, to allow programs expecting standard capabilities to work
+unmodified.
+
+\subsection{Indirect Capabilities in Software}
+
+The above architectural behavior means that, on the whole, that software need
+not be aware when handling indirect capabilities, but only code that performs
+allocation or delegation would construct indirect capabilities, maintaining
+pointer tables.
+
+Indirect capabilities might be used for general revocation between compartments.
+A buffer passed to another compartment could be passed as an indirect
+capability,
+with a word allocated by the caller to hold the pointer.
+On return, this pointer capability will be invalidated, and no further use
+of the indirect capability will succeed.
+
+Indirect capabilities might be used to achieve memory safety for the heap in C.
+Every allocation could return an indirect capability, and generate a new entry
+in a pointer table.
+A call to free would invalidate the entry in the pointer table, and memory could
+be reused immediately with a new allocation in the pointer table.
+Sweeping revocation may eventually be necessary to free virtual memory space
+consumed by freed segments of the pointer table.
+
+Indirect capabilities might be used for a copying garbage collector.
+Relocation of allocated objects would be facilitated by all references being
+indirected through a single pointer.
+When an object is moved, a single pointer could be updated.
+While an object is being moved, the pointer could be made invalid, with any
+use causing a trap that could be caught and handled appropriately.
+
+% >>>
+\section{Indirect Sentry Capabilities} % <<<
+\label{app:exp:indsentry}
+
+While sentry capabilities facilitate the construction of capabilities
+that grant the right to run code from a fixed entry point, if that code is
+intended to run in a particular (register) context, software must use
+trampolines (e.g., the PLT stubs) to ensure that this context is constructed
+correctly.  These trampolines must intermingle data and code, as the trampoline
+has amplified access, relative to its caller, only to the region of its
+instruction pointer.  The trampolines must, as well, be \emph{per-context}
+(e.g., library instance), which necessitates duplication of the trampoline code
+sequence for each context.
+
+\subsection{Points-to-PCC} % <<<
+
+Herein, we propose yet another architecturally-understood form of sealed
+capability, the \emph{indirect} sentry capability, which is a curious
+hybrid of a sentry capability (of \cref{sec:arch-sentry}) and a special
+case of an indirect capability (recall \cref{section:indirect-capabilities}).
+Where sentry capabilities point directly at the code to be run (and
+expose the entire region bounded by PCC to the callee), these indirect
+capabilities point at a capability to be installed into PCC (which, in turn,
+points to the code to be run).  Upon invoking such a capability, it is unsealed
+and installed into the IDC (capability) register and the pointed-to capability
+is installed into PCC; thereby, the callee is granted access to both regions of
+memory.%
+%
+\footnote{If this pointed-to capability is, itself, a sentry capability,
+it should be unsealed as part of the load into PCC.  We do not currently
+believe that \emph{requiring} this capability to be a sentry capability
+has any meaningful impact on the security properties of the system, and so we
+do not.}
+%
+The unsealing and IDC register writeback is not separable from the load from
+memory and change of PCC: either both registers are updated and the instruction
+completes, or neither are updated and the instruction traps.  We propose a
+\insnref{CInvoke}-like, single-operand instruction for such invocations,
+\insnnoref{CInvokeInd}; we intend this to be a separate instruction from
+\insnref{CJR} so that there is no need for a conditional load in the
+microarchitecture.  We do not envision a version of \insnnoref{CInvokeInd}
+that writes a link address, but see below for discussion of making function
+calls and returns with \insnnoref{CInvokeInd}.
+
+Any capability authorizing capability load may be made into a sealed indirect
+entry capability, for which we propose reserving the \cotype{} $2^{64} - 4$.%
+%
+\footnote{While we do not anticipate comingling code and data within the
+authorized region, we do not see much benefit in enforcing a lack of
+\cappermX on the original capability nor in shedding it as part of
+sealing.
+%
+\nwfnote{If we get really tight on encoding space, we could use \cappermX
+to distinguish between sentry and indirect sentry capabilities both with
+\cotype{} $2^{64} - 2$.}
+%
+}
+%
+A new, two-operand instruction is required for this action, which we call
+\insnnoref{CSealIndEntry}.
+
+It is straightforward to adapt the designs of \cref{sec:arch-sentry} to this
+instruction so that, for example, the PLT stub \emph{code} can be relocated to
+the common, read-only section, leaving a kind of data-only trampoline which
+contains capabilities to the (also shared) code to be run and the per-instance
+RW data.  Each entrypoint requires one capability, rather than a full PLT stub.
+This enables unifying the per-instance PLT stub and per-instance data regions
+into a single per-instance region which continues to not need execute
+permission.
+
+Additionally, this mechanism could be suitable for decreasing the information
+exposure between caller and callee functions.  If, rather than exposing a return
+(sentry) capability to the callee, the caller were to spill its return
+capability to the stack and expose a sealed indirect entry capability derived
+from the stack, the callee can have its access to the caller's stack completely
+removed.  Upon return, the caller's original stack capability would be
+available in IDC.  Spilling the return address will involve storing a
+capability derived from PCC but pointing past the \insnnoref{CInvokeInd}
+instruction.  All told, we expect this kind of function call to require ten
+instructions on call rather than the one \insnref{CJALR}:
+%
+\begin{itemize}
+
+	\item three (\insnref{CGetPCC}, \insnref{CIncOffsetImm},
+		\insnref{CSC}) to compute and spill the return address,
+
+	\item two to move the stack pointer
+		(\insnref{CRepresentableAlignmentMask},
+		\insnref{CAndAddr}),
+
+	\item four to bound the stack pointer (\insnref{CGetOffset},
+		\insnref{CSetOffset} (to zero), \insnref{CSetBounds},
+		\insnref{CSetOffset} (back)),
+
+	\item one to seal indirect sentry capability into the link register
+		(\insnnoref{CSealIndEntry}), and
+
+	\item one to transfer control (\insnref{CJR} or
+		\insnnoref{CInvokeInd}).
+
+\end{itemize}
+%
+There is likely opportunity for additional, specialized instructions here;
+some plausible examples include:
+%
+\begin{itemize}
+%
+  \item An instruction which set the \emph{limit} (i.e., $\cbase +
+  \clength$) of a capability to the cursor and left the base alone could
+  replace the four instruction sequence bounding the stack pointer.
+%
+  \item \insnref{CRepresentableAlignmentMask} and \insnref{CAndAddr}
+  could be fused into a dedicated instruction for aligning the capability's
+  offset appropriately.
+%
+\end{itemize}
+
+% >>>
+\subsection{Points to Pair} % <<<
+
+Another option, for architectures open to multi-word transactions in their
+memory subsystems, is an indirect sentry capability which points to the pair of
+PCC and IDC.  Invocation of such a sentry performs two capability loads through
+an ephemeral (architecturally invisible), unsealed copy of the given sentry and
+then, with both capabilities in hand, installs both into the register file
+atomically.  There is no requirement that the two capabilities pointed at be
+sealed.  Because these capabilities reside in memory, the instruction
+constructing these ``points to pair'' indirect sentries likely cannot perform
+any validation on their contents.
+
+% >>>
+% >>>
+\section{Anti-tamper Seals}
+\label{sec:anti-tamper}
+
+When implementing allocators such as the C language's malloc and free,
+it is common to require that the caller only pass values to free that
+were previously returned to malloc (according to ISO C, doing otherwise
+is undefined behavior.)
+As is typical of C, run-time programmers exploit this and do not perform
+checks that the passed pointer is in fact an allocated pointer and the
+implementation may not retain sufficent information to confirm this.
+We could greatly reduce the number of check in the free path if we could
+be certain that the passed capability was exactly the one we handed out.
+
+To address this need, we propose a new variant of sealing: anti-tamper seals.
+A portion of the otype space would be reserved for anti-tamper seals
+and capabilities sealed with an anti-tamper otype would have the following
+properties:
+\begin{itemize}
+  \item The capability can be dereferenced or jumped to as though it were
+  unsealed.
+%
+  \item Address modifying instructions (e.g. CSetOffset) work as though
+  the capability where unsealed.
+%
+  \item CAndPerm, CSetBounds, and CSetBoundsExact unseal the capability
+  (setting its otype to -1).
+  \bdnote{Other capability derrivation instructions require evaluation...}
+\end{itemize}
+
+The justification for allowing address adjustments is similar to that
+for allowing capabilities to stray out of bounds.
+We want to allow for the case that a programmer alters the address
+of a capability before restoring its address using some seperate state
+(e.g. buffer length) and freeing it.
+It's unclear how common such code is, but intuitively such patters
+will be difficult to detect statically.
+
+% >>>
+\section{Compact Capability Coloring} % <<<
+\label{sec:compactcolors}
+
+\note{CInvoke presents an interesting challenge, generally, when we desire to
+restrict capability flow: the colors of the sealed capabilities authorizing
+CInvoke, the current PCC, and any argument capabilities to be passed must be
+sensible to the calling domain (which holds them, of course, prior to the
+CInvoke), but will become visible in the callee domain.  This suggests that
+callees must have some private, suitably colored region of memory whither to
+spill whatever colors come their way.  This further suggests, perhaps, that
+the assignment of semantics to individual colors may not be as unconstrained
+as desired, as the decisions are not confined to particular security
+domains.}{nwf}
+
+As noted above, the \cappermG permission described in the model of
+Section~\ref{sect:capability-permission-bits} is semantically not parallel
+to the other permissions.  It is a one-bit attribute of the capability
+itself, a concept we term a \emph{color}, borrowing from the
+information-flow
+analysis community~\cite{Popek79}.  Capabilities without the \cappermG
+color (called Local) have their \emph{flow} constrained, in that they can
+be stored only through a capability (of any color) bearing the
+\cappermSLC permission (as well as
+\cappermSC and \cappermS).  These two bits, one color and
+one permission, are leveraged by the existing runtime system to ensure that
+pointers to the stack can be stored only to the stack (and not the heap).
+That is, excepting capabilities within the TCB, all capabilities authorizing
+access to stack memory are colored Local, and all capabilities bearing the
+\cappermSLC permission authorize access only to stack
+memory.  While the model permits a capability to stack memory (which must,
+per the above restriction, be Local) to be without the
+\cappermSLC permission, such capabilities are not
+deliberately constructed (unless they lack \cappermSC and/or
+\cappermS as well, i.e., as part of a read-only view).
+
+To recapitulate, then, we have the following four states of being for
+capabilities:
+
+\begin{center}\begin{tabular}{ccc}
+{\bf Color} & {\bf \cappermSLC} & {\bf Use} \\
+\hline
+Global & Yes & TCB only \\
+Global & No  & Heap memory \\
+Local  & Yes & Stack memory \\
+Local  & No  & Unused
+\end{tabular}\end{center}
+
+The last configuration may be created (even outside its read-only utility)
+by monotonic action from any of the other configurations.  These colorings
+and permissions capture the following intended flow policy:
+
+\begin{center}\begin{tabular}{ccc}
+{\bf Capability type...} & {\bf Stored through type...} & {\bf Permitted} \\
+\hline
+Stack & Stack & Yes \\
+Heap  & Stack & Yes \\
+Stack & Heap  & No  \\
+Heap  & Heap  & Yes \\
+\end{tabular}\end{center}
+
+In this policy, stack-type capabilities are universal authorizers of
+stores (`universal recipients', if you will) and heap-type capabilities
+are universally authorized to be stored (`universal donors').  (The
+TCB-only, Global capabilities with \cappermSLC may be
+stored to and may authorize any capability store; the unused state can be
+stored only to TCB- or stack-state capabilities, and may authorize storage
+only of TCB- or heap-state capabilities.)
+
+Neglecting the TCB state for a moment, we see that a single bit should be
+sufficient to encode our desired policy, using a material conditional:
+\emph{if} the capability being stored is stack-type, then the capability
+authorizing this store must also be stack-stated (or, equivalently, phrased
+as the contrapositive, \emph{if} the capability authorizing the store is
+heap-stated, the capability being stored must also be heap-stated). Similar
+flow policies also exist for flows across permission rings (the kernel may
+hold its own and user capabilities, but user programs may hold only user
+capabilities) and for flows through garbage-collector-managed memory regions
+(capabilities to managed memory may be stored only in managed memory,
+so that the collector must be notified of roots escaping).  This suggests that we are justified in
+carving out several bits for orthogonal colorations; we suggest at least
+three, for the cases just considered, and perhaps no more than six, for
+reasons we will discuss below.
+
+To abstract over the several colors, we adopt the terms `positively colored' and
+`negatively colored' to refer to the two possible states of a color.  The flow
+policy is the logical \emph{and}
+of the conditional for each color: ``if the
+capability being stored is positively colored, then the capability authorizing the
+store must also be positively colored'' or, equivalently, ``if the capability
+authorizing the store is negatively colored, the capability being stored must be
+negatively colored.''  Positively colored capabilities are the `universal
+recipients', and
+negatively colored capabilities are the `universal donors'.%
+%
+\footnote{Another dimension of generalization would be to have
+\emph{load}-side color checking.  That is, we could imagine enforcing
+policies of the form ``if the capability authorizing a load is positively colored, then
+the capability loaded must also be positively colored (and if not, the result is not a
+capability).''  We have no immediate use for such policies, but for somewhat
+related considerations, see Section~\ref{app:exp:recmutload}.}
+
+The two-bit color-and-permission scheme described at the start of the
+section has a simple answer to the `primordial' coloring of capabilities,
+and to the recoloring of capabilities into target states: the
+maximally permissive TCB state may be monotonically transformed with
+\insnref{CAndPerm} into any other state.  Subsequent (monotonic)
+actions will never convert a heap-type capability into a stack-type one, or
+vice-versa.  Given only a single bit for our color, any primordial
+capability must have \emph{some} color, not a dedicated TCB-only
+`colorless' choice.  Further, our one-bit scheme must not ambiently permit
+conversion, in either direction, between the two states.  We therefore
+propose that color bits are separate from permissions, immune to the action
+of the ambiently available \insnref{CAndPerm} instruction.  We suggest
+that, primordially, capabilities be positively colored in all colors, so that, having
+explicitly changed the color of some memory capabilities, the software may
+not accidentally store into these now negatively colored regions.
+
+What remains to be spelled out, then, is the \emph{selective} authority to
+alter colors.  Towards this end, we conceptually introduce yet another
+`space' of identifiers guarded by capabilities and introduce a
+`color-change authority' capability, which moves about the system as any
+other (and itself bears colors).  The primordial capability authorizes
+any change to any color of any capability anywhere in memory.  Such
+authority may be monotonically shed, coming to authorize only some changes
+(e.g., creating stacks from heap memory, but not the reverse) to some colors
+(e.g., changing only the stack/heap color but not the kernel/user color).%
+%
+\footnote{In principle, one could also monotonically confine color changes
+to capabilities located in particular parts of memory or, perhaps more
+usefully, to memory capabilities \emph{referencing} particular parts of
+memory.  Encoding a restricted notion of change authority for non-memory
+capabilities such as sealing, compartment, or color-change capabilities is
+less obvious.  We are not yet sure how to proceed in this dimension of
+monotonicity, and do not so here.  Our color-change capabilities will
+always authorize changes to any capability anywhere, but, of course, the
+would-be authorized agent needs access to the source capability in the first
+place.}
+
+\paragraph{Variant 1}
+%
+We introduce a new instruction, \insnnoref{CChangeColor}, which takes a
+capability register containing the source capability, another for the
+destination, and a third for the authority capability.  This instruction
+carries out \emph{all authorized transitions} to produce a target that differs from the source only
+in its colors.  We might have preferred a four-parameter instruction, which
+additionally specified \emph{which} color to change from the authorized set,
+but this would likely require too many bits; in practice, we believe that
+color-change-authorizing capabilities would be few and relatively static, so
+the cost of tailoring to uses would be small.
+
+An initial encoding of such color-change authority capabilities,
+backwards-compatible with the existing capability encoding described in this
+document, is to use a capability that
+%
+\begin{itemize}
+%
+  \item Bears no permissions other than a new Permit\_Change\_Color permission.
+(Ideally, this would be encoded as the \emph{type} of the capability, and not
+consume an entire permission bit.)
+%
+  \item Has a base of zero and a limit of the top of the address space.
+%
+  \item Stores in its offset a bitmask authorizing color changes as follows:
+color $n$ may be transitioned from its current value $c_n$ to its negation
+if bit $2n + c_n$ is set.
+%
+\end{itemize}
+%
+It is immaterial which of `0' or `1' one assigns to the different color
+choices.  However, the system must pick one; we suggest using `1',
+commonly read as `true', for the `positively colored' choice, in keeping with the
+presentation above.
+In this encoding, the offset-adjusting instructions must be modified to
+permit only bitwise \emph{and} operations on the offsets of these capabilities.
+(If one is conflating capability types, as we do at present, the appropriate
+guard is that \emph{only} Permit\_Change\_Color is set.) This is perhaps the
+most awkward feature of this design, though we believe the checks can be
+added without impacting timing.  (In a world where capability types were
+explicit and separate from permission bits, we could reuse the permission
+bits, already subject to manipulation only by \insnref{CAndPerm} to
+carry our permission bitmask, assuming there are at most half as many colors
+as permission bits.)
+
+\paragraph{Variant 2}
+%
+Perhaps a more natural encoding
+would instead have capabilities that enact
+exactly one color change when cited (but may \emph{authorize} more than one).
+Here, we propose that the space of integers from $0$ to $2C$, with $C$ being
+the number of color bits available in the system, be another `identifier
+space' for capabilities.  A color-change capability holding value $2n+c_n$
+requests toggling color $n < C$ from $c_n$ to its negation when used as the
+authorizing capability with the \insnnoref{CChangeColor} instruction.  In
+this scheme, there would be no need for any fiddly bit manipulations of
+capability offsets, but at the cost of more capabilities held by agents
+authorized to perform some, but not all, color changes.
+
+\paragraph{Variant 3}
+%
+In fact, there is no need to introduce an entirely new capability type,
+permission bit, or instruction.  Because sealing object types
+(\cotype{}), in practice, are only at most 24
+bits wide, and there are very few colors, we could reuse invalid encoding space
+for sealing capabilities to also authorize color changes: values $x$ in the
+range of $2^{24}$ to $2^{24}+C$ could be defined as colors rather than invalid
+\cotype{}s and the existing use of \cappermSeal and \cappermUnseal bits could
+control setting the target capability's color number $x - 2^{24}$ to become
+positively or negatively colored.  The existing \insnref{CSeal} and
+\insnref{CUnseal}
+instructions could be used in lieu of any new
+\insnnoref{CChangeColor}.  This shares with variant 2 the need to have many capabilities
+held by agents authorized to change multiple colors if they are not contiguous
+or authorize different transition directions.
+
+\note{In light of the increased alignment requirements imposed on sealed
+capabilities and to facilitate sealing of capabilities authorizing color
+change, one may wish to shift the color index up by 12 bits, using $b$ to $b
++ 2^{12}C$ and ignoring the bits below 12.  One might be tempted by $b =
+2^{24}$, so as to be `just above' the \cotype{} space, as
+it
+was above, but
+as sealing alignment requirements apply to them as well, perhaps $b =
+2^{36}$ is a better choice.}{nwf}
+
+% >>>
+\section{Sealing With In-Memory Tokens} % <<<
+\label{app:exp:typetoken}
+
+Deciding on the number of \cotype{} bits within a sealed capability has
+been challenging, because the bits come at the expense of bits for precision
+of bounds, permissions, and colors.  In this section, we propose that
+\emph{virtual addresses} can play double-duty as \emph{type identifiers},
+either supplanting or reducing the need for in-capability \cotype{}
+bits.  The design of this section is a somewhat invasive change to CHERI,
+but appears promising.
+
+\subsection{Mechanism Overview} % <<<
+
+We propose that sealed objects have their type not in the referring
+capability, but rather in a tagged capability-sized structure at the
+\emph{base} of the object in memory.  This structure is termed a `type
+token' and it contains a virtual address (and metadata) but does not confer
+any permissions, to its contained address or otherwise, to its bearer; in
+fact, as a defensive posture, we do not permit tagged type tokens to be
+loaded into registers unless PCC has \cappermASR.%
+%
+\footnote{This means that a sealed object cannot simply be copied via
+\texttt{memmove}; a copy or move constructor must be invoked to reconstruct
+the type tag on the target memory.  This does not seem to be an especially
+high burden.  In fact, even the \cappermASR caveat can
+be removed if an alternative mechanism for tag reconstruction is made
+available to the kernel; for example, capability reconstruction as per
+\cref{section:capability-reconstruction} could gain the ability to
+reconstruct tags given the sealing authority.}
+%
+In addition to creating a sealed reference capability, sealing an object
+would \emph{store} a suitable type token to memory, derived from the
+capability used to authorize the seal.  Unsealing \emph{fetches} and
+verifies this type token against the capability authorizing the unsealing.
+
+% >>>
+\subsection{Shared VTables with Sentry Capabilities and Type Tokens} % <<<
+\label{app:exp:typetoken:vt}
+
+\begin{figure}[htb] % fig:app:exp:typetoken:vt <<<
+  \centering
+  \includegraphics{fig-type-token.pdf}
+
+  \caption{Schematic representation of a shared VTable design for a base class.
+  The user directly holds a sentry capability to the object constructor guard,
+  which uses the adjacent Permit\_Create\_Type\_Token-bearing capability to
+  stamp object instances.  Each object instance is held by the user through a
+  \cappermLC-bearing capability and has a two-capability header,
+  consisting of a \cappermLC-bearing capability to the VTable and
+  a sealed capability bearing load and store permissions to the object instance
+  data.  The VTable itself is an array of sentry capabilities pointing at
+  method guards, which in turn verify the object instance's type token against
+  their unsealing right before invoking the actual class method handler.}
+  %
+  \label{fig:app:exp:typetoken:vt}
+
+\end{figure} % >>>
+
+Sentry capabilities (recall \cref{sec:arch-sentry}) give software the ability
+to ensure that control flow can enter a given region at a particular
+address: the bearer of a sentry capability can jump to it but cannot adjust
+its offset.  However, unlike the existing
+\insnref{CInvoke} mechanism, sentry capabilities when invoked transition only the PCC register.
+To transition other registers as a function of the instance, we propose a
+PLT-like scheme using dedicated trampolines to load \emph{unsealed}
+capabilities that were nevertheless beyond the reach of the caller, due to
+the sealed nature of the sentry capability held.
+
+In-memory type tokens allow software the ability to mimic the existing
+CHERI sealing mechanism, trading one capability in memory to not need the
+\cotype{} bits in referring capabilities.  (This does come with the
+additional cost that sealing a region of memory under multiple seals will
+require the use of several tokens in memory with successively larger bounds
+in the referring capabilities.) In \cref{fig:app:exp:typetoken:vt} we show a
+schematic representation of using in-memory type tokens to guard method
+invocation of a multiply instantiated (C++) object.
+
+Combined with sentry capabilities, an object's shared code can now securely
+verify that its first argument is indeed a sealed capability to a data
+region resulting from this object's constructor.  The constructor is made
+available as a sentery capability to a region containing a capability bearing
+\cappermSeal.  The non-constructor capabilities in the VTable are sentry
+capabilities pointing within a region bearing corresponding \cappermUnseal
+rights.  These three regions (the constructor guard code, the method guard
+code, and the VTable) are created once, when the object class is loaded, and
+will never be written to thereafter.  Conveniently, the object-class code
+location can be used as its own type token value, there is no need for a
+separate pool of virtual addresses for type token values.  The separation of unsealing
+rights is not essential and is another defense in depth: the non-constructor
+methods will not necessarily come to hold, even transitively, a capability
+bearing \cappermSeal for this object type.
+
+% >>>
+\subsection{The Mechanism in More Detail} % <<<
+
+Type tokens are created directly into memory with a new \insnnoref{CSealTyT}
+instruction, stored at the \emph{base address} of the capability
+being sealed, which must be capability-aligned (and the to-be-sealed
+capability must authorize an at-least-one-capability-sized segment of
+memory).  \insnnoref{CSealTyT} requires that the capability to be sealed
+bear \cappermL and \cappermS and that the invocation reference an
+in-bounds \cappermSeal-bearing%
+%
+\footnote{For compatibility with CHERI-MIPS, we exclude from
+\insnnoref{CSealTyT}'s domain sealing capabilities referencing the
+bottom of memory, from $0$ and to the maximum \cotype{} value, interpreted
+as an unsigned integer, available to the implementation, inclusive. These are
+reserved for use with the existing \insnref{CSeal} instruction.}
+%
+capability whose cursor will form the type tag.%
+%
+\footnote{It is not clear whether \insnnoref{CSealTyT} should permit the
+clearing of \cappermL and/or \cappermS in the resulting sealed
+capability, despite requiring them on input.}
+%
+Software must ensure that the store done as part of sealing is visible to
+other processors before publishing the sealed capability anywhere it may be
+read by another core.  Immediate fencing is not always required, and so we
+suggest it not be intrinsic to the \insnnoref{CSealTyT} instruction.
+%
+The sealed capability resulting from \insnnoref{CSealTyT} will have its
+\cotype{} set to $2^{64} - 3$, truncated as required by the implementation.
+
+Attempting to load a type token via \insnref{CLC} will succeed, but will
+strip the tag.  The resulting register contents need not be particularly
+well specified; in particular, we should no more expect sensible results
+from the capability-observing instructions here than if we had loaded an
+arbitrary untagged region of memory.
+
+Token-mediated unsealing is done by a new \insnnoref{CUnsealTyT} that
+takes a sealed capability (with \cotype{} of $2^{64} - 3$)
+and an in-bounds authorizing capability bearing
+\cappermUnseal.  If the cursor of the authorizing capability matches the
+virtual address stored in the type token at the base of the sealed object,%
+%
+\footnote{This load is why \insnnoref{CSealTyT} required \cappermL of
+its to-be-sealed capability.}
+%
+then \insnnoref{CUnsealTyT} produces an unsealed version of the sealed
+capability.  Microarchitecturally, \insnnoref{CUnsealTyT} is somewhat akin to a
+compare-and-swap whose store-back is into the register file rather than
+memory.
+
+It might be helpful to software to add a \insnnoref{CGetTypeTyT}
+instruction that
+somewhat mirrors the \insnref{CGetType} instruction.
+\insnnoref{CGetTypeTyT} would fetch from the base address of a
+sealed capability (of the right \cotype{}) and store
+the virtual address from the type token back to a general-purpose
+integer register.
+We propose that, if an exception is not desirable, that the value $2^{64} - 1$ be
+used if the memory at the base is not a type token.
+
+% >>>
+\subsection{Unseal-Once Type Tokens} % <<<
+
+It is likely useful to have a version of unsealing that atomically prevents
+any future attempts.  Rather than merely \emph{fetch} the type token, this
+instruction would carry out a CAS-like update of the type token in memory.
+
+% >>>
+\subsection{User Permissions For Type-Sealed VA Capabilities} % <<<
+
+Because type tokens are capability-sized structures used only for their
+contained virtual addresses, there are many spare bits in the structure (in
+fact, a few type-tagging bits shy of an entire machine word's worth).  One
+especially attractive possibility, if it can be demonstrated to be
+sufficiently secure, is to push the architecturally defined permission bits
+within the sealed capability into the type token.  This would permit the use
+of the intra-capability permission bits as user permissions, subject to the
+action of \texttt{CAndPerm} despite the sealed nature of the capability.
+We would then be able to use capability permission bits to help arbitrate
+permissions to methods within an object, as is typical of other capability
+systems, rather than, as suggested by the design in
+\cref{app:exp:typetoken:vt} above, having one sentry capability per procedure
+and gating permission by possession of the procedure's guard's sentry
+capability.  \insnnoref{CUnsealTyT} would use the bits from the type token in
+its output capability, and software would be able to inspect the permission
+bits of the input object reference (i.e., there would be no need for a second
+register storeback in \insnnoref{CUnsealTyT}).
+
+In this scheme, should an object wish to be able to grant sealed references
+with one of several sets of architectural permissions, it suffices to place
+an array of type tokens at the beginning of instance memory and adjust the
+base of the (to be sealed) capability, while leaving the cursor to point at
+the start of the object's data.  Any type tokens within reach confer no
+authority, even after we have moved architectural permission bits into them.
+Further, because type tokens cannot be created in memory except by
+\insnnoref{CSealTyT} or highly privileged software, aliasing of the
+memory containing the type token cannot \emph{de novo} amplify architectural
+access (but may be vulnerable to confusion within suitably authorized
+control flow).
+
+% >>>
+\subsection{Token-mediated CInvoke} % <<<
+
+\insnref{CInvoke} poses something of a challenge for in-memory type tags: a
+single instruction must, seemingly, perform \emph{two} fetches from memory
+and then do a comparison on the loaded values.  However, because the
+instruction cares only about the equality, it seems that we can turn this
+into a fetch from one capability's base and then a CAS-style
+\emph{comparison} against the other's.  In fact, this combines nicely with
+unseal-once type tokens: if \insnref{CInvoke} fetches from the sealed code
+capability first, it is then in a position to issue the appropriate CAS
+against the sealed data capability.  In CHERI-MIPS, \insnref{CInvoke} is
+already a two-cycle instruction, occupying two successive stages of the
+pipeline, and so we conjecture that the changes requisite to support
+token-mediation are small.
+
+% >>>
+\subsection{Hybridization} % <<<
+
+This scheme uses one \cotype{} value for its sealed capabilities; the remaining
+values are still available for the rest of the system's use.  It is our hope
+that most users of \cotype{} values can be rearchitected to use this in-memory
+scheme and that the \cotype{} field can be reduced in size.  However, the
+\cotype{} field should not be entirely eliminated: its existence allows us avoid
+some of the overhead of this design in the innermost ring of the system.%
+%
+\footnote{Because the innermost ring is presumably the kernel's TCB, a
+hypervisor, or `nanokernel'-- effectively microcode -- the resulting system
+has some similarities to the Intel 432 / BiiN / i960MX lineage, which had a
+few architecturally understood special types of capabilities -- but relied on
+software interpretation for the rest.}
+%
+Such \cotype{} bits would also let software create sealed objects other than
+enter capabilities without memory footprint.
+
+% >>>
+% >>>
+\section{Windowed Short Capabilities} % <<<
+\label{sec:windowedshortcaps}
+
+An frequent initial objection to CHERI is that even the 128-bit compressed
+form of capabilities occupies too much space, especially for pointer-heavy
+workloads.  However, when discussing a 64-bit virtual address space, it
+seems plausible that 128 bits is the best we can do: the metadata CHERI
+requires vastly outstrips any `spare' bits in the address, and any size
+that was not a power of two bits would be awkward, at best.  One way out
+would be to imagine that one could mix 128-bit and 64-bit capabilities
+within an address space, with the caveat that the 64-bit capabilities could
+address only a 32-bit address space (i.e., they would have a 4 GiB reach)
+and would have a smaller set of permission bits, fewer flag bits, and fewer
+bits for object types.  While we could limit all 64-bit capabilities to
+referencing a particular, fixed 4 GiB region of the larger addess space
+(e.g., the first 4 GiB), a better design, if we could get it, would be to
+allow the 4 GiB window to be chosen by a 128-bit capability.
+
+The design we detail here treats these 64-bit capabilities as specialized
+representations of 128-bit capabilities.  Importantly, this design does not
+modify the representation or semantics of capabilities within the register
+file: the bulk of the system's operation is not impacted.  We introduce new,
+purpose-made instructions for loading and storing these short
+representations of capabilities; stores especially may fail if translation
+is not possible.
+
+\subsection{Restricting Capabilities to 32-bit Windows} % <<<
+
+Because 64-bit capabilities operate only within a 4 GiB window of the
+address space, when fetching a 64-bit capability from memory, we fill in the
+implied upper 32 bits of the full 64-bit address from the \emph{cursor} of
+the \emph{capability authorizing the fetch}.  This straightforward operation
+is provided by the \insnref{CLShC} instruction.
+
+When attempting to (encode and) store a capability to a short form in memory,
+the store will fail%
+%
+\footnote{It would be sufficient to store a de-tagged word, but trapping is
+more likely programmer friendly.  While this is a data-dependent action, as it
+requires a comparison between the (untranslated, virtual) target address and
+the capability from the register file, this is not the only data dependence in
+the short capability store instruction.}
+%
+unless all three of the following addresses agree on their top 32 bits: the
+computed destination address of the store and the base and limit of the
+capability being stored; the cursor of the capability to be stored is permitted
+to be within either adjacent 4 GiB window (but must still be representable).%
+%
+\footnote{Alternatively, it would suffice to ensure that, on decoding, any
+access beyond the limits of the 4-GiB-aligned region had been shed.  Because
+short capabilities are never used directly, there is some flexibility in
+enforcement here.}
+%
+All of this is provided by the \insnref{CSShC} instruction.
+
+A consequence of this design is that short capabilities (transitively
+reached through short capabilities) are always interpreted within the 4 GiB
+window specified by the initial reference through a full capability.  These
+capabilities may be stored as short capabilities anywhere within this window
+(or as full capabilities anywhere in the address space).  Because
+capabilities in registers always have their full 64-bit virtual address
+cursor and bounds, it is impossible to use a short capability in one 4 GiB
+window to derive a capability to any part of a different window: the
+dereferencable region is always contained within the original window whence
+the capability was loaded, and so attempted stores to another window will
+fail.%
+%
+\footnote{If ever direct memory-to-memory capability copies become possible,
+it would be necessary to explicitly check that copied short capabilities are
+not being replicated in ways that would change their decoding.}
+
+\nwfnote{The proposed instruction encodings have quite sizable footprint in
+the encoding space.  Moreover, we probably want \insnnoref{CLLShC}
+and \insnnoref{CSCShC} opcodes, too.}
+
+% >>>
+\subsection{Restrictions Within Short Capabilities} % <<<
+
+In order to reduce the space required for metadata within short
+capabilities, we suggest several restrictions.
+
+Within the permissions field, we suggest that short capabilities be limited
+to expressing virtual address space, so that \cappermSeal, \cappermUnseal,
+and \cappermCid are implicitly false for any short capability.  This
+seems reasonable, as these gate fundamentally new facilities offered by CHERI
+and seem like they will be relatively rare even in fully CHERI-fied software
+stacks, so the requirement to use a 128-bit capability should not be
+onerous.
+%
+Further, because we intend short capabilities to be used mostly for
+sandboxes within a larger ecosystem, we think it reasonable to imply that
+\cappermASR is also false.
+%
+Similarly, we do not foresee the utility of the Local/Global distinction for
+short capabilities, and so propose implying
+\cappermSLC to be false.%
+%
+\footnote{We could also imply the Global permission bit to be \emph{true},
+but then we would need to fail attempts to encode local capabilities into short
+forms.  While we do not anticipate the use of capabilities bearing
+\cappermSLC outside trusted
+software, it nevertheless seems simpler to leave Global within the short
+capability encoding.}
+%
+All told, these implications eliminate five existing permission bits from
+short capabilities' representations.
+
+We suggest a reduced object type range for short capabilities, as well.
+This will have implications in the software stack: `small' object types
+will be somewhat precious, and so may need to have special handling in the
+allocator(s) thereof.  The utility of sealed short capabilities, and
+especially of architecturally defined sealing object types to short
+capabilities, remains an open question.
+
+Bound metadata may also be subject to pressure, and so short capabilities
+may face stricter alignment requirements for large objects than full,
+128-bit capabilities.  While this would not be great, it may be that
+references to large objects are relatively sparse, and so software may find
+it easier to fall back to full capabilities rather than insist that all
+capabilities should be short whenever possible.
+
+% >>>
+\subsection{Tag Bits and Representation for Shared Memory} % <<<
+
+Short ``capabilities" could plausably be left untagged in the architecture
+and used only as forgeable fat pointers which are lifted into the capability
+space on coversion.
+If we were to tag short capabilities, we require more bits for
+distinguishing mixed capability widths from data.
+In a 128-bit-sized and -aligned
+region of memory, there are five possible options, assuming that 128-bit
+capabilities must remain 128-bit-aligned:
+%
+\begin{inenum}
+%
+  \item One 128-bit capability.
+%
+  \item Two 64-bit capabilities.
+%
+  \item One 64-bit capability, followed by data.
+%
+  \item One 64-bit capability, preceded by data.
+%
+  \item Only data.
+%
+\end{inenum}
+%
+There are several ways that we could arrange to distinguish these
+possibilities, but two seem especially attractive.  Perhaps the simplest
+approach is to use three out-of-band tag bits rather than the one per
+128-bit granule of memory that CHERI now imposes; this would leave us with
+three values reserved for future expansion.  One could slightly tamp down on
+the need for tag bits by tagging entire \emph{cache lines} instead: eight
+sets of 5-way discrimination, corresponding to 128-byte cache lines, requires
+only 19 bits rather than the more straightforward 24, at the cost of more
+complex decoding logic (likely in the LLC).
+
+However, we may be better served by the use of two out-of-band tags and one
+bit in the capability encodings themselves, effectively giving us somewhere
+between two and four bits of metadata, depending on the scenario.  One
+possible encoding is shown in \cref{tab:shorttags}.  Forbidden states should
+trigger machine check exceptions or something similarly indicative of
+catastrophe.
+%
+This scheme is relatively straight foward to operate, but requires a little
+awkward handling of the inherent asymmetry between the upper and lower 64
+bits within a 128-bit granule.  A load of a full capability must verify that
+both out of band tag bits and $t_\text{hi}$ are all asserted.  A load of a
+short capability from the upper position must verify that $T_\text{hi}$ is
+asserted and $t_\text{hi}$ is clear.  A load of a short capability from the
+lower position must verify that $T_\text{low}$ is asserted, that
+$t_\text{low}$ is clear, and that either $T_\text{hi}$ or $t_\text{hi}$ is
+clear.  Data stores always clear the corresponding out-of-band bit; stores
+to the lower half of a capability granule must additionally access
+$T_\text{hi}$ and, if $T_\text{hi}$ is asserted, then access $t_\text{hi}$
+to determine whether $T_\text{hi}$ should be cleared as well (to avoid the
+forbidden states marked with $\dagger$).  Fortunately, all of this state
+machine logic is localized within a cache line and its tag bits.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{cccc|l}
+
+$T_\text{hi}$ & $T_\text{low}$ & $t_\text{hi}$ & $t_\text{low}$ & Meaning \\
+\hline\hline
+
+0 & 0 & $X$ & $X$ & Two data words \\
+0 & 1 & $X$ & 0   & 64 bits of data above a 64-bit capability \\
+0 & 1 & $X$ & 1   & Forbidden \\
+1 & 0 & 0   & $X$ & A 64-bit capability above 64 bits of data \\
+1 & 0 & 1   & $X$ & Forbidden\textsuperscript{$\dagger$} \\
+1 & 1 & 0   & 0   & Two 64-bit capabilities \\
+1 & 1 & 0   & 1   & Forbidden \\
+1 & 1 & 1   & $X$ & A 128-bit capability \\
+
+\end{tabular}
+\end{center}
+
+\caption{A possible hybrid out-of-band and in-band tagging scheme for mixing
+128-bit and 64-bit capabilities.  $t_\text{hi}$ and $t_\text{low}$ are the
+intra-capability tag bits for the upper and lower 64-bit regions,
+respectively, while $T_\text{hi}$ and $T_\text{low}$ denote the
+corresponding two out-of-band tag bits.  $X$ indicates `don't care' and
+stands for either bit value.}
+
+\label{tab:shorttags}
+\end{table}
+
+Similar considerations hold should we wish to mix all of 64-, 128-, and
+256-bit capability forms.  In such a system, there are 26 states for every
+256-bit granule of memory: each 128-bit granule may be in each of the 5
+states given above, or an adjacent pair may hold a 256-bit capability.
+
+\subsubsection{With Relaxed Alignment Requirements} % <<<
+
+It may be more natural to permit \emph{all} capabilities, both 64-bit and
+128-bit, to be stored at 64-bit alignment.  In such a case, within a
+128-bit-sized and -aligned region, there are now these 10 possibilities:
+%
+\begin{inenum}
+%
+  \item One 128-bit capability, spanning the whole region.
+%
+  \item The tail of a 128-bit capability, followed by the head of a 128-bit capability.
+%
+  \item The tail of a 128-bit capability, followed by a 64-bit capability.
+%
+  \item The tail of a 128-bit capability, followed by data.
+%
+  \item The head of a 128-bit capability, preceeded by a 64-bit capability.
+%
+  \item The head of a 128-bit capability, preceeded by data.
+%
+  \item Two 64-bit capabilities.
+%
+  \item One 64-bit capability, followed by data.
+%
+  \item One 64-bit capability, preceded by data.
+%
+  \item Only data.
+%
+\end{inenum}
+
+
+% >>>
+% >>>
+\subsection{SoCs With Mixed-Size Capabilities} % <<<
+
+It is frequently the case that Systems on Chip (SoCs) contain 64-bit
+application cores and also 32-bit microcontrollers.
+One potential further use for this approach is to allow bridging between those
+two worlds: 64-bit cores with 128-bit capabilites that are able to load and
+store 64-bit capabilities used by 32-bit cores connected to the same memory
+fabric.
+Care would be required to ensure that capabilities originating on one core
+were derefenced only with a suitable address space on a second core able to
+access them.
+
+\nwfnote{In such circumstances, one could imagine that the shared memory
+block(s) have a capability granularity and then restrict larger cores to
+using the short-cap operations and requiring that software preserve the
+alignment requirements for these regions when they are virtually mapped.}
+
+% >>>
+% >>>
+\section{Capabilities For Physical Addresses} % <<<
+\label{app:exp:physcap}
+
+\subsection{Motivation}
+
+CHERI capabilities that authorize access to memory are typically interpreted
+in combination with an ambient virtual address translation configuration.
+That is, the addresses authorized by a CHERI memory capability are taken to
+be virtual addresses, which are then translated to physical addresses by the
+core's MMU.  The MMU configuration defines a virtual address space; it is,
+ultimately, in all modern, mainstream architectures, described by
+\emph{integers}.%
+%
+\footnote{In architectures with hardware page table walkers, such as Arm and
+RISC-V, these integers are arranged in defined, tabular format.  In
+architectures without, such as MIPS, the analogous structures are defined
+only in software, but the soft-loaded TLB is programmed using integer
+values written to architecturally specified registers.}
+%
+The use of provenance-free integers to describe such configurations carries
+risks, just as with pointers.  Necessarily, the ability to configure the MMU
+must be confined to privileged, and necessarily trusted, software; this
+software must enforce its intended policies concerning permitted access to
+the core's view of physical memory and it must do so with no architectural
+safeguards.
+
+Moreover, a (software) system may, as part of timesharing the CPU core,
+reprogram the MMU to achieve isolation (and, possibly, controlled
+non-isolation) between different `process contexts'.  Further, these
+contexts may be dynamic, reshaping their associated MMU configurations
+across time.  CHERI capabilities are not explicitly associated with a
+particular context and/or time.  As a result, software must ensure that
+capabilities are not transmissible improperly%
+%
+\footnote{The simplest and most restrictive policy is to entirely prevent
+transmission of capabilities between contexts.  However, if contexts have
+common identically interpreted regions of their address spaces, one could
+imagine utility in passing capabilities referencing only these spaces.  Such
+passing would, in CHERI's design, necessarily have to go via a software
+intermediate rather than more direct passing through the shared region
+itself.}
+%
+from one context to another, nor retained improperly as context mappings
+evolve.  Thus, the direct mechanisms available for capability passing within
+a single context (including between CHERI compartments therein) are likely
+not available for cross-context communication.
+
+A similar story plays out in hardware: `physical' addresses are meaningful
+only when paired with a \emph{location}, as bus bridges may remap addresses
+in transit from one port to another.  When devices or cores wish to
+communicate, they must model the action of the intermediate fabric and
+generate (integer) addresses that may not be meaningful locally but will be
+at the remote endpoint, across the bus fabric.  Again, all the problems with
+integer addresses resurface and are exacerbated by the relatively minimal
+protection mechanisms available at the physical bus layer.
+
+For this section, we focus on two cases: software on a CHERI core seeking to
+escalate its privilege, and peripheral devices wishing to attack the core
+(possibly in cooperation with software).  In both cases, the intended victim
+of the attack(s) will be taken to be the CHERI core's trusted computing base
+(e.g., a hypervisor).  We restrict our attention to steady-state operation
+rather than attacks against the initial bootstrap; that is, we assume that
+any would-be attacker was not present during the load of said TCB and that
+the \emph{core} itself is trusted to faithfully execute instructions.
+
+\subsection{Capability-Mediated CPU Physical Memory Protection} % <<<
+
+RISC-V has a notion of a Physical Memory Protection (PMP) unit that
+validates every (post-virtual-address-translation) memory request issued by
+a processor core.  Roughly, for each request, an $n$-way associative lookup
+against a table of (region, permissions) pairs is performed, and the request
+is authorized only if the table contains a region containing the requested
+address and the request is of a type permitted by that region.  For details,
+see the RISC-V Privileged Architecture specification~\cite[\S
+3.6]{RISCV:Privileged:1.10}.
+
+The control interface to the PMP is, as might be imagined, based on
+integers: coarsely speaking, machine-mode code is able to write arbitrary
+bits to the PMP table through the core's CSR interface.  Supervisor and user
+mode code are not permitted access to the table.  Thus, any code in machine
+mode can alter restrictions imposed on supervisor or user memory access, and
+so a confused deputy attack on the machine mode could result in privilege
+escalation for the supervisor or user programs.  We would prefer to have a
+more `least authority'-friendly option.
+
+We propose a `capability-mediated PMP' (CPMP).  Its control interface will
+permit table entries to be populated only from valid (tagged) capabilities.
+We imagine using a pair of a CSR and a special capability register to
+provide row-by-row access to the augmented table.
+
+Because machine-mode code on RISC-V has explicit control over whether
+address translation is enabled, a baseline capability-mediated PMP
+implementation could repurpose the existing CHERI capability mechanisms and
+rely on software to track the distinction between capabilities intended for
+use as physical addresses and those intended for use as virtual addresses.
+Such an approach runs slightly against the grain of our design principles,
+and has limitations; for example, sealed forms must be used if these
+capabilities are to be given to supervisor (or user) code.
+
+For these reasons, and to enable a wider series of uses, we envision creating
+a new capability provenance \emph{root}.  Capabilities derived from this
+root are distinct from existing CHERI capabilities (by, say, having a bit
+immutably set that the existing capabilities maintain cleared) and denote
+ranges of physical addresses, even in the presence of paging.  Accesses via
+these capabilities bypass any paging mechanism and, dually, we can now make
+accesses via the existing CHERI capabilities
+that
+ \emph{always} go via address translation, even in machine mode.%
+%
+\footnote{This obviates the RISC-V \texttt{mstatus} MPRV mechanism for
+toggling address translation.}
+%
+These capabilities may have their born authority decreased as with any other
+CHERI capability, and may flow to non-machine-mode code to enable (for
+example) light-weight partitioning of physical resources between multiple
+supervisors.
+
+% >>>
+\subsection{Capability-Mediated DMA Physical Memory Protection} % <<<
+
+Whereas RISC-V considers PMPs only in the context of a CPU core, nearly
+identical hardware can be used to gate peripheral DMA requests.  Here, the
+PMP's control interface is exposed to the CPU, most likely as a
+memory-mapped region, and the direction of requests is backwards, but the
+operation of the device is fundamentally the same.  When presented with a
+memory request \emph{by the peripheral}, such a gate performs an associative
+scan of the configured table and either permits the request to enter the bus
+or rejects the request.  We tentatively call such a gate an IOPMP.
+
+Whereas IOPMPs could be programmed using integers (as in the RISC-V PMPs), or
+using existing CHERI capabilities transported over the memory bus, the story
+is much more credible if they can require physical-address capabilities.  So
+equipped, we reduce the risk of confusion or misbehavior of machine-mode
+code but, more excitingly, we gain the possibility of directly exposing
+peripheral IOPMPs to non-machine-mode code for efficient device
+pass-through.
+
+This story is fairly satisfying for the control of the IOPMP itself;
+however, there remains a challenge of translating the authority carried by
+the CHERI CPU core into an address suitable for comprehension by the
+peripheral.  That is, because the peripheral continues to speak in
+\emph{integer} addresses in its control messages, software on the core could
+easily treat the peripheral as a confused deputy, causing it to DMA to
+regions authorized by, for example, other (software) compartments.  It may
+be necessary to limit sharing of peripherals this way, or more directly
+involve the IOPMPs in device control.  One could imagine, for example, that
+the IOPMP could `back-translate' core-originated capabilities in control
+messages into integers for the peripheral's consumption, perhaps with a tag.
+
+% >>>
+\subsection{Capability-Based Page Tables} % <<<
+\label{app:exp:physcap:ptw}
+
+Traditionally, hypervisors must deny the supervisors they oversee the
+ability to directly control the memory translation tables.  Towards the
+`paravirtualization' end of the spectrum, the hypervisors require that the
+guests make hypercalls to manipulate the page tables.  Towards the
+`hardware-assisted' end, the CPU's MMU will use `nested translation':
+the `guest physical' addresses manipulated by the guest are subject to
+re-translation, through tables controlled by the hypervisor, before becoming
+`host physical' addresses and exiting the CPU core.  Both approaches have
+substantial costs.
+
+A more radical approach would have us change the traditional memory
+management unit (MMU) page tables.  Instead of mapping virtual
+addresses to \emph{integer} physical addresses, the page tables would yield
+a \emph{physical capability} for a virtual address.  We envision repurposing
+the capability permission bits for the PTE permission bits, and extending the
+flags field of \cref{sec:model-flags} to encompass non-authority flags
+of PTEs, notably including accessed, dirty, and global flags.
+
+To simplify the system, we may require that physical capabilities installed
+in page tables have offset zero and length at least a full page (of the
+appropriate level of the tree).  This allows us to skip a capability bounds
+check when translating a virtual address but retains proof of
+\emph{provenance} of the authority to access a given region of physical
+addresses.
+
+% >>>
+\subsection{Capability-Based Page Tables in IOMMUs} % <<<
+
+As with the PMPs, this new facility also finds use in guarding peripherals.
+Rather than the associative table scans of the IOPMPs above, we could have
+capability-mediated IOMMUs whose page-table entires, again, contain
+physical-address capabilities.  Of course, there is no reason that an IOPMP
+expose a 64-bit address space to the peripheral, nor that it use
+hierarchical pages.  For many peripherals, a \emph{single} page-sized
+aperature (or even smaller) may suffice.  The concern of integer addresses
+in peripheral control messages continues to apply.
+
+% >>>
+\subsection{Exposing Capabilities Directly To Peripherals} % <<<
+
+Both IOPMPs and IOMMUs, mediated by capabilities or not, continue to expose
+an \emph{integer} address space to the peripheral.  While the peripheral may
+be using CHERI for its internal computations, its interface with the host
+remains capability-less.  In some cases of mutually distrusting peers, this
+may suffice, and each side may have capability-mediating devices under its
+control to guard the interconnect.
+
+However, in other cases the host may wish to extend the \emph{tagged}
+memory bus all the way to the peripheral, and then grant capabilities
+directly to the device as though it were a software process.  In such cases,
+we expect that an IOPMP- or IOMMU-like guarding device will still be useful,
+to prevent a malicious or errant device from synthesizing or retaining (and
+subsequently using) capabilities that the host does not intend.  All
+capabilities transiting the guard would be checked to be a \emph{subset} of
+a capability in the guard's table.  We note, in passing, that such guard
+devices are also useful for the case of direct peripheral-to-peripheral
+access, not merely the case of peripheral-to-memory as we have generally
+focused upon here.  The details of the control interface to such a device,
+as well as its internal operation, are left to future work.
+
+% >>>
+% >>>
+\section{Distributed Capabilities For Peripherals And Accelerators} % <<<
+%\tmnote{This section overlaps with the previous and is intentionally being kept separate for now.
+%It will need merging in due course.  Commented out until it's a bit more stable}
+\input{app-exp-peripherals}
+
+% >>>
+\section{Details of Proposed Instructions} % <<<
+\label{app:exp:insns}
+
+The following instructions are described using the same syntax and approach as
+those in Chapter~\ref{chap:isaref-mips}.
+
+\input{insn-mips/candaddr}
+\input{insn-mips/cbuildcap}
+\input{insn-mips/ccleartags}
+\input{insn-mips/ccopytype}
+\input{insn-mips/ccseal}
+\input{insn-mips/cgetandaddr}
+\input{insn-mips/clcnt}
+\input{insn-mips/clshc}
+\input{insn-mips/csshc}
+\input{insn-mips/ctestsubset}
+
+% >>>
+
+% vim: foldmethod=marker:foldmarker=<<<,>>>

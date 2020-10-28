@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}#(vaddr, value) =
+  match value {
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(true)  => { RETIRE_SUCCESS },
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(false) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("store got false from mem_write_value") },
+    #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL }
+  }

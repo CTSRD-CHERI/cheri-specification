@@ -1,0 +1,105 @@
+This version of the \textit{CHERI Instruction-Set Architecture} is an interim
+version distributed for review by DARPA and our collaborators:
+
+\begin{itemize}
+\item We have added new instructions \insnref{CSetAddr} (Set capability
+  address to value from register), \insnref{CAndAddr} (Mask address of
+  capability -- experimental), and \insnref{CGetAndAddr} (Move capability
+  address to an integer register, with mask -- experimental), which optimize
+  common virtual-address-related operations in language runtimes such as
+  WebKit's Javascript engine.
+  These instructions cater better to a language mapping from C's
+  \ccode{intptr_t} type to the virtual address, rather than offset, of a
+  capability, which has been our focus previously.
+  These complement the previously added \insnref{CGetAddr} that allows
+  easier compiler access to a capability's virtual address.
+
+\item We have added two new experimental instructions, \insnref{CRAM}
+  (Retrieve Mask to Align Capabilities to Precisely Representable Address) and
+  \insnref{CRRL} (Round to Next Precisely Representable Value), which
+  allow software to retrieve alignment information for the base and length for
+  a proposed set of bounds.
+
+\item \insnref{CMove}, which was previously an assembler pseudo-operation
+  for \insnref{CIncOffset}, is now a stand-alone instruction.
+  This avoids the need to special case sealed capabilities when
+  \insnref{CIncOffset} is used solely to move, not to modify, a
+  capability.
+
+\item The names of the instructions \insnnoref{CSetBoundsImmediate} and
+  \insnnoref{CIncOffsetImmediate} have been shortened to
+  \insnref{CSetBoundsImm} and \insnref{CIncOffsetImm}.
+
+\item The instructions \insnnoref{CCheckType} and \insnnoref{CCheckPerm}
+  have been deprecated, as they have not proven to be particularly useful in
+  implementing multi-protection-domain systems.
+
+\item We have added a new pseudo-operation, \insnnoref{CAssertInBounds},
+  described in \cref{\insnmipslabelname{cassertinbounds}}, allows an exception
+  to be thrown if the address of a capability is not within bounds.
+
+\item The instruction \insnref{CCheckTag} has now been assigned an opcode.
+
+\item We have revised the encodings of many instructions in our draft
+  CHERI-RISC-V specification in Appendix~\ref{app:isaquick-riscv}.
+
+\item We more clearly specify that when a special register write occurs to
+  \EPC{}, the result is similar to \insnref{CSetOffset} but with the tag
+  bit stripped, in the event of a failure, rather than an exception being
+  thrown.
+
+\item We have added a reference to our TaPP 2018 paper, \textit{Pointer
+  Provenance in a Capability Architecture}, which describes how architectural
+  traces of pointer behavior, visible through the CHERI instruction set, can
+  be analyzed to understand software and structure.
+
+\item We have added a reference to our ICCD 2018 paper, \textit{CheriRTOS:
+  A Capability Model for Embedded Devices}, which describes an embedded
+  variant of CHERI using 64-bit capabilities for 32-bit addresses, and how
+  embedded real-time operating systems might utilize CHERI features.
+
+\item We have revised our description of conventions for capability values,
+  including when used as pointers, to hold integers, and for NULL value, to
+  more clearly describe their use.
+  We more clearly describe the requirements for the in-memory
+  representation of capabilities, such as a zeroed NULL capability so that
+  BSS behaves as desired.
+  We provide more clear architecture-neutral explanations of pointer
+  dereferencing, capability
+  permissions and their composition, the namespaces protected by capability
+  permissions, exception handling, exception priorities, virtual memory, and
+  system reset.
+  These definitions appear in Chapter~\ref{chap:architecture}.
+  Chapter~\ref{chap:cheri-mips}, which describes CHERI-MIPS, has been
+  shortened as a variety of content has been made architectural neutral.
+
+\item More detailed rationale is provided for our composition of CHERI with
+  the MIPS exception-handling model.
+
+\item We are more careful to use the term ``pointer'' to refer to the
+  C-language type, verses integer or capability values that maybe used by the
+  compiler to implement pointers.
+
+\item With the advent of ISA variations utilizing a merged register file, we
+  are more careful to differentiate integer registers from general-purpose
+  registers, as general-purpose registers may also hold capabilities.
+
+\item We more clearly define the terms ``upper bound'' and ``lower bound''.
+
+\item We now more clearly describe the effects of our \textit{principle of
+  intentionality} on capa\-bility-aware instruction design in
+  Section~\ref{sec:capability-aware-instructions}.
+
+\item We better describe the rationale for tagged capabilities in registers
+  and memory, in contrast to cryptographic and probabilistic protections, in
+  Section~\ref{sec:probablistic_capability_protection}.
+
+\item We have made a number of improvements to the CHERI-x86-64 sketch,
+  described in Chapter~\ref{chap:cheri-x86-64}, to improve realism around trap
+  handling and instruction design.
+
+\item We have rewritten our description of the interaction between CHERI and
+  Direct Memory Access (DMA) in Section~\ref{sec:dma}. to more clearly
+  describe tag-stripping and capability-aware DMA options.
+
+\end{itemize}

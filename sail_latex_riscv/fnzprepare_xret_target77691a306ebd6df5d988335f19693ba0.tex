@@ -1,0 +1,22 @@
+function #\hyperref[sailRISCVzpreparezyxretzytarget]{prepare\_xret\_target}#(p) = {
+  /* Similar to prepare_trap_vector above we need to return the absolute address
+     destined for PC, rather than the #\hyperref[sailRISCVzoffset]{offset}# (architecutral PC) */
+  let epcc : Capability = match p {
+                            Machine    => MEPCC,
+                            Supervisor => SEPCC,
+                            User       => UEPCC
+                          };
+
+  let epcc = #\hyperref[sailRISCVzlegalizzezyepcc]{legalize\_epcc}#(epcc);
+
+  /*
+   * Sentries unseal on transfer into nextPCC; other sealed types will trap
+   * with a seal violation later, when we go to do a fetch from nextPCC.
+   */
+  let epcc = if epcc.otype == #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_otype_width, otype_sentry)
+             then #\hyperref[sailRISCVzunsealCap]{unsealCap}#(epcc)
+             else epcc;
+
+  nextPCC = epcc;
+  epcc.address
+}

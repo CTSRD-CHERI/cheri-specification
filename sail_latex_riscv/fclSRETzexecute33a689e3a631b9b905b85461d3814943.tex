@@ -1,0 +1,11 @@
+let sret_illegal : bool = match cur_privilege {
+  User       => true,
+  Supervisor => ~ (#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}# ()) | mstatus.#\hyperref[sailRISCVzTSR]{TSR}#() == 0b1,
+  Machine    => ~ (#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}# ())
+};
+if   sret_illegal
+then #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#()
+else if ~(#\hyperref[sailRISCVzextzycheckzyxretzypriv]{ext\_check\_xret\_priv}# (Supervisor))
+then #\hyperref[sailRISCVzextzyfailzyxretzypriv]{ext\_fail\_xret\_priv}# ()
+else #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(#\hyperref[sailRISCVzexceptionzyhandler]{exception\_handler}#(cur_privilege, #\hyperref[sailRISCVzCTLzySRET]{CTL\_SRET}#(), PC));
+RETIRE_FAIL

@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzlookupzyTLB48]{lookup\_TLB48}#(asid, vaddr) =
+  match tlb48 {
+    #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzNone]{None}#(),
+    #\hyperref[sailRISCVzSome]{Some}#(e) => if #\hyperref[sailRISCVzmatchzyTLBzyEntry]{match\_TLB\_Entry}#(e, asid, vaddr) then #\hyperref[sailRISCVzSome]{Some}#((0, e)) else #\hyperref[sailRISCVzNone]{None}#()
+  }

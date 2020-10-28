@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVznumzyofzyextzyexczytype]{num\_of\_ext\_exc\_type}#(e) =
+  match (e) {
+    EXC_LOAD_CAP_PAGE_FAULT => 26,
+    EXC_SAMO_CAP_PAGE_FAULT => 27,
+    EXC_CHERI               => 28
+  }

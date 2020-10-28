@@ -1,0 +1,10 @@
+function #\hyperref[sailRISCVzclintzydispatch]{clint\_dispatch}#() -> unit = {
+  if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+  then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("clint::tick mtime <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mtime));
+  mip->#\hyperref[sailRISCVzMTI]{MTI}#() = 0b0;
+  if mtimecmp <=_u mtime then {
+    if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#(" clint timer pending at mtime " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(mtime));
+    mip->#\hyperref[sailRISCVzMTI]{MTI}#() = 0b1
+  }
+}

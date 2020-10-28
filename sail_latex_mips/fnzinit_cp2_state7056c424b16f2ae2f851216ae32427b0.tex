@@ -1,0 +1,18 @@
+function #\hyperref[sailMIPSzinitzycp2zystate]{init\_cp2\_state}# () = {
+  PCC = default_cap;
+  NextPCC = default_cap;
+  DelayedPCC = default_cap;
+  DDC  = default_cap;
+  KCC  = default_cap;
+  EPCC = default_cap;
+  ErrorEPCC = default_cap;
+  KDC  = null_cap;
+  KR1C = null_cap;
+  KR2C = null_cap;
+  CPLR = null_cap;
+  CULR = null_cap;
+  foreach (i from 1 to 31) {
+    let idx = #\hyperref[sailMIPSztozybits]{to\_bits}#(5, i) in
+    #\hyperref[sailMIPSzwriteCapReg]{writeCapReg}#(idx, null_cap)
+  }
+}

@@ -1,0 +1,70 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CJR / CJALR}
+\insnmipslabel{cjalr}
+\subsection*{CJR / CJALR: Jump (and Link) Capability Register}
+
+\subsubsection*{Format}
+
+CJALR cb, cd
+
+\begin{center}
+\cheritwoop[header]{0xc}{cd}{cb}
+\end{center}
+
+\phantomsection
+\insnmipslabel{cjr}
+
+CJR cb
+
+\begin{center}
+\cherioneop[header]{0x3}{cb}
+\end{center}
+
+\note{rmn30}{Now that C0 is NULL we could encode this using CJALR with cd == 0 and save a whole opcode.}
+\subsubsection*{Description}
+
+The current \PCC{} (with an offset of the current \PC{} $+$ 8) is
+optionally saved in \textit{cd}.
+\PCC{} is then loaded from capability register \textit{cb} and \PC{}
+is set from its offset.
+
+\subsubsection*{Semantics}
+\sailMIPScode{CJALR}
+
+\subsubsection*{Exceptions}
+
+A coprocessor 2 exception will be raised if:
+
+\begin{itemize}
+\item
+\emph{cb.\ctag{}} is not set.
+\item
+\emph{cb} is sealed. (But see \cref{sec:arch-sentry}.)
+\item
+\textit{cb.\cperms.Permit\_Execute} is not set.
+\item
+\textit{cb.\coffset{}} + 4 is greater than \textit{cb.\clength{}}.
+\end{itemize}
+
+An address error exception will be raised if
+
+\begin{itemize}
+\item
+\textit{cb.\cbase{}} + \textit{cb.\coffset{}} is not 4-byte word aligned.
+\end{itemize}
+
+\subsubsection*{Notes}
+
+\begin{itemize}
+\item
+\insnmipsref{CJALR} has a branch delay slot.
+\item
+The change to \PCC{} does not take effect until the instruction in the branch
+delay slot has been executed.
+\item
+\note{rmn30}{The following text is copied from cjr but was not present here before I merged cjr and cjalr. What is the importance of this? I think it is just to rule out offsets effectively less than zero but since we actually store the address (not offset) and compare against base in Sail I think it is redundant.}
+\textit{cb.\cbase{}} and \textit{cb.\clength{}} are treated as unsigned integers,
+and the result of the addition does not wrap around (i.e., an exception is
+raised if \emph{cb.\cbase{}}+\emph{cb.\coffset{}} is greater than maxaddr).
+\end{itemize}

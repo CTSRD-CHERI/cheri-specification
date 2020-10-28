@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzpmpWriteAddr]{pmpWriteAddr}#(locked: bool, tor_locked: bool, reg: xlenbits, v: xlenbits) -> xlenbits =
+  if   sizeof(xlen) == 32
+  then { if (locked | tor_locked) then reg else v }
+  else { if (locked | tor_locked) then reg else #\hyperref[sailRISCVzEXTZ]{EXTZ}#(v[53..0]) }

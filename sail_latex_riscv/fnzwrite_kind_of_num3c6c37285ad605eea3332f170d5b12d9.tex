@@ -1,0 +1,13 @@
+function write_kind_of_num arg# = match arg# {
+  0 => Write_plain,
+  1 => Write_conditional,
+  2 => Write_release,
+  3 => Write_exclusive,
+  4 => Write_exclusive_release,
+  5 => Write_RISCV_release,
+  6 => Write_RISCV_strong_release,
+  7 => Write_RISCV_conditional,
+  8 => Write_RISCV_conditional_release,
+  9 => Write_RISCV_conditional_strong_release,
+  _ => Write_X86_locked
+}

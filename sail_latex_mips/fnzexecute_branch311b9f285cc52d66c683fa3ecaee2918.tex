@@ -1,0 +1,8 @@
+function #\hyperref[sailMIPSzexecutezybranch]{execute\_branch}# (pc) = {
+  let len = #\hyperref[sailMIPSzgetCapLength]{getCapLength}#(PCC);
+  /* Check the branch is within PCC bounds. Note that PC is offset to
+  base so branches below base will be negative / very large and
+  greater than top. */
+  if #\hyperref[sailMIPSzunsigned]{unsigned}#(pc) + 4 > len then
+    #\hyperref[sailMIPSzraisezyc2zyexceptionzynoreg]{raise\_c2\_exception\_noreg}#(CapEx_LengthViolation);
+  #\hyperref[sailMIPSzexecutezybranchzymips]{execute\_branch\_mips}#(pc); }

@@ -1,0 +1,20 @@
+function #\hyperref[sailRISCVztranslationMode]{translationMode}#(priv) = {
+  if priv == Machine then Sbare
+  else {
+    let arch = #\hyperref[sailRISCVzarchitecture]{architecture}#(#\hyperref[sailRISCVzgetzymstatuszySXL]{get\_mstatus\_SXL}#(mstatus));
+    match arch {
+      #\hyperref[sailRISCVzSome]{Some}#(RV64) => {
+        let mbits : satp_mode = #\hyperref[sailRISCVzMkzySatp64]{Mk\_Satp64}#(satp).#\hyperref[sailRISCVzMode]{Mode}#();
+        match #\hyperref[sailRISCVzsatp64Modezyofzybits]{satp64Mode\_of\_bits}#(RV64, mbits) {
+          #\hyperref[sailRISCVzSome]{Some}#(m) => m,
+          #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("invalid RV64 translation mode in satp")
+        }
+      },
+      #\hyperref[sailRISCVzSome]{Some}#(RV32) => {
+        let s = #\hyperref[sailRISCVzMkzySatp32]{Mk\_Satp32}#(satp[31..0]);
+        if s.#\hyperref[sailRISCVzMode]{Mode}#() == 0b0 then Sbare else Sv32
+      },
+      _    => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unsupported address translation arch")
+    }
+  }
+}

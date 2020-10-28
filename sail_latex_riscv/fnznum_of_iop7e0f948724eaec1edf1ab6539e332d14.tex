@@ -1,0 +1,8 @@
+function num_of_iop arg# = match arg# {
+  RISCV_ADDI => 0,
+  RISCV_SLTI => 1,
+  RISCV_SLTIU => 2,
+  RISCV_XORI => 3,
+  RISCV_ORI => 4,
+  RISCV_ANDI => 5
+}

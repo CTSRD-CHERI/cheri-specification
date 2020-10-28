@@ -1,0 +1,12 @@
+function #\hyperref[sailRISCVzliftzysie]{lift\_sie}#(o : Minterrupts, d : Minterrupts, s : Sinterrupts) -> Minterrupts = {
+  let m : Minterrupts = o;
+  let m = if d.#\hyperref[sailRISCVzSEI]{SEI}#() == 0b1 then #\hyperref[sailRISCVzupdatezySEI]{update\_SEI}#(m, s.#\hyperref[sailRISCVzSEI]{SEI}#()) else m;
+  let m = if d.#\hyperref[sailRISCVzSTI]{STI}#() == 0b1 then #\hyperref[sailRISCVzupdatezySTI]{update\_STI}#(m, s.#\hyperref[sailRISCVzSTI]{STI}#()) else m;
+  let m = if d.#\hyperref[sailRISCVzSSI]{SSI}#() == 0b1 then #\hyperref[sailRISCVzupdatezySSI]{update\_SSI}#(m, s.#\hyperref[sailRISCVzSSI]{SSI}#()) else m;
+  if #\hyperref[sailRISCVzhaveNExt]{haveNExt}#() then {
+    let m = if d.#\hyperref[sailRISCVzUEI]{UEI}#() == 0b1 then #\hyperref[sailRISCVzupdatezyUEI]{update\_UEI}#(m, s.#\hyperref[sailRISCVzUEI]{UEI}#()) else m;
+    let m = if d.#\hyperref[sailRISCVzUTI]{UTI}#() == 0b1 then #\hyperref[sailRISCVzupdatezyUTI]{update\_UTI}#(m, s.#\hyperref[sailRISCVzUTI]{UTI}#()) else m;
+    let m = if d.#\hyperref[sailRISCVzUSI]{USI}#() == 0b1 then #\hyperref[sailRISCVzupdatezyUSI]{update\_USI}#(m, s.#\hyperref[sailRISCVzUSI]{USI}#()) else m;
+    m
+  } else m
+}

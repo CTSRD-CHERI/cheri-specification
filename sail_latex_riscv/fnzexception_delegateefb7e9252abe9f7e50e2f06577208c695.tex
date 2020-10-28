@@ -1,0 +1,14 @@
+function #\hyperref[sailRISCVzexceptionzydelegatee]{exception\_delegatee}#(e : ExceptionType, p : Privilege) -> Privilege = {
+  let idx   = #\hyperref[sailRISCVznumzyofzyExceptionType]{num\_of\_ExceptionType}#(e);
+  let super = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(medeleg.#\hyperref[sailRISCVzbits]{bits}#()[idx]);
+  /* if S-mode is absent, medeleg delegates to U-mode if 'N' is supported. */
+  let user  = if   #\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#()
+              then super & #\hyperref[sailRISCVzhaveNExt]{haveNExt}#() & #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(sedeleg.#\hyperref[sailRISCVzbits]{bits}#()[idx])
+              else super & #\hyperref[sailRISCVzhaveNExt]{haveNExt}#();
+  let deleg = if      #\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#() & user  then User
+              else if #\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#() & super then Supervisor
+              else                               Machine;
+  /* We cannot transition to a less-privileged mode. */
+  if   #\hyperref[sailRISCVzprivLevelzytozybits]{privLevel\_to\_bits}#(deleg) <_u #\hyperref[sailRISCVzprivLevelzytozybits]{privLevel\_to\_bits}#(p)
+  then p else deleg
+}

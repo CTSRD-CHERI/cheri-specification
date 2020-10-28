@@ -1,0 +1,7 @@
+function #\hyperref[sailMIPSzsetzyCP0ErrorEPC]{set\_CP0ErrorEPC}# (v) = {
+  let (representable, newErrorEPCC) = #\hyperref[sailMIPSzsetCapOffset]{setCapOffset}#(ErrorEPCC, v);
+  ErrorEPCC = if representable then
+      {newErrorEPCC with tag = newErrorEPCC.tag & not(newErrorEPCC.sealed)}
+    else
+      #\hyperref[sailMIPSzunrepCap]{unrepCap}#(newErrorEPCC);
+}

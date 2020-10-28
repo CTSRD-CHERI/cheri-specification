@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzminzyinstructionzybytes]{min\_instruction\_bytes}# () -> CapAddrInt = {
+  if   (~ (#\hyperref[sailRISCVzsyszyenablezywritablezymisa]{sys\_enable\_writable\_misa}# ())) & (~ (#\hyperref[sailRISCVzsyszyenablezyrvc]{sys\_enable\_rvc}# ()))
+  then 4  /* RVC is hardwired to be disabled */
+  else 2  /* RVC is active or it could become active */
+}

@@ -1,0 +1,22 @@
+let rs1_val : xlenbits = if is_imm then #\hyperref[sailRISCVzEXTZ]{EXTZ}#(rs1) else #\hyperref[sailRISCVzX]{X}#(rs1);
+let isWrite : bool = match op {
+  CSRRW  => true,
+  _      => if is_imm then #\hyperref[sailRISCVzunsigned]{unsigned}#(rs1_val) != 0 else #\hyperref[sailRISCVzunsigned]{unsigned}#(rs1) != 0
+};
+if ~ (#\hyperref[sailRISCVzcheckzyCSR]{check\_CSR}#(csr, cur_privilege, isWrite))
+then { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL }
+else if ~ (#\hyperref[sailRISCVzextzycheckzyCSR]{ext\_check\_CSR}#(csr, cur_privilege, isWrite))
+then { #\hyperref[sailRISCVzextzycheckzyCSRzyfail]{ext\_check\_CSR\_fail}#(); RETIRE_FAIL }
+else {
+  let csr_val = #\hyperref[sailRISCVzreadCSR]{readCSR}#(csr); /* could have side-effects, so technically shouldn't perform for CSRW[I] with rd == 0 */
+  if isWrite then {
+    let new_val : xlenbits = match op {
+      CSRRW => rs1_val,
+      CSRRS => csr_val | rs1_val,
+      CSRRC => csr_val & ~(rs1_val)
+    };
+    #\hyperref[sailRISCVzwriteCSR]{writeCSR}#(csr, new_val)
+  };
+  #\hyperref[sailRISCVzX]{X}#(rd) = csr_val;
+  RETIRE_SUCCESS
+}

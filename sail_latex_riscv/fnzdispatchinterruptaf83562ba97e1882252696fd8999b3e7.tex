@@ -1,0 +1,21 @@
+function #\hyperref[sailRISCVzdispatchInterrupt]{dispatchInterrupt}#(priv : Privilege) -> #\hyperref[sailRISCVzoption]{option}#((InterruptType, Privilege)) = {
+  /* If we don't have different privilege levels, we don't need to check delegation.
+   * Absence of U-mode implies absence of S-mode.
+   */
+  if (~ (#\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#())) | ((~ (#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#())) & (~ (#\hyperref[sailRISCVzhaveNExt]{haveNExt}#()))) then {
+    assert(priv == Machine, "invalid current privilege");
+    let enabled_pending = mip.#\hyperref[sailRISCVzbits]{bits}#() & mie.#\hyperref[sailRISCVzbits]{bits}#();
+    match #\hyperref[sailRISCVzfindPendingInterrupt]{findPendingInterrupt}#(enabled_pending) {
+      #\hyperref[sailRISCVzSome]{Some}#(i) => let r = (i, Machine) in #\hyperref[sailRISCVzSome]{Some}#(r),
+      #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzNone]{None}#()
+    }
+  } else {
+    match #\hyperref[sailRISCVzgetPendingSet]{getPendingSet}#(priv) {
+      #\hyperref[sailRISCVzNone]{None}#()      => #\hyperref[sailRISCVzNone]{None}#(),
+      #\hyperref[sailRISCVzSome]{Some}#(ip, p) => match #\hyperref[sailRISCVzfindPendingInterrupt]{findPendingInterrupt}#(ip) {
+                       #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzNone]{None}#(),
+                       #\hyperref[sailRISCVzSome]{Some}#(i) => let r = (i, p) in #\hyperref[sailRISCVzSome]{Some}#(r)
+                     }
+    }
+  }
+}

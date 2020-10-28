@@ -1,0 +1,6 @@
+function f_is_SNaN_D   x64 = {
+  let (sign, exp, mant) = #\hyperref[sailRISCVzfsplitzyD]{fsplit\_D}# (x64);
+  (  (exp == #\hyperref[sailRISCVzones]{ones}#())
+   & (mant [51] == bitzero)
+   & (mant != #\hyperref[sailRISCVzzzeros]{zeros}#()))
+}
