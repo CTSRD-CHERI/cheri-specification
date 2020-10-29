@@ -721,8 +721,8 @@ registers.
 \insnriscvref{CJALR} and during exceptions; \textit{ASR} indicates
 \PCC{}.\cperms{} must grant \cappermASR{} to permit access (in addition to
 being in a permitted mode).
-\textbf{Reset} indicates whether the register should be initialised to the
-default root capability ($\infty$) or NULL capability ($\emptyset$).
+\textbf{Reset} indicates whether the register is initialised to the default
+root capability ($\infty$) or NULL capability ($\emptyset$) on reset.
 Some special capabilities registers are extensions of existing RISC-V
 registers, with the capability offset being equal to the original register.
 \note{We should describe this in more detail including behavior if they are
