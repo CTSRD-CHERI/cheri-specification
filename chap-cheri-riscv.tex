@@ -621,12 +621,8 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
 \begin{figure}[!h]
 \begin{center}
 \begin{bytefield}[bitwidth=\textwidth/34]{32}
-  \bitheader[endianness=big]{0,1,2,4,5,9,10,15,16,31} \\
-  \bitbox{16}{\textbf{WIRI}}
-  \bitbox{6}{\texttt{cap idx}}
-  \bitbox{5}{\texttt{cause}}
-%  \bitbox{1}{\texttt{m}}
-  \bitbox{3}{\textbf{WIRI}}
+  \bitheader[endianness=big]{0,1,2,31} \\
+  \bitbox{30}{\textbf{WIRI}}
   \bitbox{1}{\texttt{d}}
   \bitbox{1}{\texttt{e}}
 \end{bytefield}
@@ -650,12 +646,7 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
 to do lazy CHERI-context save/restore similar fo floating point.}
 %\item [m] The \texttt{m} ``mode'' bit controls the current capability encoding
 %mode (i.e. the behavior of memory instructions).
-\item [cause] The \texttt{cause} field reports the cause of the last capability exception, following the encoding described in Table~\ref{table:capability-cause}.
-\item [cap idx] The \texttt{cap idx} field reports the index of the capability register that caused the last exception.
 \end{description}
-
-The \texttt{cause} and \texttt{cap idx} fields of this register are deprecated
-and will be replaced by \xtval{}.
 
 \subsection{Special Capability Registers (SCRs)}
 \label{subsection:cheri-riscv-scrs}
