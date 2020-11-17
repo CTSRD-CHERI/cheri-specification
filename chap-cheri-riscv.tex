@@ -644,8 +644,6 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
 \item [d] The \texttt{d} ``dirty'' bit tells whether a capability register has been written. This is intended to help with memory requirements when implementing context switching.  \arnote{Is this still useful if we have hybrid and purecap co-process communication?}
 \hmnote{If the user-mode apps are purecap, and the kernel is hybrid (or does not do any cap ops at all), this bit might be useful
 to do lazy CHERI-context save/restore similar fo floating point.}
-%\item [m] The \texttt{m} ``mode'' bit controls the current capability encoding
-%mode (i.e. the behavior of memory instructions).
 \end{description}
 
 \subsection{Special Capability Registers (SCRs)}
@@ -846,9 +844,6 @@ Section~\ref{subsection:compressed-instructions}.
 \subsubsection{Encoding Modes}
 \label{sec:cheri-riscv-encmodes}
 
-%We define two encoding modes selected using the \texttt{m} bit of \xccsr{} (see
-%Section~\ref{subsubsec-ccsrs}):
-
 We define two encoding modes, selected using the CHERI-RISC-V-specific
 encoding-mode flag in the capability \cflags{} field of \PCC{}:
 
@@ -878,15 +873,6 @@ semantics or risk insecure behavior.
 When \xTCC{} is set by the operating system, it should contain an appropriate
 encoding-mode flag to ensure that exception handlers utilize the correct
 instruction encoding.
-
-%\rwnote{Should we say something about architectural visibility of an
-%  encoding-mode change -- i.e., that it's visible only after an exception is
-%  fired, when an exception returns, or on a jump?}
-
-%
-%\rwnote{Or is there a status CSR being restored during exception entry...?}\ajnote{\mccsr{} would be the one implicitly used to decide on instruction decoding when entering an m-mode exception, \sccsr{} for s-mode, and \uccsr{} for u-mode exceptions.}
-%\pmnote{There is space in mstatus[30:23] that could be used to store the per-ring mode bits.
-%  There is also a reserved but unused trap-mode bit in mtvec.mode[1] that could be used to determine instruction decoding of the exception handler.}
 
 \subsubsection{Non-Compressed Instructions Affected by Capability Encoding
   Mode}
@@ -1462,9 +1448,6 @@ The following edge-case behaviors relating to CSRs/SCRs are also specified:
 % switch for an architecture with a dedicated capability register file. If the
 % architecture is using a merged register file for capability and integer
 % registers, the dirty field should be removed}.
-% When the \texttt{m} ``mode'' field is set, the processor operates in
-% ``\capmode{}''. Running in \capmode{} affects the behavior of certain
-% instructions as defined below.
 
 % Instructions that alter the control flow and cause memory accesses for
 % instruction fetches, such as branches and jumps, consider their target address
@@ -1477,8 +1460,7 @@ The following edge-case behaviors relating to CSRs/SCRs are also specified:
 % \UTCC{}, \STCC{} or \MTCC{} is loaded in \PCC{}, and \PCC{} is saved in the
 % appropriate \UEPCC{}, \SEPCC{} or \MEPCC{}. If the exception is a capability
 % exception, the appropriate RISC-V \ucause{}, \scause{} or \mcause{} is set to a
-% new ``capability exception'' cause, and the \texttt{cap idx} and \texttt{cause}
-% fields of the \xccsr{} are also updated.
+% new ``capability exception'' cause, and \xtval{} is updated appropriately.
 
 % The following instruction produces a \PCC{}-derived capability when in
 % \capmode{}, and an offset into \PCC{} otherwise:
