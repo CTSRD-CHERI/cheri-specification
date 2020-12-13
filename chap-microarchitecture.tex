@@ -297,7 +297,7 @@ CHERI capability manipulation instructions should not speculatively produce capa
 For example, \insnref{CBuildCap} should not forward tagged bits to its consumers while waiting for the result of its bounds check.
 \insnref{CSetBounds} and \insnref{CUnseal} share similar concerns.
 It is believed that all open-source CHERI implementations may currently forward unsafe values for these instructions, and the Toooba microarchitecture is likely vulnerable to speculative execution attacks through this vector.
-This concern might be more Systematically alleviated by an architecture that clears tags rather than throws exceptions for operations that manipulate the privilege of a capability. The ARM Morello architecture generally clears tags rather than throws exceptions for capability manipulation instructions, and we expect the Morello microarchitecture to be immune to this class of attacks for this reason.
+This concern might be more systematically alleviated by an architecture that clears tags rather than throws exceptions for operations that manipulate the privilege of a capability. The ARM Morello architecture generally clears tags rather than throws exceptions for capability manipulation instructions, and we expect the Morello microarchitecture to be immune to this class of attacks for this reason.
 
 In addition, any speculation in a microarchitecture that could synthesise a value rather than deriving it from architecturally-defined bits (\textit{e.g.} value speculation) should not produce valid capability values.
 This could include not only a capability predicted to be loaded from a memory location, but also a predicted integer value that is used to bound a capability.
