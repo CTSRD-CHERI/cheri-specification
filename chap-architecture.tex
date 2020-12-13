@@ -3060,7 +3060,8 @@ that it is desirable to retain in applying CHERI concepts in any ISA:
 
 \begin{itemize}
 \item Capabilities can be used to implement pointers into virtual address
-  spaces (or physical address spaces for processors without MMUs);
+  spaces (or physical address spaces for processors without virtual memory,
+  or with virtual memory disabled).
 \item Tags on registers or in memory determine whether they are valid
   capabilities for loading, fetching, or jumping to;
 \item Tagged registers can contain both data
@@ -3082,13 +3083,15 @@ conditions
 \item Capabilities contain bounds and permissions; a capability's address is
   able to float freely within (and to varying extents, beyond) the bounds;
 \item Permissions control both data and control-flow operations;
-\item Guarded manipulation implements monotonicity: rights can be reduced but
+\item Guarded manipulation in the architecture (and, implicitly, microarchitecture) implements monotonicity: rights can be reduced but
   not increased through valid manipulations of capabilities;
 \item Invalid manipulations of capabilities violating guarded-manipulation rules
   lead to an exception or clearing of the valid tag, whether in a register or
   in memory, with suitable atomicity;
 \item Loads via, stores via, and jumps to capabilities are constrained by their
-  permissions and bounds, throwing exceptions on a violation;
+  permissions and bounds, throwing exceptions on a violation -- for jumps,
+  this could be on the jump instruction, or on instruction fetch at the
+  target;
 \item Capability exceptions, in general, are delivered with greater priority
   than MMU exceptions;
 \item Permissions on capabilities include the ability to not just control
@@ -3103,7 +3106,7 @@ conditions
   additional permissions controlling the loading and storing of capabilities;
 \item That MMU-enforced permissions may clear tags or throw exceptions if
   violated (possibly as configurable option);
-\item Strong C-language compatibility is maintained through definitions of
+\item C-language compatibility is maintained through definitions of
   NULL to be untagged, zero-filled memory, instructions to convert between
   capabilities and integer pointers, and instructions providing C-compatible
   equality operators;
@@ -3112,8 +3115,9 @@ in
 special registers or within a capability
   register file, allow a software supervisor to operate with greater rights
   than non-supervisor code, recovering those rights on exception delivery;
-\item A simple capability flow-control model to allow the propagation of
-  capabilities to be constrained;
+\item A capability flow-control model to allow the propagation of
+  capabilities to be constrained, preventing capabilities marked as local
+  from being stored via capabilities marked to prevent that;
 \item Sealed capabilities allow a non-monotonic escalation of privilege
   associated with a constrained control-flow transition to a defined address.
   Subject to the use of suitable instructions, and appropriate permissions, a
