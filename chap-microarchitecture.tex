@@ -173,7 +173,7 @@ but could use the \emph{IncOffset} function discussed below followed by \emph{Ca
 
 \subsubsection{Fast Representability Checks}
 When the address of a capability is being modified, the algorithm must assert that the resulting capability will still decode the same bounds as the original capability.
-Custom \emph{fast representability checks} that operate directly on the compressed fields of the encoding are required for each single-cycle operation that modifies the address to avoid dependance on decompressed values which generally require the majority of a cycle to calculate.
+Custom \emph{fast representability checks} that operate directly on the compressed fields of the encoding are required for each single-cycle operation that modifies the address to avoid dependence on decompressed values which generally require the majority of a cycle to calculate.
 
 The \emph{IncOffset} and \emph{SetOffset} operations are supported by a single function listed in Section~\ref{sec:cheri-128-listings-incoffset} and implement the function described in Section~\ref{sec:cheri-concentrate-fast-representable-limit-checking}.
 This shared function allows a single circuit to support both operations.
