@@ -1471,7 +1471,7 @@ Our recommendation is that capability-aware instructions be inaccessible in
 capability values that violate provenance validity and monotonicity
 properties.
 Any writes of non-capability values into capability-extended general-purpose
-registers be treated in a similar manner to integer stores into those
+registers should be treated in a similar manner to integer writes into those
 registers in the capability-aware execution environment: they should clear the
 remainder of the register including the tag bit.
 Writes of integer values into capability-extended special-purpose registers
