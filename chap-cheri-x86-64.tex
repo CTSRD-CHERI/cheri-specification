@@ -97,18 +97,20 @@ The capability-sized registers would be named with a `C' prefix in place
 of the `R' prefix used for 64-bit registers
 (\CAX{}, \CBX{}, etc.).
 As with CHERI-RISC-V,
-we recommend that reads of the general-purpose registers as integers return
-the cursor value (virtual address).
-Writes to general-purpose registers using non-capability-aware instructions
+we recommend that the bottom 64 bits of capability registers contain
+the integer value (virtual address) and the upper 64 bits contain
+capability metadata.
+Reads of capability registers as integers return the integer value.
+Integer writes to capability registers
 should clear the tag and upper 64 bits of capability metadata, storing the
-desired integer value in the register's cursor.
+desired integer value in the bottom 64 bits.
 
 The \RIP{} register (which contains the address of the current instruction)
 would also be extended into a \CIP{} capability.  This would function as
 the equivalent of \PCC{} for CHERI-MIPS and CHERI-RISC-V.  As with
 those architectures, the
 value of \RIP{} should be the current offset of \CIP{} rather than the
-cursor value (virtual address).
+integer value (virtual address).
 
 \section{Additional Capability Registers}
 
@@ -266,7 +268,7 @@ prefixes when used with instructions using capability-aware addresses
 to select an implicit base register of \CFS{} or \CGS{}, respectively.
 However, this approach is potentially confusing.  Would an instruction
 using an existing address of ``(\%cax)'' and an instruction prefix of
-``GS:'' simply use the cursor of \CAX{} (value of \RAX{}) as an offset
+``GS:'' simply use the integer value of \CAX{} (value of \RAX{}) as an offset
 relative to \CGS{}?  In addition, instructions that manipulate
 capabilities need a way to specify an additional capability register
 as an operand.
