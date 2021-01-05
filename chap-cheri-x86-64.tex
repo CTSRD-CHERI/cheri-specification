@@ -308,19 +308,27 @@ addressing mode is enabled,
 these string instructions should use \CSI{} instead of \RSI{} and \CDI{} instead of
 \RDI{}.
 
-Instructions that work with the stack such as \insnnoref{PUSH}
-or \insnnoref{CALL} use the stack pointer as an implicit
-operand.  In plain 64-bit mode, \RSP{} would be treated as an offset
-into \DDC{} to compute the stack pointer.  In ``capability mode'',
-these instructions would use \CSP{} as the stack pointer.  Hybrid code
-executing in plain 64-bit mode that uses \CSP{} as the stack pointer
-would simulate these instructions using \insnnoref{MOV}
-instructions and adjusting the offset of \CSP{}.  Similarly,
-``capability mode'' instructions using \RSP{} as the stack pointer
-would use \insnnoref{MOV} combined with adjustments to \RSP{}.
-
 \insnnoref{XLAT} should use \CBX{} as the implicit table address when
 using capability-aware addressing.
+
+\subsection{Stack Address Size}
+
+Instructions that work with the stack such as \insnnoref{PUSH} or
+\insnnoref{CALL} use the stack pointer as an implicit operand.  In
+32-bit x86, the `B' flag of the stack segment selector determines if
+the 16-bit or 32-bit stack pointer register is used.  In 64-bit long
+mode, \RSP{} is always used as the stack pointer.
+
+To support a CHERI stack pointer, we propose reusing the `B' flag of
+the stack segment selector to determine the stack pointer.  When `B'
+is clear, \RSP{} would be treated as an offset into \DDC{} to compute
+the stack pointer.  When `B' is set, \CSP{} would be used as the stack
+pointer.  Code which needs to use the alternate stack pointer
+interpretation would simulate these instructions using \insnnoref{MOV}
+instructions and adjusting the desired stack pointer using
+instructions such as \insnnoref{ADD} or \insnnoref{SUB}.  Emulation of
+\insnnoref{CALL} or \insnnoref{RET} would use \insnnoref{JMP} to
+adjust the instruction pointer.
 
 \section{Capability-Aware Instructions}
 
@@ -393,14 +401,6 @@ should default to a capability operand in ``capability mode''.
 Note that attempting to push or pop a misaligned capability will raise
 an exception.  The stack pointer must be suitably aligned before the
 use of \insnnoref{CALLC}, \insnnoref{IRETC}, and \insnnoref{RETC}.
-
-The implicit stack pointer operand in \insnnoref{CALL} and
-\insnnoref{RET} also bears consideration.  To avoid an
-explosion of new opcodes while also providing compact enoding for
-common uses, these instructions would use \CSP{} as the stack pointer
-in ``capability mode'' and \RSP{} as the stack pointer in plain 64-bit
-mode.  Code that needs to use an alternate stack pointer would use
-explicit stack manipulation along with \insnnoref{JMP}.
 
 \subsection{Extending Existing Instructions to Support Capability Operands}
 
