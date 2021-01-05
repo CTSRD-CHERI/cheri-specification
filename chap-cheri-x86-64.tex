@@ -699,6 +699,34 @@ information:
   implement.
 \end{enumerate}
 
+\section{Call Gates}
+
+We do not recommend extending call gates to support capabilities.
+Supporting capabilities with call gates would likely require the
+following changes:
+
+\begin{itemize}
+  \item Extending the global and local descriptor table format to
+    support a new capability call gate which stored a full capability
+    rather than a 64-bit offset.  This will be more invasive than the
+    64-bit call gate which depends on the abillity to force a number
+    of reserved bits in the fourth double word to zero as a sentinel
+    type for the second half of a 64-bit call gate.
+
+    As with 64-bit call gates, capability call gates would not support
+    parameter copying.
+
+    Calls to a capability call gate would push a suitable ``far''
+    return frame with each stack push made in a 16-byte increment.
+
+  \item 64-bit call gates as well as capability call gates would need
+    to support code segments with both the `L` and `D` bits set.
+
+  \item A means would need to be set for determing the value of the
+    `B' flag in the resulting stack segment.  For example, it could be
+    copied from the `D' flag of the target code segment.
+\end{itemize}
+
 \section{Interrupt and Exception Handling}
 \label{sec:x86:interrupt-exception}
 
