@@ -86,6 +86,11 @@ As with CHERI-MIPS and CHERI-RISC-V, we recommend that both memory and
 registers contain tagged capabilities.  Similar to CHERI-RISC-V, we also
 recommend a single, 128-bit format for CHERI-x86-64 capabilities.
 
+Since capabilities require 16 byte alignment in memory, attempts to
+load or store capabilities at misaligned addresses should raise a
+General Protection Fault with an error code of zero similar to
+misaligned loads and stores of SSE registers.
+
 \section{Extending Existing Registers}
 
 The x86 architecture has expanded its general-purpose integer registers multiple
@@ -381,6 +386,10 @@ a capability operand in ``capability mode''.
 Section~\ref{sec:x86:interrupt-exception}) from the stack loading
 capabilities into \CIP{} and \CSP{}.  The \insnnoref{IRET} instruction
 should default to a capability operand in ``capability mode''.
+
+Note that attempting to push or pop a misaligned capability will raise
+an exception.  The stack pointer must be suitably aligned before the
+use of \insnnoref{CALLC}, \insnnoref{IRETC}, and \insnnoref{RETC}.
 
 The implicit stack pointer operand in \insnnoref{CALL} and
 \insnnoref{RET} also bears consideration.  To avoid an
