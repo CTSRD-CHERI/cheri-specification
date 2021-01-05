@@ -319,6 +319,9 @@ instructions and adjusting the offset of \CSP{}.  Similarly,
 ``capability mode'' instructions using \RSP{} as the stack pointer
 would use \insnnoref{MOV} combined with adjustments to \RSP{}.
 
+\insnnoref{XLAT} should use \CBX{} as the implicit table address when
+using capability-aware addressing.
+
 \section{Capability-Aware Instructions}
 
 CHERI-x86-64 will require new instructions to examine and modify
