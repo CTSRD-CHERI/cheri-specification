@@ -524,6 +524,16 @@ add %csp,$16
     rather than computing addresses, it may make sense for
     \insnnoref{LEA} to use integer operands and ``plain'' addressing
     by default even in ``capability mode''.
+
+  \item \insnnoref{ENTER} and \insnnoref{LEAVE} could be extended to
+    support implicit capability operands, or they could be deprecated
+    for capabilities and remain as integer-only instructions.
+
+    If these instructions were extended to support capability
+    operands, the capability-sized versions would operate on \CSP{}
+    and \CBP{} rather than \RSP{} and \RBP{}.  These instructions
+    would also default to capability operands in ``capability mode''
+    if extended.
 \end{itemize}
 
 \subsection{New CHERI Instructions}
