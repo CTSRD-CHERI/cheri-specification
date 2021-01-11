@@ -754,7 +754,8 @@ two possible approaches.
 
 The first approach would add two new control registers: the Kernel
 Code Capability (\KCC{}) and Kernel Stack Capability (\KSC{}).  Access to
-these registers would be restricted to supervisor mode.  These new registers
+these registers would be restricted to supervisor mode and would also
+require \cappermASR{} in \CIP{}.  These new registers
 could be named as instruction operands, using the same approach decribed
 earlier for \CFS{} and \CGS{}.
 
@@ -863,3 +864,14 @@ the tag cleared instead of faulting.
 
 Instruction fetches always ignore tags and will never raise a
 capability page-fault exception.
+
+\section{Controlling Access to System Registers}
+
+In CHERI-x86-64, \cappermASR{} would be required to directly access the
+following registers:
+
+\begin{itemize}
+  \item Control registers including \KCC{}, \KSC{}, \CSTAR{}, and \KGS{}
+  \item Debug registers
+  \item Model-specific registers
+\end{itemize}
