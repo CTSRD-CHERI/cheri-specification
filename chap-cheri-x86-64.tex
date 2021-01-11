@@ -133,8 +133,9 @@ that is added as an offset to the virtual address of existing instructions.
 For CHERI-x86-64 we recommend replacing these segment registers with two
 new capability registers: \CFS{} and \CGS{}.
 
-In addition, new capability registers may be required to manage user
-to kernel transitions as detailed below.
+In addition, new capability control registers will be required to
+manage user to kernel transitions as described in
+Section~\ref{sec:x86:capability-control-registers}.
 
 \section{Using Capabilities with Memory Address Operands}
 
@@ -259,6 +260,7 @@ The immediate offset is applied to \CIP{} and the load
 or store is constrained by the bounds and permissions of \CIP{}.
 
 \subsection{Using Additional Capability Registers}
+\label{sec:x86:using-additional-caps}
 
 The proposed capability-aware addressing mode proposed above allows
 for the capability versions of existing general-purpose integer registers such
@@ -746,20 +748,32 @@ in a single slot.  However, this would result in a frame layout
 inconsistent with far calls.  \insnnoref{IRETC} would be used in
 interrupt service routines to unwind this frame.
 
+\subsection{Capability Control Registers}
+\label{sec:x86:capability-control-registers}
+
 Interrupt and exception handlers require new capabilities for the
-program counter (\CIP{}) and stack pointer (\CSP{}) registers.  We consider
-two possible approaches.
+program counter (\CIP{}) and stack pointer (\CSP{}) registers.  These
+values must be derived from valid, privileged capabilities.  To
+support this, we propose the addition of a new class of capability
+registers: capability control registers.
+
+Capability control registers are capability-sized control registers.
+As with other control registers such as \CRFOUR, direct access to
+capability control registers would be restricted to supervisor mode as
+well as requiring \cappermASR{} in \CIP{}.  Unlike other control
+registers, however, capability control registers would not be accessed
+via the \texttt{0F 20} and \texttt{0F 22} opcodes of \insnnoref{MOV}.
+Instead, capability control registers would be named as additional
+capability registers using the same approach described earlier for
+\CFS{} and \CGS{} in Section\~ref{sec:x86:using-additional-caps}.
+
+We consider two possible approaches for deriving \CIP{} and \CSP{} at
+the start of an interrupt or exception.
 
 \subsection{Kernel Code and Stack Capabilities}
 
-The first approach would add two new control registers: the Kernel
-Code Capability (\KCC{}) and Kernel Stack Capability (\KSC{}).  Access to
-these registers would be restricted to supervisor mode and would also
-require \cappermASR{} in \CIP{}.  These new registers
-could be named as instruction operands, using the same approach decribed
-earlier for \CFS{} and \CGS{}.
-
-Transitions into
+The first approach would add two new capability control registers: the Kernel
+Code Capability (\KCC{}) and Kernel Stack Capability (\KSC{}).  Transitions into
 supervisor mode would load new offsets relative to \KCC{} and \KSC{} from
 existing data structures and tables to construct the new \CIP{} and \CSP{}
 register values.  For example, the current virtual address stored in
@@ -777,7 +791,7 @@ code such as operating-system kernels.
 
 \subsection{Capabilities in Entry Points}
 
-The second approach would be to replace virtual addresses stored in
+The second approach would replace virtual addresses stored in
 existing entry points with complete capabilities.  This is a more
 invasive change, requiring larger changes to existing systems code, but
 it enables the use of more fine-grained capabilities for each entry
@@ -787,10 +801,8 @@ Setting the desired kernel stack pointers \CSP{} would require a new
 \TSS{} layout that expanded the existing \RSP{} and \IST{} entries to
 capabilities.
 
-For \insnnoref{SYSCALL}, a new control register \CSTAR{} could be
-added to hold the target instruction pointer.  As with \KCC{},
-this register would be a privileged register in the same bank as
-\CFS{} and \CGS{}.
+For \insnnoref{SYSCALL}, a new capability control register \CSTAR{} would be
+added to hold the target instruction pointer.
 
 Entries in the \IDT{} would be expanded to 32-bytes, appending a capability
 code pointer in the last 16 bytes.  This would double the size of the
@@ -810,7 +822,7 @@ instruction can be difficult to use.  Interrupt and exception handlers
 must be careful not to invoke \insnnoref{SWAPGS} if the interrupt
 or exception is taken while executing the kernel mode \GS{}.  We
 recommend avoiding the use of \insnnoref{SWAPGS}, and instead defining
-a new privileged control register \KGS{}.  Operating systems could
+a new capability control register \KGS{}.  Operating systems could
 either choose to use \KGS{} to initialize \CGS{} in interrupt and
 exception handlers, or else use \KGS{} directly as the kernel mode TLS
 pointer.
