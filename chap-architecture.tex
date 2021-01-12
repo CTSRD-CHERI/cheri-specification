@@ -1350,18 +1350,21 @@ Selecting a new $E$ forces a fresh selection of $T$ and $B$, but is certain not 
 
 \subsubsection{CHERI Concentrate Alignment Requirements}
 \label{sec:ccalignment}
-For a requested base and top to be exactly representable the CHERI concentrate format may require additional alignment requirements:
+For a requested base and length to be exactly representable the CHERI concentrate format may require additional alignment requirements:
 \begin{itemize}
 \item
-  For allocations with $I_E = 0$ (i.e. lengths less than $4$ kiB for $MW = 14$) there is no specific alignment requirement.
+  For allocations with $I_E = 0$ (i.e. lengths less than $8$ kiB for $MW = 14$) there is no specific alignment requirement.
 
 \item
-  For larger allocations the base and top must be aligned to $2^{E+3+C}$ byte
-  boundaries (i.e., the $E + 3 + C$ least significant bits are zero) where $E$
-  is determined from the length, $l$, by
-  $E = 52 - \text{CountLeadingZeros}(l[64:13])$, and $C$ is an additional carry
-  bit from rounding up the truncated (to $E + 3 + MW - 4$ bits) length to a
-  multiple of $2^{E+3}$ (that is, $C = 1$ if and only if any of the $E + 3$
+  For larger allocations the base and length must be aligned to $2^{E+3}$ byte
+  boundaries (i.e., the $E + 3$ least significant bits are zero).
+  $E$ is determined from the requested length $l$ and is subject to rounding such that an
+  $E_{\text{initial}}$ is calculated for $l$, which is then aligned up to $l_{\text{aligned}}$ which is used to derive
+  the final $E$.
+  Specifically, $E = E_{\text{initial}} + C$, where $E_{initial} = 52 - \text{CountLeadingZeros}(l[64:13])$
+  and $C$ is an additional carry
+  bit from rounding up the truncated (to $E_{\text{initial}} + 3 + MW - 4$ bits) length to a
+  multiple of $2^{E+3}$ (that is, $C = 1$ if and only if any of the $E_{\text{initial}} + 3$
   least significant bits of $l$ are non-zero and the next $MW - 4$ least
   significant bits of $l$ are all $1$).
 
