@@ -1354,8 +1354,17 @@ For a requested base and top to be exactly representable the CHERI concentrate f
 \begin{itemize}
 \item
   For allocations with $I_E = 0$ (i.e. lengths less than $4$ kiB for $MW = 14$) there is no specific alignment requirement.
+
 \item
-  For larger allocations the base and top must be aligned to $2^{E+3}$ byte boundaries (i.e. the $E + 3$ least significant bits are zero) where $E$ is determined from the length, $l$, by $E = 52 - \text{CountLeadingZeros}(l[64:13])$
+  For larger allocations the base and top must be aligned to $2^{E+3+C}$ byte
+  boundaries (i.e., the $E + 3 + C$ least significant bits are zero) where $E$
+  is determined from the length, $l$, by
+  $E = 52 - \text{CountLeadingZeros}(l[64:13])$, and $C$ is an additional carry
+  bit from rounding up the truncated (to $E + 3 + MW - 4$ bits) length to a
+  multiple of $2^{E+3}$ (that is, $C = 1$ if and only if any of the $E + 3$
+  least significant bits of $l$ are non-zero and the next $MW - 4$ least
+  significant bits of $l$ are all $1$).
+
 \item
   No additional alignment requirements are currently placed on sealed capabilities or on \DDC{}.
 \end{itemize}
