@@ -498,18 +498,18 @@ an exception raised if an attempt were made to load non-capability data into a
 capability register with \insnref{CLC}.)
 
 Giving capability registers and memory locations a tag bit
-simplifies the implementation of \ccode{cmemcpy()}.
-\ccode{cmemcpy()} is a variant of \ccode{memcpy()} that copies
-the tag bit as well as the data, and so can be used to copy structures
+simplifies the implementation of \ccode{memcpy()}.
+In CHERI, \ccode{memcpy()} copies
+the tag bit as well as the data so that it can be used to copy structures
 containing capabilities. As capability registers are dynamically tagged,
-\ccode{cmemcpy()} can copy a structure by loading
+\ccode{memcpy()} can copy a structure by loading
 its constituent words into capability
 registers and storing them to memory, without needing to know at compile time
 whether it is copying a capability or non-capability data.
 
 Tag bits on capability registers may also be useful for dynamically typed
 languages in which a parameter to a function can be (at run time) either a
-capability or an integer. \ccode{cmemcpy()} can be regarded as
+capability or an integer. \ccode{memcpy()} can be regarded as
 a function whose parameter (technically a \ccode{void *}) is
 dynamically typed.
 
