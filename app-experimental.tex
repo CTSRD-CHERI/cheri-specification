@@ -2280,6 +2280,10 @@ of the attack(s) will be taken to be the CHERI core's trusted computing base
 rather than attacks against the initial bootstrap; that is, we assume that
 any would-be attacker was not present during the load of said TCB and that
 the \emph{core} itself is trusted to faithfully execute instructions.
+Note that these extensions may be added to a system which supports
+CHERI for virtual address pointers with no impact to most user mode
+software.  These extensions most affect the interfaces between
+firmware, hypervisors, and operating system kernels.
 
 \subsection{Capability-Mediated CPU Physical Memory Protection} % <<<
 
