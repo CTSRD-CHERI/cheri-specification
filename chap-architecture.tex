@@ -1353,7 +1353,7 @@ Selecting a new $E$ forces a fresh selection of $T$ and $B$, but is certain not 
 For a requested base and length to be exactly representable the CHERI concentrate format may require additional alignment requirements:
 \begin{itemize}
 \item
-  For allocations with $I_E = 0$ (i.e. lengths less than $8$ kiB for $MW = 14$) there is no specific alignment requirement.
+  For allocations with $I_E = 0$ (i.e. lengths less than $4$ kiB for $MW = 14$) there is no specific alignment requirement.
 
 \item
   For larger allocations the base and length must be aligned to $2^{E+3}$ byte
