@@ -166,14 +166,14 @@ between 32-bit and 64-bit addresses, but a few other single-byte opcodes
 are invalid in 64-bit mode and could be repurposed as a prefix.
 
 We propose a new capability-aware addressing mode that can be
-toggled via the `D' flag of the current code segment and a new 0x62
-opcode prefix.  (In 32-bit x86, the 0x62 opcode is the
-\insnnoref{BOUND} instruction, which is invalid in 64-bit mode.)
+toggled via the `D' flag of the current code segment and a new 0x07
+opcode prefix.  (In 32-bit x86, the 0x07 opcode is the
+\insnnoref{POP ES} instruction, which is invalid in 64-bit mode.)
 If the `D' flag of a 64-bit code segment is set to 1,
 then the CPU would execute in ``capability mode'' -- which would include
 using the capability-aware addressing mode by default.  Individual
 instructions could toggle between capability-aware and ``plain''
-64-bit addressing via the 0x62 opcode prefix.  Addresses using the
+64-bit addressing via the 0x07 opcode prefix.  Addresses using the
 ``plain'' 32-bit or 64-bit addressing would always be treated as offsets
 relative to \DDC{}.  Instructions using capability-aware addressing
 would always use 64-bit virtual addresses and ignore any 0x67 opcode
@@ -212,7 +212,7 @@ mov 0x8(%rbp),%rax
 
 would read the 64-bit value at an offset of RBP+8 from the \DDC{} capability.
 Both instructions would use the same opcode aside from the addition of
-an 0x62 opcode prefix.  In a code segment with `D' set to 1, the second
+an 0x07 opcode prefix.  In a code segment with `D' set to 1, the second
 instruction would require the prefix.  In a code segment with `D' set to 0,
 the first instruction would require the prefix.
 
@@ -349,7 +349,7 @@ segment to determine the operand size.  We propose a similar
 scheme for supporting capability-sized operands.
 
 First, we propose reusing a single-byte opcode declared invalid in
-64-bit mode such as 0x07 (\insnnoref{POP ES}) as an opcode prefix
+64-bit mode such as 0x06 (\insnnoref{PUSH ES}) as an opcode prefix
 (\textbf{capability operand prefix}).
 
 When not executing in ``capability mode'', existing instructions will
