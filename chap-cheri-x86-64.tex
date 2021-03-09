@@ -286,12 +286,12 @@ in opcodes.  This is similar to the use of bits in \REX{} prefixes to
 extend the general-purpose integer register selector fields in other
 instructions.  Instructions with memory addresses will use at most one
 capability-register, and the \FS{} prefix could be used to select
-capability registers with an index of 32 or higher.  For instructions
+capability registers with an index of 16 or higher.  For instructions
 operating on two capability registers, the \FS{} prefix would affect the
 register selected for the first capability register operand, and the
 \GS{} prefix would affect the register selected for the second capability
 register operand.  Additional capability registers such as \DDC{}, \CFS{},
-and \CGS{} would be assigned register indices starting at 32 and require
+and \CGS{} would be assigned register indices starting at 16 and require
 a suitable prefix.
 
 \subsection{Instructions with Implicit Memory Operands}
