@@ -765,12 +765,12 @@ registers, however, capability control registers would not be accessed
 via the \texttt{0F 20} and \texttt{0F 22} opcodes of \insnnoref{MOV}.
 Instead, capability control registers would be named as additional
 capability registers using the same approach described earlier for
-\CFS{} and \CGS{} in Section\~ref{sec:x86:using-additional-caps}.
+\CFS{} and \CGS{} in Section~\ref{sec:x86:using-additional-caps}.
 
 We consider two possible approaches for deriving \CIP{} and \CSP{} at
 the start of an interrupt or exception.
 
-\subsection{Kernel Code and Stack Capabilities}
+\subsubsection{Kernel Code and Stack Capabilities}
 
 The first approach would add two new capability control registers: the Kernel
 Code Capability (\KCC{}) and Kernel Stack Capability (\KSC{}).  Transitions into
@@ -789,7 +789,7 @@ for \KCC{} and \KSC{} that can accommodate any desired entry point or stack
 location.  However, it will require minimal changes to existing systems
 code such as operating-system kernels.
 
-\subsection{Capabilities in Entry Points}
+\subsubsection{Capabilities in Entry Points}
 
 The second approach would replace virtual addresses stored in
 existing entry points with complete capabilities.  This is a more
