@@ -701,6 +701,16 @@ information:
   implement.
 \end{enumerate}
 
+Unlike CHERI-MIPS and CHERI-RISC-V, we recommend that CHERI-x86-64
+only raise capability violation faults when a invalid memory access is
+performed such as an out-of-bounds access or access via an untagged
+capability.  Specifically, we recommend that instructions which modify
+capabilities should not raise capability violation faults (for
+example, when a capability becomes unrepresentable) but should instead
+clear the tag of the resulting capability.  This permits compilers to
+speculatively reorder these instructions without raising spurious
+faults during execution.
+
 \section{Call Gates}
 
 We do not recommend extending call gates to support capabilities.
