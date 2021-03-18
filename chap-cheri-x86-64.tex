@@ -118,6 +118,7 @@ value of \RIP{} should be the current offset of \CIP{} rather than the
 integer value (virtual address).
 
 \section{Additional Capability Registers}
+\label{sec:x86:additional-caps}
 
 Additional capability registers beyond those present in the general-purpose
 integer
@@ -136,6 +137,12 @@ new capability registers: \CFS{} and \CGS{}.
 In addition, new capability control registers will be required to
 manage user to kernel transitions as described in
 Section~\ref{sec:x86:capability-control-registers}.
+
+These additional registers would be stored as a second bank of
+capability registers after the existing bank of general-purpose
+registers.  Using these additional registers as instruction operands
+will require extending the relevant register selector field to five
+bits.
 
 \section{Using Capabilities with Memory Address Operands}
 
@@ -259,12 +266,12 @@ should be resolved relative to \CIP{}.
 The immediate offset is applied to \CIP{} and the load
 or store is constrained by the bounds and permissions of \CIP{}.
 
-\subsection{Using Additional Capability Registers}
-\label{sec:x86:using-additional-caps}
+\subsection{Using Additional Capability Registers as a Base Address}
+\label{sec:x86:additional-caps-as-base}
 
 The proposed capability-aware addressing mode proposed above allows
 for the capability versions of existing general-purpose integer registers such
-as \CAX{} or \CBP{} to be encoded in existing register instructions.
+as \CAX{} or \CBP{} to be encoded as the base address in existing register instructions.
 However, it does not permit the direct use of the additional
 capability registers \DDC{}, \CFS{}, or \CGS{}.  \DDC{} is not expected to be
 used as an explicit base address, but \CFS{} and \CGS{} must be usable in this
@@ -276,23 +283,14 @@ to select an implicit base register of \CFS{} or \CGS{}, respectively.
 However, this approach is potentially confusing.  Would an instruction
 using an existing address of ``(\%cax)'' and an instruction prefix of
 ``GS:'' simply use the integer value of \CAX{} (value of \RAX{}) as an offset
-relative to \CGS{}?  In addition, instructions that manipulate
-capabilities need a way to specify an additional capability register
-as an operand.
+relative to \CGS{}?
 
-To handle both of these cases, we propose to reuse the existing \FS{} and
-\GS{} segment prefixes to extend the capability register selector field
-in opcodes.  This is similar to the use of bits in \REX{} prefixes to
-extend the general-purpose integer register selector fields in other
-instructions.  Instructions with memory addresses will use at most one
-capability-register, and the \FS{} prefix could be used to select
-capability registers with an index of 16 or higher.  For instructions
-operating on two capability registers, the \FS{} prefix would affect the
-register selected for the first capability register operand, and the
-\GS{} prefix would affect the register selected for the second capability
-register operand.  Additional capability registers such as \DDC{}, \CFS{},
-and \CGS{} would be assigned register indices starting at 16 and require
-a suitable prefix.
+To avoid this confusion, we propose to reuse the existing \GS{}
+segment prefix to extend the capability register selector field for
+the base address register in memory operands.  When this prefix is
+present, a capability register with an index of 16 or higher would be
+used as the base address.  The lower four bits of the register
+selector would be determined by the existing registor selector fields.
 
 \subsection{Instructions with Implicit Memory Operands}
 
@@ -341,11 +339,17 @@ specifies a capability operation rather than an integer operation.
 Existing x86 toolchains already use instruction suffixes such as
 \texttt{b}, \texttt{w}, \texttt{l}, and \texttt{q} to explicitly state
 the operand size.  We recommand that the \texttt{c} suffix be used to
-explicitly state operands which are capability-sized.
+explicitly state a capability operand size.
+
+We consider three different strategies for supporting capability
+operands.
+
+\subsection{Capability Operands via Operand Size Prefix}
 
 Previous extensions to the x86 architecture have relied on opcode
 prefixes combined with the `D' and `L' flags of the current code
-segment to determine the operand size.  We propose a similar
+segment to determine the operand size.  The first strategy we
+will consider uses a similar
 scheme for supporting capability-sized operands.
 
 First, we propose reusing a single-byte opcode declared invalid in
@@ -361,19 +365,55 @@ prefix would have higher precedence than both both \texttt{REX.W} and
 the 0x66 prefix.
 
 In ``capability mode'', most instructions which can operate on either
-integer or capability-sized values will follow the same logic in the
+integer or capability-sized values would follow the same logic in the
 previous paragraph to determine the operand size.  However, a few
-instructions will default to using a capability-sized operand when
+instructions would default to using a capability-sized operand when
 executed in ``capability mode''.  For these instructions, the
-capability operand prefix can be used to revert to a smaller operand
-size.  The effective operand size is then determined by \texttt{REX.W}
-and the 0x66 prefix.  The following sections will describe the default
-operand size in ``capability mode'' for instructions which support
-both integer and capability operands.
+capability operand prefix could be used to revert to a smaller operand
+size.  The effective operand size would then determined by \texttt{REX.W}
+and the 0x66 prefix.
 
-Finally, some instructions may only operate on capabilities.  For
-these instructions, prefixes are ignored and the operand is always
-capability-sized.
+One important consideration for instructions in this strategy is how
+to extend register selector fields to five bits.  Similar to the
+approach described for base address registers in
+Section~\ref{sec:x86:additional-caps-as-base}, other segment prefixes
+such as \FS{} or \ES{} could be used to imply a fifth bit of 1 for
+other register operands.
+
+\subsection{Capability Operands via VEX Prefixes}
+
+The second strategy would avoid reusing existing opcodes for
+instructions with capability operands.  Instead, new opcodes would be
+allocated for each instruction which accepts capability operands.  For
+these new instructions, the upper three bits of the \texttt{VEX.mmmmm}
+field would be used as the 5th bit of the register selector fields
+similar to \texttt{EVEX.R'}, \texttt{EVEX.X}, and \texttt{EVEX.V'}
+fields in \EVEX{} prefixes.  If an instruction only operates on
+capability registers in the general-purpose register set, then a two
+byte \VEX{} prefix could be used.
+
+\subsection{Capability Operands via Both Methods}
+
+Each of the two strategies given above have tradeoffs.  Using opcode
+prefixes can result in shorter opcodes.  On the other hand, the use of
+multiple segment prefixes to expand register fields may prove
+unwieldy.  The use of \VEX{} prefixes would permit new CHERI-specific
+instructions to accept three operands instead of two.
+
+A third strategy would combine these two approaches.  Some existing
+instructions would use the first approach.  These instructions would
+only be able to use the first 16 general-purpose registers as operands
+(with the exception of the base memory address register for any memory
+operands) to avoid the requirement for multiple segment prefixes on a
+single instruction.  This would permit the reuse of existing shorter
+opcodes for frequently used instructions such as \insnnoref{CALL} and
+\insnnoref{RET}.
+
+Other instructions (including new CHERI-specific instructions) would
+use new two- or three-byte opcodes compatible with \VEX{} prefixes.
+
+The following sections describe specific instructions in more detail
+assuming this third strategy.
 
 \subsection{Control-Flow Instructions}
 
@@ -383,31 +423,38 @@ the offset of the \CIP{} capability.  If the resulting value of \CIP{}
 is invalid, a capability violation fault would be raised when fetching
 the next instruction (see Section~\ref{sec:x86:capability-fault}).
 
-Absolute near calls and jumps would support both integer and
-capabality-sized operands.  Instructions using an integer operand
-would set the address of the \CIP{} capability while instructions
+All other control-flow instructions would support capability operands
+via the capability operand prefix and would default to capability
+operands in ``capability mode''
+
+Absolute near calls and jumps which used an integer operand
+would set the offset of the \CIP{} capability while instructions
 using a capability operand would load a new capability into \CIP{}.
-Research is required to determine the default operand size of absolute
-near calls and jumps in ``capability mode''.  For now, we recommend
-that the default be capability-sized.
 
-Far calls and jumps would support both integer and capability-sized
-operands.  For capabity-sized operands, the memory address points to
+For far calls and jumps with a capability-sized operand,
+the memory address would point
 to a 16-bit segment selector followed by a capability.  Note that the
-capability must be suitably aligned.  The current segment selector is
-pushed on the stack as a 16-byte value where the first two bytes
-contain the selector and the remaning 14 bytes' value is undefined.
 
-A \insnnoref{RETC} should pop a capability off of the stack which is
-loaded into \CIP{}.  A far \insnnoref{RETC} should additionally pop
-off a 16-byte value off of the stack of which the low 16 bits are used
-as the new code segment selector.  The \insnnoref{RET} instruction
-should default to a capability operand in ``capability mode''.
+low four bits of the memory address would have to be set to 14 to
+align the capability.  The current segment selector would be pushed
+onto the stack as a 16-byte value where the first two bytes contain
+the selector and the remaining 14 bytes' value is undefined.  Far
+calls and jumps with an integer operand would use the integer operand
+to set the offset of \CIP{}.  Note that while a far call or jump with
+an integer operand doesn't seem very useful in ``capability mode'', a
+far call or jump with a capability operand in plain 64-bit mode may be
+desirable as a way to enter ``capability mode''.
 
-\insnnoref{IRETC} should pop a capability execption frame (see
+A near \insnnoref{RETC} would pop a capability off of the stack and
+load it into \CIP{}.  A far \insnnoref{RETC} would additionally pop
+a 16-byte value off of the stack of which the low 16 bits are used
+as the new code segment selector.  The integer versions of
+\insnnoref{RET} would use the integer value popped off of the stack
+as the new offset of \CIP{}.
+
+\insnnoref{IRETC} should pop a capability exception frame (see
 Section~\ref{sec:x86:interrupt-exception}) from the stack loading
-capabilities into \CIP{} and \CSP{}.  The \insnnoref{IRET} instruction
-should default to a capability operand in ``capability mode''.
+capabilities into \CIP{} and \CSP{}.
 
 Note that attempting to push or pop a misaligned capability will raise
 an exception.  The stack pointer must be suitably aligned before the
@@ -423,22 +470,35 @@ capability operands:
     capabilities similar to \insnref{CLC} and \insnref{CSC} as well as
     copying capabilities between registers similar to \insnref{CMove}.
 
-    When the capability operand prefix is used with the \texttt{C7 /0}
-    variant of \insnnoref{MOV} which accepts a 32-bit immediate
+    The existing \texttt{89} and \texttt{8B} opcodes would be extended
+    to support capability operands via the capability operand prefix.
+    Note that these instructions would only permit a general-purpose
+    register as the source (\texttt{89}) or destination (\texttt{8B}).
+
+    The \texttt{A1} and \texttt{A2} opcodes would be extended to use
+    \CAX{} as the implicit operand when used with the capability
+    operand prefix.
+
+    To handle loads and stores as well as copying capabilities where
+    at least one operand is an additional capability register, two
+    new opcodes (such as \texttt{0F 24} and \texttt{0F 25}) would be
+    used with a \VEX{} prefix.
+
+    To support efficiently NULL pointers to memory, the \texttt{C7 /0}
+    opcode would be extended to support capability operands via
+    the capability operand prefix.  When extended to a capability
     operand, this instruction should store a NULL-derived capability
     using the immediate operand sign-extended to 64 bits as the
     integer value of the resulting capability.
-
-    To provide a more compact form for storing NULL pointers into
-    memory, it may also be desirable to support the capability operand
-    prefix with the \texttt{C6 /0} opcode which accepts an 8-bit
-    immediate.
 
     \insnnoref{MOV} should default to integer operands in ``capability
     mode''.
 
   \item \insnnoref{CMOVC} would handle conditional loads and stores of
-    capabilities.
+    capabilities.  Existing opcodes for \insnnoref{CMOV} would be
+    extended to support capability operands via the capability operand
+    prefix.  Note that this would only support moves to and from
+    general-purpose capability registers.
 
     \insnnoref{CMOV} should default to integer operands in
     ``capability mode''.
@@ -447,8 +507,8 @@ capability operands:
     the offset of a capability similar to \insnref{CIncOffset}.  Note
     that for these instructions, the source operand would either be a
     sign-extended immediate or a 64-bit integer register whose value
-    is either added to or subtracted from the capability-sized
-    destination operand.
+    is either added to or subtracted from the offset of the
+    capability-sized destination operand.
 
     For example:
  
@@ -460,6 +520,12 @@ add %csp,$16
 
     These instructions should set flag bits in \RFLAGS{} according to
     the integer value of the resulting capability.
+
+    The \insnref{ADD} opcodes \texttt{01}, \texttt{03}, \texttt{05},
+    \texttt{81 /0}, and \texttt{83 /0} and the \insnnoref{SUB}
+    opcodes \texttt{29}, \texttt{2B}, \texttt{2D}, \texttt{81 /5} and
+    \texttt{83 /5} would be extended to support capability operands
+    via the capability operand prefix.
 
     \insnnoref{ADD} and \insnnoref{SUB} should default to integer
     operands in ``capability mode''.
@@ -475,28 +541,24 @@ add %csp,$16
     These instructions should set flag bits in \RFLAGS{} according to
     the integer value of the resulting capability.
 
+    The \insnnoref{AND} opcodes \texttt{21}, \texttt{23}, \texttt{25},
+    \texttt{81 /4} and \texttt{83 /4}; the \insnnoref{OR} opcodes
+    \texttt{09}, \texttt{0B}, \texttt{0D}, \texttt{81 /1}, and
+    \texttt{81 /3}; and the \insnnoref{XOR} opcodes \texttt{31},
+    \texttt{33}, \texttt{35}, \texttt{81 /6}, and \texttt{83 /6} would
+    be extended to support capability operands via the capability
+    operand prefix.
+
     \insnnoref{AND}, \insnnoref{ORC}, and \insnnoref{XOR} should
     default to integer operands in ``capability mode''.
-
-  \item \insnnoref{CMPC} would perform a complete comparison of two
-    capabilities similar to \insnref{CSetEqualExact} setting
-    \texttt{ZF} to the result of the comparison.  Other flags would
-    not be affected by this instruction.  This is somewhat different
-    than other variants of \insnnoref{CMP} which perform the
-    equivalent \insnnoref{SUB} instruction and then discard the
-    result as in this case the flags set would not be identical to the
-    flags set as a result of \insnnoref{SUBC}.
-
-    We do not anticipate a need for a capability-sized variant of
-    \insnnoref{TEST}.
-
-    \insnnoref{CMP} should default to integer operands in ``capability
-    mode''.
 
   \item \insnnoref{CMPXCHGC} will be required to support atomic
     operations on capabilities.  (Note that \insnnoref{CMPXCHG16B}'s
     existing semantics are not suitable for capabilities as it divides
     the values into register pairs.)
+
+    The opcodes \texttt{0F B0} and \texttt{0F B1} would be extended to
+    support capability operands via the capability operand prefix.
 
     \insnnoref{CMPXCHG} should default to integer operands in
     ``capability mode''.
@@ -509,6 +571,9 @@ add %csp,$16
     would be ignored and would be overwritten with the original value
     of the first operand.
 
+    The opcode \texttt{0F C0} would be extended to support capability
+    operands via the capability operand prefix.
+
     \insnnoref{XADDC} should set flag bits in \RFLAGS{} according to
     the integer value of the resulting capability.
 
@@ -518,13 +583,29 @@ add %csp,$16
   \item \insnnoref{PUSHC} and \insnnoref{POPC} would be used to save
     and restore capability registers on the stack.
 
-    \insnnoref{PUSH} and \insnnoref{POP} should default to capability
-    operands in ``capability mode''.
+    In general, \insnnoref{PUSH} and \insnnoref{PUSHF} in ``capability
+    mode'' would always push a 16 byte value onto the stack.  If the
+    operand is not a capability register, then the sign-extended value
+    of the operand is used as the address of NULL-derived capability
+    which is pushed on the stack.  Similarly, \insnnoref{POP} and
+    \insnnoref{POPF} would always pop a 16 byte value off of the
+    stack.
 
-  \item \insnnoref{LEAC} would storing the resulting address in a
-    destination register.  If the instruction is using ``plain''
+    To save or restore a capability register in plain 64-bit mode, one
+    would use \insnnoref{MOVC} to load or store the capability and
+    adjust the stack pointer manually.
+
+    In ``capability mode'' the use of the 0x66 prefix with
+    \insnnoref{PUSH} or \insnnoref{POP} instructions would be
+    reserved.
+
+  \item \insnnoref{LEAC} would store the resulting address in a
+    destination capability register.  If the instruction is using ``plain''
     addressing, the resulting capability would be a NULL-derived
     capability with the computed address.
+
+    The opcode \texttt{8D} would be extended to support capability
+    operands via the capability operand prefix.
 
     \insnnoref{LEA} should default to capability operands in
     ``capability mode''.
@@ -552,15 +633,12 @@ add %csp,$16
 For other capability operations we
 propose adding new CHERI-specific instructions.
 Existing general-purpose x86 instructions support two operands rather
-than three operands.  To avoid introducing a new operand encoding
-format, we propose to use two-operand variants of CHERI
-instructions when adapting instructions to x86.
-
-Three operand instructions could be introduced by using VEX prefixes.
-However, the use of capabilities from the upper bank of capability
-registers such as \DDC{}, \CFS{}, or \CGS{} as operands would require
-extra care.  One option would be to reuse the \ES{} segment prefix to
-extend the third operand field to five bits.
+than three operands.  To avoid requiring a \VEX{} prefix for all new
+CHERI instructions, most instructions are defined with two operands
+rather than three.  New instructions which require three operands must
+be encoded using a \VEX{} prefix.  In addition, instructions using a
+capability from the upper bank, such as \DDC{}, \CFS{}, or \CGS{} as
+one of the operands must use a three-byte \VEX{} prefix.
 
 Operands are described using the syntax from Volume 2 of Intel's
 Software Developer's Manual~\cite{intel-sdm-vol2} with the following
@@ -601,6 +679,14 @@ extracted from the capability.
 
 \subsubsection{Capability-Modification Instructions}
 
+If these instructions fail, they should clear the tag in the resulting
+capability rather than raising an exception as is done for CHERI-MIPS
+and CHERI-RISC-V.  In addition, it is likely beneficial if these
+instructions set \texttt{ZF} in \RFLAGS{} to the value of the tag of
+the resulting capability to permit \texttt{ZF} to be used to determine
+if these operations failed or succeeded (for example,
+\insnref{CBuildCap}).
+
 \begin{itemize}
   \item \insnref{CSeal} r/mc, rc
   \item \insnref{CUnSeal} r/mc, rc
@@ -612,13 +698,28 @@ extracted from the capability.
   \item \insnref{CSetBounds} r/mc, uimm16
   \item \insnref{CSetBoundsExact} r/mc, r64
   \item \insnref{CClearTag} r/mc
-  \item \insnref{CBuildCap} r/mc, rc
+  \item \insnref{CBuildCap} rc, r/mc, rc
+
+    This instruction uses three operands so that the two source operands
+    can remain unchanged when using \insnref{CBuildCap} over a list of
+    possible root capabilities.
+
   \item \insnref{CCopyType} r/mc, rc
-  \item \insnref{CCSeal} r/mc, rc
+
+    This instruction may warrant three operands for the same reason as
+    \insnref{CBuildCap}.
+
+  \item \insnref{CCSeal} rc, r/mc, rc
   \item \insnref{CSealEntry} r/mc
 \end{itemize}
 
 \subsubsection{Pointer-Arithmetic Instructions}
+
+If these instructions fail, they should clear the tag in the resulting
+capability rather than raising an exception as is done for CHERI-MIPS
+and CHERI-RISC-V.  In addition, it is likely beneficial if these
+instructions set \texttt{ZF} in \RFLAGS{} to the value of the tag of
+the resulting capability.
 
 \begin{itemize}
   \item \insnref{CToPtr} rc, r/mc
@@ -627,11 +728,12 @@ extracted from the capability.
 
 \subsubsection{Pointer-Comparison Instructions}
 
-For this instruction, the result of the comparison should be written
+For these instructions, the result of the comparison should be written
 to the \texttt{ZF} field of \RFLAGS{} instead of to a destination
 register as is done in CHERI-MIPS and CHERI-RISC-V.
 
 \begin{itemize}
+  \item \insnriscvref{CSetEqualExact} r/mc, rc
   \item \insnref{CTestSubset} r/mc, rc
 \end{itemize}
 
@@ -655,8 +757,6 @@ single operand \insnnoref{CTestTag} which copies the tag value to
 \end{itemize}
 
 \subsubsection{Tag-Memory Access Instructions}
-
-These instructions always use capability addressing mode.
 
 \begin{itemize}
   \item \insnref{CLoadTags} r64, m
@@ -774,8 +874,8 @@ well as requiring \cappermASR{} in \CIP{}.  Unlike other control
 registers, however, capability control registers would not be accessed
 via the \texttt{0F 20} and \texttt{0F 22} opcodes of \insnnoref{MOV}.
 Instead, capability control registers would be named as additional
-capability registers using the same approach described earlier for
-\CFS{} and \CGS{} in Section~\ref{sec:x86:using-additional-caps}.
+capability registers as described in
+Section~\ref{sec:x86:additional-caps}.
 
 We consider two possible approaches for deriving \CIP{} and \CSP{} at
 the start of an interrupt or exception.
