@@ -968,7 +968,7 @@ Bit & Name & Description \\
 If an instruction performs a memory access which violates a CHERI page
 permission (such as a store of a tagged capability to a page where the
 \texttt{CW} bit is clear), a page-fault (PF\#) exception should be
-raised.  Bit 6 (currently reserved) should be set in the page-fault
+raised.  Bit 8 (currently reserved) should be set in the page-fault
 error code provided by the processor indicating that the fault was
 caused by a capabilty permission violation.  Other bits in the page
 fault error code such as \texttt{P}, \texttt{W/R}, \texttt{U/S}, and
