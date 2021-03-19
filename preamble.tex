@@ -423,11 +423,14 @@
 \@makeinsncmds{mips}
 \@makeinsncmds{riscv}
 
-% Default is currently MIPS
-\@makeinsncmds@explicit{}{mips}
+\newcommand{\definsnarch}[1]{\def\@definsnarch{#1}}
+\@makeinsncmds@explicit{}{\@definsnarch}
 
 \let\insnnoref\@insnfmt
 \makeatother
+
+% Default is currently MIPS
+\definsnarch{mips}
 
 \newcommand{\cherithreeop}[5][NOHEADER]{
 \begin{bytefield}{32}
