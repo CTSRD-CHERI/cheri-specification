@@ -505,6 +505,22 @@ capability operands:
     \insnnoref{MOVNTI} should default to integer operands in
     ``capability mode''.
 
+  \item The string instructions \insnnoref{LODS}, \insnnoref{MOVS},
+    and \insnnoref{STOS} would be extended to support capability
+    operands.
+
+    The opcodes \texttt{A5}, \texttt{AB}, and \texttt{AD} would be
+    extended to support capability operands via the capability operand
+    prefix.  For \insnnoref{LODSC} and \insnnoref{STOSC}, \CAX{} would
+    be used as the implicit operand.
+
+    These instructions should default to integer operands in
+    ``capability mode''.
+
+    We do not currently foresee a need to extend \insnnoref{CMPS} and
+    \insnnoref{SCAS} with support for capability operands.  If that
+    did prove necessary, they could be extended in the same manner.
+
   \item \insnnoref{CMOVC} would handle conditional loads and stores of
     capabilities.  Existing opcodes for \insnnoref{CMOV} would be
     extended to support capability operands via the capability operand
