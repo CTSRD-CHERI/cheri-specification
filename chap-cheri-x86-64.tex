@@ -494,6 +494,17 @@ capability operands:
     \insnnoref{MOV} should default to integer operands in ``capability
     mode''.
 
+  \item \insnnoref{MOVNTIC} would store a single capability to memory
+    using a non-temporal hint.
+
+    The existing \texttt{0F C3} opcode would be extended to support
+    capability operands via the capability operand prefix.  Note that
+    this would only support stores of general-purpose capability
+    registers.
+
+    \insnnoref{MOVNTI} should default to integer operands in
+    ``capability mode''.
+
   \item \insnnoref{CMOVC} would handle conditional loads and stores of
     capabilities.  Existing opcodes for \insnnoref{CMOV} would be
     extended to support capability operands via the capability operand
