@@ -687,70 +687,191 @@ extensions:
 
 \subsubsection{Capability-Inspection Instructions}
 
-These instructions would set the \texttt{PF}, \texttt{SF}, and
-\texttt{ZF} flags in \RFLAGS{} according to the integer field
+These instructions would set the \texttt{ZF} flag in \RFLAGS{}
+according to the integer field
 extracted from the capability.
 
 \begin{itemize}
   \item \insnref{CGetPerm} r64, r/mc
+
+    Set \emph{r64} to the combined \textbf{perms} and \textbf{uperms}
+    fields of \emph{r/mc}.
+
   \item \insnref{CGetType} r64, r/mc
+
+    Set \emph{r64} to the \textbf{otype} field of \emph{r/mc}.  In
+    addition to \texttt{ZF}, this instruction should also set
+    \texttt{SF} in \RFLAGS{}.
+
   \item \insnref{CGetBase} r64, r/mc
+
+    Set \emph{r64} to the \textbf{base} field of \emph{r/mc}.
+
   \item \insnref{CGetLen} r64, r/mc
+
+    Set \emph{r64} to the \textbf{length} field of \emph{r/mc}.
+
   \item \insnref{CGetTag} r64, r/mc
+
+    Set \emph{r64} to the \textbf{tag} field of \emph{r/mc}.
+
   \item \insnref{CGetSealed} r64, r/mc
+
+    Set \emph{r64} to 1 if \emph{r/mc} is sealed and to 0 otherwise.
+
   \item \insnref{CGetOffset} r64, r/mc
-  \item \insnref{CGetFlags} r64, r/mc
-  \item \insnref{CGetSealed} r64, r/mc
+
+    Set \emph{r64} to the \textbf{offset} field of \emph{r/mc}.
+
   \item \insnref{CGetAddr} r64, r/mc
+
+    Set \emph{r64} to the \textbf{address} field of \emph{r/mc}.
 \end{itemize}
 
 \subsubsection{Capability-Modification Instructions}
 
 If these instructions fail, they should clear the tag in the resulting
 capability rather than raising an exception as is done for CHERI-MIPS
-and CHERI-RISC-V.  In addition, it is likely beneficial if these
-instructions set \texttt{ZF} in \RFLAGS{} to the value of the tag of
-the resulting capability to permit \texttt{ZF} to be used to determine
-if these operations failed or succeeded (for example,
-\insnref{CBuildCap}).
+and CHERI-RISC-V.
 
 \begin{itemize}
   \item \insnref{CSeal} r/mc, rc
+
+    Seal \emph{r/mc} with \textbf{otype} equal to the \textbf{address}
+    field of \empty{rc}.  If the sealing operation fails, set
+    \emph{r/mc} to its original value with the \textbf{tag} field
+    cleared and clear \texttt{ZF}.  If the sealing operation succeeds,
+    set \texttt{ZF} to 1.
+
   \item \insnref{CUnSeal} r/mc, rc
+
+    Unseal \emph{r/mc} using \emph{rc} as the authority for the
+    unsealing operation.  If the unsealing operation fails, set
+    \emph{r/mc} to its original value with the \textbf{tag} field
+    cleared and clear \texttt{ZF}.  If the unsealing operation
+    succeeds, set \texttt{ZF} to 1.
+
   \item \insnref{CAndPerm} r/mc, r64
-  \item \insnref{CSetFlags} r/mc, r64
+
+    Set the \textbf{perms} and \textbf{uperms} fields of \emph{r/mc}
+    to the bitwise and of the existing field values and \emph{r64}.
+    If \emph{r/mc} is sealed and tagged, set \emph{r/mc} to its
+    original value with the \textbf{tag} field cleared.
+
   \item \insnref{CSetOffset} r/mc, r64
+
+    Set the \textbf{offset} field of \emph{r/mc} to \emph{r64}.  If
+    \emph{r/mc} is sealed and tagged, set \emph{r/mc} to its original
+    value with the \textbf{tag} field cleared.
+
   \item \insnref{CSetAddr} r/mc, r64
+
+    Set the \textbf{address} field of \emph{r/mc} to \emph{r64}.  If
+    \emph{r/mc} is sealed and tagged, set \emph{r/mc} to its original
+    value with the \textbf{tag} field cleared.
+
   \item \insnref{CSetBounds} r/mc, r64
   \item \insnref{CSetBounds} r/mc, uimm16
+
+    Set the \textbf{base} field of \emph{r/mc} to the current
+    \textbf{address} field of \emph{r/mc}, and set the \textbf{length}
+    field of \emph{r/mc} to the second operand.  If the \emph{r/mc} is
+    sealed and tagged, set \emph{r/mc} to its original value with the
+    \textbf{tag} field cleared.  If the resulting capability is not
+    contained within the bounds of the original value of \emph{r/mc},
+    clear the \textbf{tag} field in the resulting capability.
+
+    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
+    in the resulting value of \emph{r/mc}.
+
   \item \insnref{CSetBoundsExact} r/mc, r64
+
+    Set the \textbf{base} field of \emph{r/mc} to the current
+    \textbf{address} field of \emph{r/mc}, and set the \textbf{length}
+    field of \emph{r/mc} to \emph{r64}.  If the \emph{r/mc} is sealed
+    and tagged, set \emph{r/mc} to its original value with the
+    \textbf{tag} field cleared.  If the resulting capability is not
+    contained within the bounds of the original value of \emph{r/mc},
+    clear the \textbf{tag} field in the resulting capability.  If the
+    resulting capability cannot be represented exactly, clear the
+    \textbf{tag} field in the resulting capability.
+
+    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
+    in the resulting value of \emph{r/mc}.
+
   \item \insnref{CClearTag} r/mc
-  \item \insnref{CBuildCap} rc, r/mc, rc
 
-    This instruction uses three operands so that the two source operands
-    can remain unchanged when using \insnref{CBuildCap} over a list of
-    possible root capabilities.
+    Clear the \textbf{tag} field of \emph{r/mc}.
 
-  \item \insnref{CCopyType} r/mc, rc
+  \item \insnref{CBuildCap} rca, r/mc, rcb
 
-    This instruction may warrant three operands for the same reason as
-    \insnref{CBuildCap}.
+    Set \emph{rca} equal to \emph{r/mc} with the \textbf{base},
+    \textbf{length}, \textbf{address}, \textbf{perms}, and
+    \textbf{uperms} fields replaced with the corresponding fields in
+    \emph{rcb}.  If \emph{rcb} is a sentry then \emph{rca} is also
+    sealed as a sentry.  If \emph{r/mc} does not authorize the
+    construction of the desired capability, set \emph{rca} equal to
+    \emph{rcb} with the \textbf{tag} field cleared.
 
-  \item \insnref{CCSeal} rc, r/mc, rc
+    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
+    of \emph{rca}.
+
+  \item \insnref{CCopyType} rca, r/mc, rcb
+
+    Set \emph{rca} to \emph{r/mc} with the \textbf{address} field set
+    to \emph{rcb}.\textbf{otype}.  On failure (including if the
+    \textbf{otype} field of \emph{rcb} is a reserved value), set
+    \emph{rca} to the \textbf{NULL} capability with the
+    \textbf{address} field set to \emph{rcb}.\textbf{otype}.
+
+    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
+    of \emph{rca}.
+
+  \item \insnref{CCSeal} rca, r/mc, rcb
+
+    Set \emph{rca} to \emph{r/mc} conditionally sealed with
+    \textbf{otype} equal to the \textbf{address} field of \emph{rcb}.
+    If \emph{rca} is not sealed with \emph{rcb}.\textbf{otype}, it
+    will be set equal to \emph{r/mc}.  Set \texttt{ZF} in \RFLAGS{} to
+    1 if \emph{rca} is sealed with \emph{rcb}.\textbf{otype} or 0
+    otherwise.
+
   \item \insnref{CSealEntry} r/mc
+
+    Seal \emph{r/mc} as a sentry.  On failure, leave \emph{r/mc}
+    unchanged.  Set \texttt{ZF} in \RFLAGS{} to 1 if \emph{r/mc} if
+    \emph{r/mc} is sealed as a sentry or 0 otherwise.
 \end{itemize}
 
 \subsubsection{Pointer-Arithmetic Instructions}
 
-If these instructions fail, they should clear the tag in the resulting
-capability rather than raising an exception as is done for CHERI-MIPS
-and CHERI-RISC-V.  In addition, it is likely beneficial if these
-instructions set \texttt{ZF} in \RFLAGS{} to the value of the tag of
-the resulting capability.
+These instructions should set \texttt{ZF} in \RFLAGS{} to indicate
+success (set) or failure (clear).  If one of these instructions fails, it
+should not raise an exception.
 
 \begin{itemize}
-  \item \insnref{CToPtr} rc, r/mc
-  \item \insnref{CFromPtr} r/mc, r64
+  \item \insnref{CToPtr} r64, rc, r/mc
+
+    If the \textbf{tag} field of \emph{r/mc} is not set or \emph{rc}
+    is sealed and tagged, then set \emph{r64} to 0 and clear
+    \texttt{ZF} in \RFLAGS{}.
+
+    If the \textbf{tag} field of \emph{rc} is not set, then set
+    \emph{r64} to 0 and set \texttt{ZF} in \RFLAGS{} to 1; otherwise,
+    set \emph{r64} to \emph{rc}.\textbf{address} -
+    \emph{r/mc}.\textbf{base} and set \texttt{ZF} in \RFLAGS{} to 1.
+
+  \item \insnref{CFromPtr} rc, r/mc, r64
+
+    If \emph{r64} is 0, then set \emph{rc} to \textbf{NULL} and set
+    \texttt{ZF} to 1.
+
+    If \emph{r/mc} is untagged or sealed, then set \emph{rc} to the
+    \textbf{NULL} capability with the \textbf{address} field set to
+    \emph{r64} and set \texttt{ZF} to 0.
+
+    Otherwise, set \emph{rc} to \emph{r/mc} with its \textbf{offset}
+    replaced by \emph{r64} and set \texttt{ZF} to 1.
 \end{itemize}
 
 \subsubsection{Pointer-Comparison Instructions}
@@ -761,7 +882,18 @@ register as is done in CHERI-MIPS and CHERI-RISC-V.
 
 \begin{itemize}
   \item \insnriscvref{CSetEqualExact} r/mc, rc
+
+    If all of the fields in the in-memory representation of
+    \emph{r/mc} and \emph{rc} are identical including tags and any
+    reserved encoding bits, set \texttt{ZF} to 1; otherwise, set
+    \texttt{ZF} to 0.
+
   \item \insnref{CTestSubset} r/mc, rc
+
+    If the \textbf{tag} fields of \emph{r/mc} and \emph{rc} are the
+    same and the bounds and permissions of \emph{rc} are a subset of
+    \emph{r/mc}, set \texttt{ZF} to 1; otherwise, set \texttt{ZF} to
+    0.
 \end{itemize}
 
 Additionally, to support efficient tag checks without overwriting an
@@ -773,6 +905,13 @@ single operand \insnnoref{CTestTag} which copies the tag value to
 
 \begin{itemize}
   \item \insnref{CInvoke} rc, r/mc
+
+    If \emph{rc} and \emph{r/mc} are sealed with the same
+    \textbf{otype}, set \CIP{} to the unsealed \emph{rc} and set
+    \CAX{} to the unsealed \emph{r/mc}.  Note that this control
+    transfer is a jump and does not push any values onto the stack.
+    If this instruction fails, it raises a Capability Violation Fault
+    (see Section~\ref{sec:x86:capability-fault}).
 \end{itemize}
 
 \subsubsection{Adjusting to Compresssed Capability Precision
@@ -780,14 +919,56 @@ single operand \insnnoref{CTestTag} which copies the tag value to
 
 \begin{itemize}
   \item \insnref[CRoundRepresentableLength]{CRRL} r64, r/m64
+
+    Set \emph{r64} to the smallest value greater or equal to
+    \emph{r/m64} that can be used as a length to set exact bounds on a
+    capability with a suitably aligned base.
+
   \item \insnref[CRepresentableAlignmentMask]{CRAM} r64, r/m64
+
+    Set \emph{r64} to a mask that can be used to round addresses down
+    to a value that is sufficiently aligned to set exact bounds for
+    the nearest representable length of \emph{r/m64}.
 \end{itemize}
 
 \subsubsection{Tag-Memory Access Instructions}
 
+These instructions permit bulk access to a set of in-memory tags.
+Each instruction accesses the tags in a ``stride'' of capabilties.
+The size of a stride is implementation dependent.  It must be a power
+of two, and it is suggested that a stride contain the number of tags
+in a single cache line.  The stride size should either be reported in
+a new \insnnoref{CPUID} leaf or be defined as equal to the value
+returned by an existing \insnnoref{CPUID} leaf.
+
 \begin{itemize}
   \item \insnref{CLoadTags} r64, m
+
+    Set \emph{r64} to a bitmask of tags for a stride of capabilties
+    located in memory at and above the memory addressed by \emph{m}.
+    Bit 0 corresponds to tag for the capability at the address
+    \emph{m}.  The authorizing capability for \emph{m} (either \DDC{}
+    or an explicit capability register as the base address register)
+    must include \cappermL{} and \cappermLC{} and authorize access to
+    the entire stride of capabilities.  The address of \emph{m} must
+    also be aligned to a stride of capabilities.
+
+    If this instruction fails, it raises either a Capability Violation
+    Fault (see Section~\ref{sec:x86:capability-fault}) or a Page
+    Fault.
+
   \item \insnref{CClearTags} m
+
+    Clear the memory tags for a stride of capabilities located in
+    memory at and above the memory addressed by \emph{m}.  The
+    authorizing capability for \emph{m} must include \cappermS{} and
+    \cappermSC{} and authorize access to the entire stride of
+    capabilities.  The address of \emph{m} must also be aligned to a
+    stride of capabilities.
+
+    If this instruction fails, it raises either a Capability Violation
+    Fault (see Section~\ref{sec:x86:capability-fault}) or a Page
+    Fault.
 \end{itemize}
 
 \section{Interactions with Vector Extensions}
