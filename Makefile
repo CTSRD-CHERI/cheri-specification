@@ -5,13 +5,13 @@ SAIL_LATEX_MIPS_DIR=sail_latex_mips
 SAIL_LATEX_RISCV_DIR=sail_latex_riscv
 
 SOURCES=$(wildcard *.tex insn-mips/*.tex insn-riscv/*.tex $(SAIL_LATEX_MIPS_DIR)/*.tex $(SAIL_LATEX_RISCV_DIR)/*.tex) cheri.bib
-TEXSTYLES=$(wildcard *.sty)
 DIFFDIR=diff
 DIFFTEX=$(SOURCES:%=${DIFFDIR}/%)
 DIFFPARAM=--type=UNDERLINE --packages=amsmath,hyperref --math-markup=1
 
 TIKZFIGURES=fig-representable-regions.pdf fig-sentry-plt.pdf fig-type-token.pdf
 FIGSOURCES=						\
+	20200816-cheri-timeline.pdf			\
 	fig-cheri-high-level.pdf			\
 	fig-pointer-provenance.pdf			\
 	fig-cheri-high-level.pdf			\
@@ -65,11 +65,16 @@ ${PREVEOUS}:
 .PHONY: diffdir
 diffdir:
 	@(test -d ${DIFFDIR} || mkdir ${DIFFDIR})
+	@(test -d ${DIFFDIR}/insn-mips || mkdir ${DIFFDIR}/insn-mips)
+	@(test -d ${DIFFDIR}/insn-riscv || mkdir ${DIFFDIR}/insn-riscv)
+	@(test -d ${DIFFDIR}/sail_latex_mips || mkdir ${DIFFDIR}/sail_latex_mips)
+	@(test -d ${DIFFDIR}/sail_latex_riscv || mkdir ${DIFFDIR}/sail_latex_riscv)
 
 ${DIFFDIR}/$(TARGET): $(DIFFTEX)
 	cp Makefile ${DIFFDIR}/
 	cp ${FIGSOURCES} ${DIFFDIR}/
-	cp ${TEXSTYLES} ${DIFFDIR}/
+	cp sail_latex_mips/*.sail ${DIFFDIR}/sail_latex_mips
+	cp sail_latex_riscv/*.sail ${DIFFDIR}/sail_latex_riscv
 	make -C ${DIFFDIR}
 	@(echo "diff of between "${PREVEOUS}" and this version is now in "${DIFFDIR}"/"${TARGET})
 
