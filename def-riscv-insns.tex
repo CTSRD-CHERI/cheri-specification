@@ -73,11 +73,11 @@
 \rvcheriexpload[name=LC.DDC,restriction=RV32,notable]{03}{cd}{rs1}
 \rvcheriexpload[name=LD.DDC,restriction=RV64/128]{03}{rd}{rs1}
 \rvcheriexpload[name=LC.DDC,restriction=RV64,notable]{17}{cd}{rs1}
-\rvcheriexpload[name=LQ.DDC,restriction=RV128]{17}{rd}{rs1}
+\rvcheriexpload[name=LQ.DDC,restriction=RV128,noref]{17}{rd}{rs1}
 \rvcheriexpload[name=LBU.DDC]{04}{rd}{rs1}
 \rvcheriexpload[name=LHU.DDC]{05}{rd}{rs1}
 \rvcheriexpload[name=LWU.DDC,restriction=RV64/128]{06}{rd}{rs1}
-\rvcheriexpload[name=LDU.DDC,restriction=RV128,tablesuffix=\rvcherildufootnotemark]{07}{rd}{rs1}
+\rvcheriexpload[name=LDU.DDC,restriction=RV128,noref,tablesuffix=\rvcherildufootnotemark]{07}{rd}{rs1}
 
 \rvcheriexpload[name=LB.CAP]{08}{rd}{cs1}
 \rvcheriexpload[name=LH.CAP]{09}{rd}{cs1}
@@ -85,27 +85,27 @@
 \rvcheriexpload[name=LC.CAP,restriction=RV32,notable]{0B}{cd}{cs1}
 \rvcheriexpload[name=LD.CAP,restriction=RV64/128]{0B}{rd}{cs1}
 \rvcheriexpload[name=LC.CAP,restriction=RV64,notable]{1F}{cd}{cs1}
-\rvcheriexpload[name=LQ.CAP,restriction=RV128]{1F}{rd}{cs1}
+\rvcheriexpload[name=LQ.CAP,restriction=RV128,noref]{1F}{rd}{cs1}
 \rvcheriexpload[name=LBU.CAP]{0C}{rd}{cs1}
 \rvcheriexpload[name=LHU.CAP]{0D}{rd}{cs1}
 \rvcheriexpload[name=LWU.CAP,restriction=RV64/128]{0E}{rd}{cs1}
-\rvcheriexpload[name=LDU.CAP,restriction=RV128,tablesuffix=\rvcherildufootnotemark]{0F}{rd}{cs1}
+\rvcheriexpload[name=LDU.CAP,restriction=RV128,noref,tablesuffix=\rvcherildufootnotemark]{0F}{rd}{cs1}
 
-\rvcheriexploadres[name=LR.B.DDC,tablesuffix=\rvcheriatomicfootnotemark]{10}{rd}{rs1}
-\rvcheriexploadres[name=LR.H.DDC,tablesuffix=\rvcheriatomicfootnotemark]{11}{rd}{rs1}
-\rvcheriexploadres[name=LR.W.DDC,tablesuffix=\rvcheriatomicfootnotemark]{12}{rd}{rs1}
-\rvcheriexploadres[name=LR.C.DDC,restriction=RV32,tablesuffix=\rvcheriatomicfootnotemark,notable]{13}{cd}{rs1}
-\rvcheriexploadres[name=LR.D.DDC,restriction=RV64/128,tablesuffix=\rvcheriatomicfootnotemark]{13}{rd}{rs1}
-\rvcheriexploadres[name=LR.C.DDC,restriction=RV64,tablesuffix=\rvcheriatomicfootnotemark,notable]{14}{cd}{rs1}
-\rvcheriexploadres[name=LR.Q.DDC,restriction=RV128,tablesuffix=\rvcheriatomicfootnotemark]{14}{rd}{rs1}
+\rvcheriexploadres[name=LR.B.DDC,noref,tablesuffix=\rvcheriatomicfootnotemark]{10}{rd}{rs1}
+\rvcheriexploadres[name=LR.H.DDC,noref,tablesuffix=\rvcheriatomicfootnotemark]{11}{rd}{rs1}
+\rvcheriexploadres[name=LR.W.DDC,noref,tablesuffix=\rvcheriatomicfootnotemark]{12}{rd}{rs1}
+\rvcheriexploadres[name=LR.C.DDC,restriction=RV32,noref,tablesuffix=\rvcheriatomicfootnotemark,notable]{13}{cd}{rs1}
+\rvcheriexploadres[name=LR.D.DDC,restriction=RV64/128,noref,tablesuffix=\rvcheriatomicfootnotemark]{13}{rd}{rs1}
+\rvcheriexploadres[name=LR.C.DDC,restriction=RV64,noref,tablesuffix=\rvcheriatomicfootnotemark,notable]{14}{cd}{rs1}
+\rvcheriexploadres[name=LR.Q.DDC,restriction=RV128,noref,tablesuffix=\rvcheriatomicfootnotemark]{14}{rd}{rs1}
 
-\rvcheriexploadres[name=LR.B.CAP,tablesuffix=\rvcheriatomicfootnotemark]{18}{rd}{cs1}
-\rvcheriexploadres[name=LR.H.CAP,tablesuffix=\rvcheriatomicfootnotemark]{19}{rd}{cs1}
-\rvcheriexploadres[name=LR.W.CAP,tablesuffix=\rvcheriatomicfootnotemark]{1A}{rd}{cs1}
-\rvcheriexploadres[name=LR.C.CAP,restriction=RV32,tablesuffix=\rvcheriatomicfootnotemark,notable]{1B}{cd}{cs1}
-\rvcheriexploadres[name=LR.D.CAP,restriction=RV64/128,tablesuffix=\rvcheriatomicfootnotemark]{1B}{rd}{cs1}
-\rvcheriexploadres[name=LR.C.CAP,restriction=RV64,tablesuffix=\rvcheriatomicfootnotemark,notable]{1C}{cd}{cs1}
-\rvcheriexploadres[name=LR.Q.CAP,restriction=RV128,tablesuffix=\rvcheriatomicfootnotemark]{1C}{rd}{cs1}
+\rvcheriexploadres[name=LR.B.CAP,noref,tablesuffix=\rvcheriatomicfootnotemark]{18}{rd}{cs1}
+\rvcheriexploadres[name=LR.H.CAP,noref,tablesuffix=\rvcheriatomicfootnotemark]{19}{rd}{cs1}
+\rvcheriexploadres[name=LR.W.CAP,noref,tablesuffix=\rvcheriatomicfootnotemark]{1A}{rd}{cs1}
+\rvcheriexploadres[name=LR.C.CAP,restriction=RV32,noref,tablesuffix=\rvcheriatomicfootnotemark,notable]{1B}{cd}{cs1}
+\rvcheriexploadres[name=LR.D.CAP,restriction=RV64/128,noref,tablesuffix=\rvcheriatomicfootnotemark]{1B}{rd}{cs1}
+\rvcheriexploadres[name=LR.C.CAP,restriction=RV64,noref,tablesuffix=\rvcheriatomicfootnotemark,notable]{1C}{cd}{cs1}
+\rvcheriexploadres[name=LR.Q.CAP,restriction=RV128,noref,tablesuffix=\rvcheriatomicfootnotemark]{1C}{rd}{cs1}
 
 \rvcheriexpstore[name=SB.DDC]{00}{rs2}{rs1}
 \rvcheriexpstore[name=SH.DDC]{01}{rs2}{rs1}
@@ -113,7 +113,7 @@
 \rvcheriexpstore[name=SC.DDC,restriction=RV32,notable]{03}{cs2}{rs1}
 \rvcheriexpstore[name=SD.DDC,restriction=RV64/128]{03}{rs2}{rs1}
 \rvcheriexpstore[name=SC.DDC,restriction=RV64,notable]{04}{cs2}{rs1}
-\rvcheriexpstore[name=SQ.DDC,restriction=RV128]{04}{rs2}{rs1}
+\rvcheriexpstore[name=SQ.DDC,restriction=RV128,noref]{04}{rs2}{rs1}
 
 \rvcheriexpstore[name=SB.CAP]{08}{rs2}{cs1}
 \rvcheriexpstore[name=SH.CAP]{09}{rs2}{cs1}
@@ -121,20 +121,20 @@
 \rvcheriexpstore[name=SC.CAP,restriction=RV32,notable]{0B}{cs2}{cs1}
 \rvcheriexpstore[name=SD.CAP,restriction=RV64/128]{0B}{rs2}{cs1}
 \rvcheriexpstore[name=SC.CAP,restriction=RV64,notable]{0C}{cs2}{cs1}
-\rvcheriexpstore[name=SQ.CAP,restriction=RV128]{0C}{rs2}{cs1}
+\rvcheriexpstore[name=SQ.CAP,restriction=RV128,noref]{0C}{rs2}{cs1}
 
-\rvcheriexpstorecond[name=SC.B.DDC,tablesuffix=\rvcheriatomicfootnotemark]{10}{rd}{rs2}{rs1}
-\rvcheriexpstorecond[name=SC.H.DDC,tablesuffix=\rvcheriatomicfootnotemark]{11}{rd}{rs2}{rs1}
-\rvcheriexpstorecond[name=SC.W.DDC,tablesuffix=\rvcheriatomicfootnotemark]{12}{rd}{rs2}{rs1}
-\rvcheriexpstorecond[name=SC.C.DDC,restriction=RV32,tablesuffix=\rvcheriatomicfootnotemark,notable]{13}{cd}{cs2}{rs1}
-\rvcheriexpstorecond[name=SC.D.DDC,restriction=RV64/128,tablesuffix=\rvcheriatomicfootnotemark]{13}{rd}{rs2}{rs1}
-\rvcheriexpstorecond[name=SC.C.DDC,restriction=RV64,tablesuffix=\rvcheriatomicfootnotemark,notable]{14}{cd}{cs2}{rs1}
-\rvcheriexpstorecond[name=SC.Q.DDC,restriction=RV128,tablesuffix=\rvcheriatomicfootnotemark]{14}{rd}{rs2}{rs1}
+\rvcheriexpstorecond[name=SC.B.DDC,noref,tablesuffix=\rvcheriatomicfootnotemark]{10}{rd}{rs2}{rs1}
+\rvcheriexpstorecond[name=SC.H.DDC,noref,tablesuffix=\rvcheriatomicfootnotemark]{11}{rd}{rs2}{rs1}
+\rvcheriexpstorecond[name=SC.W.DDC,noref,tablesuffix=\rvcheriatomicfootnotemark]{12}{rd}{rs2}{rs1}
+\rvcheriexpstorecond[name=SC.C.DDC,restriction=RV32,noref,tablesuffix=\rvcheriatomicfootnotemark,notable]{13}{cd}{cs2}{rs1}
+\rvcheriexpstorecond[name=SC.D.DDC,restriction=RV64/128,noref,tablesuffix=\rvcheriatomicfootnotemark]{13}{rd}{rs2}{rs1}
+\rvcheriexpstorecond[name=SC.C.DDC,restriction=RV64,noref,tablesuffix=\rvcheriatomicfootnotemark,notable]{14}{cd}{cs2}{rs1}
+\rvcheriexpstorecond[name=SC.Q.DDC,restriction=RV128,noref,tablesuffix=\rvcheriatomicfootnotemark]{14}{rd}{rs2}{rs1}
 
-\rvcheriexpstorecond[name=SC.B.CAP,tablesuffix=\rvcheriatomicfootnotemark]{18}{rd}{rs2}{cs1}
-\rvcheriexpstorecond[name=SC.H.CAP,tablesuffix=\rvcheriatomicfootnotemark]{19}{rd}{rs2}{cs1}
-\rvcheriexpstorecond[name=SC.W.CAP,tablesuffix=\rvcheriatomicfootnotemark]{1A}{rd}{rs2}{cs1}
-\rvcheriexpstorecond[name=SC.C.CAP,restriction=RV32,tablesuffix=\rvcheriatomicfootnotemark,notable]{1B}{cd}{cs2}{cs1}
-\rvcheriexpstorecond[name=SC.D.CAP,restriction=RV64/128,tablesuffix=\rvcheriatomicfootnotemark]{1B}{rd}{rs2}{cs1}
-\rvcheriexpstorecond[name=SC.C.CAP,restriction=RV64,tablesuffix=\rvcheriatomicfootnotemark,notable]{1C}{cd}{cs2}{cs1}
-\rvcheriexpstorecond[name=SC.Q.CAP,restriction=RV128,tablesuffix=\rvcheriatomicfootnotemark]{1C}{rd}{rs2}{cs1}
+\rvcheriexpstorecond[name=SC.B.CAP,noref,tablesuffix=\rvcheriatomicfootnotemark]{18}{rd}{rs2}{cs1}
+\rvcheriexpstorecond[name=SC.H.CAP,noref,tablesuffix=\rvcheriatomicfootnotemark]{19}{rd}{rs2}{cs1}
+\rvcheriexpstorecond[name=SC.W.CAP,noref,tablesuffix=\rvcheriatomicfootnotemark]{1A}{rd}{rs2}{cs1}
+\rvcheriexpstorecond[name=SC.C.CAP,restriction=RV32,noref,tablesuffix=\rvcheriatomicfootnotemark,notable]{1B}{cd}{cs2}{cs1}
+\rvcheriexpstorecond[name=SC.D.CAP,restriction=RV64/128,noref,tablesuffix=\rvcheriatomicfootnotemark]{1B}{rd}{rs2}{cs1}
+\rvcheriexpstorecond[name=SC.C.CAP,restriction=RV64,noref,tablesuffix=\rvcheriatomicfootnotemark,notable]{1C}{cd}{cs2}{cs1}
+\rvcheriexpstorecond[name=SC.Q.CAP,restriction=RV128,noref,tablesuffix=\rvcheriatomicfootnotemark]{1C}{rd}{rs2}{cs1}
