@@ -1,0 +1,10 @@
+struct EncCapability = {
+  perms      : #\hyperref[sailRISCVzbits]{bits}#(cap_uperms_width + cap_hperms_width),
+  otype      : #\hyperref[sailRISCVzbits]{bits}#(cap_otype_width),
+  reserved   : #\hyperref[sailRISCVzbits]{bits}#(cap_reserved_width),
+  flags      : #\hyperref[sailRISCVzbits]{bits}#(cap_flags_width),
+  internal_E : bit,
+  T          : #\hyperref[sailRISCVzbits]{bits}#(cap_mantissa_width - 2),
+  B          : #\hyperref[sailRISCVzbits]{bits}#(cap_mantissa_width),
+  address    : #\hyperref[sailRISCVzbits]{bits}#(cap_addr_width)
+}

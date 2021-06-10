@@ -1,6 +1,6 @@
 function #\hyperref[sailRISCVzfastRepCheck]{fastRepCheck}#(c, i) : (Capability, CapAddrBits) -> bool=
     let E = #\hyperref[sailRISCVzunsigned]{unsigned}#(c.E) in
-    if (E >= maxE - 2) then
+    if (E >= cap_max_E - 2) then
         true /* in this case representable region is whole address space */
     else
         let i_top    = #\hyperref[sailRISCVzsigned]{signed}#(i >>#\hyperref[sailRISCVzzys]{\_s}# (E + cap_mantissa_width)) in

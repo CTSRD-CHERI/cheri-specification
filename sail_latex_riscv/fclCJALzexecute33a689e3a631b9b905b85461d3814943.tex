@@ -1,0 +1,16 @@
+let off : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
+let newPC = PCC.address + off;
+if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(PCC, newPC, #\hyperref[sailRISCVzminzyinstructionzybytes]{min\_instruction\_bytes}#())) then {
+  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_LengthViolation, PCC_IDX);
+  RETIRE_FAIL
+} else if newPC[1] == bitone & ~(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()) then {
+  #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(newPC,  #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#());
+  RETIRE_FAIL
+} else {
+  let (success, linkCap) = #\hyperref[sailRISCVzsetCapAddr]{setCapAddr}#(PCC, nextPC); /* Note that nextPC accounts for compressed instructions */
+  assert(success, "Link cap should always be representable.");
+  assert(#\hyperref[sailRISCVznot]{not}# (#\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(linkCap)), "Link cap should always be unsealed");
+  #\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzsealCap]{sealCap}#(linkCap, #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_otype_width, otype_sentry));
+  nextPC = newPC;
+  RETIRE_SUCCESS
+}

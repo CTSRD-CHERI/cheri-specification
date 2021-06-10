@@ -1,0 +1,50 @@
+function #\hyperref[sailRISCVzencCapabilityToCapability]{encCapabilityToCapability}#(t,c) : (bool, EncCapability) -> Capability = {
+  internal_E : bool = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.internal_E);
+  E : #\hyperref[sailRISCVzbits]{bits}#(cap_E_width)  = #\hyperref[sailRISCVzzzeros]{zeros}#();
+  Bs : #\hyperref[sailRISCVzbits]{bits}#(cap_mantissa_width) = #\hyperref[sailRISCVzzzeros]{zeros}#();
+  T : #\hyperref[sailRISCVzbits]{bits}#(cap_mantissa_width - 2) = #\hyperref[sailRISCVzzzeros]{zeros}#();
+  lenMSBs : #\hyperref[sailRISCVzbits]{bits}#(2) = #\hyperref[sailRISCVzzzeros]{zeros}#();
+  if internal_E then {
+    E = c.T[internal_E_take_bits - 1..0] @ c.B[internal_E_take_bits - 1..0];
+    /* Exponent chosen so that length MSBs is 01 */
+    lenMSBs = 0b01;
+    T = c.T[cap_mantissa_width - 3..3] @ #\hyperref[sailRISCVzzzeros]{zeros}#(internal_E_take_bits);
+    Bs = c.B[cap_mantissa_width - 1..3] @ #\hyperref[sailRISCVzzzeros]{zeros}#(internal_E_take_bits);
+  } else {
+    /* Exponent zero */
+    lenMSBs = 0b00;
+    T = c.T;
+    Bs = c.B;
+  };
+  /* Reconstruct top two bits of T given T = B + len and:
+   * 1) the top two bits of B
+   * 2) most significant two bits of length derived from format above
+   * 3) carry out of B[20..0] + len[20..0] that is implied if T[20..0] < B[20..0]
+   */
+  carry_out = if T <_u Bs[cap_mantissa_width - 3..0] then 0b01 else 0b00;
+  Ttop2 = Bs[cap_mantissa_width - 1..cap_mantissa_width - 2] + lenMSBs + carry_out;
+  return struct {
+    tag                    = t,
+    uperms                 = if cap_uperms_width > 0 then c.perms[cap_hperms_width + cap_uperms_width - 1..cap_hperms_width] else [],
+    permit_set_CID         = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[11]),
+    access_system_regs     = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[10]),
+    permit_unseal          = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[9]),
+    permit_cinvoke         = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[8]),
+    permit_seal            = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[7]),
+    permit_store_local_cap = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[6]),
+    permit_store_cap       = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[5]),
+    permit_load_cap        = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[4]),
+    permit_store           = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[3]),
+    permit_load            = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[2]),
+    permit_execute         = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[1]),
+    global                 = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.perms[0]),
+    reserved               = c.reserved,
+    flag_cap_mode          = #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(c.flags[0]),
+    internal_E             = internal_E,
+    E                      = E,
+    B                      = Bs,
+    T                      = Ttop2 @ T,
+    otype                  = c.otype,
+    address                = c.address
+  }
+}

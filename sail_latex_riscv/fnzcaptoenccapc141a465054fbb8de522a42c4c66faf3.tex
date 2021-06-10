@@ -1,0 +1,20 @@
+function #\hyperref[sailRISCVzcapToEncCap]{capToEncCap}#(cap) : Capability -> EncCapability = {
+  t_hi : #\hyperref[sailRISCVzbits]{bits}#(cap_mantissa_width - 2 - internal_E_take_bits) = cap.T[cap_mantissa_width - 3..internal_E_take_bits];
+  t_lo : #\hyperref[sailRISCVzbits]{bits}#(internal_E_take_bits)  = cap.T[internal_E_take_bits - 1..0];
+  b_hi : #\hyperref[sailRISCVzbits]{bits}#(cap_mantissa_width - internal_E_take_bits) = cap.B[cap_mantissa_width - 1..internal_E_take_bits];
+  b_lo : #\hyperref[sailRISCVzbits]{bits}#(internal_E_take_bits)  = cap.B[internal_E_take_bits - 1..0];
+  if cap.internal_E then {
+    t_lo = cap.E[2 * internal_E_take_bits - 1..internal_E_take_bits];
+    b_lo = cap.E[internal_E_take_bits - 1..0];
+  };
+  return struct {
+    perms = cap.uperms @ #\hyperref[sailRISCVzgetCapHardPerms]{getCapHardPerms}#(cap),
+    reserved = cap.reserved,
+    flags = #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.flag_cap_mode),
+    otype = cap.otype,
+    internal_E = #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(cap.internal_E)[0],
+    T = t_hi @ t_lo,
+    B = b_hi @ b_lo,
+    address = cap.address
+  };
+}

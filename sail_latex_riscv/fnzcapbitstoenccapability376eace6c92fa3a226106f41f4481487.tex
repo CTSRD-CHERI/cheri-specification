@@ -1,0 +1,10 @@
+function #\hyperref[sailRISCVzcapBitsToEncCapability]{capBitsToEncCapability}#(c) : CapBits -> EncCapability = struct {
+  perms      = c[127..112],
+  reserved   = c[111..110],
+  flags      = c[109..109],
+  otype      = c[108..91],
+  internal_E = c[90],
+  T          = c[89..78],
+  B          = c[77..64],
+  address    = c[63..0]
+}

@@ -3,8 +3,6 @@ function #\hyperref[sailRISCVzlegalizzezyccsr]{legalize\_ccsr}#(c : ccsr, v : xl
   // Technically, WPRI does not need a legalizer, since software is
   // assumed to legalize; so we could remove this function.
   let v = #\hyperref[sailRISCVzMkzyccsr]{Mk\_ccsr}#(v);
-  let c = #\hyperref[sailRISCVzupdatezycapzyidx]{update\_cap\_idx}#(c, v.#\hyperref[sailRISCVzcapzyidx]{cap\_idx}#());
-  let c = #\hyperref[sailRISCVzupdatezycause]{update\_cause}#(c, v.#\hyperref[sailRISCVzcause]{cause}#());
   /* For now these bits are not really supported so hardwired to true */
   let c = #\hyperref[sailRISCVzupdatezyd]{update\_d}#(c, 0b1);
   let c = #\hyperref[sailRISCVzupdatezye]{update\_e}#(c, 0b1);

@@ -1,5 +1,5 @@
 function #\hyperref[sailRISCVzgetCapBoundsBits]{getCapBoundsBits}#(c) : Capability -> (CapAddrBits, CapLenBits) =
-  let E = #\hyperref[sailRISCVzmin]{min}#(maxE, #\hyperref[sailRISCVzunsigned]{unsigned}#(c.E)) in
+  let E = #\hyperref[sailRISCVzmin]{min}#(cap_max_E, #\hyperref[sailRISCVzunsigned]{unsigned}#(c.E)) in
   let a : CapAddrBits = c.address in
   /* Extract bits we need to make the top correction and calculate representable limit */
   let a3 = #\hyperref[sailRISCVztruncate]{truncate}#(a >> (E + cap_mantissa_width - 3), 3) in
@@ -21,11 +21,11 @@ function #\hyperref[sailRISCVzgetCapBoundsBits]{getCapBoundsBits}#(c) : Capabili
        representable space wraps the address space. */
     let base2 : #\hyperref[sailRISCVzbits]{bits}#(2) = 0b0 @ [base[cap_addr_width - 1]];
     let top2  : #\hyperref[sailRISCVzbits]{bits}#(2) = top[cap_addr_width .. cap_addr_width - 1];
-    if (E < (maxE - 1)) & (#\hyperref[sailRISCVzunsigned]{unsigned}#(top2 - base2) > 1) then {
+    if (E < (cap_max_E - 1)) & (#\hyperref[sailRISCVzunsigned]{unsigned}#(top2 - base2) > 1) then {
       top[cap_addr_width] = ~(top[cap_addr_width]);
     };
     /* TODO The following top MSB correction was thought to be equivalent
-       to the one above, but differs at least in some cases where E >= maxE - 1
+       to the one above, but differs at least in some cases where E >= cap_max_E - 1
     if (base[cap_addr_width] == bitone) then {
        top[cap_addr_width] = if (aHi == 1) & (tHi == 1) then bitone else bitzero;
     };

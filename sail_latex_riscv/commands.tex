@@ -394,6 +394,8 @@ Similarly, we define shifts of 32 and 1 (i.e., powers of two).
 
 \newcommand{\sailRISCVvalWriteMemt}{\saildoclabelled{sailRISCVzzyzywritezymemt}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz__write_memte6e713c02b822271b225111a241edb5f.tex}}}}
 
+\newcommand{\sailRISCVvalWriteTag}{\saildoclabelled{sailRISCVzzyzywritezytag}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz__write_taga3db5671522692a95035f749d1a6fc7c.tex}}}}
+
 \newcommand{\sailRISCVvalExclRes}{\saildoclabelled{sailRISCVzzyzyexclzyres}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz__excl_res213a4f8bb9ba5c1a34b50a170a41bba0.tex}}}}
 
 \newcommand{\sailRISCVvalBarrier}{\saildoclabelled{sailRISCVzzyzybarrier}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz__barrier9c91ff87b358aa40ed8f2b1e1d97f44c.tex}}}}
@@ -1334,8 +1336,6 @@ Similarly, we define shifts of 32 and 1 (i.e., powers of two).
 
 \newcommand{\sailRISCVtypecapregIdx}{\saildoclabelled{sailRISCVtypezcapregzyidx}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcapreg_idx46cb8ec24174ac7dafd6635c5040002d.tex}}}}
 
-\newcommand{\sailRISCVtypecheriCause}{\saildoclabelled{sailRISCVtypezcherizycause}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcheri_causec1e7f09ff14a785b125a16b7f7b4f4fe.tex}}}}
-
 \newcommand{\sailRISCVtypescreg}{\saildoclabelled{sailRISCVtypezscreg}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezscreg7666c10c12f9f7ff3cd4397f32a77413.tex}}}}
 
 \newcommand{\sailRISCVtypecapSizze}{\saildoclabelled{sailRISCVtypezcapzysizze}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_sizze1bdaf9cd8fe2936d527bdd4bc7dd72ca.tex}}}}
@@ -1344,32 +1344,37 @@ Similarly, we define shifts of 32 and 1 (i.e., powers of two).
 
 \newcommand{\sailRISCVtypeCapBits}{\saildoclabelled{sailRISCVtypezCapBits}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcapbits32830b87cefa69a0cdb78ef00d25b781.tex}}}}
 
-\newcommand{\sailRISCVtypecapOtypeWidth}{\saildoclabelled{sailRISCVtypezcapzyotypezywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_otype_widthcbba33421b0d173c367e3bd232817e06.tex}}}}
-
 \newcommand{\sailRISCVtypecapHpermsWidth}{\saildoclabelled{sailRISCVtypezcapzyhpermszywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_hperms_width7a71e6f5d2bdf15a0098752dcdf93274.tex}}}}
 
 \newcommand{\sailRISCVtypecapUpermsWidth}{\saildoclabelled{sailRISCVtypezcapzyupermszywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_uperms_widthf6dfed0942499b0c2d58b90971faca40.tex}}}}
+
+\newcommand{\sailRISCVtypecapOtypeWidth}{\saildoclabelled{sailRISCVtypezcapzyotypezywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_otype_widthcbba33421b0d173c367e3bd232817e06.tex}}}}
+
+\newcommand{\sailRISCVtypecapReservedWidth}{\saildoclabelled{sailRISCVtypezcapzyreservedzywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_reserved_width162aad08df94c6f762b5521864cec58f.tex}}}}
+
+\newcommand{\sailRISCVtypecapFlagsWidth}{\saildoclabelled{sailRISCVtypezcapzyflagszywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_flags_width335bf4f42772a3e75f4dbee10e086942.tex}}}}
+
+\newcommand{\sailRISCVtypecapMantissaWidth}{\saildoclabelled{sailRISCVtypezcapzymantissazywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_mantissa_width9664b91a58eac86639a6d61f4c90f63a.tex}}}}
+
+\newcommand{\sailRISCVtypecapEWidth}{\saildoclabelled{sailRISCVtypezcapzyEzywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_e_width973f9a73b0496551f021cfb45bc16fba.tex}}}}
 
 \newcommand{\sailRISCVtypecapAddrWidth}{\saildoclabelled{sailRISCVtypezcapzyaddrzywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_addr_width7d4b25117798a50c5addfe865237309d.tex}}}}
 
 \newcommand{\sailRISCVtypecapLenWidth}{\saildoclabelled{sailRISCVtypezcapzylenzywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_len_width9583637a11dff282b382f15c2de94120.tex}}}}
 
-\newcommand{\sailRISCVtypecapMantissaWidth}{\saildoclabelled{sailRISCVtypezcapzymantissazywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_mantissa_width9664b91a58eac86639a6d61f4c90f63a.tex}}}}
-
 \newcommand{\sailRISCVtypecapsPerCacheLine}{\saildoclabelled{sailRISCVtypezcapszyperzycachezyline}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcaps_per_cache_line7254e281fd7ea6b3c919ca9a34d729ad.tex}}}}
 
-\newcommand{\sailRISCVtypeCapAddrInt}{\saildoclabelled{sailRISCVtypezCapAddrInt}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcapaddrintf3dc84d3e8f46c74b19aac7a9fd4f1f2.tex}}}}
+\newcommand{\sailRISCVtypeinternalETakeBits}{\saildoclabelled{sailRISCVtypezinternalzyEzytakezybits}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezinternal_e_take_bits2053c0fdb4543de9de260a4bcf9ff42e.tex}}}}
 
-\newcommand{\sailRISCVtypeCapLen}{\saildoclabelled{sailRISCVtypezCapLen}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcaplenf6618af706b03f95ca9741cffae7687d.tex}}}}
+\newcommand{\sailRISCVtypeEncCapability}{\saildoclabelled{sailRISCVtypezEncCapability}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezenccapability8703f01ba56a7670e501750457ffebed.tex}}}}
 
-\newcommand{\sailRISCVtypeCapability}{\saildoclabelled{sailRISCVtypezCapability}{\saildoctype{A partially decompressed version of a capability, populated by
-capBitsToCapability. E is not present in all formats.
+\newcommand{\sailRISCVvalcapBitsToEncCapability}{\saildoclabelled{sailRISCVzcapBitsToEncCapability}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzcapbitstoenccapability376eace6c92fa3a226106f41f4481487.tex}}}}
 
-}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcapability5646515621fe4c3bb7fe8874d1909f0e.tex}}}}
+\newcommand{\sailRISCVfncapBitsToEncCapability}{\saildoclabelled{sailRISCVfnzcapBitsToEncCapability}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzcapbitstoenccapability376eace6c92fa3a226106f41f4481487.tex}}}}
 
-\newcommand{\sailRISCVvalcapBitsToCapability}{\saildoclabelled{sailRISCVzcapBitsToCapability}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzcapbitstocapability5a9b90d5c99889a6865e9bf96c63fbdd.tex}}}}
+\newcommand{\sailRISCVvalencCapToBits}{\saildoclabelled{sailRISCVzencCapToBits}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzenccaptobits948ae8b1faab2106f5564feb2065ac65.tex}}}}
 
-\newcommand{\sailRISCVfncapBitsToCapability}{\saildoclabelled{sailRISCVfnzcapBitsToCapability}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzcapbitstocapability5a9b90d5c99889a6865e9bf96c63fbdd.tex}}}}
+\newcommand{\sailRISCVfnencCapToBits}{\saildoclabelled{sailRISCVfnzencCapToBits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzenccaptobits948ae8b1faab2106f5564feb2065ac65.tex}}}}
 
 \newcommand{\sailRISCVtypememMeta}{\saildoclabelled{sailRISCVtypezmemzymeta}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezmem_metaf5b381cf38597ad4a56a53301483f3c2.tex}}}}
 
@@ -1409,23 +1414,43 @@ capBitsToCapability. E is not present in all formats.
 
 \newcommand{\sailRISCVvalTraceMemoryRead}{\saildoclabelled{sailRISCVzzyzyTraceMemoryRead}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz__tracememoryread11a5e2cc4158cfc2c22e91249b3a83cb.tex}}}}
 
-\newcommand{\sailRISCVtypecapFlagsWidth}{\saildoclabelled{sailRISCVtypezcapzyflagszywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_flags_width335bf4f42772a3e75f4dbee10e086942.tex}}}}
-
 \newcommand{\sailRISCVtypecapUpermsShift}{\saildoclabelled{sailRISCVtypezcapzyupermszyshift}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_uperms_shiftbe2a57515ea08a94424ab7ec6686232b.tex}}}}
 
 \newcommand{\sailRISCVtypecapPermsWidth}{\saildoclabelled{sailRISCVtypezcapzypermszywidth}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcap_perms_widthf1a97a7ea919ad9f42706f84547f5b1a.tex}}}}
 
 \newcommand{\sailRISCVtypeCapAddrBits}{\saildoclabelled{sailRISCVtypezCapAddrBits}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcapaddrbitsdbb96675d10b9e9b205f71df6a15d202.tex}}}}
 
+\newcommand{\sailRISCVtypeCapAddrInt}{\saildoclabelled{sailRISCVtypezCapAddrInt}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcapaddrintf3dc84d3e8f46c74b19aac7a9fd4f1f2.tex}}}}
+
 \newcommand{\sailRISCVtypeCapLenBits}{\saildoclabelled{sailRISCVtypezCapLenBits}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcaplenbits0c88c644020f10b2ca144bfbaba3ec9e.tex}}}}
+
+\newcommand{\sailRISCVtypeCapLen}{\saildoclabelled{sailRISCVtypezCapLen}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcaplenf6618af706b03f95ca9741cffae7687d.tex}}}}
 
 \newcommand{\sailRISCVtypeCapPermsBits}{\saildoclabelled{sailRISCVtypezCapPermsBits}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcappermsbits6613dfcf198c86f0eab4b7594494ef02.tex}}}}
 
 \newcommand{\sailRISCVtypeCapFlagsBits}{\saildoclabelled{sailRISCVtypezCapFlagsBits}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcapflagsbitsc0aea8b13e99ce9586aae1d820edcb88.tex}}}}
 
+\newcommand{\sailRISCVtypeCapability}{\saildoclabelled{sailRISCVtypezCapability}{\saildoctype{A partially decompressed version of a capability -- E, B, T,
+lenMSB, sealed and otype fields are not present in all formats and are
+populated by capBitsToCapability.
+
+}{\lstinputlisting[language=sail]{sail_latex_riscv/typezcapability5646515621fe4c3bb7fe8874d1909f0e.tex}}}}
+
 \newcommand{\sailRISCVvalgetCapHardPerms}{\saildoclabelled{sailRISCVzgetCapHardPerms}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzgetcaphardperms801568201da814b3b7b1126c01e5c34b.tex}}}}
 
 \newcommand{\sailRISCVfngetCapHardPerms}{\saildoclabelled{sailRISCVfnzgetCapHardPerms}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzgetcaphardperms801568201da814b3b7b1126c01e5c34b.tex}}}}
+
+\newcommand{\sailRISCVvalencCapabilityToCapability}{\saildoclabelled{sailRISCVzencCapabilityToCapability}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzenccapabilitytocapability7ba73fdb2e8fe4a2b512fe117732f648.tex}}}}
+
+\newcommand{\sailRISCVfnencCapabilityToCapability}{\saildoclabelled{sailRISCVfnzencCapabilityToCapability}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzenccapabilitytocapability7ba73fdb2e8fe4a2b512fe117732f648.tex}}}}
+
+\newcommand{\sailRISCVvalcapBitsToCapability}{\saildoclabelled{sailRISCVzcapBitsToCapability}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzcapbitstocapability5a9b90d5c99889a6865e9bf96c63fbdd.tex}}}}
+
+\newcommand{\sailRISCVfncapBitsToCapability}{\saildoclabelled{sailRISCVfnzcapBitsToCapability}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzcapbitstocapability5a9b90d5c99889a6865e9bf96c63fbdd.tex}}}}
+
+\newcommand{\sailRISCVvalcapToEncCap}{\saildoclabelled{sailRISCVzcapToEncCap}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzcaptoenccapc141a465054fbb8de522a42c4c66faf3.tex}}}}
+
+\newcommand{\sailRISCVfncapToEncCap}{\saildoclabelled{sailRISCVfnzcapToEncCap}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzcaptoenccapc141a465054fbb8de522a42c4c66faf3.tex}}}}
 
 \newcommand{\sailRISCVvalcapToBits}{\saildoclabelled{sailRISCVzcapToBits}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzcaptobits025010a6e8c284beecc438f72babcc70.tex}}}}
 
@@ -1476,7 +1501,7 @@ to \lstinline`flags` and returns the result as new capability.
 
 \newcommand{\sailRISCVfnisCapSealed}{\saildoclabelled{sailRISCVfnzisCapSealed}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnziscapsealeda9077bc28a9d2efcd12e42755a4de536.tex}}}}
 
-\newcommand{\sailRISCVvalhasReservedOType}{\saildoclabelled{sailRISCVzhasReservedOType}{\saildocval{Tests whether the capability has a reserved otype (larger than \hyperref[sailRISCVzmaxzyotype]{\lstinline{max_otype}}).
+\newcommand{\sailRISCVvalhasReservedOType}{\saildoclabelled{sailRISCVzhasReservedOType}{\saildocval{Tests whether the capability has a reserved otype (larger than \hyperref[sailRISCVzcapzymaxzyotype]{\lstinline{cap_max_otype}}).
 Note that this includes both sealed (\saildocabbrev{e.g.} sentry) and unsealed (all ones)
 otypes.
 
@@ -4560,38 +4585,6 @@ otypes.
 
 \newcommand{\sailRISCVoverloadCCCCCCCCCCCCCModBits}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
-\newcommand{\sailRISCVvalGetCcsrCapIdx}{\saildoclabelled{sailRISCVzzygetzyccsrzycapzyidx}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_ccsr_cap_idx07f5b7d982282306c072600892773224.tex}}}}
-
-\newcommand{\sailRISCVfnGetCcsrCapIdx}{\saildoclabelled{sailRISCVfnzzygetzyccsrzycapzyidx}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_get_ccsr_cap_idx07f5b7d982282306c072600892773224.tex}}}}
-
-\newcommand{\sailRISCVvalSetCcsrCapIdx}{\saildoclabelled{sailRISCVzzysetzyccsrzycapzyidx}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_set_ccsr_cap_idxf1dab003746059638583e08318dd0939.tex}}}}
-
-\newcommand{\sailRISCVfnSetCcsrCapIdx}{\saildoclabelled{sailRISCVfnzzysetzyccsrzycapzyidx}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_set_ccsr_cap_idxf1dab003746059638583e08318dd0939.tex}}}}
-
-\newcommand{\sailRISCVvalUpdateCcsrCapIdx}{\saildoclabelled{sailRISCVzzyupdatezyccsrzycapzyidx}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_update_ccsr_cap_idxcf97e2a26597f29b63eaa57befa11cea.tex}}}}
-
-\newcommand{\sailRISCVfnUpdateCcsrCapIdx}{\saildoclabelled{sailRISCVfnzzyupdatezyccsrzycapzyidx}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ccsr_cap_idxcf97e2a26597f29b63eaa57befa11cea.tex}}}}
-
-\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDupdateCapIdx}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDzupdatezycapzyidx}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDzupdate_cap_idxe77ade3df0db97f2d0c7e159a697bce8.tex}}}}
-
-\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEModCapIdx}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEzzymodzycapzyidx}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEz_mod_cap_idx2aa9e57d92bb9ee2c5c8636b1e91e4b8.tex}}}}
-
-\newcommand{\sailRISCVvalGetCcsrCause}{\saildoclabelled{sailRISCVzzygetzyccsrzycause}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_ccsr_caused575f504e43b5c4f705e1e76299969a8.tex}}}}
-
-\newcommand{\sailRISCVfnGetCcsrCause}{\saildoclabelled{sailRISCVfnzzygetzyccsrzycause}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_get_ccsr_caused575f504e43b5c4f705e1e76299969a8.tex}}}}
-
-\newcommand{\sailRISCVvalSetCcsrCause}{\saildoclabelled{sailRISCVzzysetzyccsrzycause}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_set_ccsr_causea61c64eff6f93cf534fa898aaa26f2b0.tex}}}}
-
-\newcommand{\sailRISCVfnSetCcsrCause}{\saildoclabelled{sailRISCVfnzzysetzyccsrzycause}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_set_ccsr_causea61c64eff6f93cf534fa898aaa26f2b0.tex}}}}
-
-\newcommand{\sailRISCVvalUpdateCcsrCause}{\saildoclabelled{sailRISCVzzyupdatezyccsrzycause}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_update_ccsr_causecd8b7254c686be403e4e906a346f4642.tex}}}}
-
-\newcommand{\sailRISCVfnUpdateCcsrCause}{\saildoclabelled{sailRISCVfnzzyupdatezyccsrzycause}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ccsr_causecd8b7254c686be403e4e906a346f4642.tex}}}}
-
-\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFupdateCauseA}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFzupdatezycause}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFzupdate_cause68e022ebb6a1524860ca61573bc7f0b3.tex}}}}
-
-\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGModCauseA}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGzzymodzycause}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGz_mod_causeb77ad00e2fa7ea0bcdf939ce8b0035af.tex}}}}
-
 \newcommand{\sailRISCVvalGetCcsrD}{\saildoclabelled{sailRISCVzzygetzyccsrzyd}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_ccsr_d5cb2dcaceb4937b225b4475484d2bf2d.tex}}}}
 
 \newcommand{\sailRISCVfnGetCcsrD}{\saildoclabelled{sailRISCVfnzzygetzyccsrzyd}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_get_ccsr_d5cb2dcaceb4937b225b4475484d2bf2d.tex}}}}
@@ -4604,9 +4597,9 @@ otypes.
 
 \newcommand{\sailRISCVfnUpdateCcsrD}{\saildoclabelled{sailRISCVfnzzyupdatezyccsrzyd}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ccsr_dad4c6c7e8973232b0249a9b870dab8b8.tex}}}}
 
-\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHupdateDA}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHzupdatezyd}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHzupdate_d57d9225616475e802ecec210f39b5b9d.tex}}}}
+\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDupdateDA}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDzupdatezyd}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDzupdate_d57d9225616475e802ecec210f39b5b9d.tex}}}}
 
-\newcommand{\sailRISCVoverloadIIIIIIIIIIIIIModDA}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIzzymodzyd}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIz_mod_db168473f6dc9a1201d80a180a02bc64a.tex}}}}
+\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEModDA}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEzzymodzyd}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEz_mod_db168473f6dc9a1201d80a180a02bc64a.tex}}}}
 
 \newcommand{\sailRISCVvalGetCcsrE}{\saildoclabelled{sailRISCVzzygetzyccsrzye}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_ccsr_e6d359c132221ee638d3b99e5bb880b1c.tex}}}}
 
@@ -4620,9 +4613,9 @@ otypes.
 
 \newcommand{\sailRISCVfnUpdateCcsrE}{\saildoclabelled{sailRISCVfnzzyupdatezyccsrzye}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ccsr_e79adbf3ff342d3a9fc182dd2dd614be3.tex}}}}
 
-\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJupdateEA}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJzupdatezye}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJzupdate_e7a63b7e30669139ab9225922027a87d0.tex}}}}
+\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFupdateEA}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFzupdatezye}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFzupdate_e7a63b7e30669139ab9225922027a87d0.tex}}}}
 
-\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKModEA}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKzzymodzye}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKz_mod_ed8b4db91b378334a887e790f3939603e.tex}}}}
+\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGModEA}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGzzymodzye}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGz_mod_ed8b4db91b378334a887e790f3939603e.tex}}}}
 
 \newcommand{\sailRISCVvallegalizzeCcsr}{\saildoclabelled{sailRISCVzlegalizzezyccsr}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzlegalizze_ccsr8248d36ab83d1808c1e3e0b64d88c1cf.tex}}}}
 
@@ -4660,7 +4653,7 @@ otypes.
 
 \newcommand{\sailRISCVfnwCBits}{\saildoclabelled{sailRISCVfnzwCzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzwc_bitsb8b2d4f53308d4bb8d154a1f6664d336.tex}}}}
 
-\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLC}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLzC}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLzc15f67105dab436b80b9241d87d1f8e9d.tex}}}}
+\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHC}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHzC}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHzc15f67105dab436b80b9241d87d1f8e9d.tex}}}}
 
 \newcommand{\sailRISCVvalextInitRegs}{\saildoclabelled{sailRISCVzextzyinitzyregs}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzext_init_regs1d9ff00ce58fd5712eb26190e338015a.tex}}}}
 
@@ -4678,7 +4671,7 @@ instead of null.
 
 \newcommand{\sailRISCVfncapRegNameAbi}{\saildoclabelled{sailRISCVfnzcapzyregzynamezyabi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzcap_reg_name_abi719d69842e8a63e886ffe0791675d4e0.tex}}}}
 
-\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMtoStr}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
+\newcommand{\sailRISCVoverloadIIIIIIIIIIIIItoStr}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
 
 \newcommand{\sailRISCVvalcapRegName}{\saildoclabelled{sailRISCVzcapzyregzyname}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzcap_reg_name2541adc6dad121efe53209371c0fbc68.tex}}}}
 
@@ -4718,9 +4711,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateUstatusBits}{\saildoclabelled{sailRISCVfnzzyupdatezyUstatuszybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ustatus_bits58fc869676c24d63b7324b3ddc882d14.tex}}}}
 
-\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNupdateBits}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJupdateBits}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOModBits}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKModBits}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetUstatusUPIE}{\saildoclabelled{sailRISCVzzygetzyUstatuszyUPIE}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_ustatus_upiec1c1afe6b971883383e700b3ef0f0b35.tex}}}}
 
@@ -4734,9 +4727,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateUstatusUPIE}{\saildoclabelled{sailRISCVfnzzyupdatezyUstatuszyUPIE}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ustatus_upie620a46996c155948c916224ee8c0d297.tex}}}}
 
-\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPupdateUPIE}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPzupdatezyUPIE}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPzupdate_upiea5ad86a550536087d757a5582d1a8bb9.tex}}}}
+\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLupdateUPIE}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLzupdatezyUPIE}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLzupdate_upiea5ad86a550536087d757a5582d1a8bb9.tex}}}}
 
-\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQModUPIE}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQzzymodzyUPIE}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQz_mod_upie27f56ba53dc72f512e0a128ab616ba83.tex}}}}
+\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMModUPIE}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMzzymodzyUPIE}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMz_mod_upie27f56ba53dc72f512e0a128ab616ba83.tex}}}}
 
 \newcommand{\sailRISCVvalGetUstatusUIE}{\saildoclabelled{sailRISCVzzygetzyUstatuszyUIE}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_ustatus_uie443e8ee7d068af4b9b66e7cbf42dd57e.tex}}}}
 
@@ -4750,9 +4743,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateUstatusUIE}{\saildoclabelled{sailRISCVfnzzyupdatezyUstatuszyUIE}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ustatus_uie937a13d13f328a695bd490140941d1ad.tex}}}}
 
-\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRupdateUIE}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRzupdatezyUIE}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRzupdate_uied194e7b32c7c54d35dfc1b602b4b5907.tex}}}}
+\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNupdateUIE}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNzupdatezyUIE}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNzupdate_uied194e7b32c7c54d35dfc1b602b4b5907.tex}}}}
 
-\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSModUIE}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSzzymodzyUIE}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSz_mod_uie18b8fe18a506d4c612ff106c8cc5fb23.tex}}}}
+\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOModUIE}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOzzymodzyUIE}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOz_mod_uie18b8fe18a506d4c612ff106c8cc5fb23.tex}}}}
 
 \newcommand{\sailRISCVvallowerSstatus}{\saildoclabelled{sailRISCVzlowerzysstatus}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzlower_sstatusee8227db3ac1f80e02871989d3ac7837.tex}}}}
 
@@ -4784,9 +4777,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateUinterruptsBits}{\saildoclabelled{sailRISCVfnzzyupdatezyUinterruptszybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_uinterrupts_bits9c553d2ae4d62c448e09c704b0d8bba7.tex}}}}
 
-\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTupdateBits}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPupdateBits}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUModBits}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQModBits}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetUinterruptsUEI}{\saildoclabelled{sailRISCVzzygetzyUinterruptszyUEI}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_uinterrupts_uei6c329ab1295c95ff6f49fe4076feabea.tex}}}}
 
@@ -4800,9 +4793,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateUinterruptsUEI}{\saildoclabelled{sailRISCVfnzzyupdatezyUinterruptszyUEI}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_uinterrupts_ueib05aa22b4bb2fffd287cb5a502f86a7d.tex}}}}
 
-\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVupdateUEI}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVzupdatezyUEI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVzupdate_uei8252f0ae84161aa560a37211f39d1461.tex}}}}
+\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRupdateUEI}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRzupdatezyUEI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRzupdate_uei8252f0ae84161aa560a37211f39d1461.tex}}}}
 
-\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWModUEI}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWzzymodzyUEI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWz_mod_uei7faef47ef8aacd0d1b2ad1e0530fdf8e.tex}}}}
+\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSModUEI}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSzzymodzyUEI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSz_mod_uei7faef47ef8aacd0d1b2ad1e0530fdf8e.tex}}}}
 
 \newcommand{\sailRISCVvalGetUinterruptsUTI}{\saildoclabelled{sailRISCVzzygetzyUinterruptszyUTI}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_uinterrupts_uti4f7a1e53cab567fa843f7436769357a0.tex}}}}
 
@@ -4816,9 +4809,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateUinterruptsUTI}{\saildoclabelled{sailRISCVfnzzyupdatezyUinterruptszyUTI}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_uinterrupts_uti881f938d0d5ebb68be2d1bcc7637dc77.tex}}}}
 
-\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXupdateUTI}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXzupdatezyUTI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXzupdate_uti7bb127f84633c2b4f4b4de5582168ddf.tex}}}}
+\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTupdateUTI}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTzupdatezyUTI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTzupdate_uti7bb127f84633c2b4f4b4de5582168ddf.tex}}}}
 
-\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYModUTI}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYzzymodzyUTI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYz_mod_utia23224af950fbe7be4b3db2f7092e6b4.tex}}}}
+\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUModUTI}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUzzymodzyUTI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUz_mod_utia23224af950fbe7be4b3db2f7092e6b4.tex}}}}
 
 \newcommand{\sailRISCVvalGetUinterruptsUSI}{\saildoclabelled{sailRISCVzzygetzyUinterruptszyUSI}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_uinterrupts_usi1b085056d929d854a848f905b87c060b.tex}}}}
 
@@ -4832,9 +4825,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateUinterruptsUSI}{\saildoclabelled{sailRISCVfnzzyupdatezyUinterruptszyUSI}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_uinterrupts_usi1ec1151a92f98583f7c0c3cb9f03ca01.tex}}}}
 
-\newcommand{\sailRISCVoverloadZZZZZZZZZZZZZupdateUSI}{\saildoclabelled{sailRISCVoverloadZZZZZZZZZZZZZzupdatezyUSI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadZZZZZZZZZZZZZzupdate_usi3c691c58ab628cbd10b9e21b62e0cfc4.tex}}}}
+\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVupdateUSI}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVzupdatezyUSI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVzupdate_usi3c691c58ab628cbd10b9e21b62e0cfc4.tex}}}}
 
-\newcommand{\sailRISCVoverloadAAAAAAAAAAAAAAModUSI}{\saildoclabelled{sailRISCVoverloadAAAAAAAAAAAAAAzzymodzyUSI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadAAAAAAAAAAAAAAz_mod_usif3c3aecb7417cc350ad372adfb40e4d3.tex}}}}
+\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWModUSI}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWzzymodzyUSI}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWz_mod_usif3c3aecb7417cc350ad372adfb40e4d3.tex}}}}
 
 \newcommand{\sailRISCVvallowerSip}{\saildoclabelled{sailRISCVzlowerzysip}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzlower_sipfb2971a9ef35ea1e2a4c00f905ec894c.tex}}}}
 
@@ -5164,11 +5157,11 @@ instead of null.
 
 \newcommand{\sailRISCVfnwFBits}{\saildoclabelled{sailRISCVfnzwFzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzwf_bits141c8aafc4ef81f118d39a00d8a5249d.tex}}}}
 
-\newcommand{\sailRISCVoverloadBBBBBBBBBBBBBBF}{\saildoclabelled{sailRISCVoverloadBBBBBBBBBBBBBBzF}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadBBBBBBBBBBBBBBzf71805d10b9ea2a56437652aba0daf9bf.tex}}}}
+\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXF}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXzF}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXzf71805d10b9ea2a56437652aba0daf9bf.tex}}}}
 
 \newcommand{\sailRISCVvalfregNameAbi}{\saildoclabelled{sailRISCVzfregzynamezyabi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzfreg_name_abi149ff973f4a58e634d652021d3e44de0.tex}}}}
 
-\newcommand{\sailRISCVoverloadCCCCCCCCCCCCCCtoStr}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCCztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCCzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
+\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYtoStr}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
 
 \newcommand{\sailRISCVvalfregName}{\saildoclabelled{sailRISCVzfregzyname}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzfreg_name4ac4601cc383d5edd878a00fc0bde952.tex}}}}
 
@@ -5194,9 +5187,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateFcsrBits}{\saildoclabelled{sailRISCVfnzzyupdatezyFcsrzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_fcsr_bitsd93593273c229b56f42c5419848120a5.tex}}}}
 
-\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDDupdateBits}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDDzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDDzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadZZZZZZZZZZZZZupdateBits}{\saildoclabelled{sailRISCVoverloadZZZZZZZZZZZZZzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadZZZZZZZZZZZZZzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEEModBits}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEEzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEEz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadAAAAAAAAAAAAAAModBits}{\saildoclabelled{sailRISCVoverloadAAAAAAAAAAAAAAzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadAAAAAAAAAAAAAAz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetFcsrFRM}{\saildoclabelled{sailRISCVzzygetzyFcsrzyFRM}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_fcsr_frmc585de536fb10558f0653a1315c2301e.tex}}}}
 
@@ -5210,9 +5203,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateFcsrFRM}{\saildoclabelled{sailRISCVfnzzyupdatezyFcsrzyFRM}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_fcsr_frmdde96c8b780c41e6aa00deb4160779be.tex}}}}
 
-\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFFupdateFRM}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFFzupdatezyFRM}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFFzupdate_frm523f62f4860983773adf9a52ee1eea5c.tex}}}}
+\newcommand{\sailRISCVoverloadBBBBBBBBBBBBBBupdateFRM}{\saildoclabelled{sailRISCVoverloadBBBBBBBBBBBBBBzupdatezyFRM}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadBBBBBBBBBBBBBBzupdate_frm523f62f4860983773adf9a52ee1eea5c.tex}}}}
 
-\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGGModFRM}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGGzzymodzyFRM}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGGz_mod_frmd6735957b64e7c0e8f6762761df1daef.tex}}}}
+\newcommand{\sailRISCVoverloadCCCCCCCCCCCCCCModFRM}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCCzzymodzyFRM}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCCz_mod_frmd6735957b64e7c0e8f6762761df1daef.tex}}}}
 
 \newcommand{\sailRISCVvalGetFcsrFFLAGS}{\saildoclabelled{sailRISCVzzygetzyFcsrzyFFLAGS}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_fcsr_fflagse7920eae191e6251650c82768d152824.tex}}}}
 
@@ -5226,9 +5219,9 @@ instead of null.
 
 \newcommand{\sailRISCVfnUpdateFcsrFFLAGS}{\saildoclabelled{sailRISCVfnzzyupdatezyFcsrzyFFLAGS}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_fcsr_fflags358f6ae3cab298c0e35ab7d81a328b5f.tex}}}}
 
-\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHHupdateFFLAGS}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHHzupdatezyFFLAGS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHHzupdate_fflags40cb509aa136e461ae0ef1ffa4627b5a.tex}}}}
+\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDDupdateFFLAGS}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDDzupdatezyFFLAGS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDDzupdate_fflags40cb509aa136e461ae0ef1ffa4627b5a.tex}}}}
 
-\newcommand{\sailRISCVoverloadIIIIIIIIIIIIIIModFFLAGS}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIIzzymodzyFFLAGS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIIz_mod_fflags96236e6dd2fda3eab086581987046fc9.tex}}}}
+\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEEModFFLAGS}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEEzzymodzyFFLAGS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEEz_mod_fflags96236e6dd2fda3eab086581987046fc9.tex}}}}
 
 \newcommand{\sailRISCVvalextWriteFcsr}{\saildoclabelled{sailRISCVzextzywritezyfcsr}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzext_write_fcsr8225c20959aaf9205d48c42ffe341a87.tex}}}}
 
@@ -5453,7 +5446,7 @@ instead of null.
 \newcommand{\sailRISCVfnhandleCheriCapException}{\saildoclabelled{sailRISCVfnzhandlezycherizycapzyexception}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzhandle_cheri_cap_exceptionc1ff083ca6d0a739fb48243e22ff4898.tex}}}}
 
 \newcommand{\sailRISCVvalhandleCheriRegException}{\saildoclabelled{sailRISCVzhandlezycherizyregzyexception}{\saildocval{Causes the processor to raise a capability exception by writing the given
-capability exception cause and register number to the xccsr register then
+capability exception cause and register number to the xtval register then
 signalling an exception.
 
 }{\lstinputlisting[language=sail]{sail_latex_riscv/valzhandle_cheri_reg_exceptionfad1b48ae08f4eb90d02a5d75771c894.tex}}}}
@@ -5619,9 +5612,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateHtifCmdBits}{\saildoclabelled{sailRISCVfnzzyupdatezyhtifzycmdzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_htif_cmd_bitsf4016ddf8b504ce2ad50554db668de5e.tex}}}}
 
-\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJJupdateBits}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJJzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJJzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFFupdateBits}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFFzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFFzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKKModBits}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKKzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKKz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGGModBits}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGGzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGGz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetHtifCmdDevice}{\saildoclabelled{sailRISCVzzygetzyhtifzycmdzydevice}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_htif_cmd_device49a4f976524fe1bb4129d075a7e50cb3.tex}}}}
 
@@ -5635,9 +5628,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateHtifCmdDevice}{\saildoclabelled{sailRISCVfnzzyupdatezyhtifzycmdzydevice}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_htif_cmd_device37d8d93e2615eb16246d9d3624507e12.tex}}}}
 
-\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLLupdateDevice}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLLzupdatezydevice}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLLzupdate_device133872281fc83dcb5df6232f6344d8c0.tex}}}}
+\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHHupdateDevice}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHHzupdatezydevice}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHHzupdate_device133872281fc83dcb5df6232f6344d8c0.tex}}}}
 
-\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMMModDevice}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMMzzymodzydevice}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMMz_mod_deviced59eb8a2803361d08f70d5dfe4de57a2.tex}}}}
+\newcommand{\sailRISCVoverloadIIIIIIIIIIIIIIModDevice}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIIzzymodzydevice}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIIz_mod_deviced59eb8a2803361d08f70d5dfe4de57a2.tex}}}}
 
 \newcommand{\sailRISCVvalGetHtifCmdCmd}{\saildoclabelled{sailRISCVzzygetzyhtifzycmdzycmd}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_htif_cmd_cmd819958801f753cde6a79cea6d1060596.tex}}}}
 
@@ -5651,9 +5644,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateHtifCmdCmd}{\saildoclabelled{sailRISCVfnzzyupdatezyhtifzycmdzycmd}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_htif_cmd_cmd6ec3dd793a5d6eea4a6de9c247ff1ed7.tex}}}}
 
-\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNNupdateCmd}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNNzupdatezycmd}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNNzupdate_cmdfa3836cfddf11c618c06ae9d2b47cd43.tex}}}}
+\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJJupdateCmd}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJJzupdatezycmd}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJJzupdate_cmdfa3836cfddf11c618c06ae9d2b47cd43.tex}}}}
 
-\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOOModCmd}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOOzzymodzycmd}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOOz_mod_cmda78881afb278208f2e0a03703f92acc3.tex}}}}
+\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKKModCmd}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKKzzymodzycmd}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKKz_mod_cmda78881afb278208f2e0a03703f92acc3.tex}}}}
 
 \newcommand{\sailRISCVvalGetHtifCmdPayload}{\saildoclabelled{sailRISCVzzygetzyhtifzycmdzypayload}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_htif_cmd_payload61085de7e39b8efa3ae178ccc88eb7d5.tex}}}}
 
@@ -5667,9 +5660,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateHtifCmdPayload}{\saildoclabelled{sailRISCVfnzzyupdatezyhtifzycmdzypayload}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_htif_cmd_payloadf8c76e11f35c2157b590a60e4678b1cc.tex}}}}
 
-\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPPupdatePayload}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPPzupdatezypayload}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPPzupdate_payload1cd3e49aac00ade7b567c8c5fce6bd11.tex}}}}
+\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLLupdatePayload}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLLzupdatezypayload}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLLzupdate_payload1cd3e49aac00ade7b567c8c5fce6bd11.tex}}}}
 
-\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQQModPayload}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQQzzymodzypayload}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQQz_mod_payload7f7d1a64858e00d9a581ddd7341ee771.tex}}}}
+\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMMModPayload}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMMzzymodzypayload}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMMz_mod_payload7f7d1a64858e00d9a581ddd7341ee771.tex}}}}
 
 \newcommand{\sailRISCVvalhtifLoad}{\saildoclabelled{sailRISCVzhtifzyload}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzhtif_load7bc11b4853a5dae019f61722a0a6d6d7.tex}}}}
 
@@ -5807,9 +5800,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdatePTEBitsBits}{\saildoclabelled{sailRISCVfnzzyupdatezyPTEzyBitszybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_pte_bits_bits103014768edd92dc714fb7a033a0405f.tex}}}}
 
-\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRRupdateBits}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRRzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRRzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNNupdateBits}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNNzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNNzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSSModBits}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSSzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSSz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOOModBits}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOOzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOOz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetPTEBitsD}{\saildoclabelled{sailRISCVzzygetzyPTEzyBitszyD}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_pte_bits_d1ee6a89af287b35ae0a1cf2945b86d59.tex}}}}
 
@@ -5823,9 +5816,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdatePTEBitsD}{\saildoclabelled{sailRISCVfnzzyupdatezyPTEzyBitszyD}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_pte_bits_d0702d6e9e8c79296c17be6a87f7d2bcb.tex}}}}
 
-\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTTupdateD}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTTzupdatezyD}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTTzupdate_da9201c8a6710e680d16238f3581a0227.tex}}}}
+\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPPupdateD}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPPzupdatezyD}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPPzupdate_da9201c8a6710e680d16238f3581a0227.tex}}}}
 
-\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUUModD}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUUzzymodzyD}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUUz_mod_d8c29507d9735e49d608a373bd2e2c599.tex}}}}
+\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQQModD}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQQzzymodzyD}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQQz_mod_d8c29507d9735e49d608a373bd2e2c599.tex}}}}
 
 \newcommand{\sailRISCVvalGetPTEBitsA}{\saildoclabelled{sailRISCVzzygetzyPTEzyBitszyA}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_pte_bits_adca5243c2ba1646df88e501938973569.tex}}}}
 
@@ -5839,9 +5832,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdatePTEBitsA}{\saildoclabelled{sailRISCVfnzzyupdatezyPTEzyBitszyA}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_pte_bits_a3004f24784d29ad77e6bb0801c41e98e.tex}}}}
 
-\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVVupdateA}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVVzupdatezyA}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVVzupdate_ab740c1f378b55b3328b2a9f25ff6c1cf.tex}}}}
+\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRRupdateA}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRRzupdatezyA}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRRzupdate_ab740c1f378b55b3328b2a9f25ff6c1cf.tex}}}}
 
-\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWWModA}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWWzzymodzyA}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWWz_mod_a62a6f88676512d98a363811f9f5ba327.tex}}}}
+\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSSModA}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSSzzymodzyA}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSSz_mod_a62a6f88676512d98a363811f9f5ba327.tex}}}}
 
 \newcommand{\sailRISCVvalGetPTEBitsG}{\saildoclabelled{sailRISCVzzygetzyPTEzyBitszyG}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_pte_bits_g072ec08934990455850facd53f018b89.tex}}}}
 
@@ -5855,9 +5848,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdatePTEBitsG}{\saildoclabelled{sailRISCVfnzzyupdatezyPTEzyBitszyG}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_pte_bits_g7f8aa128b55e6f52846f32adb9e9a045.tex}}}}
 
-\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXXupdateG}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXXzupdatezyG}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXXzupdate_ga61979e0097ae60f8598f57688dbae8b.tex}}}}
+\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTTupdateG}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTTzupdatezyG}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTTzupdate_ga61979e0097ae60f8598f57688dbae8b.tex}}}}
 
-\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYYModG}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYYzzymodzyG}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYYz_mod_g521053c016cb3f20bf7b96843a7a2cf4.tex}}}}
+\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUUModG}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUUzzymodzyG}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUUz_mod_g521053c016cb3f20bf7b96843a7a2cf4.tex}}}}
 
 \newcommand{\sailRISCVvalGetPTEBitsU}{\saildoclabelled{sailRISCVzzygetzyPTEzyBitszyU}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_pte_bits_u300741c1239ab0c65dc451f1700b52d8.tex}}}}
 
@@ -5871,9 +5864,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdatePTEBitsU}{\saildoclabelled{sailRISCVfnzzyupdatezyPTEzyBitszyU}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_pte_bits_u977bcbc754c6423b417ff582c0113450.tex}}}}
 
-\newcommand{\sailRISCVoverloadZZZZZZZZZZZZZZupdateU}{\saildoclabelled{sailRISCVoverloadZZZZZZZZZZZZZZzupdatezyU}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadZZZZZZZZZZZZZZzupdate_uf25457b59a73b45bf964c7ab354d043c.tex}}}}
+\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVVupdateU}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVVzupdatezyU}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVVzupdate_uf25457b59a73b45bf964c7ab354d043c.tex}}}}
 
-\newcommand{\sailRISCVoverloadAAAAAAAAAAAAAAAModU}{\saildoclabelled{sailRISCVoverloadAAAAAAAAAAAAAAAzzymodzyU}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadAAAAAAAAAAAAAAAz_mod_u960ee5decf6c18ea57af0e0387ef7d9c.tex}}}}
+\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWWModU}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWWzzymodzyU}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWWz_mod_u960ee5decf6c18ea57af0e0387ef7d9c.tex}}}}
 
 \newcommand{\sailRISCVvalGetPTEBitsX}{\saildoclabelled{sailRISCVzzygetzyPTEzyBitszyX}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_pte_bits_x1b94d5b50779d8431b6a164038524c85.tex}}}}
 
@@ -5887,9 +5880,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdatePTEBitsX}{\saildoclabelled{sailRISCVfnzzyupdatezyPTEzyBitszyX}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_pte_bits_xe681f15474cf63965beb076cc7920964.tex}}}}
 
-\newcommand{\sailRISCVoverloadBBBBBBBBBBBBBBBupdateX}{\saildoclabelled{sailRISCVoverloadBBBBBBBBBBBBBBBzupdatezyX}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadBBBBBBBBBBBBBBBzupdate_x647abdeca7ac108f059148e19df0452e.tex}}}}
+\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXXupdateX}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXXzupdatezyX}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXXzupdate_x647abdeca7ac108f059148e19df0452e.tex}}}}
 
-\newcommand{\sailRISCVoverloadCCCCCCCCCCCCCCCModX}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCCCzzymodzyX}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCCCz_mod_xc906d7554de3b79cd0cc78501a562587.tex}}}}
+\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYYModX}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYYzzymodzyX}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYYz_mod_xc906d7554de3b79cd0cc78501a562587.tex}}}}
 
 \newcommand{\sailRISCVvalGetPTEBitsW}{\saildoclabelled{sailRISCVzzygetzyPTEzyBitszyW}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_pte_bits_w1d621d1d07d6e1ee0c6cbdd6eff9e867.tex}}}}
 
@@ -5903,9 +5896,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdatePTEBitsW}{\saildoclabelled{sailRISCVfnzzyupdatezyPTEzyBitszyW}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_pte_bits_w18528f50b9477178a61c7f8ca1c44e05.tex}}}}
 
-\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDDDupdateW}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDDDzupdatezyW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDDDzupdate_w3209efc3cdd41bbc0810494fad257f06.tex}}}}
+\newcommand{\sailRISCVoverloadZZZZZZZZZZZZZZupdateW}{\saildoclabelled{sailRISCVoverloadZZZZZZZZZZZZZZzupdatezyW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadZZZZZZZZZZZZZZzupdate_w3209efc3cdd41bbc0810494fad257f06.tex}}}}
 
-\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEEEModW}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEEEzzymodzyW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEEEz_mod_w196183ee717bdd84cd7d5e4b2af0b219.tex}}}}
+\newcommand{\sailRISCVoverloadAAAAAAAAAAAAAAAModW}{\saildoclabelled{sailRISCVoverloadAAAAAAAAAAAAAAAzzymodzyW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadAAAAAAAAAAAAAAAz_mod_w196183ee717bdd84cd7d5e4b2af0b219.tex}}}}
 
 \newcommand{\sailRISCVvalGetPTEBitsR}{\saildoclabelled{sailRISCVzzygetzyPTEzyBitszyR}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_pte_bits_r3a52c7a77cb754fb6a6eb55405de30cd.tex}}}}
 
@@ -5919,9 +5912,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdatePTEBitsR}{\saildoclabelled{sailRISCVfnzzyupdatezyPTEzyBitszyR}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_pte_bits_r320dc9e678d3a436f17fb038197c377c.tex}}}}
 
-\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFFFupdateR}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFFFzupdatezyR}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFFFzupdate_ree87191d8946f350c6ec7e0b7d1dc14b.tex}}}}
+\newcommand{\sailRISCVoverloadBBBBBBBBBBBBBBBupdateR}{\saildoclabelled{sailRISCVoverloadBBBBBBBBBBBBBBBzupdatezyR}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadBBBBBBBBBBBBBBBzupdate_ree87191d8946f350c6ec7e0b7d1dc14b.tex}}}}
 
-\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGGGModR}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGGGzzymodzyR}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGGGz_mod_r2cb5b1200e8617fc71d89b8d03167318.tex}}}}
+\newcommand{\sailRISCVoverloadCCCCCCCCCCCCCCCModR}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCCCzzymodzyR}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCCCz_mod_r2cb5b1200e8617fc71d89b8d03167318.tex}}}}
 
 \newcommand{\sailRISCVvalGetPTEBitsV}{\saildoclabelled{sailRISCVzzygetzyPTEzyBitszyV}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_pte_bits_vb582fda618233a0ee7948c90600227f6.tex}}}}
 
@@ -5935,9 +5928,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdatePTEBitsV}{\saildoclabelled{sailRISCVfnzzyupdatezyPTEzyBitszyV}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_pte_bits_vf1ed439c0a93204c0e278d68fd72351c.tex}}}}
 
-\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHHHupdateV}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHHHzupdatezyV}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHHHzupdate_v550d76e01b2aee2bcdcdd8fcb788e6ae.tex}}}}
+\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDDDupdateV}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDDDzupdatezyV}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDDDzupdate_v550d76e01b2aee2bcdcdd8fcb788e6ae.tex}}}}
 
-\newcommand{\sailRISCVoverloadIIIIIIIIIIIIIIIModV}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIIIzzymodzyV}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIIIz_mod_v136fe7ecc31e11f2521faa02b71b57fa.tex}}}}
+\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEEEModV}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEEEzzymodzyV}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEEEz_mod_v136fe7ecc31e11f2521faa02b71b57fa.tex}}}}
 
 \newcommand{\sailRISCVtypeextPte}{\saildoclabelled{sailRISCVtypezextPte}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezextpte08291a23c157d4bccbd0a79786be8e37.tex}}}}
 
@@ -5959,9 +5952,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateExtPTEBitsBits}{\saildoclabelled{sailRISCVfnzzyupdatezyExtzyPTEzyBitszybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ext_pte_bits_bits5b635310b9455d491454822f0311285b.tex}}}}
 
-\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJJJupdateBits}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJJJzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJJJzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFFFupdateBits}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFFFzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFFFzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKKKModBits}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKKKzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKKKz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGGGModBits}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGGGzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGGGz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetExtPTEBitsCapWrite}{\saildoclabelled{sailRISCVzzygetzyExtzyPTEzyBitszyCapWrite}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_ext_pte_bits_capwrite0baac5a6f85e40fbdac28ee04067e65c.tex}}}}
 
@@ -5975,9 +5968,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateExtPTEBitsCapWrite}{\saildoclabelled{sailRISCVfnzzyupdatezyExtzyPTEzyBitszyCapWrite}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ext_pte_bits_capwritedcd59d2d59ab5341029d35f94ab8d27f.tex}}}}
 
-\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLLLupdateCapWrite}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLLLzupdatezyCapWrite}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLLLzupdate_capwritec85de060c1310bedb36952771a329406.tex}}}}
+\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHHHupdateCapWrite}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHHHzupdatezyCapWrite}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHHHzupdate_capwritec85de060c1310bedb36952771a329406.tex}}}}
 
-\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMMMModCapWrite}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMMMzzymodzyCapWrite}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMMMz_mod_capwritee4dbda0d648b2ccd05f17d2dddd34537.tex}}}}
+\newcommand{\sailRISCVoverloadIIIIIIIIIIIIIIIModCapWrite}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIIIzzymodzyCapWrite}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIIIz_mod_capwritee4dbda0d648b2ccd05f17d2dddd34537.tex}}}}
 
 \newcommand{\sailRISCVvalGetExtPTEBitsCapRead}{\saildoclabelled{sailRISCVzzygetzyExtzyPTEzyBitszyCapRead}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_ext_pte_bits_capread333ce4aba2e72cd3f2c792b515f6703a.tex}}}}
 
@@ -5991,9 +5984,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateExtPTEBitsCapRead}{\saildoclabelled{sailRISCVfnzzyupdatezyExtzyPTEzyBitszyCapRead}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_ext_pte_bits_capreadb593f0e07fbd2201e626b373cddf00e2.tex}}}}
 
-\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNNNupdateCapRead}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNNNzupdatezyCapRead}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNNNzupdate_capread56ae6dad86051d18043217916904fc13.tex}}}}
+\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJJJupdateCapRead}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJJJzupdatezyCapRead}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJJJzupdate_capread56ae6dad86051d18043217916904fc13.tex}}}}
 
-\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOOOModCapRead}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOOOzzymodzyCapRead}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOOOz_mod_capread786e2e18dc372ac62966150177d60d05.tex}}}}
+\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKKKModCapRead}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKKKzzymodzyCapRead}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKKKz_mod_capread786e2e18dc372ac62966150177d60d05.tex}}}}
 
 \newcommand{\sailRISCVvalisPTEPtr}{\saildoclabelled{sailRISCVzisPTEPtr}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzispteptrba43877f6dc42c078f937aa41c879446.tex}}}}
 
@@ -6019,7 +6012,7 @@ in cap cause).
 
 \newcommand{\sailRISCVfnptwErrorToStr}{\saildoclabelled{sailRISCVfnzptwzyerrorzytozystr}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzptw_error_to_stra1d14633b5815718af0734f3fe6896fb.tex}}}}
 
-\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPPPtoStr}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPPPztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPPPzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
+\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLLLtoStr}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLLLztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLLLzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
 
 \newcommand{\sailRISCVvalextGetPtwError}{\saildoclabelled{sailRISCVzextzygetzyptwzyerror}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzext_get_ptw_errorb38503fe4519ddae4ed13f9933d3c0a5.tex}}}}
 
@@ -6063,9 +6056,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoVaddrBits}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyVaddrzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_vaddr_bitsc681e87f3f4d859da7fee6d71d8b62c6.tex}}}}
 
-\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQQQupdateBits}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQQQzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQQQzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMMMupdateBits}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMMMzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMMMzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRRRModBits}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRRRzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRRRz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNNNModBits}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNNNzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNNNz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeTwoVaddrVPNi}{\saildoclabelled{sailRISCVzzygetzySV32zyVaddrzyVPNi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv32_vaddr_vpniab523206431fb7d5db154d45287e96ba.tex}}}}
 
@@ -6079,9 +6072,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoVaddrVPNi}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyVaddrzyVPNi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_vaddr_vpnif3d232fd203d42def1af1b10dd8639df.tex}}}}
 
-\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSSSupdateVPNi}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSSSzupdatezyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSSSzupdate_vpni561962844c1733722e96cd548b134172.tex}}}}
+\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOOOupdateVPNi}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOOOzupdatezyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOOOzupdate_vpni561962844c1733722e96cd548b134172.tex}}}}
 
-\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTTTModVPNi}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTTTzzymodzyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTTTz_mod_vpni3dea7adc47f37ae733dae17ca8f9a4fe.tex}}}}
+\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPPPModVPNi}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPPPzzymodzyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPPPz_mod_vpni3dea7adc47f37ae733dae17ca8f9a4fe.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeTwoVaddrPgOfs}{\saildoclabelled{sailRISCVzzygetzySV32zyVaddrzyPgOfs}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv32_vaddr_pgofsdbfd9837672881608e9b05eff50b2e99.tex}}}}
 
@@ -6095,9 +6088,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoVaddrPgOfs}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyVaddrzyPgOfs}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_vaddr_pgofs4d5270a8a6277991b4da2a32d070beba.tex}}}}
 
-\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUUUupdatePgOfs}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUUUzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUUUzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
+\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQQQupdatePgOfs}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQQQzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQQQzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
 
-\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVVVModPgOfs}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVVVzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVVVz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
+\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRRRModPgOfs}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRRRzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRRRz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
 
 \newcommand{\sailRISCVtypeSVThreeTwoPaddr}{\saildoclabelled{sailRISCVtypezSV32zyPaddr}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezsv32_paddr9f5cfa9b0e96f55368dd46c5e00148a5.tex}}}}
 
@@ -6117,9 +6110,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoPaddrBits}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyPaddrzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_paddr_bits471b1f564b9f112d8202c1386e4a2c40.tex}}}}
 
-\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWWWupdateBits}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWWWzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWWWzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSSSupdateBits}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSSSzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSSSzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXXXModBits}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXXXzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXXXz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTTTModBits}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTTTzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTTTz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeTwoPaddrPPNi}{\saildoclabelled{sailRISCVzzygetzySV32zyPaddrzyPPNi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv32_paddr_ppni1504c6497d4791cfe4234a5cc0365252.tex}}}}
 
@@ -6133,9 +6126,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoPaddrPPNi}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyPaddrzyPPNi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_paddr_ppnic2e893ade647c24a430ebfdfc1376233.tex}}}}
 
-\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYYYupdatePPNi}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYYYzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYYYzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
+\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUUUupdatePPNi}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUUUzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUUUzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
 
-\newcommand{\sailRISCVoverloadZZZZZZZZZZZZZZZModPPNi}{\saildoclabelled{sailRISCVoverloadZZZZZZZZZZZZZZZzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadZZZZZZZZZZZZZZZz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
+\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVVVModPPNi}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVVVzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVVVz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeTwoPaddrPgOfs}{\saildoclabelled{sailRISCVzzygetzySV32zyPaddrzyPgOfs}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv32_paddr_pgofs835ba010b40a7fd02d4a61e2ab2de4b4.tex}}}}
 
@@ -6149,9 +6142,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoPaddrPgOfs}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyPaddrzyPgOfs}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_paddr_pgofsece69bfc0ddb3bbee82163605c655cd8.tex}}}}
 
-\newcommand{\sailRISCVoverloadAAAAAAAAAAAAAAAAupdatePgOfs}{\saildoclabelled{sailRISCVoverloadAAAAAAAAAAAAAAAAzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadAAAAAAAAAAAAAAAAzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
+\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWWWupdatePgOfs}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWWWzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWWWzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
 
-\newcommand{\sailRISCVoverloadBBBBBBBBBBBBBBBBModPgOfs}{\saildoclabelled{sailRISCVoverloadBBBBBBBBBBBBBBBBzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadBBBBBBBBBBBBBBBBz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
+\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXXXModPgOfs}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXXXzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXXXz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
 
 \newcommand{\sailRISCVtypeSVThreeTwoPTE}{\saildoclabelled{sailRISCVtypezSV32zyPTE}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezsv32_pte054d26e26929f0189a30c1313f7f54e1.tex}}}}
 
@@ -6171,9 +6164,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoPTEBits}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyPTEzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_pte_bits6ed5ef3d3bdb39782740d15add28a8ca.tex}}}}
 
-\newcommand{\sailRISCVoverloadCCCCCCCCCCCCCCCCupdateBits}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCCCCzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCCCCzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYYYupdateBits}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYYYzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYYYzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDDDDModBits}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDDDDzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDDDDz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadZZZZZZZZZZZZZZZModBits}{\saildoclabelled{sailRISCVoverloadZZZZZZZZZZZZZZZzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadZZZZZZZZZZZZZZZz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeTwoPTEPPNi}{\saildoclabelled{sailRISCVzzygetzySV32zyPTEzyPPNi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv32_pte_ppni0d6471170f5c73c025591b74f4c1fe5e.tex}}}}
 
@@ -6187,9 +6180,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoPTEPPNi}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyPTEzyPPNi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_pte_ppni21f940c0d0da732c90fb464f03b30e8e.tex}}}}
 
-\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEEEEupdatePPNi}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEEEEzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEEEEzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
+\newcommand{\sailRISCVoverloadAAAAAAAAAAAAAAAAupdatePPNi}{\saildoclabelled{sailRISCVoverloadAAAAAAAAAAAAAAAAzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadAAAAAAAAAAAAAAAAzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
 
-\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFFFFModPPNi}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFFFFzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFFFFz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
+\newcommand{\sailRISCVoverloadBBBBBBBBBBBBBBBBModPPNi}{\saildoclabelled{sailRISCVoverloadBBBBBBBBBBBBBBBBzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadBBBBBBBBBBBBBBBBz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeTwoPTERSW}{\saildoclabelled{sailRISCVzzygetzySV32zyPTEzyRSW}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv32_pte_rswe20144b93e162ff3dff60d8ea711bcfe.tex}}}}
 
@@ -6203,9 +6196,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoPTERSW}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyPTEzyRSW}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_pte_rsw2127473fcefd5043f7339af205217e28.tex}}}}
 
-\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGGGGupdateRSW}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGGGGzupdatezyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGGGGzupdate_rsw7e773e2fdd93d70f9490f8401b97d4e9.tex}}}}
+\newcommand{\sailRISCVoverloadCCCCCCCCCCCCCCCCupdateRSW}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCCCCzupdatezyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCCCCzupdate_rsw7e773e2fdd93d70f9490f8401b97d4e9.tex}}}}
 
-\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHHHHModRSW}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHHHHzzymodzyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHHHHz_mod_rswf4989a734cfde890cb5a1c8d3b4e6798.tex}}}}
+\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDDDDModRSW}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDDDDzzymodzyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDDDDz_mod_rswf4989a734cfde890cb5a1c8d3b4e6798.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeTwoPTEBITS}{\saildoclabelled{sailRISCVzzygetzySV32zyPTEzyBITS}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv32_pte_bitse339fd2b2bd11b8fd6c71664018dafca.tex}}}}
 
@@ -6219,9 +6212,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeTwoPTEBITS}{\saildoclabelled{sailRISCVfnzzyupdatezySV32zyPTEzyBITS}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv32_pte_bits55ab6942a6f92e27c0aaaffec4bc5b75.tex}}}}
 
-\newcommand{\sailRISCVoverloadIIIIIIIIIIIIIIIIupdateBITS}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIIIIzupdatezyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIIIIzupdate_bits5a3f6688b4b8427544fc33354e84149f.tex}}}}
+\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEEEEupdateBITS}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEEEEzupdatezyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEEEEzupdate_bits5a3f6688b4b8427544fc33354e84149f.tex}}}}
 
-\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJJJJModBITS}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJJJJzzymodzyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJJJJz_mod_bits60455a5b4231baf7b82d860f6efc2682.tex}}}}
+\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFFFFModBITS}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFFFFzzymodzyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFFFFz_mod_bits60455a5b4231baf7b82d860f6efc2682.tex}}}}
 
 \newcommand{\sailRISCVtypepaddrSixFour}{\saildoclabelled{sailRISCVtypezpaddr64}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezpaddr64f58cecb2121bad03c9e64da6cd15339b.tex}}}}
 
@@ -6257,9 +6250,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNineVaddrBits}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyVaddrzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_vaddr_bits9b5c877641996c39232fdaa69695b175.tex}}}}
 
-\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKKKKupdateBits}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKKKKzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKKKKzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGGGGupdateBits}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGGGGzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGGGGzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLLLLModBits}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLLLLzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLLLLz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHHHHModBits}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHHHHzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHHHHz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeNineVaddrVPNi}{\saildoclabelled{sailRISCVzzygetzySV39zyVaddrzyVPNi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv39_vaddr_vpni21781895f7de6beeab4c3b9429948ba9.tex}}}}
 
@@ -6273,9 +6266,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNineVaddrVPNi}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyVaddrzyVPNi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_vaddr_vpnibc20f5f41da77bf31c390df8cd865198.tex}}}}
 
-\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMMMMupdateVPNi}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMMMMzupdatezyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMMMMzupdate_vpni561962844c1733722e96cd548b134172.tex}}}}
+\newcommand{\sailRISCVoverloadIIIIIIIIIIIIIIIIupdateVPNi}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIIIIzupdatezyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIIIIzupdate_vpni561962844c1733722e96cd548b134172.tex}}}}
 
-\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNNNNModVPNi}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNNNNzzymodzyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNNNNz_mod_vpni3dea7adc47f37ae733dae17ca8f9a4fe.tex}}}}
+\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJJJJModVPNi}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJJJJzzymodzyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJJJJz_mod_vpni3dea7adc47f37ae733dae17ca8f9a4fe.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeNineVaddrPgOfs}{\saildoclabelled{sailRISCVzzygetzySV39zyVaddrzyPgOfs}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv39_vaddr_pgofs4e8b61f46949b7eec961a817eeb9caf2.tex}}}}
 
@@ -6289,9 +6282,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNineVaddrPgOfs}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyVaddrzyPgOfs}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_vaddr_pgofs2203553b5bf9afd58276a7958197b4c6.tex}}}}
 
-\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOOOOupdatePgOfs}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOOOOzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOOOOzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
+\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKKKKupdatePgOfs}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKKKKzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKKKKzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
 
-\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPPPPModPgOfs}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPPPPzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPPPPz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
+\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLLLLModPgOfs}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLLLLzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLLLLz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
 
 \newcommand{\sailRISCVtypeSVThreeNinePaddr}{\saildoclabelled{sailRISCVtypezSV39zyPaddr}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezsv39_paddr8e7ac2ddc4a718336a4f3894cdd91edd.tex}}}}
 
@@ -6311,9 +6304,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNinePaddrBits}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyPaddrzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_paddr_bits95d51c315963bb06758677d399020d4c.tex}}}}
 
-\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQQQQupdateBits}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQQQQzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQQQQzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMMMMupdateBits}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMMMMzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMMMMzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRRRRModBits}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRRRRzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRRRRz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNNNNModBits}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNNNNzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNNNNz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeNinePaddrPPNi}{\saildoclabelled{sailRISCVzzygetzySV39zyPaddrzyPPNi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv39_paddr_ppnie78045a960397b424c97285aca9dd29b.tex}}}}
 
@@ -6327,9 +6320,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNinePaddrPPNi}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyPaddrzyPPNi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_paddr_ppni64a04f2f491820010df9118b96fe3bb1.tex}}}}
 
-\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSSSSupdatePPNi}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSSSSzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSSSSzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
+\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOOOOupdatePPNi}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOOOOzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOOOOzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
 
-\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTTTTModPPNi}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTTTTzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTTTTz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
+\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPPPPModPPNi}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPPPPzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPPPPz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeNinePaddrPgOfs}{\saildoclabelled{sailRISCVzzygetzySV39zyPaddrzyPgOfs}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv39_paddr_pgofsb92f2e38ca030595309ba60289cfc67e.tex}}}}
 
@@ -6343,9 +6336,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNinePaddrPgOfs}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyPaddrzyPgOfs}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_paddr_pgofs92e3fd4a4ef641b9bd4695bcb4e6865d.tex}}}}
 
-\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUUUUupdatePgOfs}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUUUUzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUUUUzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
+\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQQQQupdatePgOfs}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQQQQzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQQQQzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
 
-\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVVVVModPgOfs}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVVVVzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVVVVz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
+\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRRRRModPgOfs}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRRRRzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRRRRz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
 
 \newcommand{\sailRISCVtypeSVThreeNinePTE}{\saildoclabelled{sailRISCVtypezSV39zyPTE}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezsv39_ptea9e6dd73ae92b5be63b2a7edb5ccc8a3.tex}}}}
 
@@ -6365,9 +6358,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNinePTEBits}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyPTEzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_pte_bitsf70d63d10d4409523d5b20cddef1d791.tex}}}}
 
-\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWWWWupdateBits}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWWWWzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWWWWzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSSSSupdateBits}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSSSSzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSSSSzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXXXXModBits}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXXXXzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXXXXz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTTTTModBits}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTTTTzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTTTTz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeNinePTEExt}{\saildoclabelled{sailRISCVzzygetzySV39zyPTEzyExt}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv39_pte_ext400fef25828eab6cdcb38e7e7fd21c72.tex}}}}
 
@@ -6381,9 +6374,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNinePTEExt}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyPTEzyExt}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_pte_ext7389da76692695bdeeaa0a6612d2ddf3.tex}}}}
 
-\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYYYYupdateExt}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYYYYzupdatezyExt}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYYYYzupdate_ext4723b679799a58fbdda2ba5058faef53.tex}}}}
+\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUUUUupdateExt}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUUUUzupdatezyExt}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUUUUzupdate_ext4723b679799a58fbdda2ba5058faef53.tex}}}}
 
-\newcommand{\sailRISCVoverloadZZZZZZZZZZZZZZZZModExt}{\saildoclabelled{sailRISCVoverloadZZZZZZZZZZZZZZZZzzymodzyExt}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadZZZZZZZZZZZZZZZZz_mod_extee31bbe7b534e72c2dacd0c25ba837ba.tex}}}}
+\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVVVVModExt}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVVVVzzymodzyExt}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVVVVz_mod_extee31bbe7b534e72c2dacd0c25ba837ba.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeNinePTEPPNi}{\saildoclabelled{sailRISCVzzygetzySV39zyPTEzyPPNi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv39_pte_ppni426489f4764a5d0ade3e9346a0b394c7.tex}}}}
 
@@ -6397,9 +6390,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNinePTEPPNi}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyPTEzyPPNi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_pte_ppni4bb75edea91e119f5e4b777a201ca7de.tex}}}}
 
-\newcommand{\sailRISCVoverloadAAAAAAAAAAAAAAAAAupdatePPNi}{\saildoclabelled{sailRISCVoverloadAAAAAAAAAAAAAAAAAzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadAAAAAAAAAAAAAAAAAzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
+\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWWWWupdatePPNi}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWWWWzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWWWWzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
 
-\newcommand{\sailRISCVoverloadBBBBBBBBBBBBBBBBBModPPNi}{\saildoclabelled{sailRISCVoverloadBBBBBBBBBBBBBBBBBzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadBBBBBBBBBBBBBBBBBz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
+\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXXXXModPPNi}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXXXXzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXXXXz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeNinePTERSW}{\saildoclabelled{sailRISCVzzygetzySV39zyPTEzyRSW}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv39_pte_rswb7f6ce3a77a6a7a556a5530cded759fa.tex}}}}
 
@@ -6413,9 +6406,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNinePTERSW}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyPTEzyRSW}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_pte_rsw7d745d7147024b1db9a0ab778ae3aa90.tex}}}}
 
-\newcommand{\sailRISCVoverloadCCCCCCCCCCCCCCCCCupdateRSW}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCCCCCzupdatezyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCCCCCzupdate_rsw7e773e2fdd93d70f9490f8401b97d4e9.tex}}}}
+\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYYYYupdateRSW}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYYYYzupdatezyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYYYYzupdate_rsw7e773e2fdd93d70f9490f8401b97d4e9.tex}}}}
 
-\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDDDDDModRSW}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDDDDDzzymodzyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDDDDDz_mod_rswf4989a734cfde890cb5a1c8d3b4e6798.tex}}}}
+\newcommand{\sailRISCVoverloadZZZZZZZZZZZZZZZZModRSW}{\saildoclabelled{sailRISCVoverloadZZZZZZZZZZZZZZZZzzymodzyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadZZZZZZZZZZZZZZZZz_mod_rswf4989a734cfde890cb5a1c8d3b4e6798.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVThreeNinePTEBITS}{\saildoclabelled{sailRISCVzzygetzySV39zyPTEzyBITS}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv39_pte_bits2894d61e8f7557590f0240a44dc9dca4.tex}}}}
 
@@ -6429,9 +6422,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVThreeNinePTEBITS}{\saildoclabelled{sailRISCVfnzzyupdatezySV39zyPTEzyBITS}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv39_pte_bits3f8498b470f391c57cca777dadcbfb2e.tex}}}}
 
-\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEEEEEupdateBITS}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEEEEEzupdatezyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEEEEEzupdate_bits5a3f6688b4b8427544fc33354e84149f.tex}}}}
+\newcommand{\sailRISCVoverloadAAAAAAAAAAAAAAAAAupdateBITS}{\saildoclabelled{sailRISCVoverloadAAAAAAAAAAAAAAAAAzupdatezyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadAAAAAAAAAAAAAAAAAzupdate_bits5a3f6688b4b8427544fc33354e84149f.tex}}}}
 
-\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFFFFFModBITS}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFFFFFzzymodzyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFFFFFz_mod_bits60455a5b4231baf7b82d860f6efc2682.tex}}}}
+\newcommand{\sailRISCVoverloadBBBBBBBBBBBBBBBBBModBITS}{\saildoclabelled{sailRISCVoverloadBBBBBBBBBBBBBBBBBzzymodzyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadBBBBBBBBBBBBBBBBBz_mod_bits60455a5b4231baf7b82d860f6efc2682.tex}}}}
 
 \newcommand{\sailRISCVtypevaddrFourEight}{\saildoclabelled{sailRISCVtypezvaddr48}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezvaddr4805a60a23d20e81c5ff9e6a5609aea22f.tex}}}}
 
@@ -6455,9 +6448,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightVaddrBits}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyVaddrzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_vaddr_bits591ffccf87e6224a472977f7dbf4b171.tex}}}}
 
-\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGGGGGupdateBits}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGGGGGzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGGGGGzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadCCCCCCCCCCCCCCCCCupdateBits}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCCCCCzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCCCCCzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHHHHHModBits}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHHHHHzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHHHHHz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadDDDDDDDDDDDDDDDDDModBits}{\saildoclabelled{sailRISCVoverloadDDDDDDDDDDDDDDDDDzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadDDDDDDDDDDDDDDDDDz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVFourEightVaddrVPNi}{\saildoclabelled{sailRISCVzzygetzySV48zyVaddrzyVPNi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv48_vaddr_vpnibe8fbceb3423612d8be18c52f74da3d9.tex}}}}
 
@@ -6471,9 +6464,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightVaddrVPNi}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyVaddrzyVPNi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_vaddr_vpni9035d832e2b055cf87646fbf4511fccb.tex}}}}
 
-\newcommand{\sailRISCVoverloadIIIIIIIIIIIIIIIIIupdateVPNi}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIIIIIzupdatezyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIIIIIzupdate_vpni561962844c1733722e96cd548b134172.tex}}}}
+\newcommand{\sailRISCVoverloadEEEEEEEEEEEEEEEEEupdateVPNi}{\saildoclabelled{sailRISCVoverloadEEEEEEEEEEEEEEEEEzupdatezyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEEEEEEEEEEEEEEEzupdate_vpni561962844c1733722e96cd548b134172.tex}}}}
 
-\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJJJJJModVPNi}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJJJJJzzymodzyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJJJJJz_mod_vpni3dea7adc47f37ae733dae17ca8f9a4fe.tex}}}}
+\newcommand{\sailRISCVoverloadFFFFFFFFFFFFFFFFFModVPNi}{\saildoclabelled{sailRISCVoverloadFFFFFFFFFFFFFFFFFzzymodzyVPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadFFFFFFFFFFFFFFFFFz_mod_vpni3dea7adc47f37ae733dae17ca8f9a4fe.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVFourEightVaddrPgOfs}{\saildoclabelled{sailRISCVzzygetzySV48zyVaddrzyPgOfs}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv48_vaddr_pgofsb1f1b723984e85436ebf972d3c0794b0.tex}}}}
 
@@ -6487,9 +6480,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightVaddrPgOfs}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyVaddrzyPgOfs}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_vaddr_pgofs474bdc293738ab8c86555518304df3b0.tex}}}}
 
-\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKKKKKupdatePgOfs}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKKKKKzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKKKKKzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
+\newcommand{\sailRISCVoverloadGGGGGGGGGGGGGGGGGupdatePgOfs}{\saildoclabelled{sailRISCVoverloadGGGGGGGGGGGGGGGGGzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadGGGGGGGGGGGGGGGGGzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
 
-\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLLLLLModPgOfs}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLLLLLzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLLLLLz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
+\newcommand{\sailRISCVoverloadHHHHHHHHHHHHHHHHHModPgOfs}{\saildoclabelled{sailRISCVoverloadHHHHHHHHHHHHHHHHHzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadHHHHHHHHHHHHHHHHHz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
 
 \newcommand{\sailRISCVtypeSVFourEightPaddr}{\saildoclabelled{sailRISCVtypezSV48zyPaddr}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezsv48_paddrb31db8c73707db172008fed5607c9247.tex}}}}
 
@@ -6509,9 +6502,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightPaddrBits}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyPaddrzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_paddr_bitsd392e84dd67a8ca48490ef502cca7bd9.tex}}}}
 
-\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMMMMMupdateBits}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMMMMMzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMMMMMzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadIIIIIIIIIIIIIIIIIupdateBits}{\saildoclabelled{sailRISCVoverloadIIIIIIIIIIIIIIIIIzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadIIIIIIIIIIIIIIIIIzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNNNNNModBits}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNNNNNzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNNNNNz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadJJJJJJJJJJJJJJJJJModBits}{\saildoclabelled{sailRISCVoverloadJJJJJJJJJJJJJJJJJzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadJJJJJJJJJJJJJJJJJz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVFourEightPaddrPPNi}{\saildoclabelled{sailRISCVzzygetzySV48zyPaddrzyPPNi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv48_paddr_ppni9c768f41f1a5703418c459280b46b7c6.tex}}}}
 
@@ -6525,9 +6518,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightPaddrPPNi}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyPaddrzyPPNi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_paddr_ppni3e4b50484e79dc7761373bc124441fd0.tex}}}}
 
-\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOOOOOupdatePPNi}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOOOOOzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOOOOOzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
+\newcommand{\sailRISCVoverloadKKKKKKKKKKKKKKKKKupdatePPNi}{\saildoclabelled{sailRISCVoverloadKKKKKKKKKKKKKKKKKzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKKKKKKKKKKKKKKKKzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
 
-\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPPPPPModPPNi}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPPPPPzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPPPPPz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
+\newcommand{\sailRISCVoverloadLLLLLLLLLLLLLLLLLModPPNi}{\saildoclabelled{sailRISCVoverloadLLLLLLLLLLLLLLLLLzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadLLLLLLLLLLLLLLLLLz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVFourEightPaddrPgOfs}{\saildoclabelled{sailRISCVzzygetzySV48zyPaddrzyPgOfs}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv48_paddr_pgofs7fbf559e6e9712930b86b30c8364e938.tex}}}}
 
@@ -6541,9 +6534,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightPaddrPgOfs}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyPaddrzyPgOfs}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_paddr_pgofsd71fa33c7b6f3543d0d9b5dc2d8380f5.tex}}}}
 
-\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQQQQQupdatePgOfs}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQQQQQzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQQQQQzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
+\newcommand{\sailRISCVoverloadMMMMMMMMMMMMMMMMMupdatePgOfs}{\saildoclabelled{sailRISCVoverloadMMMMMMMMMMMMMMMMMzupdatezyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadMMMMMMMMMMMMMMMMMzupdate_pgofs254c91319ab1d3e50b8917244b8212b1.tex}}}}
 
-\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRRRRRModPgOfs}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRRRRRzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRRRRRz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
+\newcommand{\sailRISCVoverloadNNNNNNNNNNNNNNNNNModPgOfs}{\saildoclabelled{sailRISCVoverloadNNNNNNNNNNNNNNNNNzzymodzyPgOfs}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadNNNNNNNNNNNNNNNNNz_mod_pgofs8292bb5b3acdf7a2cf33be55fc8c35fc.tex}}}}
 
 \newcommand{\sailRISCVtypeSVFourEightPTE}{\saildoclabelled{sailRISCVtypezSV48zyPTE}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezsv48_pte3a2f757f22affd3d18dd7c046956b713.tex}}}}
 
@@ -6563,9 +6556,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightPTEBits}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyPTEzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_pte_bits0a6df26df13de159300f6127a4b286db.tex}}}}
 
-\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSSSSSupdateBits}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSSSSSzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSSSSSzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
+\newcommand{\sailRISCVoverloadOOOOOOOOOOOOOOOOOupdateBits}{\saildoclabelled{sailRISCVoverloadOOOOOOOOOOOOOOOOOzupdatezybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadOOOOOOOOOOOOOOOOOzupdate_bits2be2fea5efbb571e15941b4fd6a2d080.tex}}}}
 
-\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTTTTTModBits}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTTTTTzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTTTTTz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
+\newcommand{\sailRISCVoverloadPPPPPPPPPPPPPPPPPModBits}{\saildoclabelled{sailRISCVoverloadPPPPPPPPPPPPPPPPPzzymodzybits}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadPPPPPPPPPPPPPPPPPz_mod_bits34655d348b672c050c646beeecebb43d.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVFourEightPTEExt}{\saildoclabelled{sailRISCVzzygetzySV48zyPTEzyExt}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv48_pte_ext9e4ca3d27e7c17dad6458361686784bb.tex}}}}
 
@@ -6579,9 +6572,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightPTEExt}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyPTEzyExt}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_pte_ext35aecfa61e536a6e82b25c27b17d2b27.tex}}}}
 
-\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUUUUUupdateExt}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUUUUUzupdatezyExt}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUUUUUzupdate_ext4723b679799a58fbdda2ba5058faef53.tex}}}}
+\newcommand{\sailRISCVoverloadQQQQQQQQQQQQQQQQQupdateExt}{\saildoclabelled{sailRISCVoverloadQQQQQQQQQQQQQQQQQzupdatezyExt}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadQQQQQQQQQQQQQQQQQzupdate_ext4723b679799a58fbdda2ba5058faef53.tex}}}}
 
-\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVVVVVModExt}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVVVVVzzymodzyExt}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVVVVVz_mod_extee31bbe7b534e72c2dacd0c25ba837ba.tex}}}}
+\newcommand{\sailRISCVoverloadRRRRRRRRRRRRRRRRRModExt}{\saildoclabelled{sailRISCVoverloadRRRRRRRRRRRRRRRRRzzymodzyExt}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadRRRRRRRRRRRRRRRRRz_mod_extee31bbe7b534e72c2dacd0c25ba837ba.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVFourEightPTEPPNi}{\saildoclabelled{sailRISCVzzygetzySV48zyPTEzyPPNi}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv48_pte_ppni308a2407b318a165e64cac46fe1d2d0b.tex}}}}
 
@@ -6595,9 +6588,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightPTEPPNi}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyPTEzyPPNi}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_pte_ppni151ef3d95182ce7f10853d377fa591b3.tex}}}}
 
-\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWWWWWupdatePPNi}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWWWWWzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWWWWWzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
+\newcommand{\sailRISCVoverloadSSSSSSSSSSSSSSSSSupdatePPNi}{\saildoclabelled{sailRISCVoverloadSSSSSSSSSSSSSSSSSzupdatezyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadSSSSSSSSSSSSSSSSSzupdate_ppnidfbfd9e0d78d5c191808ac3733f67562.tex}}}}
 
-\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXXXXXModPPNi}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXXXXXzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXXXXXz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
+\newcommand{\sailRISCVoverloadTTTTTTTTTTTTTTTTTModPPNi}{\saildoclabelled{sailRISCVoverloadTTTTTTTTTTTTTTTTTzzymodzyPPNi}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadTTTTTTTTTTTTTTTTTz_mod_ppnia961e365785da7376cd7bdac208fd0ad.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVFourEightPTERSW}{\saildoclabelled{sailRISCVzzygetzySV48zyPTEzyRSW}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv48_pte_rsw44e860cbd993f79b4ea9ef51b7de8885.tex}}}}
 
@@ -6611,9 +6604,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightPTERSW}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyPTEzyRSW}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_pte_rsw6c601ebf0d644b711cbbe304a5538b5e.tex}}}}
 
-\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYYYYYupdateRSW}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYYYYYzupdatezyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYYYYYzupdate_rsw7e773e2fdd93d70f9490f8401b97d4e9.tex}}}}
+\newcommand{\sailRISCVoverloadUUUUUUUUUUUUUUUUUupdateRSW}{\saildoclabelled{sailRISCVoverloadUUUUUUUUUUUUUUUUUzupdatezyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUUUUUUUUUUUUUUUzupdate_rsw7e773e2fdd93d70f9490f8401b97d4e9.tex}}}}
 
-\newcommand{\sailRISCVoverloadZZZZZZZZZZZZZZZZZModRSW}{\saildoclabelled{sailRISCVoverloadZZZZZZZZZZZZZZZZZzzymodzyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadZZZZZZZZZZZZZZZZZz_mod_rswf4989a734cfde890cb5a1c8d3b4e6798.tex}}}}
+\newcommand{\sailRISCVoverloadVVVVVVVVVVVVVVVVVModRSW}{\saildoclabelled{sailRISCVoverloadVVVVVVVVVVVVVVVVVzzymodzyRSW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadVVVVVVVVVVVVVVVVVz_mod_rswf4989a734cfde890cb5a1c8d3b4e6798.tex}}}}
 
 \newcommand{\sailRISCVvalGetSVFourEightPTEBITS}{\saildoclabelled{sailRISCVzzygetzySV48zyPTEzyBITS}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valz_get_sv48_pte_bits3cedec2ea70a0849ea60d8d346d0f936.tex}}}}
 
@@ -6627,9 +6620,9 @@ in cap cause).
 
 \newcommand{\sailRISCVfnUpdateSVFourEightPTEBITS}{\saildoclabelled{sailRISCVfnzzyupdatezySV48zyPTEzyBITS}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnz_update_sv48_pte_bits5dd960679bb9cad63f93bb029f042c00.tex}}}}
 
-\newcommand{\sailRISCVoverloadAAAAAAAAAAAAAAAAAAupdateBITS}{\saildoclabelled{sailRISCVoverloadAAAAAAAAAAAAAAAAAAzupdatezyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadAAAAAAAAAAAAAAAAAAzupdate_bits5a3f6688b4b8427544fc33354e84149f.tex}}}}
+\newcommand{\sailRISCVoverloadWWWWWWWWWWWWWWWWWupdateBITS}{\saildoclabelled{sailRISCVoverloadWWWWWWWWWWWWWWWWWzupdatezyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadWWWWWWWWWWWWWWWWWzupdate_bits5a3f6688b4b8427544fc33354e84149f.tex}}}}
 
-\newcommand{\sailRISCVoverloadBBBBBBBBBBBBBBBBBBModBITS}{\saildoclabelled{sailRISCVoverloadBBBBBBBBBBBBBBBBBBzzymodzyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadBBBBBBBBBBBBBBBBBBz_mod_bits60455a5b4231baf7b82d860f6efc2682.tex}}}}
+\newcommand{\sailRISCVoverloadXXXXXXXXXXXXXXXXXModBITS}{\saildoclabelled{sailRISCVoverloadXXXXXXXXXXXXXXXXXzzymodzyBITS}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadXXXXXXXXXXXXXXXXXz_mod_bits60455a5b4231baf7b82d860f6efc2682.tex}}}}
 
 \newcommand{\sailRISCVtypePTWResult}{\saildoclabelled{sailRISCVtypezPTWzyResult}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezptw_result387dae5ea1a379e54bc31c478988b63d.tex}}}}
 
@@ -7325,6 +7318,48 @@ in cap cause).
 
 \newcommand{\sailRISCVfclFUnderscoreUNUnderscoreTYPEUnderscoreDBexecute}{\saildoclabelled{sailRISCVfclFUnderscoreUNUnderscoreTYPEUnderscoreDBzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclFUnderscoreUNUnderscoreTYPEUnderscoreDBzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
+\newcommand{\sailRISCVfclAUIPCCexecute}{\saildoclabelled{sailRISCVfclAUIPCCzexecute}{\saildocfcl{Capability register \emph{cd} is replaced with the contents of \textbf{PCC}, with the
+\textbf{address} replaced with \textbf{PCC}.\textbf{address} $+$ \emph{imm} $\times$ 4096.
+
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclAUIPCCzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCJALexecute}{\saildoclabelled{sailRISCVfclCJALzexecute}{\saildocfcl{Capability register \emph{cd} is replaced with the next instruction's \textbf{PCC} and
+sealed as a sentry. \textbf{PCC}.\textbf{address} is incremented by \emph{imm}.
+
+\subsection*{Exceptions}
+
+
+An exception is raised if:
+
+\begin{itemize}
+\item \textbf{PCC}.\textbf{address} $+$ \emph{imm} $\lt$ \textbf{PCC}.\textbf{base}.
+\item \textbf{PCC}.\textbf{address} $+$ \emph{imm} $+$ min\_instruction\_bytes $\gt$ \textbf{PCC}.\textbf{top}.
+\item \textbf{PCC}.\textbf{address} $+$ \emph{imm} is unaligned, ignoring bit 0.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCJALzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCJALRexecute}{\saildoclabelled{sailRISCVfclCJALRzexecute}{\saildocfcl{Capability register \emph{cd} is replaced with the next instruction's \textbf{PCC} and
+sealed as a sentry. \textbf{PCC} is replaced with the value of capability
+register \emph{cs1} with its \textbf{address} incremented by \emph{imm} and the 0th bit of
+its \textbf{address} set to 0, and is unsealed if it is a sentry.
+
+\subsection*{Exceptions}
+
+
+An exception is raised if:
+
+\begin{itemize}
+\item \emph{cs1}.\textbf{tag} is not set.
+\item \emph{cs1} is sealed and is not a sentry.
+\item \emph{cs1} is a sentry and \emph{imm} $\ne$ 0.
+\item \emph{cs1}.\textbf{perms} does not grant \textbf{Permit\_Execute}.
+\item \emph{cs1}.\textbf{address} $+$ \emph{imm} $\lt$ \emph{cs1}.\textbf{base}.
+\item \emph{cs1}.\textbf{address} $+$ \emph{imm} $+$ min\_instruction\_bytes $\gt$ \emph{cs1}.\textbf{top}.
+\item \emph{cs1}.\textbf{base} is unaligned.
+\item \emph{cs1}.\textbf{address} $+$ \emph{imm} is unaligned, ignoring bit 0.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCJALRzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
 \newcommand{\sailRISCVfclCGetPermexecute}{\saildoclabelled{sailRISCVfclCGetPermzexecute}{\saildocfcl{The least significant \hyperref[sailRISCVzcapzyhpermszywidth]{\lstinline{cap_hperms_width}} bits of integer register \emph{rd} are
 set equal to the \textbf{perms} field of capability register \emph{cs1}; bits
 \hyperref[sailRISCVzcapzyupermszyshift]{\lstinline{cap_uperms_shift}} to \hyperref[sailRISCVzcapzyupermszyshift]{\lstinline{cap_uperms_shift}}+\hyperref[sailRISCVzcapzyupermszywidth]{\lstinline{cap_uperms_width}}-1 of \emph{rd} are set
@@ -7454,7 +7489,7 @@ register \emph{rd} is set to 0, otherwise integer register \emph{rd} is set to
 An exception is raised if:
 
 \begin{itemize}
-\item \emph{cs2}.\textbf{tag} is unset.
+\item \emph{cs2}.\textbf{tag} is not set.
 \item \emph{cs1}.\textbf{tag} is set and \emph{cs1} is sealed.
 \end{itemize}
 
@@ -7508,10 +7543,11 @@ An exception is raised if:
 }{\lstinputlisting[language=sail]{sail_latex_riscv/fclCIncOffsetImmediatezexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
 \newcommand{\sailRISCVfclCSetOffsetexecute}{\saildoclabelled{sailRISCVfclCSetOffsetzexecute}{\saildocfcl{Capability register \emph{cd} is set equal to capability register \emph{cs1} with its
-\textbf{offset} replaced with \emph{cs1}.\textbf{offset} $+$ \emph{rs2}.
+\textbf{address} replaced with \emph{cs1}.\textbf{base} $+$ \emph{rs2}.
 If the resulting capability cannot be represented exactly, then \emph{cd}.\textbf{tag}
 is cleared. The remaining capability fields are set to what the in-memory
-representation of \emph{cs1} with the address set to \emph{cd}.\textbf{address} decodes to.
+representation of \emph{cs1} with the address set to \emph{cs1}.\textbf{base} $+$ \emph{rs2}
+decodes to.
 
 \subsection*{Exceptions}
 
@@ -7676,7 +7712,7 @@ remaining capability fields are set to what the in-memory representation of
 An exception is raised if:
 
 \begin{itemize}
-\item \emph{cs1}.\textbf{tag} is set.
+\item \emph{cs1}.\textbf{tag} is not set.
 \item \emph{cs1} is sealed.
 \end{itemize}
 }{\lstinputlisting[language=sail]{sail_latex_riscv/fclCFromPtrzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
@@ -7800,7 +7836,7 @@ An exception is raised if:
 \item \emph{cs2}.\textbf{perms} does not grant \textbf{Permit\_Seal}.
 \item \emph{cs2}.\textbf{address} $\lt$ \emph{cs2}.\textbf{base}.
 \item \emph{cs2}.\textbf{address} $\ge$ \emph{cs2}.\textbf{top}.
-\item \emph{cs2}.\textbf{address} $\gt$ \hyperref[sailRISCVzmaxzyotype]{\lstinline{max_otype}}.
+\item \emph{cs2}.\textbf{address} $\gt$ \hyperref[sailRISCVzcapzymaxzyotype]{\lstinline{cap_max_otype}}.
 \end{itemize}
 }{\lstinputlisting[language=sail]{sail_latex_riscv/fclCSealzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
@@ -7821,7 +7857,7 @@ An exception is raised if:
 \item \emph{cs1}.\textbf{tag} is not set.
 \item \emph{cs2}.\textbf{sealed} is set.
 \item \emph{cs2}.\textbf{perms} does not grant \textbf{Permit\_Seal}.
-\item \emph{cs2}.\textbf{address} $\gt$ \hyperref[sailRISCVzmaxzyotype]{\lstinline{max_otype}}.
+\item \emph{cs2}.\textbf{address} $\gt$ \hyperref[sailRISCVzcapzymaxzyotype]{\lstinline{cap_max_otype}}.
 \end{itemize}
 
 
@@ -7941,7 +7977,7 @@ An exception is raised if:
 \end{itemize}
 }{\lstinputlisting[language=sail]{sail_latex_riscv/fclCInvokezexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
-\newcommand{\sailRISCVfclCJALRexecute}{\saildoclabelled{sailRISCVfclCJALRzexecute}{\saildocfcl{Capability register \emph{cd} is replaced with the next instruction's \textbf{PCC} and
+\newcommand{\sailRISCVfclJALRUnderscoreCAPexecute}{\saildoclabelled{sailRISCVfclJALRUnderscoreCAPzexecute}{\saildocfcl{Capability register \emph{cd} is replaced with the next instruction's \textbf{PCC} and
 sealed as a sentry. \textbf{PCC} is replaced with the value of capability
 register \emph{cs1} with the 0th bit of its \textbf{address} set to 0 and is unsealed
 if it is a sentry.
@@ -7960,7 +7996,23 @@ An exception is raised if:
 \item \emph{cs1}.\textbf{base} is unaligned.
 \item \emph{cs1}.\textbf{address} is unaligned, ignoring bit 0.
 \end{itemize}
-}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCJALRzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclJALRUnderscoreCAPzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclJALRUnderscorePCCexecute}{\saildoclabelled{sailRISCVfclJALRUnderscorePCCzexecute}{\saildocfcl{Integer register \emph{rd} is replaced with the next instruction's
+\textbf{PCC}.\textbf{offset}. \textbf{PCC}.\textbf{offset} is replaced with the value of
+register \emph{rs1} with the 0th bit set to 0.
+
+\subsection*{Exceptions}
+
+
+An exception is raised if:
+
+\begin{itemize}
+\item \textbf{PCC}.\textbf{address} $+$ \emph{rs1} $\lt$ \textbf{PCC}.\textbf{base}.
+\item \textbf{PCC}.\textbf{address} $+$ \emph{rs1} $+$ min\_instruction\_bytes $\gt$ \textbf{PCC}.\textbf{top}.
+\item \textbf{PCC}.\textbf{address} $+$ \emph{rs1} is unaligned, ignoring bit 0.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclJALRUnderscorePCCzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
 \newcommand{\sailRISCVfclLoadDataDDCexecute}{\saildoclabelled{sailRISCVfclLoadDataDDCzexecute}{\saildocfcl{Integer register \emph{rd} is replaced with the signed or unsigned byte,
 halfword, word or doubleword located in memory at \textbf{DDC}.\textbf{address} $+$
@@ -8177,11 +8229,6 @@ An exception is raised if:
 \end{itemize}
 }{\lstinputlisting[language=sail]{sail_latex_riscv/fclStoreCapCapzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
-\newcommand{\sailRISCVfclAUIPCCexecute}{\saildoclabelled{sailRISCVfclAUIPCCzexecute}{\saildocfcl{Capability register \emph{cd} is replaced with the contents of \textbf{PCC}, with the
-\textbf{address} replaced with \textbf{PCC}.\textbf{address} $+$ \emph{imm} $\times$ 4096.
-
-}{\lstinputlisting[language=sail]{sail_latex_riscv/fclAUIPCCzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
-
 \newcommand{\sailRISCVfclLoadCapImmexecute}{\saildoclabelled{sailRISCVfclLoadCapImmzexecute}{\saildocfcl{In integer mode, capability register \emph{cd} is replaced with the capability
 located in memory at \textbf{DDC}.\textbf{address} $+$ \emph{rs1} $+$ \emph{imm}, and if
 \textbf{DDC}.\textbf{perms} does not grant \textbf{Permit\_Load\_Capability} then
@@ -8279,7 +8326,7 @@ In capability mode, an exception is raised if:
 
 \newcommand{\sailRISCVfnprintInsn}{\saildoclabelled{sailRISCVfnzprintzyinsn}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzprint_insn34adb9871c343ddeeb08d9e768ad4c92.tex}}}}
 
-\newcommand{\sailRISCVoverloadCCCCCCCCCCCCCCCCCCtoStr}{\saildoclabelled{sailRISCVoverloadCCCCCCCCCCCCCCCCCCztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadCCCCCCCCCCCCCCCCCCzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
+\newcommand{\sailRISCVoverloadYYYYYYYYYYYYYYYYYtoStr}{\saildoclabelled{sailRISCVoverloadYYYYYYYYYYYYYYYYYztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadYYYYYYYYYYYYYYYYYzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
 
 \newcommand{\sailRISCVvaldecode}{\saildoclabelled{sailRISCVzdecode}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzdecodec2b8e713fb767e340b7b488fdcba3aab.tex}}}}
 
@@ -8409,6 +8456,7 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{\_\_write\_mem}{\sailRISCVvalWriteMem}{}%
   \ifstrequal{#1}{\_\_write\_mem\_ea}{\sailRISCVvalWriteMemEa}{}%
   \ifstrequal{#1}{\_\_write\_memt}{\sailRISCVvalWriteMemt}{}%
+  \ifstrequal{#1}{\_\_write\_tag}{\sailRISCVvalWriteTag}{}%
   \ifstrequal{#1}{\_get\_Counteren\_CY}{\sailRISCVvalGetCounterenCY}{}%
   \ifstrequal{#1}{\_get\_Counteren\_HPM}{\sailRISCVvalGetCounterenHPM}{}%
   \ifstrequal{#1}{\_get\_Counteren\_IR}{\sailRISCVvalGetCounterenIR}{}%
@@ -8591,8 +8639,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{\_get\_Ustatus\_UPIE}{\sailRISCVvalGetUstatusUPIE}{}%
   \ifstrequal{#1}{\_get\_Ustatus\_bits}{\sailRISCVvalGetUstatusBits}{}%
   \ifstrequal{#1}{\_get\_ccsr\_bits}{\sailRISCVvalGetCcsrBits}{}%
-  \ifstrequal{#1}{\_get\_ccsr\_cap\_idx}{\sailRISCVvalGetCcsrCapIdx}{}%
-  \ifstrequal{#1}{\_get\_ccsr\_cause}{\sailRISCVvalGetCcsrCause}{}%
   \ifstrequal{#1}{\_get\_ccsr\_d}{\sailRISCVvalGetCcsrD}{}%
   \ifstrequal{#1}{\_get\_ccsr\_e}{\sailRISCVvalGetCcsrE}{}%
   \ifstrequal{#1}{\_get\_htif\_cmd\_bits}{\sailRISCVvalGetHtifCmdBits}{}%
@@ -8782,8 +8828,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{\_set\_Ustatus\_UPIE}{\sailRISCVvalSetUstatusUPIE}{}%
   \ifstrequal{#1}{\_set\_Ustatus\_bits}{\sailRISCVvalSetUstatusBits}{}%
   \ifstrequal{#1}{\_set\_ccsr\_bits}{\sailRISCVvalSetCcsrBits}{}%
-  \ifstrequal{#1}{\_set\_ccsr\_cap\_idx}{\sailRISCVvalSetCcsrCapIdx}{}%
-  \ifstrequal{#1}{\_set\_ccsr\_cause}{\sailRISCVvalSetCcsrCause}{}%
   \ifstrequal{#1}{\_set\_ccsr\_d}{\sailRISCVvalSetCcsrD}{}%
   \ifstrequal{#1}{\_set\_ccsr\_e}{\sailRISCVvalSetCcsrE}{}%
   \ifstrequal{#1}{\_set\_htif\_cmd\_bits}{\sailRISCVvalSetHtifCmdBits}{}%
@@ -8980,8 +9024,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{\_update\_Ustatus\_UPIE}{\sailRISCVvalUpdateUstatusUPIE}{}%
   \ifstrequal{#1}{\_update\_Ustatus\_bits}{\sailRISCVvalUpdateUstatusBits}{}%
   \ifstrequal{#1}{\_update\_ccsr\_bits}{\sailRISCVvalUpdateCcsrBits}{}%
-  \ifstrequal{#1}{\_update\_ccsr\_cap\_idx}{\sailRISCVvalUpdateCcsrCapIdx}{}%
-  \ifstrequal{#1}{\_update\_ccsr\_cause}{\sailRISCVvalUpdateCcsrCause}{}%
   \ifstrequal{#1}{\_update\_ccsr\_d}{\sailRISCVvalUpdateCcsrD}{}%
   \ifstrequal{#1}{\_update\_ccsr\_e}{\sailRISCVvalUpdateCcsrE}{}%
   \ifstrequal{#1}{\_update\_htif\_cmd\_bits}{\sailRISCVvalUpdateHtifCmdBits}{}%
@@ -9033,8 +9075,10 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{canonical\_NaN\_D}{\sailRISCVvalcanonicalNaND}{}%
   \ifstrequal{#1}{canonical\_NaN\_S}{\sailRISCVvalcanonicalNaNS}{}%
   \ifstrequal{#1}{capBitsToCapability}{\sailRISCVvalcapBitsToCapability}{}%
+  \ifstrequal{#1}{capBitsToEncCapability}{\sailRISCVvalcapBitsToEncCapability}{}%
   \ifstrequal{#1}{capBoundsEqual}{\sailRISCVvalcapBoundsEqual}{}%
   \ifstrequal{#1}{capToBits}{\sailRISCVvalcapToBits}{}%
+  \ifstrequal{#1}{capToEncCap}{\sailRISCVvalcapToEncCap}{}%
   \ifstrequal{#1}{capToMemBits}{\sailRISCVvalcapToMemBits}{}%
   \ifstrequal{#1}{capToString}{\sailRISCVvalcapToString}{}%
   \ifstrequal{#1}{cap\_creg\_name}{\sailRISCVvalcapCregName}{}%
@@ -9085,6 +9129,8 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{elf\_entry}{\sailRISCVvalelfEntry}{}%
   \ifstrequal{#1}{elf\_tohost}{\sailRISCVvalelfTohost}{}%
   \ifstrequal{#1}{emod\_int}{\sailRISCVvalemodInt}{}%
+  \ifstrequal{#1}{encCapToBits}{\sailRISCVvalencCapToBits}{}%
+  \ifstrequal{#1}{encCapabilityToCapability}{\sailRISCVvalencCapabilityToCapability}{}%
   \ifstrequal{#1}{encdec}{\sailRISCVvalencdec}{}%
   \ifstrequal{#1}{encdec\_amoop}{\sailRISCVvalencdecAmoop}{}%
   \ifstrequal{#1}{encdec\_bop}{\sailRISCVvalencdecBop}{}%
@@ -10028,6 +10074,7 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{__write_mem}{\hyperref[sailRISCVzzyzywritezymem]{#2}}{}%
   \ifstrequal{#1}{__write_mem_ea}{\hyperref[sailRISCVzzyzywritezymemzyea]{#2}}{}%
   \ifstrequal{#1}{__write_memt}{\hyperref[sailRISCVzzyzywritezymemt]{#2}}{}%
+  \ifstrequal{#1}{__write_tag}{\hyperref[sailRISCVzzyzywritezytag]{#2}}{}%
   \ifstrequal{#1}{_get_Counteren_CY}{\hyperref[sailRISCVzzygetzyCounterenzyCY]{#2}}{}%
   \ifstrequal{#1}{_get_Counteren_HPM}{\hyperref[sailRISCVzzygetzyCounterenzyHPM]{#2}}{}%
   \ifstrequal{#1}{_get_Counteren_IR}{\hyperref[sailRISCVzzygetzyCounterenzyIR]{#2}}{}%
@@ -10210,8 +10257,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{_get_Ustatus_UPIE}{\hyperref[sailRISCVzzygetzyUstatuszyUPIE]{#2}}{}%
   \ifstrequal{#1}{_get_Ustatus_bits}{\hyperref[sailRISCVzzygetzyUstatuszybits]{#2}}{}%
   \ifstrequal{#1}{_get_ccsr_bits}{\hyperref[sailRISCVzzygetzyccsrzybits]{#2}}{}%
-  \ifstrequal{#1}{_get_ccsr_cap_idx}{\hyperref[sailRISCVzzygetzyccsrzycapzyidx]{#2}}{}%
-  \ifstrequal{#1}{_get_ccsr_cause}{\hyperref[sailRISCVzzygetzyccsrzycause]{#2}}{}%
   \ifstrequal{#1}{_get_ccsr_d}{\hyperref[sailRISCVzzygetzyccsrzyd]{#2}}{}%
   \ifstrequal{#1}{_get_ccsr_e}{\hyperref[sailRISCVzzygetzyccsrzye]{#2}}{}%
   \ifstrequal{#1}{_get_htif_cmd_bits}{\hyperref[sailRISCVzzygetzyhtifzycmdzybits]{#2}}{}%
@@ -10401,8 +10446,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{_set_Ustatus_UPIE}{\hyperref[sailRISCVzzysetzyUstatuszyUPIE]{#2}}{}%
   \ifstrequal{#1}{_set_Ustatus_bits}{\hyperref[sailRISCVzzysetzyUstatuszybits]{#2}}{}%
   \ifstrequal{#1}{_set_ccsr_bits}{\hyperref[sailRISCVzzysetzyccsrzybits]{#2}}{}%
-  \ifstrequal{#1}{_set_ccsr_cap_idx}{\hyperref[sailRISCVzzysetzyccsrzycapzyidx]{#2}}{}%
-  \ifstrequal{#1}{_set_ccsr_cause}{\hyperref[sailRISCVzzysetzyccsrzycause]{#2}}{}%
   \ifstrequal{#1}{_set_ccsr_d}{\hyperref[sailRISCVzzysetzyccsrzyd]{#2}}{}%
   \ifstrequal{#1}{_set_ccsr_e}{\hyperref[sailRISCVzzysetzyccsrzye]{#2}}{}%
   \ifstrequal{#1}{_set_htif_cmd_bits}{\hyperref[sailRISCVzzysetzyhtifzycmdzybits]{#2}}{}%
@@ -10599,8 +10642,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{_update_Ustatus_UPIE}{\hyperref[sailRISCVzzyupdatezyUstatuszyUPIE]{#2}}{}%
   \ifstrequal{#1}{_update_Ustatus_bits}{\hyperref[sailRISCVzzyupdatezyUstatuszybits]{#2}}{}%
   \ifstrequal{#1}{_update_ccsr_bits}{\hyperref[sailRISCVzzyupdatezyccsrzybits]{#2}}{}%
-  \ifstrequal{#1}{_update_ccsr_cap_idx}{\hyperref[sailRISCVzzyupdatezyccsrzycapzyidx]{#2}}{}%
-  \ifstrequal{#1}{_update_ccsr_cause}{\hyperref[sailRISCVzzyupdatezyccsrzycause]{#2}}{}%
   \ifstrequal{#1}{_update_ccsr_d}{\hyperref[sailRISCVzzyupdatezyccsrzyd]{#2}}{}%
   \ifstrequal{#1}{_update_ccsr_e}{\hyperref[sailRISCVzzyupdatezyccsrzye]{#2}}{}%
   \ifstrequal{#1}{_update_htif_cmd_bits}{\hyperref[sailRISCVzzyupdatezyhtifzycmdzybits]{#2}}{}%
@@ -10652,8 +10693,10 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{canonical_NaN_D}{\hyperref[sailRISCVzcanonicalzyNaNzyD]{#2}}{}%
   \ifstrequal{#1}{canonical_NaN_S}{\hyperref[sailRISCVzcanonicalzyNaNzyS]{#2}}{}%
   \ifstrequal{#1}{capBitsToCapability}{\hyperref[sailRISCVzcapBitsToCapability]{#2}}{}%
+  \ifstrequal{#1}{capBitsToEncCapability}{\hyperref[sailRISCVzcapBitsToEncCapability]{#2}}{}%
   \ifstrequal{#1}{capBoundsEqual}{\hyperref[sailRISCVzcapBoundsEqual]{#2}}{}%
   \ifstrequal{#1}{capToBits}{\hyperref[sailRISCVzcapToBits]{#2}}{}%
+  \ifstrequal{#1}{capToEncCap}{\hyperref[sailRISCVzcapToEncCap]{#2}}{}%
   \ifstrequal{#1}{capToMemBits}{\hyperref[sailRISCVzcapToMemBits]{#2}}{}%
   \ifstrequal{#1}{capToString}{\hyperref[sailRISCVzcapToString]{#2}}{}%
   \ifstrequal{#1}{cap_creg_name}{\hyperref[sailRISCVzcapzycregzyname]{#2}}{}%
@@ -10704,6 +10747,8 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{elf_entry}{\hyperref[sailRISCVzelfzyentry]{#2}}{}%
   \ifstrequal{#1}{elf_tohost}{\hyperref[sailRISCVzelfzytohost]{#2}}{}%
   \ifstrequal{#1}{emod_int}{\hyperref[sailRISCVzemodzyint]{#2}}{}%
+  \ifstrequal{#1}{encCapToBits}{\hyperref[sailRISCVzencCapToBits]{#2}}{}%
+  \ifstrequal{#1}{encCapabilityToCapability}{\hyperref[sailRISCVzencCapabilityToCapability]{#2}}{}%
   \ifstrequal{#1}{encdec}{\hyperref[sailRISCVzencdec]{#2}}{}%
   \ifstrequal{#1}{encdec_amoop}{\hyperref[sailRISCVzencdeczyamoop]{#2}}{}%
   \ifstrequal{#1}{encdec_bop}{\hyperref[sailRISCVzencdeczybop]{#2}}{}%
@@ -11813,8 +11858,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{\_get\_Ustatus\_UPIE}{\sailRISCVfnGetUstatusUPIE}{}%
   \ifstrequal{#1}{\_get\_Ustatus\_bits}{\sailRISCVfnGetUstatusBits}{}%
   \ifstrequal{#1}{\_get\_ccsr\_bits}{\sailRISCVfnGetCcsrBits}{}%
-  \ifstrequal{#1}{\_get\_ccsr\_cap\_idx}{\sailRISCVfnGetCcsrCapIdx}{}%
-  \ifstrequal{#1}{\_get\_ccsr\_cause}{\sailRISCVfnGetCcsrCause}{}%
   \ifstrequal{#1}{\_get\_ccsr\_d}{\sailRISCVfnGetCcsrD}{}%
   \ifstrequal{#1}{\_get\_ccsr\_e}{\sailRISCVfnGetCcsrE}{}%
   \ifstrequal{#1}{\_get\_htif\_cmd\_bits}{\sailRISCVfnGetHtifCmdBits}{}%
@@ -12003,8 +12046,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{\_set\_Ustatus\_UPIE}{\sailRISCVfnSetUstatusUPIE}{}%
   \ifstrequal{#1}{\_set\_Ustatus\_bits}{\sailRISCVfnSetUstatusBits}{}%
   \ifstrequal{#1}{\_set\_ccsr\_bits}{\sailRISCVfnSetCcsrBits}{}%
-  \ifstrequal{#1}{\_set\_ccsr\_cap\_idx}{\sailRISCVfnSetCcsrCapIdx}{}%
-  \ifstrequal{#1}{\_set\_ccsr\_cause}{\sailRISCVfnSetCcsrCause}{}%
   \ifstrequal{#1}{\_set\_ccsr\_d}{\sailRISCVfnSetCcsrD}{}%
   \ifstrequal{#1}{\_set\_ccsr\_e}{\sailRISCVfnSetCcsrE}{}%
   \ifstrequal{#1}{\_set\_htif\_cmd\_bits}{\sailRISCVfnSetHtifCmdBits}{}%
@@ -12193,8 +12234,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{\_update\_Ustatus\_UPIE}{\sailRISCVfnUpdateUstatusUPIE}{}%
   \ifstrequal{#1}{\_update\_Ustatus\_bits}{\sailRISCVfnUpdateUstatusBits}{}%
   \ifstrequal{#1}{\_update\_ccsr\_bits}{\sailRISCVfnUpdateCcsrBits}{}%
-  \ifstrequal{#1}{\_update\_ccsr\_cap\_idx}{\sailRISCVfnUpdateCcsrCapIdx}{}%
-  \ifstrequal{#1}{\_update\_ccsr\_cause}{\sailRISCVfnUpdateCcsrCause}{}%
   \ifstrequal{#1}{\_update\_ccsr\_d}{\sailRISCVfnUpdateCcsrD}{}%
   \ifstrequal{#1}{\_update\_ccsr\_e}{\sailRISCVfnUpdateCcsrE}{}%
   \ifstrequal{#1}{\_update\_htif\_cmd\_bits}{\sailRISCVfnUpdateHtifCmdBits}{}%
@@ -12220,8 +12259,10 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{canonical\_NaN\_D}{\sailRISCVfncanonicalNaND}{}%
   \ifstrequal{#1}{canonical\_NaN\_S}{\sailRISCVfncanonicalNaNS}{}%
   \ifstrequal{#1}{capBitsToCapability}{\sailRISCVfncapBitsToCapability}{}%
+  \ifstrequal{#1}{capBitsToEncCapability}{\sailRISCVfncapBitsToEncCapability}{}%
   \ifstrequal{#1}{capBoundsEqual}{\sailRISCVfncapBoundsEqual}{}%
   \ifstrequal{#1}{capToBits}{\sailRISCVfncapToBits}{}%
+  \ifstrequal{#1}{capToEncCap}{\sailRISCVfncapToEncCap}{}%
   \ifstrequal{#1}{capToMemBits}{\sailRISCVfncapToMemBits}{}%
   \ifstrequal{#1}{capToString}{\sailRISCVfncapToString}{}%
   \ifstrequal{#1}{cap\_reg\_name\_abi}{\sailRISCVfncapRegNameAbi}{}%
@@ -12258,6 +12299,8 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{dispatchInterrupt}{\sailRISCVfndispatchInterrupt}{}%
   \ifstrequal{#1}{dzFlag}{\sailRISCVfndzzFlag}{}%
   \ifstrequal{#1}{effectivePrivilege}{\sailRISCVfneffectivePrivilege}{}%
+  \ifstrequal{#1}{encCapToBits}{\sailRISCVfnencCapToBits}{}%
+  \ifstrequal{#1}{encCapabilityToCapability}{\sailRISCVfnencCapabilityToCapability}{}%
   \ifstrequal{#1}{eq\_unit}{\sailRISCVfneqUnit}{}%
   \ifstrequal{#1}{exceptionType\_to\_bits}{\sailRISCVfnexceptionTypeToBits}{}%
   \ifstrequal{#1}{exceptionType\_to\_str}{\sailRISCVfnexceptionTypeToStr}{}%
@@ -13079,8 +13122,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{_get_Ustatus_UPIE}{\hyperref[sailRISCVfnzzygetzyUstatuszyUPIE]{#2}}{}%
   \ifstrequal{#1}{_get_Ustatus_bits}{\hyperref[sailRISCVfnzzygetzyUstatuszybits]{#2}}{}%
   \ifstrequal{#1}{_get_ccsr_bits}{\hyperref[sailRISCVfnzzygetzyccsrzybits]{#2}}{}%
-  \ifstrequal{#1}{_get_ccsr_cap_idx}{\hyperref[sailRISCVfnzzygetzyccsrzycapzyidx]{#2}}{}%
-  \ifstrequal{#1}{_get_ccsr_cause}{\hyperref[sailRISCVfnzzygetzyccsrzycause]{#2}}{}%
   \ifstrequal{#1}{_get_ccsr_d}{\hyperref[sailRISCVfnzzygetzyccsrzyd]{#2}}{}%
   \ifstrequal{#1}{_get_ccsr_e}{\hyperref[sailRISCVfnzzygetzyccsrzye]{#2}}{}%
   \ifstrequal{#1}{_get_htif_cmd_bits}{\hyperref[sailRISCVfnzzygetzyhtifzycmdzybits]{#2}}{}%
@@ -13269,8 +13310,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{_set_Ustatus_UPIE}{\hyperref[sailRISCVfnzzysetzyUstatuszyUPIE]{#2}}{}%
   \ifstrequal{#1}{_set_Ustatus_bits}{\hyperref[sailRISCVfnzzysetzyUstatuszybits]{#2}}{}%
   \ifstrequal{#1}{_set_ccsr_bits}{\hyperref[sailRISCVfnzzysetzyccsrzybits]{#2}}{}%
-  \ifstrequal{#1}{_set_ccsr_cap_idx}{\hyperref[sailRISCVfnzzysetzyccsrzycapzyidx]{#2}}{}%
-  \ifstrequal{#1}{_set_ccsr_cause}{\hyperref[sailRISCVfnzzysetzyccsrzycause]{#2}}{}%
   \ifstrequal{#1}{_set_ccsr_d}{\hyperref[sailRISCVfnzzysetzyccsrzyd]{#2}}{}%
   \ifstrequal{#1}{_set_ccsr_e}{\hyperref[sailRISCVfnzzysetzyccsrzye]{#2}}{}%
   \ifstrequal{#1}{_set_htif_cmd_bits}{\hyperref[sailRISCVfnzzysetzyhtifzycmdzybits]{#2}}{}%
@@ -13459,8 +13498,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{_update_Ustatus_UPIE}{\hyperref[sailRISCVfnzzyupdatezyUstatuszyUPIE]{#2}}{}%
   \ifstrequal{#1}{_update_Ustatus_bits}{\hyperref[sailRISCVfnzzyupdatezyUstatuszybits]{#2}}{}%
   \ifstrequal{#1}{_update_ccsr_bits}{\hyperref[sailRISCVfnzzyupdatezyccsrzybits]{#2}}{}%
-  \ifstrequal{#1}{_update_ccsr_cap_idx}{\hyperref[sailRISCVfnzzyupdatezyccsrzycapzyidx]{#2}}{}%
-  \ifstrequal{#1}{_update_ccsr_cause}{\hyperref[sailRISCVfnzzyupdatezyccsrzycause]{#2}}{}%
   \ifstrequal{#1}{_update_ccsr_d}{\hyperref[sailRISCVfnzzyupdatezyccsrzyd]{#2}}{}%
   \ifstrequal{#1}{_update_ccsr_e}{\hyperref[sailRISCVfnzzyupdatezyccsrzye]{#2}}{}%
   \ifstrequal{#1}{_update_htif_cmd_bits}{\hyperref[sailRISCVfnzzyupdatezyhtifzycmdzybits]{#2}}{}%
@@ -13486,8 +13523,10 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{canonical_NaN_D}{\hyperref[sailRISCVfnzcanonicalzyNaNzyD]{#2}}{}%
   \ifstrequal{#1}{canonical_NaN_S}{\hyperref[sailRISCVfnzcanonicalzyNaNzyS]{#2}}{}%
   \ifstrequal{#1}{capBitsToCapability}{\hyperref[sailRISCVfnzcapBitsToCapability]{#2}}{}%
+  \ifstrequal{#1}{capBitsToEncCapability}{\hyperref[sailRISCVfnzcapBitsToEncCapability]{#2}}{}%
   \ifstrequal{#1}{capBoundsEqual}{\hyperref[sailRISCVfnzcapBoundsEqual]{#2}}{}%
   \ifstrequal{#1}{capToBits}{\hyperref[sailRISCVfnzcapToBits]{#2}}{}%
+  \ifstrequal{#1}{capToEncCap}{\hyperref[sailRISCVfnzcapToEncCap]{#2}}{}%
   \ifstrequal{#1}{capToMemBits}{\hyperref[sailRISCVfnzcapToMemBits]{#2}}{}%
   \ifstrequal{#1}{capToString}{\hyperref[sailRISCVfnzcapToString]{#2}}{}%
   \ifstrequal{#1}{cap_reg_name_abi}{\hyperref[sailRISCVfnzcapzyregzynamezyabi]{#2}}{}%
@@ -13524,6 +13563,8 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{dispatchInterrupt}{\hyperref[sailRISCVfnzdispatchInterrupt]{#2}}{}%
   \ifstrequal{#1}{dzFlag}{\hyperref[sailRISCVfnzdzzFlag]{#2}}{}%
   \ifstrequal{#1}{effectivePrivilege}{\hyperref[sailRISCVfnzeffectivePrivilege]{#2}}{}%
+  \ifstrequal{#1}{encCapToBits}{\hyperref[sailRISCVfnzencCapToBits]{#2}}{}%
+  \ifstrequal{#1}{encCapabilityToCapability}{\hyperref[sailRISCVfnzencCapabilityToCapability]{#2}}{}%
   \ifstrequal{#1}{eq_unit}{\hyperref[sailRISCVfnzeqzyunit]{#2}}{}%
   \ifstrequal{#1}{exceptionType_to_bits}{\hyperref[sailRISCVfnzexceptionTypezytozybits]{#2}}{}%
   \ifstrequal{#1}{exceptionType_to_str}{\hyperref[sailRISCVfnzexceptionTypezytozystr]{#2}}{}%
@@ -14125,6 +14166,7 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ClearRegSet}{\sailRISCVtypeClearRegSet}{}%
   \ifstrequal{#1}{Counteren}{\sailRISCVtypeCounteren}{}%
   \ifstrequal{#1}{Counterin}{\sailRISCVtypeCounterin}{}%
+  \ifstrequal{#1}{EncCapability}{\sailRISCVtypeEncCapability}{}%
   \ifstrequal{#1}{ExceptionType}{\sailRISCVtypeExceptionType}{}%
   \ifstrequal{#1}{ExtStatus}{\sailRISCVtypeExtStatus}{}%
   \ifstrequal{#1}{Ext\_ControlAddr\_Check}{\sailRISCVtypeExtControlAddrCheck}{}%
@@ -14191,6 +14233,7 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{bits\_rm}{\sailRISCVtypebitsRm}{}%
   \ifstrequal{#1}{bop}{\sailRISCVtypebop}{}%
   \ifstrequal{#1}{cache\_op\_kind}{\sailRISCVtypecacheOpKind}{}%
+  \ifstrequal{#1}{cap\_E\_width}{\sailRISCVtypecapEWidth}{}%
   \ifstrequal{#1}{cap\_addr\_width}{\sailRISCVtypecapAddrWidth}{}%
   \ifstrequal{#1}{cap\_flags\_width}{\sailRISCVtypecapFlagsWidth}{}%
   \ifstrequal{#1}{cap\_hperms\_width}{\sailRISCVtypecapHpermsWidth}{}%
@@ -14198,13 +14241,13 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{cap\_mantissa\_width}{\sailRISCVtypecapMantissaWidth}{}%
   \ifstrequal{#1}{cap\_otype\_width}{\sailRISCVtypecapOtypeWidth}{}%
   \ifstrequal{#1}{cap\_perms\_width}{\sailRISCVtypecapPermsWidth}{}%
+  \ifstrequal{#1}{cap\_reserved\_width}{\sailRISCVtypecapReservedWidth}{}%
   \ifstrequal{#1}{cap\_size}{\sailRISCVtypecapSizze}{}%
   \ifstrequal{#1}{cap\_uperms\_shift}{\sailRISCVtypecapUpermsShift}{}%
   \ifstrequal{#1}{cap\_uperms\_width}{\sailRISCVtypecapUpermsWidth}{}%
   \ifstrequal{#1}{capreg\_idx}{\sailRISCVtypecapregIdx}{}%
   \ifstrequal{#1}{caps\_per\_cache\_line}{\sailRISCVtypecapsPerCacheLine}{}%
   \ifstrequal{#1}{ccsr}{\sailRISCVtypeccsr}{}%
-  \ifstrequal{#1}{cheri\_cause}{\sailRISCVtypecheriCause}{}%
   \ifstrequal{#1}{cregidx}{\sailRISCVtypecregidx}{}%
   \ifstrequal{#1}{csrRW}{\sailRISCVtypecsrRW}{}%
   \ifstrequal{#1}{csreg}{\sailRISCVtypecsreg}{}%
@@ -14245,6 +14288,7 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{imm12}{\sailRISCVtypeimmOneTwo}{}%
   \ifstrequal{#1}{imm20}{\sailRISCVtypeimmTwoZero}{}%
   \ifstrequal{#1}{instruction\_kind}{\sailRISCVtypeinstructionKind}{}%
+  \ifstrequal{#1}{internal\_E\_take\_bits}{\sailRISCVtypeinternalETakeBits}{}%
   \ifstrequal{#1}{interrupt\_set}{\sailRISCVtypeinterruptSet}{}%
   \ifstrequal{#1}{iop}{\sailRISCVtypeiop}{}%
   \ifstrequal{#1}{log2\_cap\_size}{\sailRISCVtypelogTwoCapSizze}{}%
@@ -14308,6 +14352,7 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ClearRegSet}{\hyperref[sailRISCVtypezClearRegSet]{#2}}{}%
   \ifstrequal{#1}{Counteren}{\hyperref[sailRISCVtypezCounteren]{#2}}{}%
   \ifstrequal{#1}{Counterin}{\hyperref[sailRISCVtypezCounterin]{#2}}{}%
+  \ifstrequal{#1}{EncCapability}{\hyperref[sailRISCVtypezEncCapability]{#2}}{}%
   \ifstrequal{#1}{ExceptionType}{\hyperref[sailRISCVtypezExceptionType]{#2}}{}%
   \ifstrequal{#1}{ExtStatus}{\hyperref[sailRISCVtypezExtStatus]{#2}}{}%
   \ifstrequal{#1}{Ext_ControlAddr_Check}{\hyperref[sailRISCVtypezExtzyControlAddrzyCheck]{#2}}{}%
@@ -14374,6 +14419,7 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{bits_rm}{\hyperref[sailRISCVtypezbitszyrm]{#2}}{}%
   \ifstrequal{#1}{bop}{\hyperref[sailRISCVtypezbop]{#2}}{}%
   \ifstrequal{#1}{cache_op_kind}{\hyperref[sailRISCVtypezcachezyopzykind]{#2}}{}%
+  \ifstrequal{#1}{cap_E_width}{\hyperref[sailRISCVtypezcapzyEzywidth]{#2}}{}%
   \ifstrequal{#1}{cap_addr_width}{\hyperref[sailRISCVtypezcapzyaddrzywidth]{#2}}{}%
   \ifstrequal{#1}{cap_flags_width}{\hyperref[sailRISCVtypezcapzyflagszywidth]{#2}}{}%
   \ifstrequal{#1}{cap_hperms_width}{\hyperref[sailRISCVtypezcapzyhpermszywidth]{#2}}{}%
@@ -14381,13 +14427,13 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{cap_mantissa_width}{\hyperref[sailRISCVtypezcapzymantissazywidth]{#2}}{}%
   \ifstrequal{#1}{cap_otype_width}{\hyperref[sailRISCVtypezcapzyotypezywidth]{#2}}{}%
   \ifstrequal{#1}{cap_perms_width}{\hyperref[sailRISCVtypezcapzypermszywidth]{#2}}{}%
+  \ifstrequal{#1}{cap_reserved_width}{\hyperref[sailRISCVtypezcapzyreservedzywidth]{#2}}{}%
   \ifstrequal{#1}{cap_size}{\hyperref[sailRISCVtypezcapzysizze]{#2}}{}%
   \ifstrequal{#1}{cap_uperms_shift}{\hyperref[sailRISCVtypezcapzyupermszyshift]{#2}}{}%
   \ifstrequal{#1}{cap_uperms_width}{\hyperref[sailRISCVtypezcapzyupermszywidth]{#2}}{}%
   \ifstrequal{#1}{capreg_idx}{\hyperref[sailRISCVtypezcapregzyidx]{#2}}{}%
   \ifstrequal{#1}{caps_per_cache_line}{\hyperref[sailRISCVtypezcapszyperzycachezyline]{#2}}{}%
   \ifstrequal{#1}{ccsr}{\hyperref[sailRISCVtypezccsr]{#2}}{}%
-  \ifstrequal{#1}{cheri_cause}{\hyperref[sailRISCVtypezcherizycause]{#2}}{}%
   \ifstrequal{#1}{cregidx}{\hyperref[sailRISCVtypezcregidx]{#2}}{}%
   \ifstrequal{#1}{csrRW}{\hyperref[sailRISCVtypezcsrRW]{#2}}{}%
   \ifstrequal{#1}{csreg}{\hyperref[sailRISCVtypezcsreg]{#2}}{}%
@@ -14428,6 +14474,7 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{imm12}{\hyperref[sailRISCVtypezimm12]{#2}}{}%
   \ifstrequal{#1}{imm20}{\hyperref[sailRISCVtypezimm20]{#2}}{}%
   \ifstrequal{#1}{instruction_kind}{\hyperref[sailRISCVtypezinstructionzykind]{#2}}{}%
+  \ifstrequal{#1}{internal_E_take_bits}{\hyperref[sailRISCVtypezinternalzyEzytakezybits]{#2}}{}%
   \ifstrequal{#1}{interrupt_set}{\hyperref[sailRISCVtypezinterruptzyset]{#2}}{}%
   \ifstrequal{#1}{iop}{\hyperref[sailRISCVtypeziop]{#2}}{}%
   \ifstrequal{#1}{log2_cap_size}{\hyperref[sailRISCVtypezlog2zycapzysizze]{#2}}{}%

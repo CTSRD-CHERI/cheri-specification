@@ -1,4 +1,4 @@
 let capVal = #\hyperref[sailRISCVzC]{C}#(cs1);
 let len = #\hyperref[sailRISCVzgetCapLength]{getCapLength}#(capVal);
-#\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVztozybits]{to\_bits}#(sizeof(xlen), if len > MAX_ADDR then MAX_ADDR else len);
+#\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVztozybits]{to\_bits}#(sizeof(xlen), if len > cap_max_addr then cap_max_addr else len);
 RETIRE_SUCCESS

@@ -1,0 +1,9 @@
+function #\hyperref[sailRISCVzencCapToBits]{encCapToBits}#(cap) : EncCapability -> CapBits =
+  cap.perms @
+  cap.reserved @
+  cap.flags @
+  cap.otype @
+  [cap.internal_E] @
+  cap.T @
+  cap.B @
+  cap.address
