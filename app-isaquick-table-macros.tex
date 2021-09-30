@@ -13,10 +13,10 @@
 \newcount\@cherienctable@tmp
 \def\@cherienctable@addtoformat#1{\ea\global\ea\def\ea\@cherienctable@format\ea{\@cherienctable@format #1}}
 \def\@cherienctable@addtobody#1{\ea\global\ea\def\ea\@cherienctable@body\ea{\@cherienctable@body #1}}
-% [cols] func2str class count
-\newcommand{\@cherienctable}[4][8]{%
+% [cols] func2str count
+\newcommand{\@cherienctable}[3][8]{%
   \@cherienctable@cols=\numexpr(#1)\relax%
-  \@cherienctable@rows=\numexpr(#4+\@cherienctable@cols-1)\relax%
+  \@cherienctable@rows=\numexpr(#3+\@cherienctable@cols-1)\relax%
   \divide\@cherienctable@rows\@cherienctable@cols%
   %
   \let\@cherienctable@format\@empty%
@@ -64,7 +64,7 @@
         \ifnum\@cherienctable@col>0%
           \@cherienctable@addtobody{ & }%
         \fi%
-        \edef\@cherienctable@cell{\csname #2\endcsname{#3}{\@cherienctable@row*\@cherienctable@cols + \@cherienctable@col}}%
+        \edef\@cherienctable@cell{\csname #2\endcsname{\@cherienctable@row*\@cherienctable@cols + \@cherienctable@col}}%
         \ifx\@cherienctable@cell\@empty%
           \@cherienctable@addtobody{-}%
         \else%

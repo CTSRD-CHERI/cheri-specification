@@ -20,6 +20,19 @@
   \fi%
 }
 \newcommand{\@rvcheriencusetablestr}[2]{\csuse{@rvcheri@enc@func2tablestr@#1@\the\numexpr(#2)}}
+\newcommand{\@rvcherimakeencusetablestrcmd}[1]{%
+  \ea\newcommand\csname @rvcheriencusetablestr@#1\endcsname[1]{%
+    \@rvcheriencusetablestr{#1}{##1}%
+  }%
+}
+\@rvcherimakeencusetablestrcmd{top}
+\@rvcherimakeencusetablestrcmd{srcsrcdest}
+\@rvcherimakeencusetablestrcmd{srcsrc}
+\@rvcherimakeencusetablestrcmd{src}
+\@rvcherimakeencusetablestrcmd{srcdest}
+\@rvcherimakeencusetablestrcmd{dest}
+\@rvcherimakeencusetablestrcmd{expload}
+\@rvcherimakeencusetablestrcmd{expstore}
 
 \let\@rvcherisubclass@tablesuffix\@empty
 \define@key{@rvcherisubclass}{tablesuffix}{\def\@rvcherisubclass@tablesuffix{#1}}

@@ -1,14 +1,20 @@
 \input{app-isaquick-table-macros}
 
 \makeatletter
-\newcommand{\rvcherienctabletop}{\@cherienctable{@rvcheriencusetablestr}{top}{8}}
-\newcommand{\rvcherienctablesrcsrcdest}{\@cherienctable{@rvcheriencusetablestr}{srcsrcdest}{128}}
-\newcommand{\rvcherienctablesrcsrc}{\@cherienctable{@rvcheriencusetablestr}{srcsrc}{32}}
-\newcommand{\rvcherienctablesrc}{\@cherienctable{@rvcheriencusetablestr}{src}{32}}
-\newcommand{\rvcherienctablesrcdest}{\@cherienctable{@rvcheriencusetablestr}{srcdest}{32}}
-\newcommand{\rvcherienctabledest}{\@cherienctable{@rvcheriencusetablestr}{dest}{32}}
-\newcommand{\rvcherienctableexpload}{\@cherienctable{@rvcheriencusetablestr}{expload}{32}}
-\newcommand{\rvcherienctableexpstore}{\@cherienctable{@rvcheriencusetablestr}{expstore}{32}}
+% class count
+\newcommand{\@rvcherimakeenctablecmd}[2]{%
+  \ea\newcommand\csname rvcherienctable#1\endcsname{%
+    \@cherienctable{@rvcheriencusetablestr@#1}{#2}%
+  }%
+}
+\@rvcherimakeenctablecmd{top}{8}
+\@rvcherimakeenctablecmd{srcsrcdest}{128}
+\@rvcherimakeenctablecmd{srcsrc}{32}
+\@rvcherimakeenctablecmd{src}{32}
+\@rvcherimakeenctablecmd{srcdest}{32}
+\@rvcherimakeenctablecmd{dest}{32}
+\@rvcherimakeenctablecmd{expload}{32}
+\@rvcherimakeenctablecmd{expstore}{32}
 
 \let\rvcheriasminsnref\insnriscvref
 \let\rvcheriasminsnnoref\insnnoref
