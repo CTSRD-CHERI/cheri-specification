@@ -1,6 +1,9 @@
 \input{app-isaquick-table-macros}
 
 \makeatletter
+\def\rvcherienctablecols{4}
+\def\rvcherienctablefontsize{\normalsize}
+
 % class count
 \newcommand{\@rvcherimakeenctablecmd}[2]{%
   % [cols]
@@ -8,7 +11,7 @@
     \IfValueTF{##1}{%
       \@cherienctable[{##1}]{@rvcheriencusetablestr@#1}{#2}%
     }{%
-      \@cherienctable{@rvcheriencusetablestr@#1}{#2}%
+      \ea\@cherienctable\ea[\rvcherienctablecols]{@rvcheriencusetablestr@#1}{#2}%
     }%
   }%
 }
