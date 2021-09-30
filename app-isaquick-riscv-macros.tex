@@ -3,8 +3,13 @@
 \makeatletter
 % class count
 \newcommand{\@rvcherimakeenctablecmd}[2]{%
-  \ea\newcommand\csname rvcherienctable#1\endcsname{%
-    \@cherienctable{@rvcheriencusetablestr@#1}{#2}%
+  % [cols]
+  \ea\NewDocumentCommand\ea{\csname rvcherienctable#1\endcsname}{o}{%
+    \IfValueTF{##1}{%
+      \@cherienctable[{##1}]{@rvcheriencusetablestr@#1}{#2}%
+    }{%
+      \@cherienctable{@rvcheriencusetablestr@#1}{#2}%
+    }%
   }%
 }
 \@rvcherimakeenctablecmd{top}{8}
