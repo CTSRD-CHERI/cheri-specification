@@ -9,9 +9,9 @@
   % [cols]
   \ea\NewDocumentCommand\ea{\csname rvcherienctable#1\endcsname}{o}{%
     \IfValueTF{##1}{%
-      \@cherienctable[{##1}]{@rvcheriencusetablestr@#1}{#2}%
+      \@cherienctable{##1}{@rvcheriencusetablestr@#1}{#2}%
     }{%
-      \ea\@cherienctable\ea[\rvcherienctablecols]{@rvcheriencusetablestr@#1}{#2}%
+      \ea\@cherienctable\ea{\rvcherienctablecols}{@rvcheriencusetablestr@#1}{#2}%
     }%
   }%
 }

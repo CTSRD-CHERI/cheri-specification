@@ -13,8 +13,8 @@
 \newcount\@cherienctable@tmp
 \def\@cherienctable@addtoformat#1{\ea\global\ea\def\ea\@cherienctable@format\ea{\@cherienctable@format #1}}
 \def\@cherienctable@addtobody#1{\ea\global\ea\def\ea\@cherienctable@body\ea{\@cherienctable@body #1}}
-% [cols] func2str count
-\newcommand{\@cherienctable}[3][8]{%
+% cols func2str count
+\newcommand{\@cherienctable}[3]{%
   \@cherienctable@cols=\numexpr(#1)\relax%
   \@cherienctable@rows=\numexpr(#3+\@cherienctable@cols-1)\relax%
   \divide\@cherienctable@rows\@cherienctable@cols%
