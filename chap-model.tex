@@ -270,7 +270,7 @@ However, the generalized CHERI protection model can be mapped into
 architectures in many different forms.
 For example, an early design choice might be between holding capabilities in
 a dedicated \textit{capability register file} or extending existing 64-bit
-registers to hold 128-bit capabilities, known as a a \textit{merged
+registers to hold 128-bit capabilities, known as a \textit{merged
 register file}.
 While this and many other choices will affect a variety of factors in the
 architecture and microarchitecture, the resulting protection model can be
@@ -435,7 +435,7 @@ propagate tags (e.g., to maintain tags on capabilities in descriptor rings).
 \label{sec:model-bounds}
 
 Capabilities contain lower and upper bounds for the memory they authorize
-access to
+access to.
 While a capability's address may move out of bounds (and perhaps back in
 again), attempts to dereference (e.g., via a load, store, or instruction
 fetch) an out-of-bounds capability will throw a hardware exception.
@@ -942,7 +942,7 @@ upper bound.
 The compressed representation exchanges stronger alignment requirements
 (proportional to object size) for a more compact representation.
 
-The CHERI Concentrate compression model (see Section~\ref{compression}) maintains the monotonicity:
+The CHERI Concentrate compression model (see Section~\ref{compression}) maintains monotonicity:
 no ISA manipulation of a
 capability can grant increased rights, and when unrepresentable cases are
 generated
@@ -1512,7 +1512,7 @@ exploit class being used by an attacker.
 
 Software compartmentalization is build on two primitives: \textit{software
 isolation} and \textit{controlled communication}.
-CHERI hybridizes two orthogonal mechanisms exist to construct isolation and
+CHERI hybridizes two orthogonal mechanisms to construct isolation and
 controlled communication: the conventional MMU (using multiple virtual address
 spaces as occurs in widely used sandboxed process models), and CHERI's
 in-address-space capability mechanism (by constructing
