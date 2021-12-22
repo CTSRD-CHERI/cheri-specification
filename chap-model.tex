@@ -752,7 +752,7 @@ CHERI supports two forms of non-monotonicity\psnote{someone should
   out: either that is only up to domain transitions, in which case
   these aren't non-..., or not, in which case these are}: jump-like capability invocation,
 and exception handling (see Section~\ref{sec:failuremodesandexceptions}).
-In CHERI-MIPS, the \insnref{CInvoke} instruction accepts a pair of sealed
+The \insnref{CInvoke} instruction accepts a pair of sealed
 capability operands on which various checks are performed (for example, that
 they are valid, sealed, and have matching object types).
 If all tests are passed, then additional capabilities become available to the
@@ -999,7 +999,7 @@ applications.
 \centering
 \includegraphics[width=\columnwidth]{fig-cheri-high-level.pdf}
 \caption{CHERI supports a wide range of operational software models including:
-unmodified MMU-based RISC operating systems; hybrid operating systems
+unmodified MMU-based operating systems; hybrid operating systems
 utilizing the MMU to support a process model and/or virtualization while
 using CHERI within virtual address spaces; and pure single-address-space
 CHERI-based operating systems.}
@@ -1272,10 +1272,11 @@ by the ISA and how they are mapped
 into programmer-visible constructs such as C-language features.
 The description in this chapter is intended to be agnostic to the specific
 Instruction-Set Architecture (ISA) in which CHERI is implemented.  
-Whereas the
-implementation described in later chapters maps into the 64-bit MIPS ISA, the
-overall CHERI strategy is intended to support a variety of ISA backends, and
-could be implemented in the 64-bit ARMv8, SPARCv9, or RISC-V ISAs with only
+While the
+implementation described in later chapters was initially mapped into the 64-bit MIPS ISA, the
+\jhbnote{When can we make RISC-V the ``main'' ISA?}
+overall CHERI strategy is intended to support a variety of ISA backends and
+has been implemented in the 64-bit ARMv8 and 32-bit and 64-bit RISC-V ISAs with only
 modest localization.
 In particular, it is important that programmers be able to rely on the
 properties described in this chapter -- regardless of the ISA-level
