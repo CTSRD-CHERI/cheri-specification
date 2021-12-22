@@ -417,6 +417,16 @@ reliable detection of pointers in both registers and memory.
 Virtual addresses can be extracted from capabilities -- e.g., for debugging
 purposes -- but avoiding doing so in code generation supports potential use
 of techniques such as copying garbage collection.
+\jhbnote{Parts of this paragraph now seem a bit out of date and more
+  reflective of an older version of 256-bit capabilities that stored
+  offsets instead of addresses.  We now store addresses, and in
+  merged register files, the corresponding integer register for a
+  capability register holds the address of valid capabilities.  They
+  aren't dereferencable as stand-alone addresses (subject to DDC), but
+  they are no longer ``obscured'' in memory.  We also rely on this
+  property for more than just debugging.  For example, the copy*
+  routines in the RISC-V kernel compare against VM\_MAXUSER\_ADDRESS
+  via the integer register without using an explicit CGetAddr.}
 
 Our CHERI 
 prototypes implement tagged memory using partitioned memory, with tags and
@@ -1167,6 +1177,9 @@ revocation:
   In addition, the value of the pointer (encoded in the offset) is distinct from
   the base and length; thus, code that stores other data in low bits of the
   pointer will not affect the collector.
+  \jhbnote{The ``value of the pointer'' language is now stale I think
+    and reflects earlier designs with capability stored offsets
+    instead of addresses.}
   Garbage collection is the logical dual of revocation: garbage collection
   extends the lifetime of objects as long as they have valid references, whereas
   revocation curtails the lifetime of references once the objects to which they
