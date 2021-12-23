@@ -396,7 +396,7 @@ When using 64-bit capabilities in RV32, the RV64 instructions \texttt{LD} and \t
 			\bitbox{5}{cs2}
 			\bitbox{5}{rs1}
 			\bitbox{3}{0x3}
-			\bitbox{5}{imm[0:4]}
+			\bitbox{5}{imm[4:0]}
 			\bitbox{7}{0x23}
 		\end{bytefield}
 		\rvcheriasmfmt[RV32]{\rvcheriasminsnref{SC} cs2, rs1, imm}\\
@@ -418,7 +418,7 @@ When using 128-bit capabilities in RV64, the RV128 instructions \texttt{LQ} and 
 			\bitbox{5}{cs2}
 			\bitbox{5}{rs1}
 			\bitbox{3}{0x4}
-			\bitbox{5}{imm[0:4]}
+			\bitbox{5}{imm[4:0]}
 			\bitbox{7}{0x23}
 		\end{bytefield}
 		\rvcheriasmfmt[RV64]{\rvcheriasminsnref{SC} cs2, rs1, imm}\\
