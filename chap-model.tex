@@ -1498,6 +1498,46 @@ where capabilities
   objects.
 \end{itemize}
 
+\subsection{Protecting Physical Addresses}
+
+A new capability type (distinguished using permissions, for example) could be
+used to express and protect physical addresses.
+The operating system would use these capabilities internally to control access
+to physical addresses to IO memory, for example.
+As most physical memory would be addressed using virtual memory mappings,
+it would be natural to use physical capabilities as leaf node page table
+entries (PTEs), reusing capability permissions as PTE permissions, though some
+additional permissions would be necessary (e.g. dirty).
+
+\paragraph{Synergy with linear capabilities and enclaves}
+Linear physical capabilities could support low-overhead enclaves. 
+If a physical capability could be linear, such that each instance is guaranteed
+to be the unique reference to that physical memory, an enclave could be certain
+that its virtual memory mapping is the only route to access that
+physical page.
+Additionally, it would be necessary to remove low-level page-table management
+from the general operating system to ensure that the physical capability is not otherwise
+dereferenced.
+
+\paragraph{Synergy with sparse, contiguous page tables}
+ASAP~\cite{margaritov2019prefetched} has proposed speculatively assuming that page
+tables are contiguous, if sparse,
+such that an address can directly index each level of
+the page table to produce the probable address of its PTEs.  This allows all levels
+to be queried in parallel, and will be likely to be correct if the operating system
+succeeds in using the expected pages for the page table.
+If the PTEs were capabilities of a unique type, it should be possible to
+accurately distinguish a PTE from data.
+With appropriate guarantees in page table layout (i.e. no overlapping contiguous
+sparse page tables), the page walker can directly load the expected leaf entry
+and know if it is a valid translation.
+For practical contiguous page table sizes, it may be appropriate to use this
+optimisation for the level before the leaf such that we have a fixed 2-level
+page walk, at least in the common case.
+We should note that this optimisation could be used apart from CHERI if physical
+pages could be tagged to distinguish PTE pages from data pages.
+
+
 \subsection{Isolation, Controlled Communication, and Compartmentalization}
 \label{sec:model-isolation-controlled-communication-compartmentalization}
 
