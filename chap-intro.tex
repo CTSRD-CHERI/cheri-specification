@@ -120,9 +120,9 @@ adoption path.
 
 In the remainder of this chapter, we describe  our high-level design goals
 for CHERI, the notion that CHERI is an architecture-neutral protection model
-with architecture-specific mappings (such as CHERI-MIPS and CHERI-RISC-V)%
-\psnote{(the CHERI-MIPS and CHERI-RISC-V mappings detailed here, Arm's experimental Morello architecture~\cite{arm-morello}, and the sketch mapping for x86 described in Chapter~\ref{chap:cheri-x86-64})}, an
-introduction to the CHERI-MIPS concrete instantiation, a brief version
+with architecture-specific mappings (such as CHERI-RISC-V and Arm's Morello)%
+\psnote{(the CHERI-RISC-V mapping detailed here, Arm's experimental Morello architecture~\cite{arm-morello}, and the sketch mapping for x86 described in Chapter~\ref{chap:cheri-x86-64})}, an
+introduction to the CHERI-RISC-V concrete instantiation, a brief version
 history, an outline of the remainder of this report, and our publications to
 date on CHERI.
 A more detailed discussion of our research methodology, including motivations,
@@ -286,13 +286,21 @@ software-engineering practices, and much more.
 \section{Architecture Neutrality and Architectural Instantiations}
 \label{sec:archneut}
 
-CHERI consists of an architectural-neutral protection model, and a set of
-instantiations of that model across multiple ISAs.
-Our initial mapping into the 64-bit MIPS ISA has allowed us to develop the
-CHERI approach.
-We have now expanded to include a more elaborated mapping into
-the 64-bit RISC-V ISA, and a sketch mapping into the x86-64 ISA.
-We have collaborated with Arm as they have developed the experimental Morello
+CHERI is an \textit{architecture-neutral protection model} in that, like
+virtual memory, it can be deployed within multiple ISAs.
+Our initial mapping into the 64-bit MIPS ISA allowed us to develop the
+CHERI approach; using it, we explored the implications downwards into
+the microarchitecture, and upwards into the software stack.
+Having developed a mature hardware-software protection model, we used this as
+the baseline to derive an architecture-neutral CHERI protection model.
+This architecture-neutral model is discussed in detail in
+Chapter~\ref{chap:architecture}.
+We have since added CHERI protection to the RISC-V ISA
+(Chapter~\ref{chap:cheri-riscv}), developed a
+lightweight
+architectural sketch for the x86-64 ISA
+(Chapter~\ref{chap:cheri-x86-64}),
+and collaborated with Arm as they have developed the experimental Morello
 architecture, an application of CHERI to the ARMv8-A
 architecture~\cite{arm-morello}.
 
@@ -434,37 +442,17 @@ type-checking features.
 The CHERI protection model and its implications for software security are
 described in detail in Chapter~\ref{chap:model}.
 
-\psnote{this is the third time (at least) that we've talked about arch-neutral.  Suggest merging the following into the intro to Section~\ref{sec:archneut}.}
-CHERI is an \textit{architecture-neutral protection model} in that, like
-virtual memory, it can be deployed within multiple ISAs.
-In developing CHERI, we initially considered it as a concrete extension to the
-64-bit MIPS ISA; using it, we could explore the implications downwards into
-the microarchitecture, and upwards into the software stack.
-Having developed a mature hardware-software protection model, we used this as
-the baseline in deriving an architecture-neutral CHERI protection model.
-This architecture-neutral model is discussed in detail in
-Chapter~\ref{chap:architecture}.
-We have demonstrated the possibility of adding CHERI protection to more than
-one base ISA by providing a detailed concrete
-instantiation for the 64-bit MIPS ISA (Chapter~\ref{chap:cheri-mips}), a
-draft instantiation in the RISC-V ISA (Chapter~\ref{chap:cheri-riscv}), and a
-lightweight
-architectural sketch for the x86-64 ISA (Chapter~\ref{chap:cheri-x86-64}).
-
-\subsection{An Architecture-Specific Mapping into 64-bit MIPS}
+\subsection{An Architecture-Specific Mapping into RISC-V}
 \label{sec:cheri-isa-design}
 
 \psnote{much of the following, eg tagged memory and the notion of capability instructions, seems arch-neutral to me.  I'd move all that into the previous section, and then present the four architectures more symmetrically}
+\jhbnote{The one risk of that change is that it becomes close to
+  duplicating the arch-neutral chaper entirely.  I think it can still
+  make sense to keep this section as a representative case.}
 
-The CHERI-MIPS ISA (see Chapter~\ref{chap:cheri-mips}) is an instantiation of
-the CHERI protection model as an
-extension to the 64-bit MIPS ISA~\cite{Heinrich:1993:MRU:154056}.
-CHERI adds the following features to the MIPS ISA\footnote{Formally,
-CHERI instructions are added to MIPS as a \textit{MIPS coprocessor} -- a reservation
-of opcode space intended for third-party use.
-Despite the suggestive term ``coprocessor'', CHERI support will typically be
-integrated tightly into the processor pipeline, memory subsystem, and so on.
-We therefore eschew use of the term.} to support granular memory protection
+The CHERI-RISC-V ISA (see Chapter~\ref{chap:cheri-riscv}) is an instantiation of
+the CHERI protection model to the 32-bit and 64-bit variants of the open-source RISC-V architecture.
+CHERI adds the following features to support granular memory protection
 and compartmentalization within address spaces:
 
 
@@ -473,28 +461,11 @@ and compartmentalization within address spaces:
 the executing thread to
 access memory, and to invoke object references
 to transition between protection domains.
-We model these registers as a separate {\em capability register file},
-supplementing the general-purpose integer register file.
+We extend the existing general-purpose integer registers as well as
+various CSRs to hold capabilities.
 
 Capability registers contain a tag, object type, permission mask, base, length, and offset (allowing the description of not just a bounded region, but also a pointer into that region, improving C-language compatibility).
 Capability registers are suitable for describing both data and code, and can hence protect both data integrity/confidentiality and control flow.
-Certain registers are reserved for use in exception handling; all others are available to be managed by the compiler using the same techniques used with conventional registers.
-Over time, we imagine that software will increasingly use capabilities rather
-than integers to describe data and object references.
-
-Another potential integration into the ISA (which would maintain the same
-CHERI protection semantics) would be to extend the existing general-purpose
-integer registers so that they could also hold capabilities.
-This might reduce the hardware resources required to implement CHERI support.
-However, we selected our current approach to maintain consistency with the
-MIPS ISA extension model (in which coprocessors have independent register
-files), and to minimize \textit{Application Binary Interface (ABI)} disruption
-on boundaries between legacy and CHERI-aware code for the purposes of rapid
-architectural and software iteration.
-We explore the potential space of mappings from the CHERI model into the ISA
-in greater detail in Section~\ref{sec:deep-vs-surface}, as well as in
-Chapters~\ref{chap:cheri-riscv} and~\ref{chap:cheri-x86-64} where we consider
-alternative mappings into non-MIPS ISAs.
 
 \item[Capability instructions] allow executing code to create, constrain (e.g., by reducing bounds or permissions), manage, and inspect capability register values.  Both unsealed (memory) and sealed (object) capabilities can be loaded and stored via memory capability registers (i.e., dereferencing).
 Object capabilities can be invoked, via special instructions, allowing a transition between protection domains, but are {\em immutable} and {\em non-dereferenceable}, providing encapsulation of the code or data that they refer to.
@@ -505,7 +476,7 @@ authority, are used to indicate exactly which rights should be exercised, to
 limit the damage that can be caused by exploiting bugs.
 Tradeoffs exist around intentional use, and in some cases compatibility or
 opcode utilization may dictate implicit capability selection; for example,
-legacy MIPS load and store instructions implicitly dereference a Default
+legacy RISC-V load and store instructions implicitly dereference a Default
 Data Capability as they are unable to explicitly name a capability register.
 Most capability instructions are part of the user-mode ISA, rather than the privileged ISA, and will be generated by the compiler to describe application data structures and protection properties.
 
@@ -533,44 +504,15 @@ model, which espouses a separation of policy and mechanism\psnote{does
   capability stuff)}, and RISC: CHERI's features make possible
 the implementation of a wide variety of OS, compiler, and application-originated policies on a common protection substrate that optimizes fast paths through hardware support.
 
-%
-% Comment out this text in order to de-emphasize a coprocessor interpretation
-% of CHERI.  However, we might want to lift some ideas from this paragraph and
-% weave them back into the overall text here at some point.
-%
-%The capability coprocessor is a coprocessor in two senses.
-%First, the capability coprocessor occupies a portion of the existing ISA
-%encoding dedicated to extensions (typically referred to as coprocessor
-%instructions).
-%Second, the capability coprocessor supplements the general-purpose integer register
-%file with its own ISA-managed registers, as well as performing (and
-%transforming) memory access, and delivering exceptions to the main pipeline,
-%requiring hardware resources that interact with the primary processor
-%pipeline.  This behavior is comparable in many ways to system,
-%floating-point, vector, or cryptographic coprocessors that will similarly
-%supplement the base ISA and processor features.
+CHERI-RISC-V applies CHERI protections in different ways compared to
+our initial CHERI-MIPS architecture.  Some of these differences arise
+from differences in the base ISA; we anticipate that
+adaptations of CHERI to ISAs will adopt
+conventions such as instruction-encoding
+in keeping with their specific flavor and design.
 
-
-%\psnote{rephrasing, as we've already introduced the fact that we're
-%prototyping on MIPS}
-%In order to prototype this approach, we have instantiated our ideas about CHERI
-%capability access to a specific instruction set: the 64-bit MIPS ISA.
-%This
-Our prototype of this approach,  instantiating our ideas about CHERI
-capability access to a specific instruction set (the 64-bit MIPS ISA)
-has necessarily led to a set of congruent implementation decisions about
-register-file size, selection of specific instructions, exception handling,
-memory alignment requirements, and so on, that reflect that starting-point
-ISA.
-These decisions might be made differently with another starting-point ISA as
-they are simply surface features of the underlying approach; we anticipate that
-adaptations to ISAs such as ARM, RISC-V, and x86-64 would adopt
-instruction-encoding conventions, and so on, more in keeping with their
-specific flavor and design (see Chapters~\ref{chap:cheri-riscv}
-and~\ref{chap:cheri-x86-64}).
-
-Other design decisions reflect the goal of creating a platform for prototyping
-and exploring the design space itself.
+Other design decisions reflect maturity of the CHERI model and lessons
+learned from CHERI-MIPS.
 In our initial work on CHERI, we utilized an uncompressed capability format
 in which each capability was 256 bits in size.
 This gave us significant flexibility to experiment with capability contents
@@ -584,29 +526,13 @@ exploiting redundancy between a pointer value and its bounds -- to implement
 As of CHERI ISAv8, capabilities are assumed to use compressed bounds whether
 based on a 32-bit or 64-bit base address size.
 
-\psnote{This is getting very MIPS-implementation-specific -- it's ok,
-  but possibly gives the wrong emphasis for people now reading the
-  document from the top?}
-In our CHERI-MIPS prototype implementation of the CHERI model, capability
-support is tightly coupled with the existing processor pipeline: instructions
-propagate values between general-purpose integer registers and capability registers; capabilities
-transform interpretation of virtual addresses generated by capability-unaware
-instructions including by transforming the program counter; capability
-instructions perform direct memory stores and loads both to and from
-general-purpose integer registers and capability registers; and capability-related behaviors
-deliver exceptions to the main pipeline.
-By virtue of having selected the MIPS-centric design choice of exposing
-capabilities as a separate set of registers, we maintain a separate capability
-register file as an independent hardware unit -- in a manner comparable to
-vector or floating-point units in current processor designs.
-The impacts of this integration include additional control logic due to
-maintaining a separate register file, and a potentially greater occupation of
-opcode space, whereas
-combining register files might permit existing instructions
-to be reused (with care) across integer and capability operations.
-%In many ways, these are surface design choices that do not affect the majority
-%of programmer-visible protection semantics (aside from small quantities of OS,
-%runtime, and compiler-visible code generation and assembly).
+CHERI-MIPS used a separate \textit{capability register file} to hold
+capability registers rather than extending general-purpose registers.
+CHERI-RISC-V instead extends general-purpose registers to hold
+capabilities. \footnote{CHERI-RISC-V can in fact be parameterized to
+  use a split register file for experimental purposes, but this is
+  not fully supported by our hardware and software implementations at
+  the time of writing.}
 
 Wherever possible, CHERI systems make use of existing hardware designs: processor pipelines and register files, cache memory,
 system buses, commodity DRAM, and commodity peripheral devices such as
@@ -615,21 +541,12 @@ We are currently focusing on enforcement of CHERI security properties on applica
 running on a general-purpose processor; in future work, we hope to consider the effects of
 implementing CHERI in peripheral processors, such as those found in Network Interface Cards (NICs) or Graphical Processing Units (GPUs).
 
-\subsection{CHERI-RISC-V, CHERI-x86-64, and Arm Morello}
+\subsection{CHERI-x86-64 and Arm Morello}
 
 The abstract CHERI memory protection and security models described above have
-been applied to three other architectures:
+been applied to two other architectures:
 
 \begin{description}
-\item[CHERI-RISC-V] is an increasingly mature application of CHERI to the
-  32-bit and 64-bit variants of the open-source RISC-V architecture
-  (Chapter~\ref{chap:cheri-riscv}).
-  RISC-V is a more contemporary architecture than MIPS, and includes features
-  such as a hardware page-table walker.
-  We have fully elaborated these ISA extensions, implemented multiple
-  microarchitectures on FPGA, and ported our complete CHERI software stack to
-  CHERI-RISC-V.
-
 \item[CHERI-x86-64] is a sketch application of CHERI to the Intel x86-64
   architecture (Chapter~\ref{chap:cheri-x86-64}).
   It is not fully elaborated, and has not been implemented, but serves to
@@ -645,26 +562,14 @@ been applied to three other architectures:
 
 Even when targeting a specific architecture, there are multiple ways to
 express CHERI's higher-level memory-protection and security-model goals.
-For example, the CHERI model can be implemented using a \textit{split
-capability register file}, similar to floating point, in which capability
-values are stored in a separate register file, or using a \textit{merged
-register file}, in which capabilities extend existing integer registers.
+For example,
 CHERI provenance validity and monotonicity properties can be maintained by
 throwing an exception on attempted violation (e.g., an attempt to broaden
 bounds), or by clearing the tag and allowing a future attempted dereference
 to throw an exception.
 
-These three architectural adaptations reflect substantially improved
-understanding of the CHERI model and its potential architecture application
-and microarchitectural implementation.
-For example, all architectures now use a merged register files rather than
-a split register file as was the case in CHERI-MIPS.\footnote{CHERI-RISC-V can
-  in fact be parameterized to use a split register file, for experimental
-  purposes, but this is not fully supported by our hardware and software
-  implementations at the time of writing.}
-
 There is a high degree of source-level compatibility between software across
-these architectures.
+all CHERI architectures.
 Compilers and low-level operating-system components necessarily have modest
 amounts of architecture-specific code generation, assembly code, and status
 or control registers.
@@ -701,6 +606,7 @@ benefits without the costs of full formal verification), and using
 machine-checked proof to establish high confidence that the
 architecture design provides specific security properties.
 
+\jhbnote{Do we want to trim mention of L3 and/or CHERI-MIPS here?}
 The basis for all this has been use of formal specifications of the
 ISA instruction behavior as a fundamental design tool, initially for
 CHERI-MIPS in L3~\cite{Fox2015}, and now for CHERI-MIPS and
@@ -710,7 +616,7 @@ instruction behavior, encoding data, etc.
 Simply moving from the informal pseudocode commonly used to describe
 instruction behavior to parsed and type-checked
 artifacts already helps maintain clear specifications.
-The CHERI-MIPS instruction descriptions in Chapter~\ref{chap:isaref-mips}
+The CHERI-RISC-V instruction descriptions in Chapter~\ref{chap:isaref-riscv}
 are automatically included from the Sail model, keeping documentation
 and model in sync.
 \psnote{Robert: do we want to include pointers to the model repos somewhere?}
@@ -829,7 +735,7 @@ protection model and instruction-set architecture.
 \medskip
 \noindent
 Chapter~\ref{chap:introduction} introduces the CHERI protection model, our
-architecture-neutral approach, and specific CHERI-MIPS and CHERI-RISC-V ISAs.
+architecture-neutral approach, and the specific CHERI-RISC-V ISA.
 
 \medskip
 \noindent
@@ -845,16 +751,8 @@ capability and tagged-memory models, categories of new instructions, etc.
 
 \medskip
 \noindent
-Chapter~\ref{chap:cheri-mips} describes an architecture-specific mapping of
-the CHERI protection model into the 64-bit MIPS architecture.
-This includes specification of the CHERI-MIPS capability coprocessor, register
-file, Translation Look-aside Buffer (TLB), privilege model, and other
-ISA-specific semantics.
-
-\medskip
-\noindent
-Chapter~\ref{chap:cheri-riscv} describes \psnote{do we really still want to regard and label this as a ``draft''?} a draft architecture-specific mapping
-of the CHERI protection model into the 64-bit RISC-V architecture.
+Chapter~\ref{chap:cheri-riscv} describes an architecture-specific mapping
+of the CHERI protection model into the 32-bit and 64-bit RISC-V architecture.
 This includes specification of the CHERI-RISC-V architecture extension,
 register file, Memory Management Unit (MMU), privilege models, and other
 ISA-specific semantics.
@@ -867,19 +765,13 @@ non-RISC instruction set.
 
 \medskip
 \noindent
-Chapter~\ref{chap:isaref-mips} provides a detailed description of each
-CHERI-MIPS instruction, and also how compilers should handle floating-point
-loads and stores via capabilities.
-
-\medskip
-\noindent
 Chapter~\ref{chap:isaref-riscv} provides a detailed description of each
 CHERI-RISC-V instruction.
 
 \medskip
 \noindent
 Chapter~\ref{chap:rationale} discusses the design rationale for many aspects
-of the CHERI-MIPS ISA, as well as our thoughts on future refinements based on
+of the CHERI ISA, as well as our thoughts on future refinements based on
 lessons learned to date.
 \psnote{The following doesn't belong with this chapter description, so
   I'd just delete it.  And that draft
@@ -922,18 +814,13 @@ including past systems that have influenced our approach.
 \medskip
 \noindent
 Chapter~\ref{chap:conclusion} discusses our short- and long-term plans for the
-CHERI protection model and CHERI-MIPS ISA, considering both our specific plans
+CHERI protection model and CHERI ISAs, considering both our specific plans
 and open research questions that must be answered as we proceed.
 
 \medskip
 \noindent
 Appendix~\ref{app:versions} provides a more detailed version history of the
-CHERI protection model and CHERI-MIPS ISA.
-
-\medskip
-\noindent
-Appendix~\ref{app:isaquick-mips} is a quick reference for CHERI-MIPS
-instructions and encodings.
+CHERI protection model and CHERI ISAs.
 
 \medskip
 \noindent
@@ -942,7 +829,7 @@ instructions and encodings.
 
 \medskip
 \noindent
-Appendix~\ref{app:experimental} specifies a number of CHERI-MIPS instructions
+Appendix~\ref{app:experimental} specifies a number of CHERI instructions
 that we still consider experimental, and hence are not included in the main
 specification.
 
@@ -959,8 +846,8 @@ CHERI-related terms.
 \medskip
 
 Future versions of this document will continue to expand our
-consideration of the CHERI model and CHERI-MIPS instruction-set architecture,
-its impact on software, and evaluation strategies and results.
+consideration of the CHERI model and CHERI instruction-set architectures,
+their impact on software, and evaluation strategies and results.
 Additional information on our prototype CHERI hardware and software
 implementations, as well as formal methods work, can be found in accompanying
 reports.
@@ -1096,7 +983,7 @@ Each has had multiple versions reflecting evolution of our approach:
   UCAM-CL-TR-876, UCAM-CL-TR-891, UCAM-CL-TR-907, UCAM-CL-TR-927,
   UCAM-CL-TR-951},
   describes the CHERI ISA, both as a high-level, software-facing
-  model and the specific mapping into the 64-bit MIPS instruction set.
+  model and the specific mapping into multiple instruction sets.
   Successive versions have introduced improved C-language support, support for
   scalable compartmentalization, and compressed capabilities.
 
