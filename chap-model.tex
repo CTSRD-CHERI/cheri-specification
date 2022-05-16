@@ -24,9 +24,9 @@ models and approaches.
 
 We describe the cross-architecture aspects of CHERI in
 Chapter~\ref{chap:architecture}.
-Collectively, our instantiations of the CHERI protection model in the 64-bit
-MIPS (Chapter~\ref{chap:cheri-mips}), 32- and 64-bit RISC-V
-(Chapter~\ref{chap:cheri-riscv}), and 64-bit ARMv8-A
+Collectively, our instantiations of the CHERI protection model in the
+32- and 64-bit RISC-V
+(Chapter~\ref{chap:cheri-riscv}) and 64-bit ARMv8-A
 (Morello~\cite{arm-morello}) ISAs
 demonstrate the portability of the model despite diverse underlying
 architectural implementations.
@@ -268,11 +268,7 @@ choices, as well as software-facing considerations such as compiler code
 generation, stack layout, operating-system behavior, and so on.
 However, the generalized CHERI protection model can be mapped into
 architectures in many different forms.
-For example, an early design choice might be between holding capabilities in
-a dedicated \textit{capability register file} or extending existing 64-bit
-registers to hold 128-bit capabilities, known as a \textit{merged
-register file}.
-While this and many other choices will affect a variety of factors in the
+While implementation choices will affect a variety of factors in the
 architecture and microarchitecture, the resulting protection model can be
 considered \textit{portable} in that common protection properties and usage
 patterns can be mapped into various architectural instantiations.
@@ -844,9 +840,8 @@ capabilities can be constrained:
 
 \begin{description}
 
-\item[Capability PTE or TLB bits] extend the existing load and store
-  permissions on TLB entries (or, in architectures with hardware page-table walkers,
-  page-table entries) with new permissions to authorize loading and storing
+\item[Capability PTE bits] extend the existing load and store
+  permissions on page-table entries with new permissions to authorize loading and storing
   of capabilities.
   This allows the operating system to maintain pages from which tagged
   capabilities cannot be loaded (tags will be transparently stripped on load),
@@ -919,7 +914,7 @@ Similarly, storing a tagged capability to a virtual-memory page might be an
 indicator to a garbage collector that it may now be necessary to scan that
 page in search of capabilities.
 
-This design point conserves PTE/TLB and permission bits; there is some argument
+This design point conserves PTE and permission bits; there is some argument
 that completing the space (i.e., shifting to three or four bits
 each\psnote{each what?}) would
 offer functional improvements -- for example, the ability to avoid exceptions on
@@ -1285,12 +1280,6 @@ by the ISA and how they are mapped
 into programmer-visible constructs such as C-language features.
 The description in this chapter is intended to be agnostic to the specific
 Instruction-Set Architecture (ISA) in which CHERI is implemented.  
-While the
-implementation described in later chapters was initially mapped into the 64-bit MIPS ISA, the
-\jhbnote{When can we make RISC-V the ``main'' ISA?}
-overall CHERI strategy is intended to support a variety of ISA backends and
-has been implemented in the 64-bit ARMv8 and 32-bit and 64-bit RISC-V ISAs with only
-modest localization.
 In particular, it is important that programmers be able to rely on the
 properties described in this chapter -- regardless of the ISA-level
 implementation -- 
