@@ -35,12 +35,8 @@ This rapidly led to a number of conclusions:
 \item Incremental deployment and compatibility with the UNIX model implied
   the need to retain
   the general-purpose memory management unit (MMU) more or less as
-  it then existed, including support for variable page sizes, TLB layout,
+  it then existed, including support for variable page sizes, page table layout,
   and so on.
-  The MIPS ISA describes a software-managed TLB rather than hardware
-  page-table walking -- as is present in most other ISAs.
-  However, this is not fundamental
-  to our approach, and either model would work.
 \end{itemize}
 
 \section{Tagged Memory for Non-Probablistic Protection}
@@ -216,14 +212,16 @@ envision capabilities gradually displacing general-purpose integer registers as
 pointers, but where management of the two register files will remain largely
 the same, with stack spilling behaving the same way, and so on, as is already
 the case for disjoint integer and floating-point register files.
-We selected the separate representation for a few pragmatic reasons:
+
+We initially selected the separate representation on CHERI-MIPS for a
+few pragmatic reasons:
 
 \begin{itemize}
-\item Coprocessor interfaces frequently make the assumption of additional
+\item Coprocessor interfaces on MIPS assume additional
   register files (a la floating-point registers).
-\item Capability registers are quite large, and by giving the capability
+\item The initial 256-bit capability registers were quite large, and by giving the capability
   coprocessor its own pipeline for manipulations, we could avoid enforcing a
-  128-bit-wide path through the main pipeline.
+  256-bit-wide path through the main pipeline.
 \item It is more obvious, given a coprocessor-based interface, how to provide
   compatibility support in which the capability coprocessor is ``disabled,''
   the default configuration in order to support unmodified MIPS compilers and
@@ -231,19 +229,20 @@ We selected the separate representation for a few pragmatic reasons:
 \end{itemize}
 
 \noindent
-However, it is entirely possible to imagine a variation on the CHERI design in
+However, a design in
 which (more similar to the manner in which the 32-bit x86 ISA was extended to
 support 64-bit registers) the two files are \textit{merged} and able to hold
-both general-purpose integer registers and capability registers.
-This becomes a more appealing choice in the presence of 128-bit compressed
-capabilities, as register size doubles rather than quadruples.
+both general-purpose integer registers and capability registers is
+also possible.
+This became a more appealing choice in the presence of 128-bit compressed
+capabilities, as register size doubled rather than quadrupled.
 
 Early in our design cycle, capability registers were able to hold only true
 capabilities (i.e., with tags); later, we weakened this requirement by adding
 an explicit tag bit to each register, in order to improve support for
 capability-oblivious code such as memory-copy routines able to copy data
 structures consisting of both capabilities and ordinary data.
-This shifts our approach somewhat more towards a merged approach; our view
+This shifted our approach somewhat more towards a merged approach; our view
 is that efficiency of implementation and compatibility (rather than
 maintaining a negligible
 effect on the software model) would be the primary reasons to select one
@@ -262,9 +261,8 @@ might be quite different; effectively pinning the two to one another would
 reduce the efficiency of both.
 
 In CHERI-RISC-V (Chapter~\ref{chap:cheri-riscv}), we parameterize the
-instruction set to support both split and merged registers files.
-This will allow us to explore in greater detail the performance and
-compatibility implications of this design choice.
+instruction set to support both split and merged register files.
+Both Morello and CHERI-x86-64 use merged register files.
 
 \section{The Compiler is Not Part of the TCB for Isolated Code}
 
@@ -421,9 +419,8 @@ program really intends to overwrite a capability with non-capability data).
 The chosen approach is simpler to
 implement in hardware. If store instructions needed to check the tag bit
 of the memory location that was being written, then they would need a
-read-modify-write cycle to memory, rather than just a write; in general,
-the MIPS architecture carefully avoids the need for a read-modify-write cycle
-within a single instruction. (However, once the memory system needs
+read-modify-write cycle to memory, rather than just a write.
+(However, once the memory system needs
 to deal with cache coherence, a write is not that much simpler than a
 read-modify-write.)
 
@@ -464,7 +461,7 @@ capabilities.
 
 \section{Reading Capabilities as Bytes}
 
-In CHERI, if a data load instruction such as \insnref[clbhwd]{CLB} is used
+In CHERI, if a non-capability data load instruction such as \insnnoref{LD} is used
 on a memory location containing a capability, the internal representation
 of the capability is read. An alternative architecture would have
 such loads return zero, or raise an exception.
@@ -519,13 +516,13 @@ CHERI has separate permission bits for storing a capability versus storing
 non-capability data (and similarly, for loading a capability versus loading
 non-capability data).
 
-(An alternative design would be just one Permit\_Load and just one
-Permit\_Store permission that were used for both capabilities and non-capability data.)
+(An alternative design would be just one \cappermL{} and just one
+\cappermS{} permission that were used for both capabilities and non-capability data.)
 
 The advantage of separate permission bits for capabilities is that
 that there can be two protected subsystems that communicate via a memory
-buffer to which they have Permit\_Load and Permit\_Store permissions, but
-do not have Permit\_Load\_Capability or Permit\_Store\_Capability. Such
+buffer to which they have \cappermL{} and \cappermS{} permissions, but
+do not have \cappermLC{} or \cappermSC{}. Such
 communicating subsystems cannot pass capabilities via the shared buffer, even
 if they collude. (We realized that this was potentially a requirement when
 trying to formally model the security guarantees provided by CHERI.)
@@ -594,6 +591,9 @@ By comparison, the CCured language includes both \ccode{FSEQ} and
 \ccode{SEQ} pointers. The alternative (no offset) architecture
 would have capabilities that acted like CCured's FSEQ, and used an extra
 offset when implementing SEQ semantics.
+\jhbnote{This section seems relevant to the initial 256-bit
+  capabilities and no-longer relevant for compressed capabilities.
+  Perhaps it just needs to be explained as such rather than outright removed.}
 
 \section{NULL Does Not Have the Tag Bit Set}
 
@@ -615,8 +615,8 @@ have been with the \ctag{} bit set, and zero in the \cbase{} field and
 an array of length zero.
 
 Many CHERI instructions are agnostic as to which of these two
-conventions for NULL is employed, but the \insnref{CFromPtr},
-\insnref{CToPtr} and \insnref{CPtrCmp} operations are aware of the
+conventions for NULL is employed, but the \insnref{CFromPtr} and
+\insnref{CToPtr} operations are aware of the
 convention.
 
 The advantages of NULL's \ctag{} bit being unset are:
@@ -627,9 +627,6 @@ Initializing a region of memory by writing zero bytes to it will initialize
 all capability variables within the region to the NULL capability. Initializing
 memory by writing zeros is, for example, done by the C \ccode{calloc()}
 function, and by some operating systems.
-\item
-It is possible for code to conditionally branch on a capability being NULL by
-using the \insnref{CBTS} or \insnref{CBTU} instruction.
 \end{itemize}
 
 \section{The length of NULL is MAXINT}
@@ -672,12 +669,12 @@ algorithm.
 
 In CHERI, a capability's permission bits together with the \cotype{} field
 determine what kind of capability it is. A capability for a region of memory
-has is unsealed (a \cotype{} of $2^{64}-1$) and \emph{Permit\_Load} and/or \emph{Permit\_Store} set;
-a capability for an object is sealed and has \emph{Permit\_Execute}
+is unsealed (a \cotype{} of $2^{64}-1$) and has \emph{\cappermL{}} and/or \emph{\cappermS{}} set;
+a capability for an object is sealed and has \emph{\cappermX{}}
 unset; a capability to call a protected subsystem (a ``call gate'') is
-sealed and has \emph{Permit\_Execute} set; a capability that allows
+sealed and has \emph{\cappermX{}} set; a capability that allows
 the owner to create objects whose type identifier (\cotype{}) falls within
-a range is unsealed and \emph{Permit\_Seal} set.
+a range is unsealed and has \emph{\cappermSeal{}} set.
 
 An alternative architecture would have included a separate
 \emph{capability type} field, as well as the \cperms{} field, within each
@@ -741,7 +738,7 @@ that were supposed to be kept isolated by the capability mechanism.)
 
 \section{Unseal is an Explicit Operation}
 
-In CHERI, it would require an explicit operation to
+In CHERI, it requires an explicit operation to
 convert an undereferenceable  pointer to an object into a pointer that
 allows the object's contents to be inspected or modified directly.
 This can be done directly with the \insnref{CUnseal} operation,
@@ -820,14 +817,14 @@ It can also be used by stand-alone CHERI-based microkernels to control use
 of the exception-handling and cache-management mechanisms, and of the MMU on
 MMU-enabled hardware.
 Although the permission limits use of features to control the virtual address
-space (e.g., TLB manipulation), it does not prevent access to kernel-only
+space (e.g., MMU special register manipulation), it does not prevent access to kernel-only
 portions of the virtual address space.
 This allows kernel code to operate without privileged permission using the
 capability mechanism to limit which portions of kernel address space are
 available for use in constrained compartments.
 
-We employ a single permission bit to conserve space (especially in 128-bit
-capabilities), but also because it offers a coherent view on architectural
+We employ a single permission bit to conserve space,
+but also because it offers a coherent view on architectural
 privilege: many of the privileged architectural instructions allow bypass of
 in-address-space memory protection in different ways, and using subsets of
 those operations safely would be quite difficult.
@@ -838,11 +835,10 @@ virtualization features), a more fine-grained decomposition might be of
 greater utility, and could motivate a new capability format intended to
 authorize use of privilege.
 
-In earlier versions, the privileged permission(s) controlled use of only CP2
-privilege (i.e., exception-handling capabilities); in the current version, the
-bit also controls MIPS privileges available only in kernel mode: TLB, CP0,
-selected uses of the \insnnoref{CACHE} instruction, and
-\insnnoref{ERET} use.
+In earlier versions, the privileged permission(s) controlled use of only CHERI-specific
+privileges (i.e., exception-handling capabilities); in the current version, the
+bit controls all privileges available only in kernel mode including
+MMU registers and exception return instructions.
 This allows compartmentalization within the kernel address space (e.g., to
 sandbox untrustworthy components), as well as more general mitigation by
 limiting use of privileged features to only selected code components, jumped
@@ -856,10 +852,10 @@ within an operating-system kernel.
 In our design, absence of the privileged permission denies use of privileged
 ISA features, but presence does not grant that right unless it is also
 authorized by kernel mode.
-Other compositions of the capability permission bit and existing MIPS KSU
-(kernel/supervisor/user-mode) authorization are imaginable.
+Other compositions of the capability permission bit and existing
+ring-based authorization are imaginable.
 For example, the permission bit could grant privileged ISA use in userspace
-regardless of KSU state.
+regardless of ring.
 While this composition might allow potentially interesting delegation of
 privilege to user components, the lack of granularity of control appears to
 offer little benefit when a similar effective delegation can be implemented
@@ -868,9 +864,9 @@ In a ring-free design (e.g., one without an MMU or kernel/supervisor/user
 modes), however, the privileged permission would be the sole means of
 authorizing privilege.
 
-Another design choice is that we have not extended MIPS with new
+Another design choice is that we have not added new
 capability-based privilege instructions; instead, we chose to limit use of
-existing instructions (such as those used in TLB management).
+existing instructions (such as those used in MMU management).
 This fails to extend the principle of intentional use to these privileged
 features; in return we achieve reduced disruption to current software
 stacks, and avoid introducing new instructions in the opcode space.
@@ -881,12 +877,12 @@ due to use of a permission bit
 on \PCC{}: even within a highly privileged
 kernel, most functions might operate without the ability to employ privileged
 instructions, with an explicit use of \insnref{CJALR} to jump to a code
-pointer with the Access\_System\_Registers permission enabled -- which
+pointer with the \cappermASR{} permission enabled -- which
 executes
 only the necessary instructions and reduces the window of opportunity for
 privilege misuse.
 
-An alternative design would extend the MIPS privileged instruction set to
+An alternative design would extend the privileged instruction set to
 include versions that accept explicit capability operands authorizing use of
 those instructions, in a manner similar to our extensions to our
 capability-extended load and store instructions.
@@ -899,79 +895,8 @@ Finally, it is conceivable that capabilities could be used to authorize
 delegation of the right to use privileged instructions to userspace code,
 rather than simply restricting the right to use privileged instructions in
 kernel code.
-We have opted to limit our approach to using capabilities to restrict features
-in the MIPS model, with a simple and deterministic composition of features.
-
-\section{Composing CHERI with MIPS Exception Handling}
-
-Exception handling is inevitably architecture specific, with the approach
-taken in MIPS being particularly RISC-esque and quirky.
-In MIPS, an exception interrupts the instruction flow, sets the \EXL{} status
-flag to transition to kernel mode, disable interrupts, updates the
-exception cause register to provide information about the exception, saves the
-current \PC{} in \EPC{}, and sets \PC{} to the appropriate interrupt vector
-address.
-Later versions of MIPS allow that address to be configured.
-Special handling is also provided if an exception fires while \EXL{} is set,
-making use of \ErrorEPC{} instead of \EPC{}.
-As only one register is saved by the architecture (\PC{}), this makes it
-difficult to perform a software-based context switch.
-Other more recent RISC architectures will bank a second register, typically
-the stack pointer, to allow that to take place.
-In MIPS, the ABI instead reserves two general-purpose integer registers, \regname{k0}
-and \regname{k1}, for use by exception handlers.
-
-\subsection{MIPS-centric Exception Handling}
-
-A primary goal of our work is to avoid disrupting MIPS exception handling.
-This has two implications: first, that when a capability-unaware OS is booted
-and operating, it should work as it did previously; and second, that when a
-capability-aware OS is used, CHERI extensions to exception handling preserve
-the existing structure and approach of exception handling.
-
-\subsection{Capability Extensions to MIPS Special Registers}
-
-The most natural extension to MIPS exception handling simply extends the
-existing \EPC{} to be an Exception Program Counter Capability (\EPCC{}), and
-\ErrorEPC{} to be an Error Exception Program Counter Capability
-(\ErrorEPCC{}), which can save and restore the full \PCC{} rather than just
-\PC{}.
-However, this is insufficient to authorize or safely protect execution of the
-exception vector, which the interrupted code may not have access to, and
-should not be able to influence.
-As with later MIPS versions, we therefore allow the exception vector to be
-defined using a special capability register, the Kernel Code Capability
-(\KCC{}), which will be installed in \PCC{} when the exception is taken, both
-authorizing access for the exception handler, and preventing the interrupted
-code from improperly affecting the exception handler.
-In the interests of a more object-centered design, in which capabilities for
-code and data are not unnecessarily, we also provide a special capability
-register, the Kernel Data Capability (\KDC{}), which is readable in kernel
-mode.
-
-\subsection{Kernel-Reserved Special Capability Registers}
-
-MIPS reserves two general-purpose integer registers for exception-handler
-bootstrapping, \regname{k0} and \regname{k1}.
-In earlier versions of the CHERI ISA, we similarly reserved two
-general-purpose capability registers, \KRC{} and \KQC{}, for kernel use.
-We have since shifted these to the Special Capability Register File, accessed
-via \insnref{CReadHwr} and \insnref{CWriteHwr}.
-We anticipate that they will be used to temporarily save general-purpose
-capability registers in a similar manner, letting the general-purpose
-registers be used by the exception handler itself -- e.g., to hold a copy of
-\KDC{} for the purposes of memory access to save capability registers for the
-preempted context.
-This design choice is especially important when contemplating a
-merged register file, in which case avoiding further reservations in that file
-would limit ABI disruption.
-Avoiding special interpretations of general-purpose capability registers also
-avoids special access-control rules (e.g., to limit access to those
-registers), simplifying the ISAs.
-Finally: these registers are used only very infrequently, and as such take up
-valuable space that could be available to the compiler, meaning that using up
-encoding and register-file space is a poorer use of micro-architectural
-resources.
+We have opted to limit our approach to using capabilities to restrict features,
+with a simple and deterministic composition of features.
 
 \section{CInvoke: Jump-Based Domain Transition}
 \label{sec:jump-based-domain-transition}
@@ -980,7 +905,7 @@ Earlier versions of the CHERI-MIPS ISA included an exception-based
 mechanism for domain transition via a pair of \insnnoref{CCall}
 and \insnnoref{CReturn} instructions.  The use of exceptions
 introduced both runtime overhead and implementation complexity in the
-kernel.  We have replaced this mechanism with \insnref{CInvoke}
+kernel.  We replaced this mechanism with \insnref{CInvoke}
 which provides jump-like semantics.
 Non-monotonicity is accomplished by virtue of unsealing the sealed
 operand capabilities to \insnref{CInvoke}.
@@ -988,33 +913,6 @@ operand capabilities to \insnref{CInvoke}.
 % What does this mean?  CCalls1 jumps into an arbitrary sealed domain.
 % Will it always be controlled by the trusted computing base?
 % Maybe we're saying that it often is?  Anyway, commented out for now.
-
-While a standard MIPS pipeline allows a branch delay slot before diverting
-control flow after a branch, \insnref{CInvoke} does not have
-a branch-delay slot --
-as the remaining branch-delay instruction in the calling domain would
-otherwise
-have access to data registers written by the branch.
-Removing the delay slot for this case disturbs the
-normal control flow of the pipeline, causing a pipeline bubble in our case,
-and also prevents an important optimization for safe
-domain crossing -- which uses the delay slot to clear the last registers in the
-calling domain that were needed as operands for the \insnref{CInvoke}
-itself.
-Nevertheless, significant software complexity was necessary to ensure a safe
-branch-delay slot for \insnref{CInvoke}.
-Rather than removing the delay slot after \insnref{CInvoke}, we
-could have thrown an exception on any instruction that reads or writes \IDC{}
-in the branch-delay slot.
-The result would be that the newly unsealed \IDC{} is available only to code
-executing at
-the newly unsealed \PCC{}, avoiding premature exposure of \IDC{} to the caller
-before callee code begins executing.
-However an exception in the branch delay slot would still expose \IDC{} to the
-exception handler, and a creative use of signals could expose \IDC{} to the
-calling domain.
-Rather than mandate a more complex set of invariants in software, we chose
-to eliminate the branch delay slot of \insnref{CInvoke}.
 
 It is possible to imagine more comprehensive jump-based instructions
 including:
@@ -1024,12 +922,12 @@ including:
   We choose not to implement this to avoid writing two general-purpose registers
   in one instruction, and because the
   caller can itself perform a move to a link destination based on
-  \insnref{CGetPCC}.
+  \insnref{AUIPCC}.
 
 \item A variation that seals caller \PCC{} and \IDC{} to construct a
   return-capability pair.
-  We choose not to implement this to multiple register writes in one instruction,
-  because the
+  We choose not to implement this to avoid multiple register writes in one instruction,
+  and because the
   caller can itself perform any necessary sealing of its own return state, if
   required.
   Further, to provide strict call-return semantics, additional more complex
@@ -1167,7 +1065,7 @@ Object capabilities require additional capability fields (software-defined
 permission bits, and the fairly wide object type field).
 The default data capability is an ordinary 128-bit capability, but has the
 property that use of a full cursor (base plus offset) introduces a further
-arithmetic addition in a critical path of MIPS loads and stores.
+arithmetic addition in a critical path of legacy loads and stores.
 In both cases, we have turned to reduced precision (i.e., increased alignment
 requirements) to eliminate these problems, looking to minimum page-granularity
 alignment of bounds while retaining fully precise pointers.
@@ -1218,7 +1116,7 @@ that should be handled by \insnref{CRepresentableAlignmentMask} and
 \section{Capability Encoding Mode}
 \label{section:capability-encoding-mode}
 
-As implemented in CHERI-MIPS, CHERI duplicates the full load-store encoding
+CHERI-MIPS duplicated the full load-store encoding
 space to provide capability-relative variations on load and store
 instructions.
 This approach ensures intentionality: the architecture is always able to
@@ -1229,7 +1127,7 @@ However, this makes heavy use of remaining unused opcode space in many
 instruction sets, and so finding alternative encoding models to make less
 copious use of opcode space is desirable.
 
-One scheme we are deploying in CHERI-RISC-V is the use of legacy vs.
+CHERI-RISC-V instead uses legacy vs.
 capability encoding modes: in the legacy encoding mode, load and store opcodes
 have their current interpretations, and a small selection of
 capability-relative loads and stores are added.
