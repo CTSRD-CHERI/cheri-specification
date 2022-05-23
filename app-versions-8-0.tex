@@ -97,8 +97,8 @@ release of the Version 8 specification:
   exception handling, including automatic unsealing of sentries when installed
   in exception program counters, not just when they are jumped to.
 
-\item Two new instructions (\insnmipsref{CGetPCCIncOffset} and
-  \insnmipsref{CGetPCCSetAddr}) have been added to improve code density when
+\item Two new instructions (\insnnoref{CGetPCCIncOffset} and
+  \insnnoref{CGetPCCSetAddr}) have been added to improve code density when
   generating code to create \PCC{}-derived capabilities for code or data
   access.
   This is of particular use when utilizing sentry capabilities.
@@ -110,18 +110,18 @@ release of the Version 8 specification:
 \item The \insnref{CLoadTags} instruction is no longer considered
   experimental, and has now also been defined for CHERI-RISC-V.
 
-\item We have removed a note on \insnmipsref{CSeal}
+\item We have removed a note on \insnnoref{CSeal}
   regarding representable unsealed capabilities being unrepresentable as
   sealed capabilities: all representable capabilities can now be sealed.
 
-\item We have a removed a note on \insnmipsref{CIncOffset} regarding a special
+\item We have a removed a note on \insnnoref{CIncOffset} regarding a special
   case in which offset of 0 is permitted to operate on sealed capabilities,
-  allowing \insnmipsref{CIncOffset} to be used to implement
-  \insnmipsref{CMove} as a pseudo-instruction.
-  This is no longer required, as \insnmipsref{CMove} is now its own
+  allowing \insnnoref{CIncOffset} to be used to implement
+  \insnnoref{CMove} as a pseudo-instruction.
+  This is no longer required, as \insnnoref{CMove} is now its own
   instruction to avoid this special casing.
 
-\item \insnmipsref{CIncOffset} is no longer specified to clear the base and
+\item \insnnoref{CIncOffset} is no longer specified to clear the base and
   length if the bounds become unrepresentable, as we guarantee that the cursor
   will hold the arithmetic result rather than the offset.
 
