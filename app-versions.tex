@@ -276,7 +276,7 @@ A short summary of key ISA versions is presented here:
   object methods explicitly test for permissions and the types of arguments.
   TLB permission bits were added to authorize use of loading and storing
   tagged values from pages.
-  New \insnmipsref{CGetDefault} and \insnmipsref{CSetDefault} pseudo-ops
+  New \insnnoref{CGetDefault} and \insnnoref{CSetDefault} pseudo-ops
   have become the preferred way to control MIPS ISA memory access.
   \insnnoref{CCall}/\insnnoref{CReturn} calling conventions were
   clarified; \insnnoref{CCall} now pushes the
@@ -318,7 +318,7 @@ A short summary of key ISA versions is presented here:
   with NULL capabilities.  To this end, the tag is now defined as unset, and
   the Unsealed bit has now been inverted to be a Sealed bit; the
   \insnnoref{CGetUnsealed} instruction has been renamed to
-  \insnmipsref{CGetSealed}.
+  \insnnoref{CGetSealed}.
 
   A new \coffset{} field has been added to the capability, which converts CHERI
   from a simple base/length capability to blending capabilities and fat
@@ -371,7 +371,7 @@ A short summary of key ISA versions is presented here:
   semantics on the field, including any necessary uniqueness for the software
   security model.
   The \insnnoref{CSetType} instruction has been removed, and a single
-  \insnmipsref{CSeal} instruction
+  \insnnoref{CSeal} instruction
   replaces the previous separate \insnnoref{CSealCode} and
   \insnnoref{CSealData} instructions.
 
@@ -416,7 +416,7 @@ A short summary of key ISA versions is presented here:
     clarified, or corrected for \insnref{CClearTag},
   \insnnoref{CGetPCC}, \insnref{CSC}, and \insnref{CSeal}.
   Sign or zero extension for immediates and offsets are now defined
-    \insnmipsref[clbhwd]{CL}, \insnmipsref[clbhwd]{CS},
+    \insnnoref[clbhwd]{CL}, \insnnoref[clbhwd]{CS},
     and other instructions.
 
   Exceptions caused due to TLB bits controlling loading and storing of
@@ -624,8 +624,8 @@ A short summary of key ISA versions is presented here:
   thrown for capability branches: it uniformly occurs on fetching the target
   instruction.
 
-  The ISA specification makes it more clear that \insnmipsref{CEQ},
-  \insnmipsref{CNE}, \insnmipsref[cptrcmp]{CL[TE]U}, and \insnmipsref{CEXEQ} are
+  The ISA specification makes it more clear that \insnnoref{CEQ},
+  \insnnoref{CNE}, \insnnoref[cptrcmp]{CL[TE]U}, and \insnnoref{CEXEQ} are
   forms of the \insnnoref{CPtrCmp} instruction.
 
   The ISA todo list has been updated to recommend a capability
@@ -707,8 +707,8 @@ A short summary of key ISA versions is presented here:
   concisely described.
 
   The immediate operands to load and store instructions, including
-  \insnmipsref{CLC}, \insnmipsref{CSC}, \insnmipsref[clbhwd]{CL[BHWD][U]}, and
-  \insnmipsref[csbhwd]{CS[BHWD]} are now ``scaled'' by the width of the data being
+  \insnnoref{CLC}, \insnnoref{CSC}, \insnnoref[clbhwd]{CL[BHWD][U]}, and
+  \insnnoref[csbhwd]{CS[BHWD]} are now ``scaled'' by the width of the data being
   stored (with the exception of capability stores, where scaling is by 16
   bytes regardless of in-memory capability size).
   This extends the range of capability-relative loads and stores, permitting
