@@ -307,7 +307,7 @@ non-disruptive introduction, yet providing an immediate reward for adoption.
 This requires supporting current low-level languages such as C and C++ more
 safely, but also cleanly supplementing MMU-based programming models required
 to support current operating systems and virtualization techniques.
-These goals have directed many key design choices in the CHERI-MIPS ISA.
+These goals have directed many key design choices in the CHERI ISA.
 
 \subsection{Hardware-Software-Formal Co-Design Methodology}
 
@@ -905,19 +905,16 @@ protection model that can be expressed through a variety of approaches
 and mappings into multiple underlying ISAs.
 This report describes a software-facing protection model
 (Chapter~\ref{chap:model}) focused on operating systems and compilers,
-specific mapping into the 64-bit MIPS ISA for the purposes of experimentation
-and evaluation (Chapters~\ref{chap:architecture}, ~\ref{chap:cheri-mips}
-and~\ref{chap:isaref-mips}), and architectural sketches for potential integration
-into other ISAs (Chapters~\ref{chap:cheri-riscv} on CHERI-RISC-V,
-Chapter~\ref{chap:cheri-x86-64} on CHERI-x86-64, and Arm
+specific mapping into the 32-bit and 64-bit RISC-V ISA for the purposes of experimentation
+and evaluation (Chapters~\ref{chap:architecture}, ~\ref{chap:cheri-riscv}
+and~\ref{chap:isaref-riscv}), and architectural sketches for potential integration
+into other ISAs (Chapter~\ref{chap:cheri-x86-64} on CHERI-x86-64 and Arm
 Morello~\cite{arm-morello}).
 However, we have taken a ``ground-up'' approach utilizing hardware-software
 co-design to ensure that concrete mapping exist that
 satisfies the practical engineering requirements of architecture,
 microarchitecture, compiler, operating system, and applications.
-At the time CHERI ISAv8 is published, we are in the throes of transitioning
-the bulk of our research from CHERI-MIPS to CHERI-RISC-V and Morello, which
-have learned substantially from our initial experiences implementing CHERI.
+At present, our research uses CHERI-RISC-V and Morello.
 
 Our selection of RISC as a foundation for the CHERI capability extensions
 is motivated by two factors.
@@ -972,6 +969,8 @@ We implement our prototypes in Bluespec SystemVerilog
 designs, as well as perform rapid design-space exploration.
 Wherever possible, we open source our designs to allow reproduction and reuse
 by other researchers.
+\jhbnote{Do we want to replace this paragraph with language about
+  Piccolo, Flute, and Tooba instead?}
 
 In addition to our BSV implementations, we have also implemented executable
 models using first the L3 ISA modeling language~\cite{Fox2015}, and later
@@ -980,6 +979,7 @@ The SAIL descriptions of CHERI-MIPS and CHERI-RISC-V are used for formal
 proof, SMT checking, and also directly incorporated into our CHERI ISA
 specification.
 We also use an adaptation of the QEMU fast ISA accelerator.
+\jhbnote{Do we want to drop L3 and MIPS here?}
 
 As the CHERI security model is necessarily a hardware-software model, we have
 also performed substantial experimentation with software stacks targeting all
@@ -990,7 +990,7 @@ capabilities.
 We have adaptations of the FreeRTOS and FreeBSD operating systems to CHERI,
 known as CheriFreeRTOS and CheriBSD.
 CheriBSD is portable across all of our CHERI-extended architectures:
-CHERI-MIPS, CHERI-RISC-V, and Morello.
+CHERI-RISC-V and Morello.
 We use CheriFreeRTOS and CheriBSD on our ISA simulations and also on FGPA.
 
 Throughout, we consider metrics such as microarchitectural disruption, Power
