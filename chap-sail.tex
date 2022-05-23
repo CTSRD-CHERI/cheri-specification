@@ -17,7 +17,6 @@ language documentation.
 
 Types used in Sail:
 
-\label{sailMIPSzbits}
 \label{sailRISCVzbits}
 \begin{itemize}
 \item \isail{int} Sail integers are of arbitrary precision (therefore there are no overflows) but can be constrained using simple first-order constraints. As a common case integer range types can be defined using \isail{range(a,b)} to indicate an integer in the range $a$ to $b$ inclusive. Operations on integers repsect the constraints on their operands so, for example, if \isail{x} and \isail{y} have type \isail{range(a, b)} then \isail{x + y} has type \isail{range(a + a, b + b)}. Integer literals are written in decimal.
@@ -29,7 +28,7 @@ Types used in Sail:
 The following operators and expression syntax are used in the Sail code:
 
 \begin{itemize}
-\item \label{sailRISCVznot}\label{sailMIPSznot}Boolean operators:
+\item \label{sailRISCVznot}Boolean operators:
 \isail{not}, \isail{|} (logical OR), \isail{&} (logical AND), \isail{^} (exclusive OR)
 
 \item Integer operators:
@@ -66,7 +65,7 @@ May return a value similar to C ternary operator.
 \item Foreach loop:
 
 % XXX: for some reason sail generates a link to "to" for ccleartags/cloadtags
-\begin{lstlisting}[language=sail,label=sailMIPSzto]
+\begin{lstlisting}[language=sail,label=sailRISCVzto]
 foreach(i from start_exp to end_exp) {
   body
 };
