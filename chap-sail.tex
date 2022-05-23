@@ -1,0 +1,112 @@
+\chapter{Sail Overview}
+\label{chap:sail}
+
+\newcommand{\isail}[1]{\lstinline[language=sail]{#1}}
+
+The instruction descriptions contained in the following chapters are accompanied by code in the Sail languge~\cite{sail-popl2019,sail-url}.
+Sail is
+a domain specific imperative language designed for describing
+processor architectures.  It has a compiler that can output executable
+code in OCaml or C for building executable models, and can also
+translate to various theorem prover languages for automated reasoning
+about the ISA.
+
+The following is a brief description of the Sail language features
+used in this document. For a full description see the Sail
+language documentation.
+
+Types used in Sail:
+
+\label{sailMIPSzbits}
+\label{sailRISCVzbits}
+\begin{itemize}
+\item \isail{int} Sail integers are of arbitrary precision (therefore there are no overflows) but can be constrained using simple first-order constraints. As a common case integer range types can be defined using \isail{range(a,b)} to indicate an integer in the range $a$ to $b$ inclusive. Operations on integers repsect the constraints on their operands so, for example, if \isail{x} and \isail{y} have type \isail{range(a, b)} then \isail{x + y} has type \isail{range(a + a, b + b)}. Integer literals are written in decimal.
+\item \isail{bits(n)} \label{zbits} is a bit vector of length \isail{n}. Vectors are indexed using square bracket notation with index 0 being the least significant bit. Aritmetic and logical operations on vectors are defined on two vectors of equal length producing a result of the same length and truncating on overflow. Where signedness is significant it is indicated in the operator name, for example \isail{<_s} performs signed comparison of bit vectors . Bit vector literals are written in hexadecimal for multiples of four bits or in binary with \isail{0x} or \isail{0b} prefixes, e.g. \isail{0x3} means `0011' and \isail{0b11} means `11'. The at symbol, \isail{@}, indicates concatenation of vectors.
+\item \isail{structs} are similar to C structs with named, typed fields acessed with a dot as in \isail{struct_val.field_name}. Struct copying with field updates is also supported as in \isail{\{struct_val with field_name=new_val\}}.
+\item Registers in Sail contain the architectural state that is modified by instruction execution. By convention register names in the CHERI specification start with a capital letter to distinguish them from local variables. Sail also supports a form of `assignment' to function calls as in \isail{wGPR(rd) = result}. This is just syntactic sugar for an extra argument to the function call. This syntax is used by functions that write registers or memory and have special behavior such as \isail{wGPR}, \isail{writeCapReg} and \isail{MEMw}.
+\end{itemize}
+
+The following operators and expression syntax are used in the Sail code:
+
+\begin{itemize}
+\item \label{sailRISCVznot}\label{sailMIPSznot}Boolean operators:
+\isail{not}, \isail{|} (logical OR), \isail{&} (logical AND), \isail{^} (exclusive OR)
+
+\item Integer operators:
+\isail{+} (addition), \isail{-} (subtraction), \isail{*} (multiplication), \isail{\%} (modulo)
+
+Sail operations on integers are the usual mathematical operators. Note \isail{a \% b} is the modulo operator that, for $b > 0$ returns a value in the range $0$ to $b-1$ regardless of the sign of $a$. Although Sail integers are notionally infinite in range, CHERI instructions can be implemented with finite arithmetic.
+
+\item Bit vector operators:
+\isail{&} (bitwise AND), \isail{<_s} (signed less than), \isail{@} (bit vector concatenation)
+
+\item Equality:
+\isail{==} (equal), \isail{!=} (not equal)
+
+\item Vector slice:
+
+  \isail{v[a..b]}
+
+Creates a sub-range of a vector from index $a$ down to $b$ inclusive.
+
+\item Local variables:
+
+  \isail{mutable_var = exp;} \\
+  \isail{let immutable_var = exp;}
+
+Mutable variables are introduced by simply assigning to them. An explicit type may be given following a colon, but types can usually be inferred. Sail supports mutable or immutable variables where immutable ones are introduced by \isail{let} and assigned only once when created.
+
+\item Functional if:
+
+\isail{if cond then exp1 else exp2}
+
+May return a value similar to C ternary operator.
+
+
+\item Foreach loop:
+
+% XXX: for some reason sail generates a link to "to" for ccleartags/cloadtags
+\begin{lstlisting}[language=sail,label=sailMIPSzto]
+foreach(i from start_exp to end_exp) {
+  body
+};
+\end{lstlisting}
+
+\item Function invocation:
+
+\isail{func_id (arg1, arg2)}
+
+\item Field selection from struct:
+
+  \isail{struct\_val.field}
+
+Returns the value of the given field from structure.
+
+\item Functional update of structure:
+
+\isail{\{struct\_val with field=exp\}}
+
+A copy of the structure with the named field replaced with another value.
+
+\end{itemize}
+
+% rmn30: removing these sections for now. Might be nice to update them for Sail.
+%The precedence of the operators used in the pseudocode is shown in
+%Table~\ref{table:operator-precedence}.
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tabular}{l}
+%\algorithmicor{} \\
+%\algorithmicand{} \\
+%\algorithmicnot{} \\
+%$=$, $\ne$, $<$, $\le$, $>$, $\ge$ \\
+%\algorithmicwith{} \\
+%$+$, $-$ \\
+%$*$, $/$, $\bmod$ \\
+%$a^{b}$
+%\end{tabular}
+%\end{center}
+%\caption{Operator precedence in pseudocode}
+%\label{table:operator-precedence}
+%\end{figure}
