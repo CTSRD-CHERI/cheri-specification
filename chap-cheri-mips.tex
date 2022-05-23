@@ -668,68 +668,6 @@ page take precedence.  (This choice slightly simplifies system software, which
 may assume that a ``MMU prohibits store capability'' fault necessarily points
 \texttt{BadVAddr} at a mapped, dirty page.)
 
-\section{Protection-Domain Transition with CInvoke}
-\label{section:protection-domain-transition-with-cinvoke}
-
-\rwnote{Much of the content here is architecture neutral, but some parts are
-  MIPS specific.}
-
-Cross-domain procedure calls are implemented using the \insnmipsref{CInvoke}
-instruction, which provides access to controlled non-monotonicity for the
-purposes of a privileged capability register-file transformation and memory
-access.
-The instruction accepts two capability-register operands, which represent the
-sealed code and data capability describing a target protection domain.
-\insnmipsref{CInvoke} checks that the two capabilities are valid, that both are
-sealed, that the code capability is executable, that the data capability is
-non-executable, and that they have a matching object type.
-
-\insnmipsref{CInvoke} unseals the sealed code and data capabilities
-and places them in \PCC{} and \IDC{}, with control transferred
-directly to the target code capability.
-A programming-language or concurrent programming-framework runtime might
-arrange that all sealed code capabilities point to a message-passing
-implementation that proceeds to check argument registers or clear other
-registers, switching directly to the target domain via a further
-\insnmipsref{CJR}, or returning to the caller if the message will be delivered
-asynchronously.
-
-Voluntary protection-domain crossing -- i.e., not triggered by an interrupt --
-will typically be modeled as a form of function invocation or message passing
-by the operating system.
-In either case, it is important that function callers/callees, message
-senders/recipients, and the operating system itself, be constructed to protect
-themselves from potential confidentiality or integrity problems arising from
-leaked or improperly consumed general-purpose integer registers or
-capabilities passed across domain transition.
-On invocation, callers will wish to ensure that non-argument registers, as
-well as unused argument registers, are cleared.
-Callees will wish to receive only expected argument registers.
-Similarly, on return, callees will wish to ensure that non-return registers,
-as well as unused return registers, are cleared.
-Likewise, callers will wish to receive back only expected return values.
-In practice, responsibility for this clearing lies with multiple of the
-parties: for example, only the compiler may be aware of which argument
-registers are unused for a particular function, whereas the operating system
-or message-passing routine may be able to clear other registers.
-Work performed by the operating system as a trusted intermediary in a
-reliable way may be usefully depended on by either party in order to prevent
-duplication of effort.
-For example, if the OS the clears non-argument
-registers on call, and non-return registers on return, caller and
-callee can avoid clearing those registers allowing that clearing
-to occur exactly once.
-\jhbnote{I'm tempted to replace OS in this paragraph with something
-  like ``domain-transfer supervisor'' since the intermediary may well
-  live in user space (like the runtime linker).}
-Efficient register clearing instructions (e.g., \insnmipsref{CClearRegs}) can
-also be used to substantially accelerate this process.
-
-In CHERI, the semantics of secure message passing or invocation are software defined, and we anticipate that different operating-system and programming-language security models might handle these, and other behaviors, in different ways.
-For example, in our prototype CheriBSD implementation, a userspace supervisor maintains a ``trusted stack'' onto which values are pushed during invocation, and from which values are popped on return.
-Over time, we anticipate providing multiple sets of semantics, perhaps corresponding to less synchronous domain-transition models, and allowing different userspace runtimes to select (or implement) the specific semantics their programming model requires.
-This is particularly important in order to provide flexible error handling: if a sandbox suffers a fault, or exceeds its execution-time budget, it is the OS and programming language that will define how recovery takes place, rather than the ISA definition.
-
 \section{Capability Register Conventions / Application Binary Interface
   (ABI)}
 
