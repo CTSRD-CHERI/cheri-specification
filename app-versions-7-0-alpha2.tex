@@ -10,19 +10,19 @@ version distributed for review by DARPA and our collaborators:
 \item Use of a branch-delay slot with \insnnoref{CCall} Selector
   1 has been removed.
 
-\item With the addition of \insnref{CReadHwr} and \insnref{CWriteHwr}
+\item With the addition of \insnnoref{CReadHwr} and \insnnoref{CWriteHwr}
   and shifting of special capability registers out of the
   general-purpose capability register file, we have now removed the check for
   the \cappermASR permission for all registers in the
   general-purpose capability register file.
 
-\item A new \insnref{CCheckTag} instruction is added, which
+\item A new \insnnoref{CCheckTag} instruction is added, which
   throws an exception if the tag is not set on the operand capability.
   This instruction could be used by a compiler to shift capability-related
   exception behavior from invalid dereference to calculation of an invalid
   capability via a non-exception-throwing manipulation.
 
-\item We have added a new \insnref{CLCBI} instruction that
+\item We have added a new \insnnoref{CLCBI} instruction that
   allows capability-relative loads of capabilities to be performed using a
   substantially larger immediate (but without a general-purpose
   integer-register operand).

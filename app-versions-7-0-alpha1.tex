@@ -85,7 +85,7 @@ This allows integers to be stored in the offset of an untagged capability
 without concern that they may hold values that are unrepresentable with
 respect to capability bounds.
 
-\item New instructions \insnref{CReadHwr} and \insnref{CWriteHwr} have
+\item New instructions \insnnoref{CReadHwr} and \insnnoref{CWriteHwr} have
 been added.
 These have allowed us to migrate special capability registers (SCRs) out of
 the general-purpose capability register file, including \DDC{}, the new user
@@ -185,8 +185,8 @@ These instructions optimize global-variable setup and stack allocations by
 reducing the number of instructions and registers required to adjust pointer
 values and set bounds.
 
-\item New Capability Branch if Not NULL (\insnref{CBNZ}) and
-Capability Branch if NULL (\insnref{CBEZ}) instructions have
+\item New Capability Branch if Not NULL (\insnnoref{CBNZ}) and
+Capability Branch if NULL (\insnnoref{CBEZ}) instructions have
 been added, which optimize pointer comparisons to NULL.
 
 \item A new Capability to Address (\insnref{CGetAddr})

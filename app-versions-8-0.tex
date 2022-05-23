@@ -50,7 +50,7 @@ release of the Version 8 specification:
   during domain-transition research, and the exception-free mechanism is our
   preferred approach.
   We have removed capability exception cause codes previously used
-  for that purpose, and will likely deprecate \insnref{CSetCause}, which was
+  for that purpose, and will likely deprecate \insnnoref{CSetCause}, which was
   used only for exception-based domain transition.
 
 \item The deprecated \insnnoref{CCheckPerm} and \insnnoref{CCheckType}
@@ -82,7 +82,7 @@ release of the Version 8 specification:
   barriers use additional MMU permissions to selectively trap on
   capability loads.
 
-\item \insnref{CPtrCmp} has been changed to compare only the addresses of
+\item \insnnoref{CPtrCmp} has been changed to compare only the addresses of
   the two capabilities, and no longer consider the tag bit, for non-exact
   comparisons.
   The previous behavior could result in surprising run-time failures of C/C++

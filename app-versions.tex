@@ -83,7 +83,7 @@ A short summary of key ISA versions is presented here:
   Pointers are allowed to move outside of their defined bounds, but can be
   dereferenced only within them.
   There is also a new instruction for C-language pointer comparison
-  (\insnref{CPtrCmp}), and a NULL capability has been defined
+  (\insnnoref{CPtrCmp}), and a NULL capability has been defined
   as having
   an in-memory representation of all zeroes without a tag, ensuring that BSS
   (pre-zeroed memory) operates without change.
@@ -127,7 +127,7 @@ A short summary of key ISA versions is presented here:
 \item[CHERI ISAv5 / UCAM-CL-TR-891 - 1.18 - June 2016]
   CHERI ISAv5 primarily serves to introduce the CHERI-128 compressed
   capability model, which supersedes prior candidate models.
-  A new instruction, \insnref{CGetPCCSetOffset}, allows jump targets to
+  A new instruction, \insnnoref{CGetPCCSetOffset}, allows jump targets to
   be more efficiently calculated relative to the current \PCC{}.
   The previous multiple privileged capability permissions authorizing access
   to exception-handling state has been reduced down to a single system
@@ -251,7 +251,7 @@ A short summary of key ISA versions is presented here:
   to capabilities, and several bug fixes such as corrections to sign extension
   for several instructions.
   A new capability-coprocessor {\pathname cause} register, retrieved using a new
-  \insnref{CGetCause}, was added to allow querying information on the
+  \insnnoref{CGetCause}, was added to allow querying information on the
   most recent
   CP2 exception (e.g., bounds-check vs type-check violations); priorities were
   provided, and also clarified with respect to coprocessor exceptions vs.
@@ -269,7 +269,7 @@ A short summary of key ISA versions is presented here:
   to branch-delay slots and the program counter.
   \insnref{CClearTag} simply cleared a register's tag, not its value.
   A software-defined capability-cause register range was made available, with a
-  new \insnref{CSetCause} instruction letting software set the cause for
+  new \insnnoref{CSetCause} instruction letting software set the cause for
   testing or control-flow reasons.
   New \insnnoref{CCheckPerm} and \insnnoref{CCheckType} instructions
   were added, letting software
@@ -333,13 +333,13 @@ A short summary of key ISA versions is presented here:
   field, and the semantics of memory access and other CHERI instructions
   (e.g., \insnnoref{CIncBase}) are updated for this new behavior.
 
-  A new \insnref{CPtrCmp} instruction has been added, which provides
+  A new \insnnoref{CPtrCmp} instruction has been added, which provides
   C-friendly
   comparison of capabilities; the instruction encoding supports various types
   of comparisons including `equal to', `not equal to', and both signed and
   unsigned `less than' and `less than or equal to' operators.
 
-  \insnref{CGetPCC} now returns \PC{} as the \coffset{} field of the
+  \insnnoref{CGetPCC} now returns \PC{} as the \coffset{} field of the
   returned \PCC{} rather than storing it to a general-purpose integer register.
   \insnref{CJR} and \insnref{CJALR} now accept target \PC{} values
   via the offsets of their
@@ -357,7 +357,7 @@ A short summary of key ISA versions is presented here:
   are described in greater detail.
   The security implications of exception cause-code precedence as relates to
   alignment and the emulation of unaligned loads and stores are clarified.
-  The behavior of \insnref{CSetCause} has been clarified to indicate
+  The behavior of \insnnoref{CSetCause} has been clarified to indicate
   that the instruction should not raise an exception unless the check for
   \capperm*{Access\_EPCC} fails.
   When an exception is raised due to the state of an argument register for
@@ -403,7 +403,7 @@ A short summary of key ISA versions is presented here:
    
   Interactions between \EPC{} and \EPCC{} are now better specified, including
     that use of untagged capabilities has undefined behavior.
-  \insnref{CBTS} and \insnref{CBTU} are now defined to use
+  \insnnoref{CBTS} and \insnnoref{CBTU} are now defined to use
     branch-delay slots, matching other MIPS-ISA branch instructions.
   \insnref{CJALR} is defined as suitably incrementing the returned
     program counter, along with branch-delay slot semantics.
@@ -414,7 +414,7 @@ A short summary of key ISA versions is presented here:
     or return-register permission bits has been clarified.
   Exception priorities and cause-code register values have been defined,
     clarified, or corrected for \insnref{CClearTag},
-  \insnref{CGetPCC}, \insnref{CSC}, and \insnref{CSeal}.
+  \insnnoref{CGetPCC}, \insnref{CSC}, and \insnref{CSeal}.
   Sign or zero extension for immediates and offsets are now defined
     \insnmipsref[clbhwd]{CL}, \insnmipsref[clbhwd]{CS},
     and other instructions.
@@ -482,19 +482,19 @@ A short summary of key ISA versions is presented here:
   Bug fixes have been applied to the definitions of \insnref{CSetBounds}
   and \insnref{CUnseal}.
 
-  Several bugs in the specification of \insnref{CLC}, \insnref{CLLD},
-  \insnref{CSC}, and \insnref[csbhwd]{CSD}, relating to omissions
+  Several bugs in the specification of \insnref{CLC}, \insnnoref{CLLD},
+  \insnref{CSC}, and \insnnoref[csbhwd]{CSD}, relating to omissions
   during the update to capability offsets, have been fixed.
   \insnref{CLC}'s description has been updated to properly reflect its
   immediate argument.
 
-  New instructions \insnref{CClearHi} and \insnref{CClearLo} have
+  New instructions \insnnoref{CClearHi} and \insnnoref{CClearLo} have
   been added to accelerate register clearing during protection-domain
   switches.
 
-  New pseudo-ops \insnref{CGetEPCC}, \insnref{CSetEPCC},
-  \insnref{CGetKCC}, \insnref{CSetKCC}, \insnref{CGetKDC}, and
-  \insnref{CSetKDC} have been defined, in the interests of better
+  New pseudo-ops \insnnoref{CGetEPCC}, \insnnoref{CSetEPCC},
+  \insnnoref{CGetKCC}, \insnnoref{CSetKCC}, \insnnoref{CGetKDC}, and
+  \insnnoref{CSetKDC} have been defined, in the interests of better
   supporting a migration of `special' registers out of the capability register
   file -- which facilitates a convergence of capability and general-purpose
   integer register files.
@@ -508,10 +508,10 @@ A short summary of key ISA versions is presented here:
   The value of the NULL capability is now centrally defined (all fields zero;
   untagged).
 
-  \insnref{ClearLo} and \insnref{ClearHi} instructions are now
+  \insnnoref{ClearLo} and \insnnoref{ClearHi} instructions are now
   defined for clearing general-purpose integer registers, supplementing
-  \insnref{CClearHi} and \insnref{CClearLo}.
-  All four instructions are described together under \insnref{CClearRegs}.
+  \insnnoref{CClearHi} and \insnnoref{CClearLo}.
+  All four instructions are described together under \insnnoref{CClearRegs}.
 
   A new \insnref{CSetBoundsExact} instruction is defined, allowing an
   exception to be thrown if an attempt to narrow bounds cannot occur
@@ -521,15 +521,15 @@ A short summary of key ISA versions is presented here:
   A new exception code is defined for this case.
 
   A full range of data widths are now support for capability-relative
-  load-linked, store conditional: \insnref{CLLB}, \insnref{CLLH},
-  \insnref{CLLW}, \insnref{CLLD}, \insnref{CSCB},
-  \insnref{CSCH}, \insnref{CSCW}, and \insnref{CSCD} (as well as
+  load-linked, store conditional: \insnnoref{CLLB}, \insnnoref{CLLH},
+  \insnnoref{CLLW}, \insnnoref{CLLD}, \insnnoref{CSCB},
+  \insnnoref{CSCH}, \insnnoref{CSCW}, and \insnnoref{CSCD} (as well as
   unsigned load-linked variations).
   Previously, only a doubleword variation was defined, but cannot be used to
   emulate the narrower widths as fine-grained bounds around a narrow type
   would throw a bounds-check exception.
   Existing load-linked, store-conditional variations for capabilities
-  (\insnref{CLLC}, \insnref{CSCC}) have been updated, including with
+  (\insnref{CLLC}, \insnnoref{CSCC}) have been updated, including with
   respect to opcode assignments.
 
   A new `candidate three' variation on compressed capabilities has been
@@ -551,20 +551,20 @@ A short summary of key ISA versions is presented here:
 
   Exception priorities have been documented (or clarified) for a number of
   instructions including \insnref{CJALR}, \insnref{CLC},
-  \insnref{CLLD}, \insnref{CSC}, \insnref{CSCC},
+  \insnnoref{CLLD}, \insnref{CSC}, \insnnoref{CSCC},
   \insnnoref{CSetLen}, \insnref{CSeal}, \insnref{CUnSeal}, and
   \insnref{CSetBounds}.
 
-  The behavior of \insnref{CPtrCmp} is now defined when an undefined
+  The behavior of \insnnoref{CPtrCmp} is now defined when an undefined
   comparison type is used.
 
   It is clarified that capability store failures due to TLB-enforced
   limitations on capability stores trigger a TLB, rather than a CP2,
   exception.
 
-  A new capability comparison instruction, \insnref{CEXEQ}, checks
+  A new capability comparison instruction, \insnnoref{CEXEQ}, checks
   whether all fields in the capability are equal; the previous
-  \insnref{CEQ} instruction checked only that their offsets pointed at the
+  \insnnoref{CEQ} instruction checked only that their offsets pointed at the
   same location.
 
   A new capability instruction, \insnref{CSUB}, allows the implementation
@@ -617,7 +617,7 @@ A short summary of key ISA versions is presented here:
   be represented.
   For manipulations such as \insnref{CSeal} and \insnref{CFromPtr},
   an exception will be thrown.
-  For operations such as \insnref{CBTU} and \insnref{CBTS}, the
+  For operations such as \insnnoref{CBTU} and \insnnoref{CBTS}, the
   exception will be thrown on the first instruction fetch following a branch
   to an unrepresentable target, rather than on the branch instruction itself.
   CHERI1 and CHERI2 no longer differ on how out-of-bounds exceptions are
@@ -626,7 +626,7 @@ A short summary of key ISA versions is presented here:
 
   The ISA specification makes it more clear that \insnmipsref{CEQ},
   \insnmipsref{CNE}, \insnmipsref[cptrcmp]{CL[TE]U}, and \insnmipsref{CEXEQ} are
-  forms of the \insnref{CPtrCmp} instruction.
+  forms of the \insnnoref{CPtrCmp} instruction.
 
   The ISA todo list has been updated to recommend a capability
   conditional-move (\insnnoref{CCMove}) instruction.
@@ -727,15 +727,15 @@ A short summary of key ISA versions is presented here:
   \insnref{CSub} instructions.
 
   To improve code generation when constructing a \PCC{}-relative capability as
-  a jump target, a new \insnref{CGetPCCSetOffset} instruction has been
+  a jump target, a new \insnnoref{CGetPCCSetOffset} instruction has been
   added.
   This instruction has the combined effects of performing sequential
-  \insnref{CGetPCC} and \insnref{CSetOffset} operations.
+  \insnnoref{CGetPCC} and \insnref{CSetOffset} operations.
 
   A broader set of opcode rationalizations and cleanups have been applied
   across the ISA, to facilitate efficient decoding and future use of the
   opcode space.
-  This includes changes to \insnref{CGetPCC}.
+  This includes changes to \insnnoref{CGetPCC}.
 
   \creg{25} is no longer reserved for exception-handler use, as \creg{27} and
   \creg{28} are already reserved for this purpose.
@@ -748,11 +748,11 @@ A short summary of key ISA versions is presented here:
   This brings the permission models in 128-bit and 256-bit representations
   back into full alignment from a software perspective.
   This also simplifies permission checking for instructions such as
-  \insnref{CClearRegs}.
+  \insnnoref{CClearRegs}.
   The permission numbering space has been rationalized as part of this change.
   Similarly, the set of exceptions has been updated to reflect a single system
   permission.
-  The descriptions of various instructions (such as \insnref{CClearRegs}
+  The descriptions of various instructions (such as \insnnoref{CClearRegs}
   have been updated with respect to revised protections for special registers
   and exception handling.
 
@@ -825,8 +825,8 @@ A short summary of key ISA versions is presented here:
   Instructions that convert from integers to capabilities now share common
   \ccode{int_to_cap} pseudocode.
 
-  The notes on \insnref{CBTS} have been synchronized to those on
-  \insnref{CBTU}.
+  The notes on \insnnoref{CBTS} have been synchronized to those on
+  \insnnoref{CBTU}.
 
   Use of language has generally been improved to differentiate the
   architectural 256-bit capability model (e.g., in which its fields are
@@ -953,8 +953,8 @@ A short summary of key ISA versions is presented here:
   \insnref{CCSeal}.
 
   Two new conditional-move instructions are added to the CHERI-MIPS ISA:
-  \insnref{CMOVN} (conditionally move capability on non-zero), and
-  \insnref{CMOVZ} (conditionally move capability on zero).
+  \insnnoref{CMOVN} (conditionally move capability on non-zero), and
+  \insnnoref{CMOVZ} (conditionally move capability on zero).
   These complement existing conditional-move instructions in the 64-bit MIPS
   ISA, allowing more efficient generated code.
 
@@ -982,7 +982,7 @@ A short summary of key ISA versions is presented here:
 
   The pseudocode for the \insnref{CGetPerm} (capability get permissions)
   instruction has been updated to match syntax used in the
-  \insnref{CGetType} and \insnref{CGetCause} instructions.
+  \insnref{CGetType} and \insnnoref{CGetCause} instructions.
 
   The pseudocode for the \insnref{CUnseal} (capability unseal) instruction
   has been corrected to avoid an aliasing problem when the source and
@@ -1030,9 +1030,9 @@ A short summary of key ISA versions is presented here:
   The ISA encoding reference has been updated for new experimental
   instructions.
 
-  A new \insnref{CNExEq} instruction has been added, which provides a
+  A new \insnnoref{CNExEq} instruction has been added, which provides a
   more efficient implementation of a test for negative exact inequality than
-  utilizing \insnref{CExEq} and inverting the result.
+  utilizing \insnnoref{CExEq} and inverting the result.
 
   Specify that when a TLB exception results from attempting to store a
   tagged capability via a TLB entry that does not authorize tagged store, the

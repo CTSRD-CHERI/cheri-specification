@@ -4,7 +4,7 @@ version distributed for review by DARPA and our collaborators:
 \begin{itemize}
 \item We have added new instructions \insnref{CSetAddr} (Set capability
   address to value from register), \insnref{CAndAddr} (Mask address of
-  capability -- experimental), and \insnref{CGetAndAddr} (Move capability
+  capability -- experimental), and \insnnoref{CGetAndAddr} (Move capability
   address to an integer register, with mask -- experimental), which optimize
   common virtual-address-related operations in language runtimes such as
   WebKit's Javascript engine.
@@ -38,7 +38,7 @@ version distributed for review by DARPA and our collaborators:
   described in \cref{\insnmipslabelname{cassertinbounds}}, allows an exception
   to be thrown if the address of a capability is not within bounds.
 
-\item The instruction \insnref{CCheckTag} has now been assigned an opcode.
+\item The instruction \insnnoref{CCheckTag} has now been assigned an opcode.
 
 \item We have revised the encodings of many instructions in our draft
   CHERI-RISC-V specification in Appendix~\ref{app:isaquick-riscv}.
