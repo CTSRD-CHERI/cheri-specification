@@ -25,7 +25,7 @@ memory, where the goals are largely architecture neutral but mechanism is
 architecture specific.
 
 \item There are now dedicated chapters for each of our applications of CHERI
-to each of three ISAs: 64-bit MIPS (Chapter~\ref{chap:cheri-mips}), 64-bit
+to each of three ISAs: 64-bit MIPS, 64-bit
 RISC-V (Chapter~\ref{chap:cheri-riscv}), and x86-64
 (Chapter~\ref{chap:cheri-x86-64}).
 
@@ -85,7 +85,7 @@ This allows integers to be stored in the offset of an untagged capability
 without concern that they may hold values that are unrepresentable with
 respect to capability bounds.
 
-\item New instructions \insnref{CReadHwr} and \insnref{CWriteHwr} have
+\item New instructions \insnnoref{CReadHwr} and \insnnoref{CWriteHwr} have
 been added.
 These have allowed us to migrate special capability registers (SCRs) out of
 the general-purpose capability register file, including \DDC{}, the new user
@@ -102,7 +102,7 @@ instructions, and the \insnref{CTestSubset} instruction, in
 which an operand of \creg{0} specifies that \DDC{} should be used.
 
 \item Various instruction pseudo-ops to access special registers, such as
-\insnmipsref{CGetDefault}, now expand to special capability register access
+\insnnoref{CGetDefault}, now expand to special capability register access
 instructions instead of capability move instructions.
 
 \item With consideration of merged rather than split integer and capability
@@ -185,8 +185,8 @@ These instructions optimize global-variable setup and stack allocations by
 reducing the number of instructions and registers required to adjust pointer
 values and set bounds.
 
-\item New Capability Branch if Not NULL (\insnref{CBNZ}) and
-Capability Branch if NULL (\insnref{CBEZ}) instructions have
+\item New Capability Branch if Not NULL (\insnnoref{CBNZ}) and
+Capability Branch if NULL (\insnnoref{CBEZ}) instructions have
 been added, which optimize pointer comparisons to NULL.
 
 \item A new Capability to Address (\insnref{CGetAddr})

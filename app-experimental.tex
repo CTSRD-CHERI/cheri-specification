@@ -13,8 +13,9 @@ document these alternative approaches (e.g., indirect capabilities) or
 potential future avenues of investigation (e.g., linear capabilities).
 We present them here in roughly increasing order of complexity.
 The body of the appendix describes the rationale and approach for each
-experimental feature; specific instruction encodings and semantics may be
-found in Section~\ref{app:exp:insns}.
+experimental feature.
+% ; specific instruction encodings and semantics may be
+% found in Section~\ref{app:exp:insns}.
 \pgnnote{roughly increasing order of complexity?
   might they instead be grouped
   more structurally as major sections, and then roughly increasing
@@ -61,9 +62,6 @@ those fields and then recreating them utilizing the corresponding
 \insnref{CSetBounds} instruction, and so on, but with reduced abstraction
 and substantially less efficiency.
 
-Details of the proposed \insnref{CBuildCap}, \insnref{CCopyType},
-and \insnref{CCSeal} instructions are deferred to \cref{app:exp:insns}.
-
 \note{It has also been proposed that something much like capability
 reconstruction be allowed to reconstruct an \emph{unsealed} capability from
 a sealed one, again, guarded by needing a superset.}{nwf}
@@ -78,8 +76,7 @@ When implementing revocation or garbage collection requiring fast scanning
 of memory for matching capabilities, significant numbers of instructions
 would be used to check whether a tested capability is a subset of a reference
 capability.  We propose a new \insnref{CTestSubset}
-instruction that reduces this instruction count substantially; see
-\cref{app:exp:insns} for details.
+instruction that reduces this instruction count substantially.
 
 \subsection{CClearTags} % <<<
 
@@ -125,7 +122,7 @@ fraction of these capabilities are expected to be valid, and so will not
 cause additional activity within their cache line.%
 %
 \footnote{Those capabilities that are found to be revoked are then subjected
-to a \insnref{CLLC}/\insnref{CSCC} sequence for atomic replacement
+to a \insnnoref{CLR.C}/\insnnoref{CSC.C} sequence for atomic replacement
 with their revoked image.}
 %
 Being able to hint to the cache that the revoker is \emph{streaming} through
@@ -133,13 +130,7 @@ memory, and so should not pave over the caches, seems like a worth-while
 objective.  We therefore introduce a non-temporal, streaming
 \insnref{CLC} analogue, \insnref{CLCNT} with architectural semantics
 exactly matching those of \insnref{CLC}, but as a separate opcode to
-hint to the microarchitecture.  To preserve encoding space,
-\insnref{CLCNT} jettisons the immediate and assumes it to be zero.
-
-\nwfnote{It may make sense to unroll the revoker loop to some presumed
-cacheline stride, in which case perhaps we should jettison the index
-register rather than the immediate.  But keeping the index register seems
-the friendlier of the options.}
+hint to the microarchitecture.
 
 While one implementation of such a streaming CLC would be to never promote
 lines in the cache hierarchy (i.e., leave them in place, in DRAM or the LLC
@@ -449,7 +440,7 @@ consider writable-and-executable to be too dangerous to permit; applying
 this to CHERI's taxonomy would mean that the presence of \cappermX* implied
 the absence of \cappermS*, \cappermSC*, and \cappermSLC* (see
 \cref{app:exp:compressperm:wxorx}).  Further, granting \cappermLC*
-effectively implies granting \cappermL*:  CLC and CLLC would trap without
+effectively implies granting \cappermL*:  CLC and CLR.C would trap without
 the latter, but more substantially, a capability load of an un-tagged (in
 memory or via the paging hardware) `should' result in a load of data
 transferred in to a capability register, albeit with the tag cleared.  On
@@ -1118,7 +1109,7 @@ It also avoids increasing the number of registers that must be written back
 by instructions.
 
 Additional concerns exist around the implementation of \PCC{} as relates to
-\insnref{CGetPCC}, which normally duplicates a capability.
+\insnref{AUIPCC}, which normally duplicates a capability.
 Although undesirable, the natural design choice is to strip the tag when
 writing to the target register, if \PCC{} is linear.
 
@@ -1409,7 +1400,7 @@ instructions on call rather than the one \insnref{CJALR}:
 %
 \begin{itemize}
 
-	\item three (\insnref{CGetPCC}, \insnref{CIncOffsetImm},
+	\item three (\insnref{AUIPCC}, \insnref{CIncOffsetImm},
 		\insnref{CSC}) to compute and spill the return address,
 
 	\item two to move the stack pointer
@@ -1929,6 +1920,8 @@ against the sealed data capability.  In CHERI-MIPS, \insnref{CInvoke} is
 already a two-cycle instruction, occupying two successive stages of the
 pipeline, and so we conjecture that the changes requisite to support
 token-mediation are small.
+\jhbnote{We should update this last sentence to be relevant to
+  CHERI-RISC-V designs}
 
 % >>>
 \subsection{Hybridization} % <<<
@@ -2227,14 +2220,7 @@ That is, the addresses authorized by a CHERI memory capability are taken to
 be virtual addresses, which are then translated to physical addresses by the
 core's MMU.  The MMU configuration defines a virtual address space; it is,
 ultimately, in all modern, mainstream architectures, described by
-\emph{integers}.%
-%
-\footnote{In architectures with hardware page table walkers, such as Arm and
-RISC-V, these integers are arranged in defined, tabular format.  In
-architectures without, such as MIPS, the analogous structures are defined
-only in software, but the soft-loaded TLB is programmed using integer
-values written to architecturally specified registers.}
-%
+\emph{integers} (PTEs).
 The use of provenance-free integers to describe such configurations carries
 risks, just as with pointers.  Necessarily, the ability to configure the MMU
 must be confined to privileged, and necessarily trusted, software; this
@@ -2441,22 +2427,22 @@ as well as its internal operation, are left to future work.
 \input{app-exp-peripherals}
 
 % >>>
-\section{Details of Proposed Instructions} % <<<
-\label{app:exp:insns}
+% \section{Details of Proposed Instructions} % <<<
+% \label{app:exp:insns}
 
-The following instructions are described using the same syntax and approach as
-those in Chapter~\ref{chap:isaref-mips}.
+% The following instructions are described using the same syntax and approach as
+% those in Chapter~\ref{chap:isaref-riscv}.
 
-\input{insn-mips/candaddr}
-\input{insn-mips/cbuildcap}
-\input{insn-mips/ccleartags}
-\input{insn-mips/ccopytype}
-\input{insn-mips/ccseal}
-\input{insn-mips/cgetandaddr}
-\input{insn-mips/clcnt}
-\input{insn-mips/clshc}
-\input{insn-mips/csshc}
-\input{insn-mips/ctestsubset}
+% \input{insn-mips/candaddr}
+% \input{insn-mips/cbuildcap}
+% \input{insn-mips/ccleartags}
+% \input{insn-mips/ccopytype}
+% \input{insn-mips/ccseal}
+% \input{insn-mips/cgetandaddr}
+% \input{insn-mips/clcnt}
+% \input{insn-mips/clshc}
+% \input{insn-mips/csshc}
+% \input{insn-mips/ctestsubset}
 
 % >>>
 

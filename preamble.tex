@@ -86,7 +86,6 @@
 
 \input{preamble-saildoc-macros}
 
-\makesailcmds{sailMIPS}{sail_latex_mips}
 \makesailcmds{sailRISCV}{sail_latex_riscv}
 
 % Must be included later than setspace, otherwise all footnote hyperlinks
@@ -209,7 +208,6 @@
 % Register names
 \newcommand{\reg}[1]{{\bf R#1}}		% MIPS register numbers
 \newcommand{\creg}[1]{{\bf C#1}}	% Capability register numbers
-\newcommand{\mreg}[1]{{\bf \$#1}}	% MIPS ABI register names
 \newcommand{\PC}{{\bf PC}}
 \newcommand{\SP}{{\bf SP}}
 \newcommand{\EPC}{{\bf EPC}}
@@ -254,6 +252,7 @@
 \newcommand{\sccsr}{\texttt{sccsr}}
 \newcommand{\uccsr}{\texttt{uccsr}}
 % RISC-V existing registers
+\newcommand{\xtdc}{\texttt{{\it x}tdc}}
 \newcommand{\xtval}{\texttt{{\it x}tval}}
 \newcommand{\xtvec}{\texttt{{\it x}tvec}}
 \newcommand{\mtvec}{\texttt{mtvec}}
@@ -267,6 +266,7 @@
 \newcommand{\mcause}{\texttt{mcause}}
 \newcommand{\scause}{\texttt{scause}}
 \newcommand{\ucause}{\texttt{ucause}}
+\newcommand{\xscratch}{\texttt{{\it x}scratch}}
 \newcommand{\xRET}{\insnnoref{{\it x}RET}}
 
 \newcommand{\AL}{{\bf AL}}
@@ -420,7 +420,6 @@
 }
 \newcommand{\@makeinsncmds}[1]{\@makeinsncmds@explicit{#1}{#1}}
 
-\@makeinsncmds{mips}
 \@makeinsncmds{riscv}
 
 \newcommand{\definsnarch}[1]{\def\@definsnarch{#1}}
@@ -429,8 +428,8 @@
 \let\insnnoref\@insnfmt
 \makeatother
 
-% Default is currently MIPS
-\definsnarch{mips}
+% Default is currently RISC-V
+\definsnarch{riscv}
 
 \newcommand{\cherithreeop}[5][NOHEADER]{
 \begin{bytefield}{32}

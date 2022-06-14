@@ -50,7 +50,7 @@ release of the Version 8 specification:
   during domain-transition research, and the exception-free mechanism is our
   preferred approach.
   We have removed capability exception cause codes previously used
-  for that purpose, and will likely deprecate \insnref{CSetCause}, which was
+  for that purpose, and will likely deprecate \insnnoref{CSetCause}, which was
   used only for exception-based domain transition.
 
 \item The deprecated \insnnoref{CCheckPerm} and \insnnoref{CCheckType}
@@ -82,7 +82,7 @@ release of the Version 8 specification:
   barriers use additional MMU permissions to selectively trap on
   capability loads.
 
-\item \insnref{CPtrCmp} has been changed to compare only the addresses of
+\item \insnnoref{CPtrCmp} has been changed to compare only the addresses of
   the two capabilities, and no longer consider the tag bit, for non-exact
   comparisons.
   The previous behavior could result in surprising run-time failures of C/C++
@@ -97,8 +97,8 @@ release of the Version 8 specification:
   exception handling, including automatic unsealing of sentries when installed
   in exception program counters, not just when they are jumped to.
 
-\item Two new instructions (\insnmipsref{CGetPCCIncOffset} and
-  \insnmipsref{CGetPCCSetAddr}) have been added to improve code density when
+\item Two new instructions (\insnnoref{CGetPCCIncOffset} and
+  \insnnoref{CGetPCCSetAddr}) have been added to improve code density when
   generating code to create \PCC{}-derived capabilities for code or data
   access.
   This is of particular use when utilizing sentry capabilities.
@@ -110,18 +110,18 @@ release of the Version 8 specification:
 \item The \insnref{CLoadTags} instruction is no longer considered
   experimental, and has now also been defined for CHERI-RISC-V.
 
-\item We have removed a note on \insnmipsref{CSeal}
+\item We have removed a note on \insnnoref{CSeal}
   regarding representable unsealed capabilities being unrepresentable as
   sealed capabilities: all representable capabilities can now be sealed.
 
-\item We have a removed a note on \insnmipsref{CIncOffset} regarding a special
+\item We have a removed a note on \insnnoref{CIncOffset} regarding a special
   case in which offset of 0 is permitted to operate on sealed capabilities,
-  allowing \insnmipsref{CIncOffset} to be used to implement
-  \insnmipsref{CMove} as a pseudo-instruction.
-  This is no longer required, as \insnmipsref{CMove} is now its own
+  allowing \insnnoref{CIncOffset} to be used to implement
+  \insnnoref{CMove} as a pseudo-instruction.
+  This is no longer required, as \insnnoref{CMove} is now its own
   instruction to avoid this special casing.
 
-\item \insnmipsref{CIncOffset} is no longer specified to clear the base and
+\item \insnnoref{CIncOffset} is no longer specified to clear the base and
   length if the bounds become unrepresentable, as we guarantee that the cursor
   will hold the arithmetic result rather than the offset.
 
@@ -248,8 +248,7 @@ release of the Version 8 specification:
   Section~\ref{sec:caching-and-explicit-prefetch}, with specific
   consideration of side-channel attacks.
   We also explicitly specify \DDC{} bounds checking on the MIPS
-  \insnnoref{PREF} prefetch instruction in
-  Section~\ref{sec:mips-prefetch}.
+  \insnnoref{PREF} prefetch instruction.
 
 \item We now reference our papers \textit{CHERIvoke: Characterising Pointer
   Revocation using CHERI Capabilities for Temporal Memory Safety} (IEEE MICRO
