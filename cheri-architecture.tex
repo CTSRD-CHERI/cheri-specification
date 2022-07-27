@@ -1,19 +1,17 @@
-%%%% University of Cambridge tech-report formatting; enable when producing
-%%%% tech-report versions of these documents; otherwise, disable.
-%\documentclass[12pt,twoside,openright,a4paper]{report}
-%\setlength{\oddsidemargin}{-0.4mm} % 25 mm left margin
-%\setlength{\evensidemargin}{\oddsidemargin}
-%\setlength{\textwidth}{160mm}      % 25 mm right margin
-%\setlength{\topmargin}{-5.4mm}     % 20 mm top margin
-%\setlength{\headheight}{5mm}
-%\setlength{\headsep}{5mm}
-%\setlength{\footskip}{10mm}
-%\setlength{\textheight}{237mm}     % 20 mm bottom margin
-%%%% .. or regular document
+\ifdefined\trformat
+\documentclass[12pt,twoside,openright,a4paper]{report}
+\setlength{\oddsidemargin}{-0.4mm} % 25 mm left margin
+\setlength{\evensidemargin}{\oddsidemargin}
+\setlength{\textwidth}{160mm}      % 25 mm right margin
+\setlength{\topmargin}{-5.4mm}     % 20 mm top margin
+\setlength{\headheight}{5mm}
+\setlength{\headsep}{5mm}
+\setlength{\footskip}{10mm}
+\setlength{\textheight}{237mm}     % 20 mm bottom margin
+\else
 \documentclass[12pt,letterpaper,twoside,openright,fleqn]{report}
 \usepackage{etex}
-%%%% End of tech-report vs. regular
-%%%%
+\fi
 
 \input{preamble}
 
@@ -56,6 +54,8 @@
 }
 
 %% CL tech-report format provides its own cover page
+\ifdefined\trformat
+\else
 \begin{minipage}[h]{\textwidth}
   %\vspace{-.2cm}
   \maketitle
@@ -90,13 +90,14 @@
 
 }
 \end{minipage}
-%%
+\fi
 
 \normalsize
 
 %% CL tech-report format requires page numbering to start at 3
-%\setcounter{page}{3}
-%%
+\ifdefined\trformat
+\setcounter{page}{3}
+\fi
 
 %% For revisions sent for editing, prefer double spacing.
 %\doublespacing

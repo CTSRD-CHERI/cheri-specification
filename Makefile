@@ -1,4 +1,5 @@
 TARGET=cheri-architecture.pdf
+TARGET_TR=cheri-architecture-tr.pdf
 PREVEOUS=../branches/20150624-cheri-architecture-1-13
 
 SAIL_LATEX_MIPS_DIR=sail_latex_mips
@@ -39,10 +40,10 @@ all: ${TARGET}
 # Howver, texloganalyser is included by default in some TeX distributions so
 # prefer that one.
 # TODO: fix the broken sail hyperrefs so we don't have to filter the out.
-${TARGET}: ${SOURCES} ${FIGSOURCES}
-	latexmk $(LATEXMK_COMMON_FLAGS) cheri-architecture.tex $(PDFLATEX_FLAGS); ret=$$?; \
+${TARGET} ${TARGET_TR}: ${SOURCES} ${FIGSOURCES}
+	latexmk $(LATEXMK_COMMON_FLAGS) $(@:.pdf=.tex) $(PDFLATEX_FLAGS); ret=$$?; \
 	    if command -v texloganalyser >/dev/null 2>/dev/null; then \
-	        texloganalyser $(TEXLOGANALYSER_FLAGS) build/cheri-architecture.log; \
+	        texloganalyser $(TEXLOGANALYSER_FLAGS) build/$(@:.pdf=.log); \
 	    fi; exit $$ret
 
 $(TIKZFIGURES): %.pdf: %.tex Makefile
