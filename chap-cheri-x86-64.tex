@@ -82,10 +82,8 @@ x86 by extending existing general-purpose integer registers.
 
 \section{Tagged Capabilities and Memory}
 
-As with CHERI-MIPS and CHERI-RISC-V, we recommend that both memory and
-registers contain tagged capabilities.  Similar to CHERI-RISC-V, we also
-recommend a single, 128-bit format for CHERI-x86-64 capabilities.
-
+As with CHERI-RISC-V, we recommend that both memory and
+registers contain tagged, 128-bit capabilities.
 Since capabilities require 16 byte alignment in memory, attempts to
 load or store capabilities at misaligned addresses should raise a
 General Protection Fault with an error code of zero similar to
@@ -112,9 +110,8 @@ desired integer value in the bottom 64 bits.
 
 The \RIP{} register (which contains the address of the current instruction)
 would also be extended into a \CIP{} capability.  This would function as
-the equivalent of \PCC{} for CHERI-MIPS and CHERI-RISC-V.  As with
-those architectures, the
-value of \RIP{} should be the current offset of \CIP{} rather than the
+the equivalent of \PCC{}.
+The value of \RIP{} should be the current offset of \CIP{} rather than the
 integer value (virtual address).
 
 \section{Additional Capability Registers}
@@ -434,7 +431,6 @@ using a capability operand would load a new capability into \CIP{}.
 For far calls and jumps with a capability-sized operand,
 the memory address would point
 to a 16-bit segment selector followed by a capability.  Note that the
-
 low four bits of the memory address would have to be set to 14 to
 align the capability.  The current segment selector would be pushed
 onto the stack as a 16-byte value where the first two bytes contain
@@ -548,7 +544,7 @@ add %csp,$16
     These instructions should set flag bits in \RFLAGS{} according to
     the integer value of the resulting capability.
 
-    The \insnref{ADD} opcodes \texttt{01}, \texttt{03}, \texttt{05},
+    The \insnnoref{ADD} opcodes \texttt{01}, \texttt{03}, \texttt{05},
     \texttt{81 /0}, and \texttt{83 /0} and the \insnnoref{SUB}
     opcodes \texttt{29}, \texttt{2B}, \texttt{2D}, \texttt{81 /5} and
     \texttt{83 /5} would be extended to support capability operands
@@ -731,8 +727,8 @@ extracted from the capability.
 \subsubsection{Capability-Modification Instructions}
 
 If these instructions fail, they should clear the tag in the resulting
-capability rather than raising an exception as is done for CHERI-MIPS
-and CHERI-RISC-V.
+capability similar to Morello rather than raising an exception as is
+done for CHERI-RISC-V.
 
 \begin{itemize}
   \item \insnref{CSeal} r/mc, rc
@@ -878,10 +874,10 @@ should not raise an exception.
 
 For these instructions, the result of the comparison should be written
 to the \texttt{ZF} field of \RFLAGS{} instead of to a destination
-register as is done in CHERI-MIPS and CHERI-RISC-V.
+register as is done in CHERI-RISC-V.
 
 \begin{itemize}
-  \item \insnriscvref{CSetEqualExact} r/mc, rc
+  \item \insnref{CSetEqualExact} r/mc, rc
 
     If all of the fields in the in-memory representation of
     \emph{r/mc} and \emph{rc} are identical including tags and any
@@ -918,13 +914,13 @@ single operand \insnnoref{CTestTag} which copies the tag value to
   Instructions}
 
 \begin{itemize}
-  \item \insnref[CRoundRepresentableLength]{CRRL} r64, r/m64
+  \item \insnref{CRRL} r64, r/m64
 
     Set \emph{r64} to the smallest value greater or equal to
     \emph{r/m64} that can be used as a length to set exact bounds on a
     capability with a suitably aligned base.
 
-  \item \insnref[CRepresentableAlignmentMask]{CRAM} r64, r/m64
+  \item \insnref{CRAM} r64, r/m64
 
     Set \emph{r64} to a mask that can be used to round addresses down
     to a value that is sufficiently aligned to set exact bounds for
@@ -1024,7 +1020,7 @@ This error code would contain the capability exception code as
 described in Section~\ref{sec:capability_exception_causes} to indicate
 the specific violation.
 
-CHERI-MIPS and CHERI-RISC-V include the name of the register which
+CHERI-RISC-V includes the name of the register which
 triggers a capability violation.  It is not feasible to provide a
 direct analog of this on x86.  Indirect jumps and calls may raise an
 exception while loading a capability from memory that is not present
@@ -1052,7 +1048,7 @@ information:
   implement.
 \end{enumerate}
 
-Unlike CHERI-MIPS and CHERI-RISC-V, we recommend that CHERI-x86-64
+Unlike CHERI-RISC-V, we recommend that CHERI-x86-64
 only raise capability violation faults when a invalid memory access is
 performed such as an out-of-bounds access or access via an untagged
 capability.  Specifically, we recommend that instructions which modify
