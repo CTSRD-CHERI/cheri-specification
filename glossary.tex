@@ -27,8 +27,6 @@
   name=address,
   description={An integer address suitable for dereference within an address
     space.
-    In \gls{CHERI-MIPS}, \glspl{capability} are always interpreted in terms of
-    \glspl{virtual address}.
     In \gls{CHERI-RISC-V}, \glspl{capability} may be interpreted as
     \glspl{virtual address} -- or \glspl{physical address} when operating in
     Machine Mode}
@@ -91,9 +89,8 @@
   software-defined or instruction-set-defined behavior, and whether or not its
   fields are immutable.
 
-  Capabilities may be held in a \gls{capability register} in a dedicated
-  \gls{capability register file}, a \gls{merged register file}, or a
-  suitably aligned \gls{tagged memory}.
+  Capabilities may be held in a \gls{capability register} or a
+  suitably-aligned word of \gls{tagged memory}.
 }
 
 \newglossaryentry{capability base}
@@ -240,30 +237,13 @@ whether a
     other \glslink{fat pointer}{fat-pointer} metadata such as
     its \gls{capability bounds} and \gls{capability permissions}, and optional
     \gls{capability object type}.
-    Capability registers may be held in a \gls{capability register file}, a
-    \gls{merged register file}, or be a \gls{special capability register}
-    accessed by dedicated instructions.
     A capability register might be a dedicated register intended primarily for
-    capability-related operations (e.g., the capability registers described
-    in \gls{CHERI-MIPS}), or a general-purpose integer
+    capability-related operations (e.g., the \gls{default data capability}), or a general-purpose integer
     register that has been extended with capability metadata (such as the
-    \gls{program-counter capability}, or the capability registers described in
-    \gls{CHERI-RISC-V} when using a merged register file).
+    \gls{program-counter capability}.
     Capability registers must be used to retain tag bits on capabilities
     transiting through memory, as only \gls{capability-based instructions}
     enforce \gls{capability provenance} and \gls{capability monotonicity}}
-}
-
-\newglossaryentry{capability register file}
-{
-  name=capability register file,
-  description={The capability register file is a register file dedicated to
-    holding general-purpose \glspl{capability}, in contrast to a \gls{merged
-    register file}, in which general-purpose integer registers are extended to
-    be able to hold tagged capabilities.
-    Some general-purpose capability registers have well-known conventions for
-    their use in software, including the \gls{return capability} and the
-    \gls{stack capability}}
 }
 
 \newglossaryentry{capability tag}
@@ -317,7 +297,7 @@ operations that conform to \gls{capability
 }
 {
   The \insnref{CInvoke} instruction is a source of controlled
-  non-monotonicity in the \gls{CHERI-MIPS} and \gls{CHERI-RISC-V} ISAs.
+  non-monotonicity in the \gls{CHERI-RISC-V} and \gls{CHERI-x86-64} ISAs.
 \psnote{See Kyndylan's note for capability monotonicity}
   It can directly enter any userspace domain described by a pair
   of sealed capabilities with the \emph{Permit\_CInvoke} permission set.
@@ -459,12 +439,36 @@ operations that conform to \gls{capability
     \gls{program-counter capability} or \gls{default data capability}}
 }
 
+\newglossaryentry{exception code capability}
+{
+  name=exception code capability,
+  description={An architecture-defined capability which holds a
+    privileged \gls{code capability} for use by the kernel during exception
+    handling.
+    This value will be installed in the \gls{program-counter capability} on
+    exception entry, with the previous value of the program-counter
+    capability stored in the \gls{exception program-counter capability}}
+}
+
+\newglossaryentry{exception data capability}
+{
+  name=exception data capability,
+  description={An architecture-defined capability which holds a
+    privileged \gls{data capability} for use by the kernel during exception
+    handling.
+    Typically, this will refer either to the data segment for a microkernel
+    intended to field exceptions, or for the full kernel.
+    Kernels compiled to primarily use \gls{legacy instructions} might install
+    this in the \gls{default data capability} for the duration of kernel
+    execution.}
+}
+
 \newglossaryentry{exception program-counter capability}
 {
-  name=exception program-counter capability (\EPCC{}),
-  description={A \gls{special capability register} into which the running
-    \gls{program-counter capability} will be moved into on an exception, and
-    whose value will be moved back into the program-counter capability on
+  name=exception program-counter capability,
+  description={An architecture-specific location into which the running
+    \gls{program-counter capability} is stored on an exception, and
+    whose value is loaded into the program-counter capability on
     exception return}
 }
 
@@ -541,48 +545,6 @@ operations that conform to \gls{capability
     describing the object's internal state}
 }
 
-\newglossaryentry{kernel code capability}
-{
-  name=kernel code capability (\KCC{}),
-  description={A \gls{special capability register} reserved to hold a
-    privileged \gls{code capability} for use by the kernel during exception
-    handling.
-    This value will be installed in the \gls{program-counter capability} on
-    exception entry, with the previous value of the program-counter
-    capability stored in the \gls{exception program-counter capability}}
-}
-
-\newglossaryentry{kernel data capability}
-{
-  name=kernel data capability (\KDC{}),
-  description={A \gls{special capability register} reserved to hold a
-    privileged \gls{data capability} for use by the kernel during exception
-    handling.
-    Typically, this will refer either to the data segment for a microkernel
-    intended to field exceptions, or for the full kernel.
-    Kernels compiled to primarily use \gls{legacy instructions} might install
-    this in the \gls{default data capability} for the duration of kernel
-    execution.
-    Use of this register is controlled by \gls{capability permissions} on
-    the currently executing \gls{program-counter capability}}
-}
-
-\newglossaryentry{kernel reserved capabilities}
-{
-  name=kernel reserved capabilities,
-  description={These \glspl{capability}, modeled on the MIPS kernel reserved
-    registers, are set aside for use by a \gls{CHERI-MIPS} operating-system
-    kernel in
-    exception handling -- in particular, in allowing userspace registers to
-    be saved so that the kernel context can be installed.
-    As with the MIPS registers, the userspace ABI is not able to use
-    capability registers set aside for kernel use; unlike the MIPS registers,
-    the kernel reserved capabilities are available for use in the ISA only
-    with a suitably authorized \gls{program-counter capability} installed.
-    Due to a different exception-handling model in \gls{CHERI-RISC-V}, that
-    ISA does not have kernel reserved capabilities}
-}
-
 \newglossaryentry{legacy instructions}
 {
   name=legacy instructions,
@@ -597,17 +559,6 @@ operations that conform to \gls{capability
     robustness}, or more efficient \gls{software compartmentalization}.
     While still constrained, these instructions do not conform to the
     \gls{principle of intentional use}}
-}
-
-\newglossaryentry{merged register file}
-{
-  name=merged register file,
-  description={A single general-purpose register file able to hold both
-    integer and tagged \gls{capability} values.
-    In \gls{CHERI-MIPS}, a dedicated \gls{capability register file} is used,
-    separate from the general-purpose integer register file.
-    In \gls{CHERI-RISC-V} and \gls{Morello}, a merged register file is supported, reducing the
-    amount of control logic required for a separate register file}
 }
 
 \newglossaryentry{Morello}
@@ -626,9 +577,7 @@ operations that conform to \gls{capability
     cause a load, store, or instruction fetch to fall out of bounds, or the
     further offset introduced via a register index or immediate operand to an
     instruction.
-%    With 256-bit capabilities, all out-of-bounds pointers are
-%    \glspl{representable capability}.
-    With \glspl{compressed capability}, if an instruction shifts the offset
+    If an instruction shifts the offset
     too far out of bounds, this may result in an \gls{unrepresentable
     capability}, leading to the \gls{capability tag} being cleared, or an
     exception being thrown}
@@ -640,7 +589,6 @@ operations that conform to \gls{capability
   plural=physical addresses,
   description={An \gls{address} that is passed directly to the memory
     hierarchy without \glslink{virtual address}{virtual-address} translation.
-    In \gls{CHERI-MIPS}, \glspl{capability} contain only virtual addresses.
     In \gls{CHERI-RISC-V}, \glspl{capability} addresses may be interpreted as
     physical addresses in Machine Mode}
 }
@@ -677,18 +625,18 @@ operations that conform to \gls{capability
 \newglossaryentry{program-counter capability}
 {
   name=program-counter capability (\PCC{}),
-  description={A \gls{special capability register} that extends the existing
+  description={A \gls{capability register} that extends the existing
     program counter to include
     \gls{capability} metadata such as a \gls{capability tag}, \gls{capability
     bounds}, and \gls{capability permissions}.
     The program-counter capability ensures that instruction fetch occurs only
     subject to capability protections.
     When an exception fires, the value of the program-counter capability will
-    be moved to the \gls{exception program-counter capability}, and the value
-    of the \gls{kernel data capability} moved into the program-counter
+    be saved in the \gls{exception program-counter capability}, and the value
+    of the \gls{exception code capability} moved into the program-counter
     capability.
     On exception return, the value of the exception program-counter capability
-    will be moved into the program-counter capability}
+    will be restored to the program-counter capability}
 }
 
 \newglossaryentry{representable capability}
@@ -706,7 +654,7 @@ operations that conform to \gls{capability
   name=reserved capability object type,
   plural=reserved capability object types,
   description={Certain \glspl{capability object type} are not available for software use and instead have hardware-defined semantics.
-  On \gls{CHERI-MIPS} and \gls{CHERI-RISC-V}, all negative \glspl{capability object type} are
+  On \gls{CHERI-RISC-V} and \gls{CHERI-x86-64}, all negative \glspl{capability object type} are
   reserved: \glspl{unsealed capability} use the value $2^{64}-1$ and \glspl{sealed entry capability}
   have an object type of $2^{64}-2$.
   The remaining \glspl{capability object type} are used for \glspl{sealed capability with an object type}}
@@ -729,7 +677,7 @@ operations that conform to \gls{capability
   name=sealed capability,
   plural=sealed capabilities,
   description={A sealed \gls{capability} is one whose \gls{capability object type}
-    is not equal to the unsealed object type ($2^{64}-1$ for \gls{CHERI-MIPS} and \gls{CHERI-RISC-V}).
+    is not equal to the unsealed object type ($2^{64}-1$ for \gls{CHERI-RISC-V} and \gls{CHERI-x86-64}).
     A sealed capability's \gls{address}, \gls{capability bounds},
     \gls{capability permissions}, and other fields are immutable -- i.e.,
     cannot be modified using \gls{capability-based instructions}.
@@ -737,7 +685,7 @@ operations that conform to \gls{capability
     using the instruction set, and must be unsealed before it can be used.
     This can be used to implement non-monotonic domain transition, as a
     sealed capability may carry rights not otherwise present in the
-    \gls{capability register file}.
+    \glspl{capability register}.
     Two types exist: \glspl{sealed capability with an object type} and
     \glspl{sealed entry capability}.
     They have different properties catering to different use cases}
@@ -767,7 +715,7 @@ operations that conform to \gls{capability
   plural=sealed entry capabilities,
   description={A sealed entry \gls{capability} (also known as
     \gls{sentry capability}) is a \gls{sealed capability}
-    whose \gls{capability object type} is set to the sentry \gls{reserved capability object type} ($2^{64}-2$ for \gls{CHERI-MIPS} and \gls{CHERI-RISC-V}).
+    whose \gls{capability object type} is set to the sentry \gls{reserved capability object type} ($2^{64}-2$ for \gls{CHERI-RISC-V} and \gls{CHERI-x86-64}).
     Sealed entry capabilities are commonly referred to as \glspl{sentry
     capability}.
     Sealed entry capabilities are do not support linking sealed code and
@@ -798,8 +746,7 @@ operations that conform to \gls{capability
 {
   name=software compartmentalization,
   description={The configuration of \glspl{code capability} and \glspl{data
-    capability} available via the \gls{capability register file} or
-    \gls{merged register file}, accessible \glspl{special capability
+    capability} available via accessible \glspl{capability
     register}, and \gls{tagged memory} such that software components can be
     isolated from one another, enabling \gls{vulnerability mitigation} via the
     application of the \gls{principle of least privilege} at the application
@@ -823,10 +770,8 @@ operations that conform to \gls{capability
 {
   name=special capability register,
   description={Special capability registers have special architectural
-    meanings, and include the \gls{program-counter capability}, the
-    \gls{default data capability}, the \gls{exception program-counter
-    capability}, the \gls{kernel code capability}, and the \gls{kernel data
-    capability}.
+    meanings, and include the \gls{default data capability} as well
+    as additional architecture-specific capability registers.
     Not all registers are accessible at all times; for example, some may be
     available only in certain rings, or when \PCC{} has the
     Access\_System\_Registers permission set}
@@ -839,7 +784,7 @@ operations that conform to \gls{capability
     each \gls{capability}-aligned, capability-sized word in memory.
     \Gls{capability-based instructions} that load and store capabilities
     maintain the tag as the capability transits between memory and the
-    \gls{capability register file}, tracking \gls{capability provenance}.
+    \glspl{capability register}, tracking \gls{capability provenance}.
     When data stores (i.e., stores of non-capabilities), the tag on the
     memory location will be atomically cleared, ensuring the integrity of
     in-memory capabilities}
