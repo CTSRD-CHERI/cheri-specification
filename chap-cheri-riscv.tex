@@ -120,8 +120,7 @@ precision.
 \subsection{CHERI-RISC-V is an ISA Design Space}
 
 A key aim in CHERI-RISC-V is to allow experiments to be run comparing various
-CHERI-related parameters: Are the general-purpose integer and capability
-register files separate or merged?  Are capabilities with respect to 32-bit or
+CHERI-related parameters:  Are capabilities with respect to 32-bit or
 64-bit virtual addresses?  What are the impacts of various instruction-set
 variations or microarchitectural optimizations?  How does greater investment
 of opcode space affect performance -- and what techniques, such as instruction
@@ -134,9 +133,6 @@ design space, in which several key design dimensions are parameterized:
 \begin{itemize}
 \item Both 32-bit and 64-bit RISC-V are extended, with 64-bit and 128-bit
   capabilities respectively.
-
-\item Both split and merged general-purpose integer and capability register
-  files are supported.
 
 % XXXRW: We now think that we are not doing this in CHERI-RISC-V.
 %
@@ -180,17 +176,14 @@ CHERI-RISC-V shares the following features with other CHERI architectures:
   including relocating access addresses using the capability base and offset.
 \item Floating point is fully supported, including capability-relative
   floating-point load and store instructions.
-\item General-purpose registers are extended to hold capabilities in
-  the ``merged'' register-file variant.
+\item General-purpose registers are extended to hold capabilities.
 \item Capability-related violations (such as loads/stores/fetches via untagged
   capabilities, out-of-bound accesses, and so on) trigger immediate precise
   exceptions.
 \item It is never left ambiguous as to whether a register index operand to a
   load or store instruction, or the register target of a jump instruction,
   is a capability and therefore must have a tag set.
-  This both ensures that a split register file can be used (as it is always
-  clear what register file the operand reads from) and also reinforces
-  intentionality.
+  This reinforces intentionality.
 \item \cappermASR limits privileged ISA
   operations when within privileged rings.
   While RISC-V's specific privileged operations differ, the intent remains the
@@ -202,7 +195,6 @@ CHERI-RISC-V shares the following features with other CHERI architectures:
 The following changes are specific to CHERI-RISC-V:
 
 \begin{itemize}
-\item CHERI-RISC-V supports a ``split'' register-file variant.
 \item Requests for non-monotonic capability transformations trigger
   immediate precise exceptions.
 \item RISC-V exception handling -- including register banking, scratch
@@ -319,45 +311,12 @@ capabilities for 64-bit addresses.
 
 \subsection{Capability Register File}
 
-CHERI-RISC-V supports two ways of providing general capability registers:
-introducing a new (``split'')
-register file (e.g., as occurs with the RISC-V F extension for floating
-point), or extending the existing (``merged'') general-purpose integer registers in the
-base instruction set.
-
-Both options can be effectively targeted by a CHERI-aware compiler, but offer
-quite different performance tradeoffs for both the microarchitecture and
-software code generation.
-For example, an additional register file may require additional control logic,
-especially in simpler pipelined designs, and additional registers may impose an
-additional data-cache footprint due to additional callee/caller register saving and context switching.
-
-In CHERI-RISC-V, we choose to specify the instruction set such that the
-register-file choice is parameterized, allowing the design space to be
-evaluated experimentally.
-Particular CPUs and compiled software stacks will target only one of these two
-approaches.
-
-\subsubsection{Split Register File}
-
-With a split register file, CHERI
-instructions with capability register operands access the capability register
-file, and integer operands specify access to the integer register file.
-
-\pmnote{The increased cost of context switching due to the larger
-  register context can be alleviated in some cases using the support
-  in \texttt{mstatus.XS} for optimizing context saves and restores.}
-
-\subsubsection{Merged Register File}
-
-With a \textit{merged register file},
-general-purpose integer registers optionally hold
+In CHERI-RISC-V,
+general-purpose integer registers are extended to optionally hold
 full
-capabilities, along with a tag, reducing the amount of control logic otherwise
-required (by avoiding an additional register file).
-This also reduces the size of register context growth.
+capabilities, along with a tag.
 
-Merging the general-purpose integer and capability register files raises the
+Extending general-purpose integer registers raises the
 question of whether and how non-capability-aware instructions should
 interact with capability values in registers -- a concern not dissimilar to
 the behavior of instructions on 64-bit architectures offering legacy 32-bit
@@ -439,8 +398,7 @@ out of portions of an in-register capability, subject to guarded manipulation.
 They are simply new instructions defined in CHERI-RISC-V and added to
 the opcode space.
 
-In the ``merged'' register-file variant,
-it is possible to imagine having memory-access and
+It is possible to imagine having memory-access and
 control-flow instructions condition their behavior based on the presence of a
 tag, selecting a compatible integer behavior if the tag is not set, and a
 capability behavior if it is set.
@@ -553,8 +511,7 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
 \begin{center}
 \begin{bytefield}[bitwidth=\textwidth/34]{32}
   \bitheader[endianness=big]{0,1,2,31} \\
-  \bitbox{30}{\textbf{WIRI}}
-  \bitbox{1}{\texttt{d}}
+  \bitbox{31}{\textbf{WIRI}}
   \bitbox{1}{\texttt{e}}
 \end{bytefield}
 \caption{\xccsr{} register format; WIRI bits are Write Ignore Read Ignore.}
@@ -572,9 +529,6 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
 
 \begin{description}
 \item [e] The \texttt{e} ``enable'' bit \ajnote{read only? / only wriFable in u-mode? only writable with a specific permission in pcc?} tells whether capability extensions are enabled or disabled.
-\item [d] The \texttt{d} ``dirty'' bit tells whether a capability register has been written. This is intended to help with memory requirements when implementing context switching.  \arnote{Is this still useful if we have hybrid and purecap co-process communication?}
-\hmnote{If the user-mode apps are purecap, and the kernel is hybrid (or does not do any cap ops at all), this bit might be useful
-to do lazy CHERI-context save/restore similar fo floating point.}
 \end{description}
 
 \subsection{Special Capability Registers (SCRs)}
@@ -782,7 +736,7 @@ encoding-mode flag in the capability \cflags{} field of \PCC{}:
 \item[Integer encoding mode (0)] Conventional RISC-V execution mode, in which
   address operands to existing RISC-V load and store opcodes contain
   \textit{integer addresses}.
-  If using a merged register file, the upper \texttt{XLEN} bits and tag bit of
+  The upper \texttt{XLEN} bits and tag bit of
   the operand register will be ignored.
   The dereference will implicitly occur relative to \DDC{}.
   The tag bit on \DDC{} must indicate that a valid capability is present, and
@@ -1260,10 +1214,8 @@ However, should an RV128 be defined that instead uses 64-bit virtual
 addresses (i.e., one with 128-bit data registers but not a 128-bit address
 space), our current opcode-space reuse would not be appropriate for a
 corresponding CHERI-RISC-V variant.
-Overloaded opcodes might reduce intentionality and in the split register-file
-configuration we would be unable to distinguish operations intended for the
-integer register file vs. the capability register file.
-With respect to intentionality, it remains to be seen how essential this
+Overloaded opcodes might reduce intentionality.
+It remains to be seen how essential this
 concern is with respect to security: tag-free copies could still be
 implemented efficiently by stripping \cappermLC{} from a source
 capability during a memory copy.
@@ -1350,11 +1302,6 @@ The following edge-case behaviors relating to CSRs/SCRs are also specified:
 
 % When the \texttt{e} ``enable'' field is set, the use of capability registers and
 % instructions is enabled.
-% The \texttt{d} ``dirty'' field is set by hardware when the capability registers
-% are written to\footnote{The dirty bit is only useful to accelerate context
-% switch for an architecture with a dedicated capability register file. If the
-% architecture is using a merged register file for capability and integer
-% registers, the dirty field should be removed}.
 
 % Instructions that alter the control flow and cause memory accesses for
 % instruction fetches, such as branches and jumps, consider their target address
@@ -1482,3 +1429,45 @@ faults was found to be more useful.  As a result, additional top-level
 exception codes (\riscvloadcappagefault{} and
 \riscvstorecappagefault{}) were added to report MMU tag permission
 violations instead.
+
+\subsection{Separate Capability Register File}
+
+CHERI-RISC-V was originally specified with two different approaches
+for adding general-purpose capability registers.  One approach
+described earlier extended existing integer general-purpose registers
+to hold capabilities (a ``merged'' register file).  The second
+approach left the integer register file as-is and added a separate
+capability register file to hold capabilities (a ``split'' register
+file).  This second approach mirrored the approach used on CHERI-MIPS.
+
+Most of the ISA is agnostic to this choice due to the principle of
+intentional-use such as the explicit use of capability-relative
+addresses versus integer pointers relative to \DDC{} or \PCC{}.
+However, the ``split'' register file approach did require a few
+additional changes:
+
+\begin{itemize}
+\item A separate \insnnoref{Clear} instruction similar to
+  \insnriscvref{CClear} and \insnriscvref{FPClear} which cleared a set
+  of general-purpose integer registers.
+
+\item A separate \insnref{CGetAddr} instruction to fetch the address
+  of a capability register.  In a ``merged'' register file this can be
+  obtained by reading the aliased general-purpose integer register.
+  Note that \insnref{CGetAddr} is currently still defined.
+
+\item A separate \insnref{CSub} instruction to compute the difference
+  between addresses in two capability registers.  In a ``merged''
+  register file this can be computed via the existing \insnnoref{SUB}
+  instruction on the aliased general-purpose integer registers.  Note
+  that \insnref{CSub} is currently still defined.
+
+\item Dirty bits were defined in a the per-mode CSR \xccsr{}. This bit
+  was set anytime a general-purpose capability register was changed.
+  It was intended to be used similar to \texttt{FS} and \texttt{XS}
+  fields in \texttt{mstatus} to optimize context switching.
+\end{itemize}
+
+In practice, only variants of CHERI-RISC-V using a ``merged'' register
+file were implemented in emulators, soft cores, toolchains, and
+operating systems.

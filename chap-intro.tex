@@ -529,10 +529,7 @@ based on a 32-bit or 64-bit base address size.
 CHERI-MIPS used a separate \textit{capability register file} to hold
 capability registers rather than extending general-purpose registers.
 CHERI-RISC-V instead extends general-purpose registers to hold
-capabilities. \footnote{CHERI-RISC-V can in fact be parameterized to
-  use a split register file for experimental purposes, but this is
-  not fully supported by our hardware and software implementations at
-  the time of writing.}
+capabilities.
 
 Wherever possible, CHERI systems make use of existing hardware designs: processor pipelines and register files, cache memory,
 system buses, commodity DRAM, and commodity peripheral devices such as
