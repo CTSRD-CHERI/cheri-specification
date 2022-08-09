@@ -1461,3 +1461,24 @@ The following edge-case behaviors relating to CSRs/SCRs are also specified:
 
 The CHERI-RISC-V specification has evolved over time.  This section
 describes some of the alternatives considered and other changes made.
+
+\subsection{Capability Exception Reporting}
+
+Initially CHERI-RISC-V reported additional information for capability
+faults via \texttt{cause} and \texttt{cap idx} fields in a new
+per-mode CSR \xccsr{}.  During CHERI-RISC-V's development, the RISC-V
+privileged spec renamed the per-mode \xbadaddr{} CSR to \xtval{} and
+reused it to store non-address information for some faults.  Following
+this change, CHERI-RISC-V moved the \texttt{cause} and \texttt{cap
+  idx} fields to \xtval{}.
+
+\subsection{MMU Capability Exceptions}
+
+Initially CHERI-RISC-V reported MMU tag permission violations via the
+\riscvcheriexception{} exception code.  Unique values were assigned
+for these violations to the \texttt{cause} field of \xtval{}.
+However, storing the faulting address in \xtval{} similar to other MMU
+faults was found to be more useful.  As a result, additional top-level
+exception codes (\riscvloadcappagefault{} and
+\riscvstorecappagefault{}) were added to report MMU tag permission
+violations instead.
