@@ -1,5 +1,5 @@
 let off : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm);
-let newPC = PCC.address + off;
+let newPC = PC + off;
 if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(PCC, newPC, #\hyperref[sailRISCVzminzyinstructionzybytes]{min\_instruction\_bytes}#())) then {
   #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_LengthViolation, PCC_IDX);
   RETIRE_FAIL

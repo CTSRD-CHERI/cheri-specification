@@ -20,7 +20,7 @@ function #\hyperref[sailRISCVzhandlezyloadzycapzyviazycap]{handle\_load\_cap\_vi
     #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(_), _) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unexpected cheri exception for cap load") },
     #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL },
     #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, ptw_info) => {
-      let c = #\hyperref[sailRISCVzmemzyreadzycap]{mem\_read\_cap}#(addr, aq, rl, false);
+      let c = #\hyperref[sailRISCVzmemzyreadzycap]{mem\_read\_cap}#(addr, aq, aq & rl, false);
       match c {
         #\hyperref[sailRISCVzMemValue]{MemValue}#(v) => {
           let cr = if ptw_info.ptw_lc == PTW_LC_CLEAR

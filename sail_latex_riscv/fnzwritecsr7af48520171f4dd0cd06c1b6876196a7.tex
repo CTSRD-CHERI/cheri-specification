@@ -9,6 +9,7 @@ function #\hyperref[sailRISCVzwriteCSR]{writeCSR}# (csr : csreg, value : xlenbit
     (0x304,  _) => { mie = #\hyperref[sailRISCVzlegalizzezymie]{legalize\_mie}#(mie, value); #\hyperref[sailRISCVzSome]{Some}#(mie.#\hyperref[sailRISCVzbits]{bits}#()) },
     (0x305,  _) => { #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzsetzymtvec]{set\_mtvec}#(value)) },
     (0x306,  _) => { mcounteren = #\hyperref[sailRISCVzlegalizzezymcounteren]{legalize\_mcounteren}#(mcounteren, value); #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(mcounteren.#\hyperref[sailRISCVzbits]{bits}#())) },
+    (0x310, 32) => { #\hyperref[sailRISCVzSome]{Some}#(mstatush.#\hyperref[sailRISCVzbits]{bits}#()) }, // ignore writes for now
     (0x320,  _) => { mcountinhibit = #\hyperref[sailRISCVzlegalizzezymcountinhibit]{legalize\_mcountinhibit}#(mcountinhibit, value); #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(mcountinhibit.#\hyperref[sailRISCVzbits]{bits}#())) },
     (0x340,  _) => { mscratch = value; #\hyperref[sailRISCVzSome]{Some}#(mscratch) },
     (0x341,  _) => { #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzsetzyxretzytarget]{set\_xret\_target}#(Machine, value)) },

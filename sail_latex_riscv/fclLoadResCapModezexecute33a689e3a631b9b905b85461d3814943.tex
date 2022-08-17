@@ -1,0 +1,7 @@
+if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
+  let (auth_val, vaddr, auth_idx) = #\hyperref[sailRISCVzgetzycherizymodezycapzyaddr]{get\_cheri\_mode\_cap\_addr}#(rs1_cs1, #\hyperref[sailRISCVzzzeros]{zeros}#());
+  #\hyperref[sailRISCVzhandlezyloadreszycapzyviazycap]{handle\_loadres\_cap\_via\_cap}#(cd, auth_idx, auth_val, vaddr, aq, rl)
+} else {
+  #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+  RETIRE_FAIL
+}

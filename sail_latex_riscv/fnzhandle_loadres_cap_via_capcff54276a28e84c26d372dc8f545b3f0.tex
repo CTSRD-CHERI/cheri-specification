@@ -1,6 +1,4 @@
-function #\hyperref[sailRISCVzhandlezyloadreszycapzyviazycap]{handle\_loadres\_cap\_via\_cap}#(cd, auth_idx, auth_val, vaddrBits) = {
-  let aq : bool = true;  /* cheri-specific aq/rl */
-  let rl : bool = true;
+function #\hyperref[sailRISCVzhandlezyloadreszycapzyviazycap]{handle\_loadres\_cap\_via\_cap}#(cd, auth_idx, auth_val, vaddrBits, aq, rl) = {
   let is_unsigned = false;
 if #\hyperref[sailRISCVznot]{not}#(auth_val.tag) then {
     #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_TagViolation, auth_idx);
@@ -21,7 +19,7 @@ if #\hyperref[sailRISCVznot]{not}#(auth_val.tag) then {
     #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(_), _) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unexpected cheri exception for cap load") },
     #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL },
     #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, ptw_info) => {
-      let c = #\hyperref[sailRISCVzmemzyreadzycap]{mem\_read\_cap}#(addr, aq, rl, false);
+      let c = #\hyperref[sailRISCVzmemzyreadzycap]{mem\_read\_cap}#(addr, aq, aq & rl, false);
       match c {
         #\hyperref[sailRISCVzMemValue]{MemValue}#(v) => {
           let cr = if ptw_info.ptw_lc == PTW_LC_CLEAR

@@ -34,7 +34,7 @@ if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
         match mtags {
           #\hyperref[sailRISCVzMemException]{MemException}#(_) => (),
           #\hyperref[sailRISCVzMemValue]{MemValue}#(tags) => {
-            match #\hyperref[sailRISCVzmemzyreadzycap]{mem\_read\_cap}#(addr + i * cap_size, aq, rl, false) {
+            match #\hyperref[sailRISCVzmemzyreadzycap]{mem\_read\_cap}#(addr + i * cap_size, aq, aq & rl, false) {
               #\hyperref[sailRISCVzMemException]{MemException}#(e) => mtags = #\hyperref[sailRISCVzMemException]{MemException}#(e),
               #\hyperref[sailRISCVzMemValue]{MemValue}#(v) =>
                 mtags = #\hyperref[sailRISCVzMemValue]{MemValue}#([tags with i = #\hyperref[sailRISCVzboolzytozybit]{bool\_to\_bit}#(v.tag)])

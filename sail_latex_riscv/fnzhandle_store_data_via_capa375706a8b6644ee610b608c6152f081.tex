@@ -21,16 +21,16 @@ function #\hyperref[sailRISCVzhandlezystorezydatazyviazycap]{handle\_store\_data
     #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(_), _) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unexpected cheri exception for data store") },
     #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL },
     #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) => {
-      let eares : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(unit) = #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, size, aq, rl, false);
+      let eares : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(unit) = #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, size, aq & rl, rl, false);
       match (eares) {
         #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL },
         #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
           let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
           let res : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) = match (width, sizeof(xlen)) {
-            (BYTE, _)     => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 1, rs2_val[7..0],  aq, rl, false),
-            (HALF, _)     => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 2, rs2_val[15..0], aq, rl, false),
-            (WORD, _)     => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq, rl, false),
-            (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq, rl, false)
+            (BYTE, _)     => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 1, rs2_val[7..0],  aq & rl, rl, false),
+            (HALF, _)     => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 2, rs2_val[15..0], aq & rl, rl, false),
+            (WORD, _)     => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq & rl, rl, false),
+            (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq & rl, rl, false)
           };
           match (res) {
             #\hyperref[sailRISCVzMemValue]{MemValue}#(true)  => RETIRE_SUCCESS,

@@ -13,6 +13,7 @@ function readCSR csr : csreg -> xlenbits = {
     (0x304,  _) => mie.#\hyperref[sailRISCVzbits]{bits}#(),
     (0x305,  _) => #\hyperref[sailRISCVzgetzymtvec]{get\_mtvec}#(),
     (0x306,  _) => #\hyperref[sailRISCVzEXTZ]{EXTZ}#(mcounteren.#\hyperref[sailRISCVzbits]{bits}#()),
+    (0x310, 32) => mstatush.#\hyperref[sailRISCVzbits]{bits}#(),
     (0x320,  _) => #\hyperref[sailRISCVzEXTZ]{EXTZ}#(mcountinhibit.#\hyperref[sailRISCVzbits]{bits}#()),
 
     (0x340,  _) => mscratch,

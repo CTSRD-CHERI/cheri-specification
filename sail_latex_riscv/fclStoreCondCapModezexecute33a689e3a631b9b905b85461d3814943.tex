@@ -1,0 +1,13 @@
+if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == false then {
+  /* should only happen in rmem
+   * rmem: allow SC to fail very early
+   */
+  #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b1);
+  RETIRE_SUCCESS
+} else if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
+  let (auth_val, vaddr, auth_idx) = #\hyperref[sailRISCVzgetzycherizymodezycapzyaddr]{get\_cheri\_mode\_cap\_addr}#(rs1_cs1, #\hyperref[sailRISCVzzzeros]{zeros}#());
+  #\hyperref[sailRISCVzhandlezystorezycondzycapzyviazycap]{handle\_store\_cond\_cap\_via\_cap}#(rd, cs2, auth_idx, auth_val, vaddr, aq, rl, false);
+} else {
+  #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
+  RETIRE_FAIL
+}

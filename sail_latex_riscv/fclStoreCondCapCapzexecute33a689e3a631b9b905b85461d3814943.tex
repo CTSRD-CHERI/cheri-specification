@@ -7,7 +7,7 @@ if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == f
 } else if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
   let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
   let vaddr = cs1_val.address;
-  #\hyperref[sailRISCVzhandlezystorezycondzycapzyviazycap]{handle\_store\_cond\_cap\_via\_cap}#(cs2, 0b0 @ cs1, cs1_val, vaddr)
+  #\hyperref[sailRISCVzhandlezystorezycondzycapzyviazycap]{handle\_store\_cond\_cap\_via\_cap}#(cs2, cs2, 0b0 @ cs1, cs1_val, vaddr, false, false, true)
 } else {
   #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
   RETIRE_FAIL
