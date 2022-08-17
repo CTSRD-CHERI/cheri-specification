@@ -1,5 +1,5 @@
 function #\hyperref[sailRISCVzhtifzytick]{htif\_tick}#() = {
   if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
   then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("htif::tick " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(htif_tohost));
-  htif_tohost = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0)  /* htif ack */
+  htif_tohost = htif_tohost /* prevent this function being optimized out */
 }

@@ -7,6 +7,6 @@ function #\hyperref[sailRISCVzmemzyreadzymeta]{mem\_read\_meta}# (typ, paddr, wi
       (false, true,  true)  => throw(#\hyperref[sailRISCVzErrorzynotzyimplemented]{Error\_not\_implemented}#("lr.rl")),
       (_, _, _)             => #\hyperref[sailRISCVzpmpzymemzyread]{pmp\_mem\_read}#(typ, paddr, width, aq, rl, res, meta)
     };
-  #\hyperref[sailRISCVzrvfizyread]{rvfi\_read}#(paddr, width, #\hyperref[sailRISCVzMemoryOpResultzydropzymeta]{MemoryOpResult\_drop\_meta}#(result));
+  #\hyperref[sailRISCVzrvfizyread]{rvfi\_read}#(paddr, width, result);
   result
 }

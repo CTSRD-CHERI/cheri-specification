@@ -1,4 +1,5 @@
-let cs1_val = if #\hyperref[sailRISCVzunsigned]{unsigned}#(cs1) == 0 then DDC else #\hyperref[sailRISCVzC]{C}#(cs1);
+let (cs1_val, cs1_idx) = if #\hyperref[sailRISCVzunsigned]{unsigned}#(cs1) == 0 then (DDC, DDC_IDX)
+                                               else (#\hyperref[sailRISCVzC]{C}#(cs1), 0b0 @ cs1);
 let cs2_val = #\hyperref[sailRISCVzC]{C}#(cs2);
 let (cs1_base, cs1_top) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(cs1_val);
 let (cs2_base, cs2_top) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(cs2_val);
@@ -6,22 +7,22 @@ let cs1_perms = #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cs1_val);
 let cs2_perms = #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cs2_val);
 let cs2_flags = #\hyperref[sailRISCVzgetCapFlags]{getCapFlags}#(cs2_val);
 if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_TagViolation, cs1);
+  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_TagViolation, cs1_idx);
   RETIRE_FAIL
 } else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
+  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_SealViolation, cs1_idx);
   RETIRE_FAIL
 } else if cs2_base < cs1_base then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs1);
+  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_LengthViolation, cs1_idx);
   RETIRE_FAIL
 } else if cs2_top > cs1_top then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs1);
+  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_LengthViolation, cs1_idx);
   RETIRE_FAIL
 } else if cs2_base > cs2_top then { /* check for length < 0 - possible because cs2 might be untagged */
   #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs2);
   RETIRE_FAIL
 } else if (cs2_perms & cs1_perms) != cs2_perms then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_UserDefViolation, cs1);
+  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_UserDefViolation, cs1_idx);
   RETIRE_FAIL
 } else {
   let (exact, cd1) = #\hyperref[sailRISCVzsetCapBounds]{setCapBounds}#(cs1_val, #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_addr_width, cs2_base), #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_len_width, cs2_top));

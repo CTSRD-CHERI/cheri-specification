@@ -1,5 +1,10 @@
 function #\hyperref[sailRISCVzlegalizzezymstatus]{legalize\_mstatus}#(o : Mstatus, v : xlenbits) -> Mstatus = {
-  let m : Mstatus = #\hyperref[sailRISCVzMkzyMstatus]{Mk\_Mstatus}#(v);
+  /*
+   * Populate all defined fields using the bits of v, stripping anything
+   * that does not have a matching bitfield entry. All bits above 32 are handled
+   * explicitly later.
+   */
+  let m : Mstatus = #\hyperref[sailRISCVzMkzyMstatus]{Mk\_Mstatus}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(v[22 .. 11] @ 0b00 @ v[8 .. 7] @ 0b0 @ v[5 .. 3] @ 0b0 @ v[1 .. 0]));
 
   /* We don't have any extension context yet. */
   let m = #\hyperref[sailRISCVzupdatezyXS]{update\_XS}#(m, #\hyperref[sailRISCVzextStatuszytozybits]{extStatus\_to\_bits}#(Off));
@@ -14,6 +19,11 @@ function #\hyperref[sailRISCVzlegalizzezymstatus]{legalize\_mstatus}#(o : Mstatu
   /* We don't support dynamic changes to SXL and UXL. */
   let m = #\hyperref[sailRISCVzsetzymstatuszySXL]{set\_mstatus\_SXL}#(m, #\hyperref[sailRISCVzgetzymstatuszySXL]{get\_mstatus\_SXL}#(o));
   let m = #\hyperref[sailRISCVzsetzymstatuszyUXL]{set\_mstatus\_UXL}#(m, #\hyperref[sailRISCVzgetzymstatuszyUXL]{get\_mstatus\_UXL}#(o));
+
+  /* We don't currently support changing MBE and SBE. */
+  let m = if sizeof(xlen) == 64 then {
+             #\hyperref[sailRISCVzMkzyMstatus]{Mk\_Mstatus}#([m.#\hyperref[sailRISCVzbits]{bits}#() with 37 .. 36 = 0b00])
+          } else m;
 
   /* Hardwired to zero in the absence of 'U' or 'N'. */
   let m = if (~ (#\hyperref[sailRISCVzhaveNExt]{haveNExt}#())) then {

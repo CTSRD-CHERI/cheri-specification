@@ -1,0 +1,13 @@
+function #\hyperref[sailRISCVzwritezysczycapzyresult]{write\_sc\_cap\_result}#(rd : regidx, cap_dest : bool, result : #\hyperref[sailRISCVzbits]{bits}#(1)) -> unit = {
+  /* Some SC instructions re-use the source register as the destination. To
+    ensure this works correctly for split register file implementations we
+    need to be careful about writing to the correct register file. This is only
+    a concern for store conditional of capabilities where the source register
+    is a capability register but the destination may be either a capability or
+    an general purpose register depending on the instruction. */
+  if cap_dest then {
+    #\hyperref[sailRISCVzC]{C}#(rd) = #\hyperref[sailRISCVzintzytozycap]{int\_to\_cap}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(result));
+  } else {
+    #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(result);
+  }
+}

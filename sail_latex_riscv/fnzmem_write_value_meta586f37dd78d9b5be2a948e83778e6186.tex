@@ -1,5 +1,5 @@
 function #\hyperref[sailRISCVzmemzywritezyvaluezymeta]{mem\_write\_value\_meta}# (paddr, width, value, ext_acc, meta, aq, rl, con) = {
-  #\hyperref[sailRISCVzrvfizywrite]{rvfi\_write}#(paddr, width, value);
+  #\hyperref[sailRISCVzrvfizywrite]{rvfi\_write}#(paddr, width, value, meta);
   if (rl | con) & (~ (#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(paddr, width)))
   then #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#())
   else match (aq, rl, con) {

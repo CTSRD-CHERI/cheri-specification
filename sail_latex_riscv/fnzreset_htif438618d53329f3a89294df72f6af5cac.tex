@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzresetzyhtif]{reset\_htif}# () -> unit = {
+  htif_cmd_write = bitzero;
+  htif_payload_writes = 0x0;
+  htif_tohost = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+}

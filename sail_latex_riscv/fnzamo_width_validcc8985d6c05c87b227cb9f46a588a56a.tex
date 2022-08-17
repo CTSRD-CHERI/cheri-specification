@@ -1,0 +1,7 @@
+function #\hyperref[sailRISCVzamozywidthzyvalid]{amo\_width\_valid}#(size : word_width) -> bool = {
+  match(size) {
+    WORD   => true,
+    DOUBLE => sizeof(xlen) >= 64,
+    _      => false
+  }
+}

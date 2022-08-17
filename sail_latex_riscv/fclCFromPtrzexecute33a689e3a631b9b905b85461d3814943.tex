@@ -1,13 +1,14 @@
-let cs1_val = if #\hyperref[sailRISCVzunsigned]{unsigned}#(cs1) == 0 then DDC else #\hyperref[sailRISCVzC]{C}#(cs1);
+let (cs1_val, cs1_idx) = if #\hyperref[sailRISCVzunsigned]{unsigned}#(cs1) == 0 then (DDC, DDC_IDX)
+                                               else (#\hyperref[sailRISCVzC]{C}#(cs1), 0b0 @ cs1);
 let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
 if rs2_val == #\hyperref[sailRISCVzzzeros]{zeros}#() then {
   #\hyperref[sailRISCVzC]{C}#(cd) = null_cap;
   RETIRE_SUCCESS
 } else if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_TagViolation, cs1);
+  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_TagViolation, cs1_idx);
   RETIRE_FAIL
 } else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
+  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_SealViolation, cs1_idx);
   RETIRE_FAIL
 } else {
   let (success, newCap) = #\hyperref[sailRISCVzsetCapOffset]{setCapOffset}#(cs1_val, rs2_val);

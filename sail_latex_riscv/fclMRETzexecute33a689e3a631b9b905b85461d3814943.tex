@@ -1,6 +1,8 @@
 if   cur_privilege != Machine
-then #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#()
+then { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL }
 else if ~(#\hyperref[sailRISCVzextzycheckzyxretzypriv]{ext\_check\_xret\_priv}# (Machine))
-then #\hyperref[sailRISCVzextzyfailzyxretzypriv]{ext\_fail\_xret\_priv}# ()
-else #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(#\hyperref[sailRISCVzexceptionzyhandler]{exception\_handler}#(cur_privilege, #\hyperref[sailRISCVzCTLzyMRET]{CTL\_MRET}#(), PC));
-RETIRE_FAIL
+then { #\hyperref[sailRISCVzextzyfailzyxretzypriv]{ext\_fail\_xret\_priv}#(); RETIRE_FAIL }
+else {
+  #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(#\hyperref[sailRISCVzexceptionzyhandler]{exception\_handler}#(cur_privilege, #\hyperref[sailRISCVzCTLzyMRET]{CTL\_MRET}#(), PC));
+  RETIRE_SUCCESS
+}

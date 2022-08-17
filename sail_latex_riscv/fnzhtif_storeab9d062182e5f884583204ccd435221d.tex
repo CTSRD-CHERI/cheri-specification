@@ -3,36 +3,54 @@ function #\hyperref[sailRISCVzhtifzystore]{htif\_store}#(paddr, width, data) = {
   then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("htif[" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(paddr) ^ "] <- " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data));
   /* Store the written value so that we can ack it later. */
   if      width == 8
-  then    { htif_tohost = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(data) }
+  then    { htif_cmd_write = bitone;
+            htif_payload_writes = htif_payload_writes + 1;
+            htif_tohost = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(data) }
   else if width == 4 & paddr == #\hyperref[sailRISCVzplatzyhtifzytohost]{plat\_htif\_tohost}#()
-  then    { htif_tohost = #\hyperref[sailRISCVzvectorzyupdatezysubrange]{vector\_update\_subrange}#(htif_tohost, 31, 0, data) }
+  then    { if   data == htif_tohost[31 .. 0]
+            then htif_payload_writes = htif_payload_writes + 1
+            else htif_payload_writes = 0x1;
+            htif_tohost = #\hyperref[sailRISCVzvectorzyupdatezysubrange]{vector\_update\_subrange}#(htif_tohost, 31, 0, data) }
   else if width == 4 & paddr == #\hyperref[sailRISCVzplatzyhtifzytohost]{plat\_htif\_tohost}#() + 4
-  then    { htif_tohost = #\hyperref[sailRISCVzvectorzyupdatezysubrange]{vector\_update\_subrange}#(htif_tohost, 63, 32, data) }
+  then    { if   data[15 .. 0] == htif_tohost[47 .. 32]
+            then htif_payload_writes = htif_payload_writes + 1
+            else htif_payload_writes = 0x1;
+            htif_cmd_write = bitone;
+            htif_tohost = #\hyperref[sailRISCVzvectorzyupdatezysubrange]{vector\_update\_subrange}#(htif_tohost, 63, 32, data) }
+  /* unaligned command writes are not supported and will not be detected */
   else    { htif_tohost = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(data) };
 
-  /* Process the cmd immediately; this is needed for terminal output. */
-  let cmd = #\hyperref[sailRISCVzMkzyhtifzycmd]{Mk\_htif\_cmd}#(htif_tohost);
-  match cmd.#\hyperref[sailRISCVzdevice]{device}#() {
-    0x00 => { /* syscall-proxy */
-      if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
-      then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("htif-syscall-proxy cmd: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(cmd.#\hyperref[sailRISCVzpayload]{payload}#()));
-      if   cmd.#\hyperref[sailRISCVzpayload]{payload}#()[0] == bitone
-      then {
-           htif_done = true;
-           htif_exit_code = (#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(cmd.#\hyperref[sailRISCVzpayload]{payload}#(), 64) >> 1)
-      }
-      else ()
-    },
-    0x01 => { /* terminal */
-      if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
-      then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("htif-term cmd: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(cmd.#\hyperref[sailRISCVzpayload]{payload}#()));
-      match cmd.#\hyperref[sailRISCVzcmd]{cmd}#() {
-        0x00 => /* TODO: terminal input handling */ (),
-        0x01 => #\hyperref[sailRISCVzplatzytermzywrite]{plat\_term\_write}#(cmd.#\hyperref[sailRISCVzpayload]{payload}#()[7..0]),
-        c    => #\hyperref[sailRISCVzprint]{print}#("Unknown term cmd: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(c))
-      }
-    },
-    d => #\hyperref[sailRISCVzprint]{print}#("htif-???? cmd: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data))
+  /* Execute if there were repeated writes of the same payload without
+   * a #\hyperref[sailRISCVzcmd]{cmd}# (e.g. in riscv-tests), or we have a complete htif command.
+   */
+  if   (((htif_cmd_write == bitone) & (#\hyperref[sailRISCVzunsigned]{unsigned}#(htif_payload_writes) > 0))
+        | (#\hyperref[sailRISCVzunsigned]{unsigned}#(htif_payload_writes) > 2))
+  then {
+    let cmd = #\hyperref[sailRISCVzMkzyhtifzycmd]{Mk\_htif\_cmd}#(htif_tohost);
+    match cmd.#\hyperref[sailRISCVzdevice]{device}#() {
+      0x00 => { /* syscall-proxy */
+        if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+        then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("htif-syscall-proxy cmd: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(cmd.#\hyperref[sailRISCVzpayload]{payload}#()));
+        if   cmd.#\hyperref[sailRISCVzpayload]{payload}#()[0] == bitone
+        then {
+             htif_done = true;
+             htif_exit_code = (#\hyperref[sailRISCVzsailzyzzerozyextend]{sail\_zero\_extend}#(cmd.#\hyperref[sailRISCVzpayload]{payload}#(), 64) >> 1)
+        }
+        else ()
+      },
+      0x01 => { /* terminal */
+        if   #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+        then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("htif-term cmd: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(cmd.#\hyperref[sailRISCVzpayload]{payload}#()));
+        match cmd.#\hyperref[sailRISCVzcmd]{cmd}#() {
+          0x00 => /* TODO: terminal input handling */ (),
+          0x01 => #\hyperref[sailRISCVzplatzytermzywrite]{plat\_term\_write}#(cmd.#\hyperref[sailRISCVzpayload]{payload}#()[7..0]),
+          c    => #\hyperref[sailRISCVzprint]{print}#("Unknown term cmd: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(c))
+        };
+        /* reset to ack */
+        #\hyperref[sailRISCVzresetzyhtif]{reset\_htif}#()
+      },
+      d => #\hyperref[sailRISCVzprint]{print}#("htif-???? cmd: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(data))
+    }
   };
   #\hyperref[sailRISCVzMemValue]{MemValue}#(true)
 }

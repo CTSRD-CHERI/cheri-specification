@@ -23,6 +23,12 @@ function #\hyperref[sailRISCVzinitzysys]{init\_sys}#() -> unit = {
   mstatus = #\hyperref[sailRISCVzsetzymstatuszyUXL]{set\_mstatus\_UXL}#(mstatus, misa.#\hyperref[sailRISCVzMXL]{MXL}#());
   mstatus->#\hyperref[sailRISCVzSD]{SD}#()   = 0b0;
 
+  /* set to little-endian mode */
+  if sizeof(xlen) == 64 then {
+    mstatus = #\hyperref[sailRISCVzMkzyMstatus]{Mk\_Mstatus}#([mstatus.#\hyperref[sailRISCVzbits]{bits}#() with 37 .. 36 = 0b00])
+  };
+  mstatush->#\hyperref[sailRISCVzbits]{bits}#() = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
+
   mip->#\hyperref[sailRISCVzbits]{bits}#()     = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
   mie->#\hyperref[sailRISCVzbits]{bits}#()     = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
   mideleg->#\hyperref[sailRISCVzbits]{bits}#() = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);

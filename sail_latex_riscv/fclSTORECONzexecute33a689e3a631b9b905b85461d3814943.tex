@@ -36,8 +36,10 @@ if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == f
               #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
               #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) => {
                 let eares : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(unit) = match (width, sizeof(xlen)) {
-                  (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 4, aq, rl, true),
-                  (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 8, aq, rl, true),
+                  (BYTE, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 1, aq & rl, rl, true),
+                  (HALF, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 2, aq & rl, rl, true),
+                  (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 4, aq & rl, rl, true),
+                  (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 8, aq & rl, rl, true),
                   _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORECON expected word or double")
                 };
                 match (eares) {
@@ -45,8 +47,10 @@ if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == f
                   #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
                     rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
                     let res : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) = match (width, sizeof(xlen)) {
-                      (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq, rl, true),
-                      (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq, rl, true),
+                      (BYTE, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 1, rs2_val[7..0], aq & rl, rl, true),
+                      (HALF, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 2, rs2_val[15..0], aq & rl, rl, true),
+                      (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq & rl, rl, true),
+                      (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq & rl, rl, true),
                       _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORECON expected word or double")
                     };
                     match (res) {

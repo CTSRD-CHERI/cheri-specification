@@ -24,9 +24,11 @@ if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
              #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _)    => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
              #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) =>
                match (width, sizeof(xlen)) {
-                 (WORD, _)    => #\hyperref[sailRISCVzprocesszyloadres]{process\_loadres}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 4, aq, rl, true), false),
-                 (DOUBLE, 64) => #\hyperref[sailRISCVzprocesszyloadres]{process\_loadres}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 8, aq, rl, true), false),
-                 _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("LOADRES expected WORD or DOUBLE")
+                 (BYTE, _)    => #\hyperref[sailRISCVzprocesszyloadres]{process\_loadres}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 1, aq, aq & rl, true), false),
+                 (HALF, _)    => #\hyperref[sailRISCVzprocesszyloadres]{process\_loadres}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 2, aq, aq & rl, true), false),
+                 (WORD, _)    => #\hyperref[sailRISCVzprocesszyloadres]{process\_loadres}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 4, aq, aq & rl, true), false),
+                 (DOUBLE, 64) => #\hyperref[sailRISCVzprocesszyloadres]{process\_loadres}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 8, aq, aq & rl, true), false),
+                 _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Unexpected AMO width")
                }
            }
     }

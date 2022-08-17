@@ -9,7 +9,8 @@ match (pred, succ) {
   (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzyrzyw]{Barrier\_RISCV\_r\_w}#()),
   (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b01, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b10) => #\hyperref[sailRISCVzzyzybarrier]{\_\_barrier}#(#\hyperref[sailRISCVzBarrierzyRISCVzywzyr]{Barrier\_RISCV\_w\_r}#()),
 
-  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00) => (),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(4)       , _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00) => (),
+  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00, _ : #\hyperref[sailRISCVzbits]{bits}#(4)       ) => (),
 
   _ => { #\hyperref[sailRISCVzprint]{print}#("FIXME: unsupported fence");
          () }

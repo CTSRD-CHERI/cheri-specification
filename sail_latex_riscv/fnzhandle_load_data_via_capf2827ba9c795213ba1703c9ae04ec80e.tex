@@ -22,10 +22,10 @@ function #\hyperref[sailRISCVzhandlezyloadzydatazyviazycap]{handle\_load\_data\_
     #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL },
     #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) =>
       match (width, sizeof(xlen)) {
-        (BYTE, _)    => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 1, aq, rl, false), is_unsigned),
-        (HALF, _)    => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 2, aq, rl, false), is_unsigned),
-        (WORD, _)    => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 4, aq, rl, false), is_unsigned),
-        (DOUBLE, 64) => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 8, aq, rl, false), is_unsigned)
+        (BYTE, _)    => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 1, aq, aq & rl, false), is_unsigned),
+        (HALF, _)    => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 2, aq, aq & rl, false), is_unsigned),
+        (WORD, _)    => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 4, aq, aq & rl, false), is_unsigned),
+        (DOUBLE, 64) => #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddrBits, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 8, aq, aq & rl, false), is_unsigned)
       }
   }
 }
