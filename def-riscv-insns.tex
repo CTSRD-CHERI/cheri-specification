@@ -27,6 +27,10 @@
 \rvcherisrcdest[name=CGetAddr]{F}{rd}{cs1}
 
 % Mark as noref and reserved until landing of
+% https://github.com/CTSRD-CHERI/sail-cheri-riscv/pull/59
+\rvcherisrcdest[name=CGetTop,noref,tablesuffix=\rvcherireservedfootnotemark]{18}{cd}{cs1}
+
+% Mark as noref and reserved until landing of
 % https://github.com/CTSRD-CHERI/sail-cheri-riscv/pull/55
 \rvcherisrcdest[name=CGetHigh,noref,tablesuffix=\rvcherireservedfootnotemark]{17}{cd}{cs1}
 \rvcherisrcsrcdest[name=CSetHigh,noref,tablesuffix=\rvcherireservedfootnotemark]{16}{cd}{cs1}{rs1}
