@@ -261,7 +261,7 @@ addresses $S_U$.
 \item
 All capability registers are either (a) reserved registers; (b) have \ctag{} =
 \algorithmicfalse{}; (c) are sealed with an \cotype{} not in $T_U$; or do not
-grant \emph{Access\_System\_Registers} permission.
+grant \cappermASR* permission.
 \item
 The above is also true of all capabilities contained within the set of memory
 addresses $S_U$.
@@ -340,7 +340,7 @@ outside of $S_U$; thus, the trusted code's data, code and stack segments
  will be unmodified.
 \item
 Given that the capability registers (apart from the reserved registers) do
-not grant \emph{Access\_System\_Registers} permission, the reserved
+not grant \cappermASR* permission, the reserved
 registers will not be modified.
 \end{itemize}
 

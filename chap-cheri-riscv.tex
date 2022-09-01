@@ -183,7 +183,7 @@ CHERI-RISC-V shares the following features with other CHERI architectures:
   This both ensures that a split register file can be used (as it is always
   clear what register file the operand reads from) and also reinforces
   intentionality.
-\item The Access\_System\_Registers permission bit limits privileged ISA
+\item \cappermASR limits privileged ISA
   operations when within privileged rings.
   While RISC-V's specific privileged operations differ, the intent remains the
   same: to allow code compartmentalization within the privileged ring.
@@ -503,7 +503,7 @@ corresponding privilege mode's CSRs. Debate still open over whether these are en
 \texttt{fcsr}          & Read-Write          \\
 \bottomrule
 \end{tabular}
-\caption{CSR Whitelist. The accesses shown are the only CSR accesses that are permitted when the installed PCC does not have the \emph{Access\_System\_Registers} permission bit set.}
+\caption{CSR Whitelist. The accesses shown are the only CSR accesses that are permitted when the installed PCC does not have \cappermASR{}.}
 \label{tab:risc-v-access-system-registers-whitelist}
 \end{table}
 
@@ -951,7 +951,7 @@ store instructions, as well as a more rich set via capability encoding mode.
 
 The floating point control
 registers (FCSR, FRM, and FFlags) are whitelisted in Table \ref{tab:risc-v-access-system-registers-whitelist}
-so they can be accessed without needing \emph{Access\_System\_Registers permission}.
+so they can be accessed without needing \cappermASR{}.
 
 \subsection{Exception Handling}
 \label{subsection:riscv:exceptionhandling}
@@ -1067,7 +1067,7 @@ enabled and physical if not.
 % virtual addresses, or even SW that, theoretically but not practically runs on
 % M/S/U processors that still work with SATP.mode = Bare across all rings.}
 
-In CHERI-RISC-V, we require the Access\_System\_Registers permission to change
+In CHERI-RISC-V, we require \cappermASR{} to change
 the page-table root (\texttt{satp}) and other virtual-memory parameters.
 (In the future, it may be desirable to extend the page-table walking mechanism
 to itself utilize capabilities, allowing the walker to be constrained;
