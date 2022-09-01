@@ -132,7 +132,7 @@ objective.  We therefore introduce a non-temporal, streaming
 exactly matching those of \insnref{CLC}, but as a separate opcode to
 hint to the microarchitecture.
 
-While one implementation of such a streaming CLC would be to never promote
+While one implementation of such a streaming \insnref{CLC} would be to never promote
 lines in the cache hierarchy (i.e., leave them in place, in DRAM or the LLC
 when loading), analysis done as part of the Efficient Tagged Memory \cite[\S
 VI.B]{joannou2017:tagged-memory} suggests that if a cacheline has one
@@ -440,7 +440,7 @@ consider writable-and-executable to be too dangerous to permit; applying
 this to CHERI's taxonomy would mean that the presence of \cappermX* implied
 the absence of \cappermS*, \cappermSC*, and \cappermSLC* (see
 \cref{app:exp:compressperm:wxorx}).  Further, granting \cappermLC*
-effectively implies granting \cappermL*:  CLC and CLR.C would trap without
+effectively implies granting \cappermL*:  \insnref{CLC} and \insnnoref{CLR.C} would trap without
 the latter, but more substantially, a capability load of an un-tagged (in
 memory or via the paging hardware) `should' result in a load of data
 transferred in to a capability register, albeit with the tag cleared.  On
