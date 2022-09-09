@@ -217,6 +217,8 @@ The following changes are specific to CHERI-RISC-V:
   as more specific cause information and the identity of the faulting
   register is reported in the existing \xtval{} CSRs (see
   Section~\ref{subsection:riscv:cheri-exception-reporting}).
+\item A new bit is defined in \menvcfg{} and \senvcfg{} to enable
+  CHERI support.
 \item New per-mode capability CSRs are added as \xccsr{} (see
   Section~\ref{subsubsec-ccsrs}).
 \item CHERI-related page permissions are added to RISC-V architectural
@@ -473,6 +475,28 @@ corresponding privilege mode's CSRs. Debate still open over whether these are en
 \label{tab:risc-v-access-system-registers-whitelist}
 \end{table}
 
+\subsubsection{CHERI Extension Control}
+
+A new bit in the \menvcfg{} and \senvcfg{} CSRs is used to enable
+CHERI for lower privilege levels.  When CHERI is disabled, attempting
+to execute CHERI-specific instructions will raise an illegal
+instruction fault including loads and stores which use a capability
+register (excluding the implicit \DDC{} operand for legacy
+loads/stores) as the memory operand.
+
+Other CHERI extensions are always enabled regardless of the state of
+this bit.  Specifically, bounds and permissions on \PCC{} and \DDC{}
+are always honored.  Exceptions always copy \PCC{} to \xEPCC{} on
+exception entry and restore the full \PCC{} on exception return.
+Capability mode is always honored if enabled in \PCC{}.  Software
+which disables CHERI in lower modes must take care to ensure that
+\PCC{} and \DDC{} are set to suitable values while lower modes
+execute.
+
+Bit 28 (\texttt{0x1C}) in the \menvcfg{} and \senvcfg{} CSRs is
+defined as the CHERI enable bit.  Its allocation within these CSRs may
+change until CHERI is ratified as a RISC-V extension.
+
 \subsubsection{Capability Control and Status Registers (CCSRs)}
 \label{subsubsec-ccsrs}
 New per HART \xccsr{} \texttt{XLEN}-bit RISC-V CSRs are defined as per
@@ -482,8 +506,7 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
 \begin{center}
 \begin{bytefield}[bitwidth=\textwidth/34]{32}
   \bitheader[endianness=big]{0,1,2,31} \\
-  \bitbox{31}{\textbf{WIRI}}
-  \bitbox{1}{\texttt{e}}
+  \bitbox{32}{\textbf{WIRI}}
 \end{bytefield}
 \caption{\xccsr{} register format; WIRI bits are Write Ignore Read Ignore.}
 \label{fig-ccsr}
@@ -497,10 +520,6 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
   The RISC-V spec unsatisfyingly does not specify what happens if
   software doesn't preserve values for WPRI, but then this spec
   doesn't need to either.}
-
-\begin{description}
-\item [e] The \texttt{e} ``enable'' bit \ajnote{read only? / only wriFable in u-mode? only writable with a specific permission in pcc?} tells whether capability extensions are enabled or disabled.
-\end{description}
 
 \subsection{Special Capability Registers (SCRs)}
 \label{subsection:cheri-riscv-scrs}
@@ -1373,9 +1392,6 @@ The following edge-case behaviors relating to CSRs/SCRs are also specified:
 %   the CHERI-RISC-V appendix.}
 
 % \newcommand{\capmode}{\textbf{capability encoding mode}}
-
-% When the \texttt{e} ``enable'' field is set, the use of capability registers and
-% instructions is enabled.
 
 % Instructions that alter the control flow and cause memory accesses for
 % instruction fetches, such as branches and jumps, consider their target address
