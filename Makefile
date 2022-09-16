@@ -5,7 +5,7 @@ PREVEOUS=../branches/20150624-cheri-architecture-1-13
 SAIL_LATEX_MIPS_DIR=sail_latex_mips
 SAIL_LATEX_RISCV_DIR=sail_latex_riscv
 
-SOURCES=$(wildcard *.tex insn-mips/*.tex insn-riscv/*.tex $(SAIL_LATEX_MIPS_DIR)/*.tex $(SAIL_LATEX_RISCV_DIR)/*.tex) cheri.bib
+SOURCES=$(wildcard *.tex insn-mips/*.tex insn-riscv/*.tex $(SAIL_LATEX_MIPS_DIR)/*.tex $(SAIL_LATEX_RISCV_DIR)/*.tex) cheri.bib LICENSE LICENSE-sail-cheri-riscv LICENSE-sail-riscv
 DIFFDIR=diff
 DIFFTEX=$(SOURCES:%=${DIFFDIR}/%)
 DIFFPARAM=--type=UNDERLINE --packages=amsmath,hyperref --math-markup=1
