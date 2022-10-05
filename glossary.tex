@@ -800,20 +800,6 @@ operations that conform to \gls{capability
     vulnerabilities}
 }
 
-\newglossaryentry{trusted stack}
-{
-  name=trusted stack,
-  description={Some software-defined object-capability models offer strong
-    call-return semantics -- i.e., that if a return is issued by an invoked
-    object, or an uncaught exception is generated, then the appropriate caller
-    will be returned to -- exactly once.
-    This can be implemented via a trusted stack, maintained by the software
-    \gls{trusted computing base} via one or more handlers invoked by \gls{CInvoke}.
-    A trusted stack for an object-oriented model will likely maintain at least
-    the caller's \gls{program-counter capability} and \gls{invoked data
-    capability} to be restored on return}
-}
-
 \newglossaryentry{unrepresentable capability}
 {
   name=unrepresentable capability,

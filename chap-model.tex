@@ -71,8 +71,7 @@ design:
   stated, has been applied throughout the CHERI design, from architectural
   privileges (e.g., the requirement to explicitly identify capability
   registers used for load or store) through to the sealed capability mechanism
-  that can be used to support object-capability models such as found in
-  CheriBSD.
+  that can be used to support object-capability models.
 \end{description}
 
 \noindent
@@ -678,11 +677,6 @@ capabilities to be atomically unsealed as control flow transfers to the code
 pointed to by the code capability, if their object types match.
 This can be used to implement controlled privilege escalation for the purposes
 of domain transition.
-Sealed capabilities sharing a common object type are the foundation for
-building the CheriBSD \textit{object-capability model} supporting
-in-address-space compartmentalization, where pairs of sealed code and data
-capabilities are object references whose invocation triggers a
-protection-domain switch.
 
 Sealed entry capabilities simply seal a single code capability, which likewise
 can be jumped to leading to an atomic unsealing and control-flow transfer.
@@ -723,14 +717,11 @@ to be used together.
 only up to ${\sim}/\cotype{}$, but it almost sounds like it's specifically a
 pair of capabilities that are linked.  Perhaps ``associated''?}
 %
-For example, for object-oriented compartmentalization models (such as the
-CheriBSD object-capability model), pairs of sealed capabilities can represent
+For example, for object-oriented compartmentalization models,
+pairs of sealed capabilities can represent
 objects: one is the code capability for a class, and the other is a data
 capability representing the data associated with a particular instance of an
 object.
-In the CheriBSD model, these two sealed capabilities have the same value in
-their object-type field, and two candidate capabilities passed to object
-invocation will not be accepted together if their object types do not match.
 
 The object-type field is set when a capability is sealed based on a second
 input capability authorizing use of the type space -- itself simply a
@@ -739,8 +730,6 @@ by the capability's bounds.
 A similar model authorizes \textit{unsealing}, which permits a sealed
 capability to be restored to a mutable and dereferenceable state -- if a
 suitable capability to have sealed it is held.
-This is used in the CheriBSD model during object invocation to grant the
-callee access to its internal state.
 
 A similar model could be achieved without using an unsealing mechanism: a
 suitably privileged component could inspect a sealed capability and rederive
@@ -774,7 +763,7 @@ in-address-space domain switch without changing rings.
 
 The newly executing code has the ability to further manipulate
 execution state, and impose semantics such as call-return secure function
-invocation (CheriBSD) or secure asynchronous message passing (microkernel),
+invocation or secure asynchronous message passing,
 which will likely be followed by a privilege de-escalation as a target domain
 is entered (see
 Section~\ref{sec:model-isolation-controlled-communication-compartmentalization}).
@@ -881,10 +870,6 @@ prevent
   This feature remains under development, as we hope to generalize it to
   further uses such as limiting the propagation of ephemeral DRAM references
   in persistent-memory systems.
-However, it
-  is used successfully in the CheriBSD
-  compartmentalization model to improve memory safety and limit obligations of
-  garbage collection.
 
 \end{description}
 
@@ -1625,11 +1610,8 @@ allocations to be delegated.
 
 Collectively, these mechanisms allow a variety of software-defined
 compartmentalization models to be constructed.
-We have experimented with several, including the CheriBSD in-process
-compartmentalization mechanism, which models domain transition on a secure
-function call with trusted stack maintained by the operating-system kernel
-via exception-based invocation~\cite{watson15:cheri,watson2016:microjournal},
-and microkernel-based systems that utilize jump-based domain transition within
+We have experimented with several, including
+microkernel-based systems that utilize jump-based domain transition within
 a single-address-space operating system, which model domain transition on
 asynchronous or synchronous message passing.
 Effective software compartmentalization relies not only on limiting access to
