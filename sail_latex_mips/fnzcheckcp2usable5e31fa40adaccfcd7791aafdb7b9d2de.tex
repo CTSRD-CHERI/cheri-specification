@@ -1,5 +1,0 @@
-function #\hyperref[sailMIPSzcheckCP2usable]{checkCP2usable}# ()  =
-  if not (CP0Status.#\hyperref[sailMIPSzCU]{CU}#()[2]) then {
-    CP0Cause->#\hyperref[sailMIPSzCE]{CE}#() = 0b10;
-    #\hyperref[sailMIPSzSignalException]{SignalException}#(CpU);
-  }

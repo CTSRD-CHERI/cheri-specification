@@ -1,2 +1,0 @@
-function _update_StatusReg_bits (v, x) = let v = { v with StatusReg_chunk_0 = update_subrange_bits(v.StatusReg_chunk_0, 31, 0, subrange_bits(x, 31, 0)) } in
-  v

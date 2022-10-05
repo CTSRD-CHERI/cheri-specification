@@ -1,6 +1,0 @@
-function #\hyperref[sailMIPSzMEMwzytagged]{MEMw\_tagged}#(addr, size, tag, data) =
-{
-  #\hyperref[sailMIPSzMEMea]{MEMea}#(addr, size);
-  #\hyperref[sailMIPSzMEMval]{MEMval}#(addr, size, #\hyperref[sailMIPSzreversezyendianness]{reverse\_endianness}#(data));
-  #\hyperref[sailMIPSzwritezytagzybool]{write\_tag\_bool}#(addr & cap_addr_mask, tag);
-}

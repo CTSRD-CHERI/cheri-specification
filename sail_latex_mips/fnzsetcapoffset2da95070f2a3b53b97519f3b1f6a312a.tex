@@ -1,7 +1,0 @@
-function #\hyperref[sailMIPSzsetCapOffset]{setCapOffset}#(c, offset) : (Capability, #\hyperref[sailMIPSzbits]{bits}#(64)) -> (bool, Capability) =
-    let base64 : #\hyperref[sailMIPSzbits]{bits}#(64) = #\hyperref[sailMIPSztozybits]{to\_bits}#(64, #\hyperref[sailMIPSzgetCapBase]{getCapBase}#(c)) in
-    let newAddress : #\hyperref[sailMIPSzbits]{bits}#(64) = base64 + offset in
-    let newCap     = { c with address = newAddress } in
-    let representable = #\hyperref[sailMIPSzcapBoundsEqual]{capBoundsEqual}#(c, newCap) in
-/*    let representable = #\hyperref[sailMIPSzfastRepCheck]{fastRepCheck}#(c, (newAddress - c.address)) in*/
-    (representable, newCap)

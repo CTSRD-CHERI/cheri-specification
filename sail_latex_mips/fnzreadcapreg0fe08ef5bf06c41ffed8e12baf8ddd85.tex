@@ -1,6 +1,0 @@
-function #\hyperref[sailMIPSzreadCapReg]{readCapReg}#(n) =
-  if (n == 0b00000) then
-    null_cap
-  else
-    let i = #\hyperref[sailMIPSzunsigned]{unsigned}#(n) in
-    *(CapRegs[i])

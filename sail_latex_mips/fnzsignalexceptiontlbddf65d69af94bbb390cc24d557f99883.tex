@@ -1,9 +1,0 @@
-function #\hyperref[sailMIPSzSignalExceptionTLB]{SignalExceptionTLB}#(ex, badAddr) = {
-  CP0BadVAddr = badAddr;
-  TLBContext->#\hyperref[sailMIPSzBadVPN2]{BadVPN2}#()  = (badAddr[31..13]);
-  TLBXContext->#\hyperref[sailMIPSzXBadVPN2]{XBadVPN2}#()= (badAddr[39..13]);
-  TLBXContext->#\hyperref[sailMIPSzXR]{XR}#()      = (badAddr[63..62]);
-  TLBEntryHi->#\hyperref[sailMIPSzR]{R}#()        = (badAddr[63..62]);
-  TLBEntryHi->#\hyperref[sailMIPSzVPN2]{VPN2}#()     = (badAddr[39..13]);
-  #\hyperref[sailMIPSzSignalException]{SignalException}#(ex);
-}
