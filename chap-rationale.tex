@@ -443,15 +443,17 @@ way that software does not need to be aware of the in-memory layout of
 capabilities.  As it is necessarily exposed, there is a risk that software
 might become dependent on a specific layout.
 One noteworthy case is in the operating-system paging code, which must
-save and restore capabilities and their tags separately; this can be
+save and restore capabilities and their tags separately.
+This can be
 accomplished by using instructions such as \insnref{CGetBase} on untagged
 values loaded from disk and then refining an in-hand capability using
-\insnref{CSetBounds} -- an important reason not to limit capability field
-retrieval instructions to tagged values.
-We have proposed a new instruction, \insnref{CBuildCap}, which would add a
-tag to an untagged value in a capability-register operand, authorized by a
-second operand holding a suitably authorized capability, to avoid software
-awareness of the in-memory layout, as well as to accelerate tag restoration
+\insnref{CSetBounds}; however,
+this requires a complex series of instructions.
+\insnref{CBuildCap} can add a
+tag to an untagged value in a capability-register operand authorized by a
+second operand holding a suitably authorized capability.
+This avoids software
+awareness of the in-memory layout and accelerates tag restoration
 when implementing system services such as swap.
 This instruction in effect implements rederivation, which is also possible
 using a sequence of individual instructions refining the authorizing

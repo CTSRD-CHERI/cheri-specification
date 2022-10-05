@@ -1721,7 +1721,7 @@ then restored.
 Memory locations can be iteratively loaded into capability registers to check
 for tags; tags can then be later restored by manually rederived manually using
 instructions such as \insnref{CAndPerm} and \insnref{CSetBounds}.
-However, these instruction sequence is complex and can incur substantial
+However, these instruction sequences are complex and can incur substantial
 overhead when used during bulk restoration.
 The \insnref{CLoadTags} instruction allows tags to be loaded for a cache
 line of memory (non-temporally), and the \insnref{CBuildCap},
@@ -3200,30 +3200,11 @@ implementation in the CHERI architecture:
   passing the sealed capability to another subsystem.
 
 \item
-  Provide a \insnnoref{CFromInt} instruction that copies a
-  general-purpose integer register into the \coffset{} field of a capability register,
-clearing all the other fields of the capability -- including the \ctag{} bit.
-  This is an architecturally cleaner way to implement casting an
-  \emph{int} to an \emph{intcap\_t} than the current approach of
-  \insnref{CFromPtr} of the NULL pointer followed by
-  \insnref{CSetOffset}.
-\jhbnote{Is this still relevant if we assume merged register files?
-  For merged register files, just storing to the non-capability
-  register does this.}
-
-\item
   Provide a variant of \insnref{CSetBounds} that sets imprecise bounds
   suitable for sealing with \insnref{CSeal}. In the 128-bit
   representation, the bounds of sealed capabilities have stronger alignment
   requirements than for unsealed capabilities.
 
-\item Introduce a \insnref{CTestSubset} instruction, which would allow
-  efficient testing of whether one capability describes rights that are a
-  subset of another, directly exposing the partial order implied by subset
-  tests in \insnref{CToPtr}, the proposed \insnref{CBuildCap}, etc.
-  This is described in more detail in \cref{\insnlabelname{ctestsubset}}.
-\jhbnote{RISC-V has this, so maybe this is no longer a TODO?}
-  
 \item
   Add versions of \insnref{CSetOffset} and \insnref{CIncOffset}
   that raise an exception, rather than clearing the tag bit, when the result
@@ -3258,14 +3239,6 @@ clearing all the other fields of the capability -- including the \ctag{} bit.
   the untrusted caller has passed a bad capability; or (b) checking that
   the capability is suitable for unsealing before attempting to unseal it.
 
-%\item
-%  Add a \insnnoref{CGetPCCIncOffset} instruction that is similar to
-%  \insnref{CGetPCCSetOffset}, except that it increments the offset
-%  instead of setting it. This instruction could be useful (for example) when
-%  using \insnref{CInvoke}; \insnnoref{CGetPCCIncOffset} would provide
-%  a convenient way to construct a capability for the return address.
-%  \arnote{This is included in ISAv8}
-
 \item
   Add instructions for copying non-capability data from a capability register
   into a general-purpose integer register. A use case is when a function is called
@@ -3290,20 +3263,6 @@ clearing all the other fields of the capability -- including the \ctag{} bit.
   be represented exactly? The use case for this instruction is when its
   desired to move up the \cbase{} of the capability, without needing to
   extra instructions to explicitly calculate the new \clength{}.
-
-\item
-  Add an instruction that returns the alignment requirement for memory regions
-  of a particular size. Having an instruction for this would avoid the
-  need for memory allocators to know the details of the compression scheme.
-\jhbnote{This is CRAM?}
-
-\item Swapping and virtual-machine migration require that tags be stripped
-  from capabilities as memory is serialized, and that tags be reattached to
-  capabilities as memory is restored.
-  Section~\ref{section:capability-reconstruction} describes a set of
-  experimental instructions that improve the efficiency of these operations,
-  but also avoid the need for software to directly inspect and interact with
-  the in-memory representation of capabilities.
 \end{itemize}
 
 The following changes have been discussed for longer-term consideration:
