@@ -92,7 +92,7 @@ The RISC-V ISA defines both 32-bit (\texttt{XLEN}=32) and 64-bit
 (\texttt{XLEN}=64) base integer instruction
 sets (RV32I, RV64I). \mmnote{Maybe mention that we don't support RV128I,
 because it has not been ratified yet.}
-Our current proposal would support either mode with few differences beyond
+Our current proposal supports either mode with few differences beyond
 capability width, although safe support for both modes in a single processor
 is not specified at this time.
 \pgnnote{This may be understated.  It may also be misinterpreted,
@@ -108,6 +108,14 @@ elements of the RISC-V ISA: integer, multiplication and division,
 atomic, floating-point, and double floating-point instructions.
 We also describe extensions to RVS, the supervisor extension defined in the
 privileged portion of the ISA.
+
+We view 64-bit CHERI-RISC-V as a mature specification suitable as a
+starting point for an official RISC-V extension.  However, we feel
+that 32-bit CHERI-RISC-V is less mature.  In particular, the current
+encoding for 64-bit capabilities provides insufficient precision.
+Further research is needed to determine if an alternate encoding,
+perhaps using an alternate scheme for permissions, can provide better
+precision.
 
 \subsection{CHERI-RISC-V is an ISA Design Space}
 
