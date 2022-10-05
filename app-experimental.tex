@@ -22,61 +22,7 @@ experimental feature.
   order within those major sections?}
 
 % >>>
-\section{Capability Reconstruction} % <<<
-\label{section:capability-reconstruction}
-
-These additional experimental instructions can be used to efficiently
-reconstruct capabilities (e.g., when a program has been paged out to disk
-and then paged back in, and the operating system needs to reconstruct the
-capabilities that were originally in its address space).
-They also reduce the need for software to inspect the in-memory representation
-of capabilities, making software more robust to format changes.
-
-Software should store or transit tags separately from the corresponding
-capa\-bility-sized, capa\-bility-aligned memory via a trustworthy medium.
-The ISA requires that tags be restored using a suitable authorizing capability
-through which it should have been possible to derive the same resulting tagged
-capability -- that is, without violating capability monotonicity.
-A security review of these instructions is still in progress, and so they
-should not yet be considered part of the ISA or safe to implement.
-These instructions serve two purposes:
-
-\begin{enumerate}
-\item They allow efficient internalization of capabilities that have been
-  stored or transferred via media that do not preserve tags.
-  This functionality might be utilized when tags must be restored by the
-  kernel's swap or compressed-memory pager, when migrating the memory of a
-  virtual machine, when restoring a process snapshot, or by an
-  in-address-space run-time linker.
-
-\item They allow tags to be restored on capabilities in a manner that
-  maintains architectural abstraction: software restoring tags need not encode
-  the specifics of the in-memory capability representation, making that
-  software less fragile in the presence of future use of reserved fields or
-  changed semantics.
-\end{enumerate}
-
-Capabilities can also be reconstructed using the current
-\insnref{CGetBase}, \insnref{CGetLen}, etc., instructions, examining
-those fields and then recreating them utilizing the corresponding
-\insnref{CSetBounds} instruction, and so on, but with reduced abstraction
-and substantially less efficiency.
-
-\note{It has also been proposed that something much like capability
-reconstruction be allowed to reconstruct an \emph{unsealed} capability from
-a sealed one, again, guarded by needing a superset.}{nwf}
-
-% >>>
 \section{Additional Architectural Assistance For Revocation} % <<<
-
-\subsection{Fast Capability Subset Testing} % <<<
-\label{subsection:fast-capability-subset-testing}
-
-When implementing revocation or garbage collection requiring fast scanning
-of memory for matching capabilities, significant numbers of instructions
-would be used to check whether a tested capability is a subset of a reference
-capability.  We propose a new \insnref{CTestSubset}
-instruction that reduces this instruction count substantially.
 
 \subsection{CClearTags} % <<<
 
