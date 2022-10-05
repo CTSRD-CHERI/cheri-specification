@@ -1,6 +1,0 @@
-function #\hyperref[sailMIPSzERETHook]{ERETHook}#() : unit -> unit =
-  {
-    let epcc_val = if (CP0Status.#\hyperref[sailMIPSzERL]{ERL}#() == bitone) then ErrorEPCC else EPCC;
-    let new_pcc = if #\hyperref[sailMIPSzisSentryCap]{isSentryCap}#(epcc_val) then #\hyperref[sailMIPSzunsealCap]{unsealCap}#(epcc_val) else epcc_val;
-    #\hyperref[sailMIPSzsetzynextzypcc]{set\_next\_pcc}#(new_pcc)
-  }

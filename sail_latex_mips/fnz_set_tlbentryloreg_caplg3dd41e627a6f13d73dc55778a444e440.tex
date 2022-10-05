@@ -1,5 +1,0 @@
-function _set_TLBEntryLoReg_CapLG (r_ref, v) = {
-    r = __bitfield_deref(r_ref);
-    r.TLBEntryLoReg_chunk_0 = update_subrange_bits(r.TLBEntryLoReg_chunk_0, 61, 61, subrange_bits(v, 0, 0));
-    (*r_ref) = r
-}

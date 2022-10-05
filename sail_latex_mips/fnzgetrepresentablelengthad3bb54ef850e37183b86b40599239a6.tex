@@ -1,4 +1,0 @@
-function #\hyperref[sailMIPSzgetRepresentableLength]{getRepresentableLength}#(len) : #\hyperref[sailMIPSzbits]{bits}#(64) -> #\hyperref[sailMIPSzbits]{bits}#(64) = {
-  let m = #\hyperref[sailMIPSzgetRepresentableAlignmentMask]{getRepresentableAlignmentMask}#(len);
-  (len + ~(m)) & m
-}

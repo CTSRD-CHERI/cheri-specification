@@ -1,9 +1,0 @@
-function #\hyperref[sailMIPSzgetCapLength]{getCapLength}#(c) : Capability -> CapLen =
-    let ('base, 'top) = #\hyperref[sailMIPSzgetCapBounds]{getCapBounds}#(c) in {
-        /* For valid capabilties we expect top >= base and hence
-           length >= 0 but representation does allow top < base in some
-           cases so might encounter on untagged capabilities. Here we just
-           pretend it is a 65-bit quantitiy and wrap. */
-        assert (not(c.tag) | top >= base);
-        (top - base) % #\hyperref[sailMIPSzpow2]{pow2}#(65)
-    }

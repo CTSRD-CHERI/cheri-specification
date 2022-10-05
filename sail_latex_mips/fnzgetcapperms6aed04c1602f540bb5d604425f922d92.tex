@@ -1,5 +1,0 @@
-function #\hyperref[sailMIPSzgetCapPerms]{getCapPerms}#(cap) : Capability -> #\hyperref[sailMIPSzbits]{bits}#(31) =
-    let perms : #\hyperref[sailMIPSzbits]{bits}#(15) = #\hyperref[sailMIPSzzzerozyextend]{zero\_extend}#(#\hyperref[sailMIPSzgetCapHardPerms]{getCapHardPerms}#(cap)) in
-    (0x000 /* uperms 30-19 */
-  @ cap.uperms
-  @ perms)

@@ -1,6 +1,0 @@
-function #\hyperref[sailMIPSzupdateBadInstr]{updateBadInstr}# () = {
-  if (InBranchDelay[0]) then {
-    CP0BadInstrP = LastInstrBits; /* PC - 4 */
-  };
-  CP0BadInstr = CurrentInstrBits; /* PC */
-}
