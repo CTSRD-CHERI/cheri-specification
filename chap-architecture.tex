@@ -1802,7 +1802,6 @@ Efficient register clearing instructions (e.g., \insnref{CClear}) can
 also be used to substantially accelerate this process.
 
 In CHERI, the semantics of secure message passing or invocation are software defined, and we anticipate that different operating-system and programming-language security models might handle these, and other behaviors, in different ways.
-For example, in our prototype CheriBSD implementation, a userspace supervisor maintains a ``trusted stack'' onto which values are pushed during invocation, and from which values are popped on return.
 Over time, we anticipate providing multiple sets of semantics, perhaps corresponding to less synchronous domain-transition models, and allowing different userspace runtimes to select (or implement) the specific semantics their programming model requires.
 This is particularly important in order to provide flexible error handling: if a sandbox suffers a fault, or exceeds its execution-time budget, it is the OS and programming language that will define how recovery takes place, rather than the ISA definition.
 
