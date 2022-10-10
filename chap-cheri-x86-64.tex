@@ -137,13 +137,11 @@ manage user to kernel transitions as described in
 Section~\ref{sec:x86:capability-control-registers}.
 
 These additional registers will be stored as a separate bank of
-capability registers after the existing bank of general-purpose
-registers.  Using these additional registers as instruction operands
-will require extending the relevant register selector field to five
-bits.  As a result, these additional registers will not be usable
+capability registers.  As with other x86 register banks such as
+control registers and debug registers, additional capability registers
+cannot be used
 as operands (with a limited exception for \CFS{} and \CGS{} described
-below) in existing instructions.  However, new CHERI-specific
-instructions may name these registers as operands via the \EVEX{} prefix.
+below) in existing instructions.
 
 \section{Capability Mode}
 
@@ -427,14 +425,14 @@ capability operands:
     \CAX{} as the implicit operand when used with the capability
     operand prefix.
 
-    To handle loads and stores as well as copying capabilities where
-    at least one operand is an additional capability register, two
-    new opcodes (such as \texttt{0F 24} and \texttt{0F 25}) would be
-    used.  The non-general-purpose-register operand would be implicitly
-    assumed to be an additional capability register without requiring
-    an \EVEX{} prefix.
+    To permit moving the contents of an additional capability register
+    to a general-purpose register or vice versa, two
+    new opcodes (\texttt{0F 24} and \texttt{0F 25}) would be
+    used.  These opcodes would permit access to \CFS{}, \CGS{}, and
+    \DDC{} in all privilege levels.  Access to other additional
+    capability registers would only be permitted in privilege level 0.
 
-    To support efficiently NULL pointers to memory, the \texttt{C7 /0}
+    To support efficiently storing NULL pointers to memory, the \texttt{C7 /0}
     opcode would be extended to support capability operands via
     the capability operand prefix.  When extended to a capability
     operand, this instruction should store a NULL-derived capability
@@ -614,24 +612,16 @@ Existing general-purpose x86 instructions support two operands rather
 than three operands.  To avoid requiring a \VEX{} prefix for all new
 CHERI instructions, most instructions are defined with two operands
 rather than three.  New instructions which require three operands must
-be encoded using either a \VEX{} or \EVEX{} prefix.  In addition,
-instructions using an
-additional capability register (such as \DDC{}, \CFS{}, or \CGS{}) as
-one of the operands must use a \EVEX{} prefix.  If a CHERI-specific
-instruction which only accepts two operands is used with an \EVEX{}
-prefix, then the \texttt{EVEX.vvvv} field must be set to 0 and
-\texttt{EVEX.V'} must be set to 1.
+be encoded using a \VEX{} prefix.
 
 Operands are described using the syntax from Volume 2 of Intel's
 Software Developer's Manual~\cite{intel-sdm-vol2} with the following
 extensions:
 
 \begin{itemize}
-  \item \textbf{rc} { }---{ } One of the capability general-purpose
+  \item \textbf{rc} { }---{ } One of the general-purpose capability
     registers: \CAX{}, \CBX{}, \CCX{}, \CDX{}, \CDI{}, \CSI{}, \CBP{},
-    \CSP{}, \creg{8}-\creg{15}; or one of the
-    additional capability registers: \DDC{}, \CFS{}, \CGS{}, \KCC{},
-    \KSC{}, \CSTAR{}, or \KGS{}.
+    \CSP{}, \creg{8}-\creg{15}.
 
   \item \textbf{r/mc} { }---{ } A capability operand that is either
     the contents of one of the capability registers for \textbf{rc} or
@@ -1233,7 +1223,12 @@ optimize pure capability code.
 \subsection{Additional Capability Registers as Operands}
 
 We considered various options for using additional capability
-registers as operands beyond those mentioned previously.
+registers such as \CGS{} as explicit operands in instructions rather
+than as a separate bank of registers only accessed via
+\insnnoref{MOV}.  All of these approaches add complexity to
+instruction decoding, but we do not anticipate frequent direct access
+to additional capability registers beyond the use of the existing
+\FS{} and \GS{} segment prefixes.
 
 \subsubsection{Using Segment Prefixes}
 
@@ -1261,3 +1256,38 @@ with a \VEX{} prefix.  The upper three bits of the \texttt{VEX.mmmmm}
 field could be reused as the 5th bit of register selector fields
 similar to \texttt{EVEX.R'}, \texttt{EVEX.X}, and \texttt{EVEX.V'}
 fields in \EVEX{} prefixes.
+
+\subsubsection{EVEX Prefixes}
+
+A third approach would be to require \EVEX{} prefixes for instructions
+using an additional capability register.
+
+\subsection{Access to Additional Capability Registers}
+
+The \CFS{}, \CGS{}, and \DDC{} capability registers must be accessible
+in all privilege levels.  However, other additional capability
+registers such as \KGS{} are only suitable for privilege level 0.
+Currently the \textbf{0F 24} and \textbf{0F 25} instructions permit
+access to a subset of registers in privilege levels other than 0.
+
+A few other approaches are enumerated below:
+
+\begin{itemize}
+  \item For \CFS{} and \CGS{} the \insnnoref{RDFSBASE} family of
+    instructions could be expanded to support a capability operand
+    size.  This would not provide a solution for access to \DDC{} but
+    would otherwise permit restricting \textbf{0F 24} and \textbf{0F
+      25} to privilege level 0.
+
+  \item Capability control registers such as \KGS{} could be allocated
+    unused indices in the existing control register bank.  This would
+    require the \textbf{0F 20} and \textbf{0F 22} opcodes to vary the
+    operand size based on the control register index.
+
+  \item The additional capability registers could be split into two
+    separate banks.  One for \CFS{}, \CGS{}, and \DDC{} accessible via
+    \textbf{0F 24} and \textbf{0F 25} accessible at all privilege
+    levels, and a second bank of capability control registers
+    accessible via a a second set of opcodes such as \textbf{0F 26}
+    and \textbf{0F 27} that were restricted to privilege level 0.
+\end{itemize}
