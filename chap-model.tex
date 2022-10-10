@@ -93,7 +93,7 @@ Typically, language-level pointer types are implemented using architectural
 integers in registers and in memory.
 CHERI provides a new architectural data type, the \textit{capability}, which
 software (such as a compiler) can use use instead when implementing pointers.
-CHERI protections complementing existing architectural protection mechanisms
+CHERI protections complement existing architectural protection mechanisms
 such as virtual memory implemented by a Memory Management Unit (MMU) or
 non-virtualized protection implemented by a Memory Protection Unit (MPU).
 CHERI protections apply to the storage and manipulation of pointers, and also
@@ -230,7 +230,7 @@ frequently be interpreted as an address.
 Capabilities also contain a number of other fields that contain additional
 metadata associated with the address, such as bounds and permissions, as well
 as a tag protecting their integrity.
-Compilers, toolchain, and runtimes implementing pointers in terms of
+Compilers, toolchains, and runtimes implementing pointers in terms of
 architectural capabilities can imbue pointers with those protections, enforced
 in hardware, subject to appropriately managing that metadata.
 Capabilities are 2$\times$ (plus 1 bit) the size of the architecture's
@@ -361,7 +361,7 @@ over the network from being directly dereferenced as a pointer.
 
 The capability tag controls which operations can be performed using a
 capability.
-Attempting controlled operations on an untagged capability will cause an
+Attempting controlled operations on an untagged capability will cause a
 precise exception.
 
 Regardless of the value of the tag bit, capability register fields can be
@@ -687,7 +687,7 @@ protection-domain switch.
 Sealed entry capabilities simply seal a single code capability, which likewise
 can be jumped to leading to an atomic unsealing and control-flow transfer.
 This can also be used to implement domain transition with privilege
-escalation, but to date has primarily been used to strength control-flow
+escalation, but to date has primarily been used to strengthen control-flow
 robustness within a single protection domain by preventing the undesired
 manipulation and use of code pointers.
 Jump-and-link instructions acting on sealed entry capabilities also generate
