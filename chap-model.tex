@@ -1067,8 +1067,13 @@ The early exception approach offers slightly improved debuggability
 (by exposing the error earlier).
 However, early exceptions limit compiler optimization as instructions that may
 throw exceptions are restricted in how they can safely be reordered.
-For example, a bounds restriction performed within a loop could be hoisted to
-before the loop, except for the possibility that the bounds are being widened.
+For example, this prevents a bounds restriction performed within a loop from
+being hoisted outside the loop, unless that instruction is always executed.
+If the loop is not always entered, this could turn a conditional execution
+of a trapping instruction into an unconditional one.%
+\footnote{This is not just a theoretical possibility -- we observed this
+ happening in the FreeBSD kernel and had to modify the compiler to avoid
+ hoisting any potentially-trapping CHERI instructions.}
 In addition, code that manipulates untrusted capabilities is forced to branch
 when the operation would be illegal, or risk being vulnerable to
 denial-of-service attacks.
