@@ -380,7 +380,7 @@
 \makeatother
 \makecapperm{ASR}{Access\_System\_Registers}
 \makecapperm{Cid}{Set\_CID}
-\makecapperm{CInvoke}{CInvoke}
+\makecapperm{Invoke}{Invoke}
 \makecapperm{L}{Load}
 \makecapperm{LC}{Load\_Capability}
 \makecapperm{S}{Store}
@@ -391,6 +391,10 @@
 \makecapperm{X}{Execute}
 % No Permit_, so always use starred form even if not given
 \makecapperm*{G}{Global}
+\makeatletter
+% Legacy until Sail is updated for Perm_Invoke
+\ea\ea\ea\let\csname @capperm@\detokenize{Permit\_CInvoke}\ea\endcsname\csname @capperm@\detokenize{Permit\_Invoke}\endcsname
+\makeatother
 
 \makeatletter
 \newcommand{\@insnlabelname}[2]{insn:#1:#2}

@@ -369,14 +369,14 @@ invasive, even if most of the changes will simply be to change the types.}
 However, the notion of other spaces is not entirely out of the question; {\em
 physical} addresses may prove to be a compelling example on some systems.
 
-While \cappermCInvoke* is {\em checked} only as part of \insnref{CInvoke}'s
+While \cappermInvoke* is {\em checked} only as part of \insnref{CInvoke}'s
 operation on sealed (i.e., object) capabilities, it is inherited from these
 sealed capabilities' precursors.  That is, the present CHERI architecture
 permits the creation of regions of virtual address space that can be
 (subdivided and) sealed, but for which these derived object capabilities are
 not useful with \insnref{CInvoke} (just with \insnref{CUnseal}).
 The utility of such regions is perhaps not readily apparent, but any shift
-to make \cappermCInvoke* apply only to object capabilities would require
+to make \cappermInvoke* apply only to object capabilities would require
 modification of the \insnref{CSeal} instruction and would slightly
 change the capability ontology.
 
@@ -443,12 +443,12 @@ For virtual-address capabilities
 the remaining seven bits correspond
 one-to-one with memory-specific permissions.  Specifically, they are:
 \cappermX* (Ex), \cappermL* (L), \cappermS* (St),
-\cappermLC* (LC), \cappermSC* (SC), \cappermCInvoke* (CC),%
+\cappermLC* (LC), \cappermSC* (SC), \cappermInvoke* (I),%
 %
 \footnote{While any capability type can, in principle, be sealed and could be
 unsealed at \insnref{CInvoke} time, \insnref{CInvoke} unseals only two
 capabilities, installing them as PCC and IDC.  As such, it seems sensible to
-restrict \insnref{CInvoke} to operating only on VA capabilities, and so \cappermCInvoke is
+restrict \insnref{CInvoke} to operating only on VA capabilities, and so \cappermInvoke is
 defined only therein.}
 %
 and \cappermASR* (ASR).  We have made no effort to
