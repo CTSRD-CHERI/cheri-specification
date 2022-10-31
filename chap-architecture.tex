@@ -404,7 +404,7 @@ Bit & Name		& Tag?		& Seal?		& Bounds? \\
 5 & \cappermSC		& \checkmark	& Unsealed	& - \\
 6 & \cappermSLC		& \checkmark	& Unsealed	& - \\
 7 & \cappermSeal	& \checkmark	& Unsealed	& Object Type \\
-8 & \cappermCInvoke	& \checkmark	& Sealed	& - \\
+8 & \cappermInvoke	& \checkmark	& Sealed	& - \\
 9 & \cappermUnseal	& \checkmark	& Unsealed	& Object Type \\
 10 & \cappermASR	& \checkmark	& Unsealed	& - \\
 11 & \cappermCid	& \checkmark	& Unsealed	& CID \\
@@ -438,7 +438,7 @@ Bit & Name		& Tag?		& Seal?		& Bounds? \\
 
 \item[\cappermSeal] Allow this capability to authorize the sealing of another capability with a \cotype{} equal to this capability's \cbase{} $+$ \coffset{}.
 
-\item[\cappermCInvoke] Allow this sealed capability to be used with \insnref{CInvoke}.
+\item[\cappermInvoke] Allow this sealed capability to be used with \insnref{CInvoke}.
 
 \item[\cappermUnseal] Allow this capability to be used to unseal another capability with a \cotype{} equal to this capability's \cbase{} $+$ \coffset{}.
 
@@ -646,7 +646,7 @@ include \cappermL, \cappermS, \cappermLC, and
 \cappermSC, and code pointers, which may have enabled
 permissions that include \cappermL, \cappermX, and
 \cappermLC.
-Other permissions, such as \cappermG or \cappermCInvoke, may also be present.
+Other permissions, such as \cappermG or \cappermInvoke, may also be present.
 The following architectural values will normally be used:
 
 \begin{itemize}
@@ -2484,7 +2484,7 @@ Value & Description \\
 0x16 & \cappermSLC Violation \\
 0x17 & \cappermSeal Violation \\
 0x18 & \cappermASR Violation \\
-0x19 & \cappermCInvoke Violation \\
+0x19 & \cappermInvoke Violation \\
 0x1a & \emph{reserved} \\
 0x1b & \cappermUnseal Violation \\
 0x1c & \cappermCid Violation \\
@@ -2546,7 +2546,7 @@ Priority & Description \\
 3  & Seal Violation \\
 4  & Type Violation \\
 5  & \cappermSeal Violation \\
-   & \cappermCInvoke Violation \\
+   & \cappermInvoke Violation \\
    & \cappermUnseal Violation \\
    & \cappermCid Violation \\
 6  & \cappermX Violation \\
