@@ -614,15 +614,8 @@ add %csp,$16
     The opcode \texttt{8D} would be extended to support capability
     operands via the capability operand prefix.
 
-    \insnnoref{LEA} should default to capability operands in
+    \insnnoref{LEA} should default to integer operands in
     capability mode.
-
-    \insnnoref{LEA}'s default disposition in capability mode
-    warrants further investigation.  If common use cases of this
-    instruction are to perform arithmetic operations on integer values
-    rather than computing addresses, it may make sense for
-    \insnnoref{LEA} to use integer operands and ``plain'' addressing
-    by default even in capability mode.
 
   \item \insnnoref{ENTER} and \insnnoref{LEAVE} could be extended to
     support implicit capability operands, or they could be deprecated
