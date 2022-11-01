@@ -590,21 +590,13 @@ add %csp,$16
   \item \insnnoref{PUSHC} and \insnnoref{POPC} would be used to save
     and restore capability registers on the stack.
 
-    In general, \insnnoref{PUSH} and \insnnoref{PUSHF} in capability
-    mode would always push a 16 byte value onto the stack.  If the
-    operand is not a capability register, then the sign-extended value
-    of the operand is used as the address of NULL-derived capability
-    which is pushed on the stack.  Similarly, \insnnoref{POP} and
-    \insnnoref{POPF} would always pop a 16 byte value off of the
-    stack.
+    The \insnnoref{PUSH} opcodes \texttt{50} and \texttt{FF / 0} and the
+    \insnnoref{POP} opcodes \texttt{58} and \texttt{8F / 0} would be
+    extended to support capability operands via the capability operand
+    prefix.
 
-    To save or restore a capability register in plain 64-bit mode, one
-    would use \insnnoref{MOVC} to load or store the capability and
-    adjust the stack pointer manually.
-
-    In capability mode the use of the 0x66 prefix with
-    \insnnoref{PUSH} or \insnnoref{POP} instructions would be
-    reserved and raise an Illegal Instruction exception.
+    \insnnoref{PUSH} and \insnnoref{POP} should default to capability
+    operands in capability mode.
 
   \item \insnnoref{LEAC} would store the resulting address in a
     destination capability register.  If the instruction is using ``plain''
