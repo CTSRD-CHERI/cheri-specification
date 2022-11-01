@@ -272,8 +272,12 @@ instructions can toggle between capability-aware and ``plain''
 64-bit addressing via the 0x07 opcode prefix.  Addresses using the
 ``plain'' 32-bit or 64-bit addressing will be treated as offsets
 relative to \DDC{}.  Instructions using capability-aware addressing
-would always use 64-bit virtual addresses and ignore any 0x67 opcode
-prefix.
+would always use 64-bit virtual addresses.
+
+The 0x07 prefix would be a Group 4 prefix meaning that a single
+instruction would not be permitted to use both 0x67 and 0x07 prefixes.
+In addition, the use of the 0x67 prefix in capability mode would not
+be permitted.
 
 \subsubsection{Capability-Aware Addressing}
 
@@ -418,15 +422,16 @@ opcodes.
 
 First, we propose reusing a single-byte opcode declared invalid in
 64-bit mode such as 0x06 (\insnnoref{PUSH ES}) as an opcode prefix
-(\textbf{capability operand prefix}).
+(\textbf{capability operand prefix}).  This prefix would be classified
+as a Group 3 prefix meaning that a single instruction would not be
+permitted to use both 0x66 and 0x06 prefixes.
 
 When not executing in capability mode, existing instructions will
 follow the existing rules for 64-bit long mode as defined by the
 0x66 prefix and \texttt{REX.W} flag to set the operand size.  If an
 instruction supports capability-sized operands, the capability operand
 prefix can be used to use a capability-sized operand instead.  This
-prefix would have higher precedence than both \texttt{REX.W} and
-the 0x66 prefix.
+prefix would have higher precedence than \texttt{REX.W}.
 
 In capability mode, most instructions which can operate on either
 integer or capability-sized values would follow the same logic in the
@@ -434,8 +439,7 @@ previous paragraph to determine the operand size.  However, a few
 instructions would default to using a capability-sized operand when
 executed in capability mode.  For these instructions, the
 capability operand prefix could be used to revert to a smaller operand
-size.  The effective operand size would then determined by \texttt{REX.W}
-and the 0x66 prefix.
+size.  The effective operand size would then determined by \texttt{REX.W}.
 
 \subsubsection{Extending Existing Instructions to Support Capability Operands}
 
