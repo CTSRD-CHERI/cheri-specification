@@ -17,7 +17,29 @@ CHERI solely for the 64-bit x86 architecture for a variety of reasons
 including its more mature virtual-memory model, as well as its larger
 general-purpose integer register file.
 
-\section{Capability Registers versus Segments}
+\section{CHERI-x86-64 Approach}
+
+In applying CHERI to the 64-bit x86 architecture, we aim to provide a
+model similar to CHERI-RISC-V and Morello.  This model should have the
+following properties:
+
+\begin{itemize}
+\item A new capability hardware type that is usable for C language
+  pointers.
+
+\item Capability values should be intentionally used.  Instructions
+  should explciitly specify if a register operand should be used as a
+  capability or an integer scalar.  Specifically, the presence (or
+  lack) of a tag should not determine if a value is treated as a
+  capability rather than an integer.
+
+\item While new instructions will be required to manipulate
+  capabilities, common code patterns for pure-capability C such as
+  function prologues and epilogues should use similar opcode density
+  to 64-bit x86.
+\end{itemize}
+
+\subsection{Capability Registers versus Segments}
 
 The x86 architecture first added virtual memory support via
 relocatable and variable-sized segments.  Each segment was assigned a
@@ -80,7 +102,57 @@ capabilities on other architectures, limiting the ability to share code
 and algorithms.  Instead, we propose to add CHERI capabilities to 64-bit
 x86 by extending existing general-purpose integer registers.
 
-\section{Tagged Capabilities and Memory}
+\subsection{Common Architectural Features}
+
+CHERI-x86-64 shares the following features with other CHERI
+architectures:
+
+\begin{itemize}
+\item Tagged memory with capability-width tag granularity and alignment.
+\item Registers able to hold capabilities are tagged.
+\item \CIP{} transforms and controls program-counter-relative fetches.
+\item \DDC{} transforms and controls memory operands using integer addresses,
+  including relocating access addresses using the capability base and offset.
+\item Floating point is fully supported, including capability-relative
+  floating-point load and store instructions.
+\item General-purpose registers are extended to hold capabilities.
+\item It is never left ambiguous as to whether a register operand used
+  as the base address of a memory operand or branch target
+  is a capability and therefore must have a tag set.
+\item \cappermASR limits privileged ISA operations when within
+  privileged rings.
+\end{itemize}
+
+\subsection{Unique Architectural Features}
+
+The following changes are specific to CHERI-RISC-V:
+
+\begin{itemize}
+ \item CHERI-x86-64 makes use of opcode prefixes to permit altering
+   the addressing mode and operand size of individual instructions,
+   both in 64-bit mode and capability mode.
+ \item Requests for most non-monotonic capability transformations
+   clear the tag on the destination capability rather than raising an
+   exception.
+ \item x86 exception handling is extended to support capabilities
+   including a new architectural stack frame for exception entry and
+   return.
+ \item A new exception code is used to report CHERI-related
+   exceptions.
+ \item New PTE bits and page fault exception code bits are defined for
+   loading and store capabilities in memory.
+ \item The \FSBASE{} and \GSBASE{} registers are extended as
+   capabilities.
+ \item As with CHERI-RISC-V, the \cflags{} field contains a single bit
+   used to enable capability mode in code capabilities installed into
+   \CIP{}.
+ \item Operations on capabilities can set bits in the \RFLAGS{}
+   register.
+\end{itemize}
+
+\section{CHERI-x86-64 Specification}
+
+\subsection{Tagged Capabilities and Memory}
 
 As with CHERI-RISC-V, we recommend that both memory and
 registers contain tagged, 128-bit capabilities.
@@ -89,7 +161,7 @@ load or store capabilities at misaligned addresses should raise a
 General Protection Fault with an error code of zero similar to
 misaligned loads and stores of SSE registers.
 
-\section{Extending Existing Registers}
+\subsection{General-Purpose Capability Registers}
 
 The x86 architecture has expanded its general-purpose integer registers multiple
 times.  Thus, the 16-bit \AX{} register has been extended to 32-bit \EAX{}
@@ -115,7 +187,7 @@ the equivalent of \PCC{}.
 The value of \RIP{} should be the current offset of \CIP{} rather than the
 integer value (virtual address).
 
-\section{Additional Capability Registers}
+\subsection{Additional Capability Registers}
 \label{sec:x86:additional-caps}
 
 Additional capability registers beyond those present in the general-purpose
@@ -143,7 +215,7 @@ cannot be used
 as operands (with a limited exception for \CFS{} and \CGS{} described
 below) in existing instructions.
 
-\section{Capability Mode}
+\subsection{Capability Mode}
 
 As with other CHERI architectures, CHERI-x86-64 should support running existing
 x86-64 code, capability-aware code, and hybrid code.  This
@@ -187,7 +259,7 @@ opcodes will also assume a capability sized operand in this mode.
 Finally, instructions which work with the stack would use \CSP{} as
 the implicit stack pointer.
 
-\section{Using Capabilities with Memory Address Operands}
+\subsection{Using Capabilities with Memory Address Operands}
 \label{sec:x86:capability-addressing}
 
 We propose a new capability-aware addressing mode that can be
@@ -203,7 +275,7 @@ relative to \DDC{}.  Instructions using capability-aware addressing
 would always use 64-bit virtual addresses and ignore any 0x67 opcode
 prefix.
 
-\subsection{Capability-Aware Addressing}
+\subsubsection{Capability-Aware Addressing}
 
 For instructions with register-based memory operands, capability-aware
 addressing would use the capability version of the register rather
@@ -230,7 +302,7 @@ an 0x07 opcode prefix.  In capability mode, the second
 instruction would require the prefix.  In plain 64-bit mode,
 the first instruction would require the prefix.
 
-\subsection{Scaled-Index Base Addressing}
+\subsubsection{Scaled-Index Base Addressing}
 
 x86 also supports an addressing mode that combines the values of two
 registers to construct a virtual address known as scaled-index base
@@ -254,7 +326,7 @@ mov (%cax,%rbx,4),%rcx
 That is, starting with the \CAX{} capability, \RBX{} * 4 would be added to the
 offset, and the resulting address validated against the \CAX{} capability.
 
-\subsection{RIP-Relative Addressing}
+\subsubsection{RIP-Relative Addressing}
 
 The 64-bit x86 architecture added a new addressing mode to support more
 efficient Position-Independent Code (PIC) performance.
@@ -273,14 +345,14 @@ should be resolved relative to \CIP{}.
 The immediate offset is applied to \CIP{} and the load
 or store is constrained by the bounds and permissions of \CIP{}.
 
-\subsection{Absolute Addresses}
+\subsubsection{Absolute Addresses}
 
 Memory operands can be encoded without a base register, either as an
 absolute address, or an absolute address added to a scaled index
 register.  These operands are always evaluated as offsets relative to
 \DDC{} including in capability mode.
 
-\subsection{Addresses Relative to CFS and CGS}
+\subsubsection{Addresses Relative to CFS and CGS}
 
 Capability-aware addressing must also permit addresses defined as
 offsets relative to \CFS{} and \CGS{} to support TLS with
@@ -290,7 +362,7 @@ operand (registers and displacement) is interpeted as an integer
 offset relative to the \CFS{} or \CGS{} capability register,
 respectively.
 
-\subsection{Instructions with Implicit Memory Operands}
+\subsubsection{Instructions with Implicit Memory Operands}
 
 Some x86 instructions have implicit memory operands addressed by a
 register.  These instructions should support addressing memory with
@@ -309,14 +381,14 @@ these string instructions should use \CSI{} instead of \RSI{} and \CDI{} instead
 \insnnoref{XLAT} should use \CBX{} as the implicit table address when
 using capability-aware addressing.
 
-\subsection{Stack Address Size}
+\subsubsection{Stack Address Size}
 
 Instructions that work with the stack such as \insnnoref{PUSH} or
 \insnnoref{CALL} use the stack pointer as an implicit operand.  In
 32-bit x86, the `B' flag of the stack segment selector determines if
 the 16-bit or 32-bit stack pointer register is used.  In 64-bit long
 mode, \RSP{} is always used as the stack pointer.  In capability mode,
-\CSP{} would be used as the stack pointer.
+\CSP{} would always be used as the stack pointer.
 
 Code which needs to use the alternate stack pointer
 interpretation would simulate these instructions using \insnnoref{MOV}
@@ -325,7 +397,7 @@ instructions such as \insnnoref{ADD} or \insnnoref{SUB}.  Emulation of
 \insnnoref{CALL} or \insnnoref{RET} would use \insnnoref{JMP} to
 adjust the instruction pointer.
 
-\section{Capability-Aware Instructions}
+\subsection{Capability-Aware Instructions}
 
 CHERI-x86-64 will require new instructions to examine and modify
 capabilities.  Many of these new instructions can be implemented as
@@ -336,7 +408,7 @@ Existing x86 toolchains already use instruction suffixes such as
 the operand size.  We recommand that the \texttt{c} suffix be used to
 explicitly state a capability operand size.
 
-\subsection{Capability Operands for Existing Opcodes}
+\subsubsection{Capability Operands for Existing Opcodes}
 
 Previous extensions to the x86 architecture have relied on opcode
 prefixes combined with the `D' and `L' flags of the current code
@@ -365,48 +437,7 @@ capability operand prefix could be used to revert to a smaller operand
 size.  The effective operand size would then determined by \texttt{REX.W}
 and the 0x66 prefix.
 
-\subsection{Control-Flow Instructions}
-
-Relative control-flow instructions such as \insnnoref{JMP},
-\insnnoref{CALL}, and conditional jumps (\insnnoref{Jcc}) would modify
-the offset of the \CIP{} capability.  If the resulting value of \CIP{}
-is invalid, a capability violation fault would be raised when fetching
-the next instruction (see Section~\ref{sec:x86:capability-fault}).
-
-All other control-flow instructions would support capability operands
-via the capability operand prefix and would default to capability
-operands in capability mode.
-
-Absolute near calls and jumps which used an integer operand
-would set the offset of the \CIP{} capability while instructions
-using a capability operand would load a new capability into \CIP{}.
-
-For far calls and jumps with a capability-sized operand,
-the memory address would point
-to a 16-bit segment selector followed by a capability.  Note that the
-low four bits of the memory address would have to be set to 14 to
-align the capability.  The current segment selector would be pushed
-onto the stack as a 16-byte value where the first two bytes contain
-the selector and the remaining 14 bytes' value is undefined.  Far
-calls and jumps with an integer operand would use the integer operand
-to set the offset of \CIP{}.
-
-A near \insnnoref{RETC} would pop a capability off of the stack and
-load it into \CIP{}.  A far \insnnoref{RETC} would additionally pop
-a 16-byte value off of the stack of which the low 16 bits are used
-as the new code segment selector.  The integer versions of
-\insnnoref{RET} would use the integer value popped off of the stack
-as the new offset of \CIP{}.
-
-\insnnoref{IRETC} should pop a capability exception frame (see
-Section~\ref{sec:x86:interrupt-exception}) from the stack loading
-capabilities into \CIP{} and \CSP{}.
-
-Note that attempting to push or pop a misaligned capability will raise
-an exception.  The stack pointer must be suitably aligned before the
-use of \insnnoref{CALLC}, \insnnoref{IRETC}, and \insnnoref{RETC}.
-
-\subsection{Extending Existing Instructions to Support Capability Operands}
+\subsubsection{Extending Existing Instructions to Support Capability Operands}
 
 Several existing instructions should be extended to support
 capability operands:
@@ -603,6 +634,47 @@ add %csp,$16
     would also default to capability operands in capability mode
     if extended.
 \end{itemize}
+
+\subsection{Control-Flow Instructions}
+
+Relative control-flow instructions such as \insnnoref{JMP},
+\insnnoref{CALL}, and conditional jumps (\insnnoref{Jcc}) would modify
+the offset of the \CIP{} capability.  If the resulting value of \CIP{}
+is invalid, a capability violation fault would be raised when fetching
+the next instruction (see Section~\ref{sec:x86:capability-fault}).
+
+All other control-flow instructions would support capability operands
+via the capability operand prefix and would default to capability
+operands in capability mode.
+
+Absolute near calls and jumps which used an integer operand
+would set the offset of the \CIP{} capability while instructions
+using a capability operand would load a new capability into \CIP{}.
+
+For far calls and jumps with a capability-sized operand,
+the memory address would point
+to a 16-bit segment selector followed by a capability.  Note that the
+low four bits of the memory address would have to be set to 14 to
+align the capability.  The current segment selector would be pushed
+onto the stack as a 16-byte value where the first two bytes contain
+the selector and the remaining 14 bytes' value is undefined.  Far
+calls and jumps with an integer operand would use the integer operand
+to set the offset of \CIP{}.
+
+A near \insnnoref{RETC} would pop a capability off of the stack and
+load it into \CIP{}.  A far \insnnoref{RETC} would additionally pop
+a 16-byte value off of the stack of which the low 16 bits are used
+as the new code segment selector.  The integer versions of
+\insnnoref{RET} would use the integer value popped off of the stack
+as the new offset of \CIP{}.
+
+\insnnoref{IRETC} should pop a capability exception frame (see
+Section~\ref{sec:x86:interrupt-exception}) from the stack loading
+capabilities into \CIP{} and \CSP{}.
+
+Note that attempting to push or pop a misaligned capability will raise
+an exception.  The stack pointer must be suitably aligned before the
+use of \insnnoref{CALLC}, \insnnoref{IRETC}, and \insnnoref{RETC}.
 
 \subsection{New CHERI Instructions}
 
@@ -917,12 +989,12 @@ returned by an existing \insnnoref{CPUID} leaf.
     Fault.
 \end{itemize}
 
-\section{Interactions with Vector Extensions}
+\subsection{Interactions with Vector Extensions}
 
 CHERI should have minimal impact on existing vector extensions to the
 x86 architecture including MMX, SSE, AVX, and AVX-512.
 
-\subsection{Vector Registers and Memory Tags}
+\subsubsection{Vector Registers and Memory Tags}
 
 We propose that vector registers should not contain tags.  Loads of
 vector registers should ignore tags in memory, and stores of vector
@@ -952,7 +1024,7 @@ contains pointers.  We believe that permitting a non-temporal store of
 a single capability via \insnnoref{MOVNTIC} is sufficient for cases
 requiring non-temporal stores of tagged capabilities.
 
-\subsection{Memory Addresssing}
+\subsubsection{Memory Addresssing}
 
 Vector instructions with memory operands would support
 capability-aware addressing in the same manner as general-purpose
@@ -960,7 +1032,7 @@ register instructions.  For scatter/gather instructions using VSIB,
 the base address register would use a capability register instead of
 an integer address when using capability-aware addressing.
 
-\section{Capability Violation Faults}
+\subsection{Capability Violation Faults}
 \label{sec:x86:capability-fault}
 
 For reporting capability violations, we propose reserving a new
@@ -1006,7 +1078,7 @@ clear the tag of the resulting capability.  This permits compilers to
 speculatively reorder these instructions without raising spurious
 faults during execution.
 
-\section{Call Gates}
+\subsection{Call Gates}
 
 We do not recommend extending call gates to support capabilities.
 Supporting capabilities with call gates would likely require the
@@ -1027,7 +1099,7 @@ following changes:
     return frame with each stack push made in a 16-byte increment.
 \end{itemize}
 
-\section{Interrupt and Exception Handling}
+\subsection{Interrupt and Exception Handling}
 \label{sec:x86:interrupt-exception}
 
 For interrupt and exception handling, we propose a new overall CPU
@@ -1046,7 +1118,7 @@ in a single slot.  However, this would result in a frame layout
 inconsistent with far calls.  \insnnoref{IRETC} would be used in
 interrupt service routines to unwind this frame.
 
-\subsection{Capability Control Registers}
+\subsubsection{Capability Control Registers}
 \label{sec:x86:capability-control-registers}
 
 Interrupt and exception handlers require new capabilities for the
@@ -1109,7 +1181,7 @@ ensure that all of the information currently stored in an \IDT{} entry
 (such as the segment selector, \IST{} index, and descriptor type) would
 be configurable.
 
-\subsection{\insnnoref{SWAPGS} and Capabilities}
+\subsubsection{\insnnoref{SWAPGS} and Capabilities}
 
 The \insnnoref{SWAPGS} instruction is used in user-to-kernel
 transitions for the 64-bit x86 architecture to permit separate TLS
@@ -1117,7 +1189,7 @@ pointers for user and kernel mode.  We recommend defining a new
 capability control register \KGS{}.  \insnnoref{SWAPGS} in capability
 mode would swap the \CGS{} and \KGS{} registers.
 
-\section{FS and GS Aliases}
+\subsection{FS and GS Aliases}
 
 The \FS{} and \GS{} segment descriptors have grown several related
 aliases over time such as the \FSBASE{} and \GSBASE{} MSRs and
@@ -1135,7 +1207,7 @@ equivalent to \insnref{CSetAddr}.  If a new address is set which makes
 the capability unrepresentable, the capability's tag should be
 cleared.
 
-\section{Page Tables}
+\subsection{Page Tables}
 
 Similar to CHERI on other architectures, additional page-table
 permission bits governing loads and stores of capabilities are
@@ -1185,7 +1257,7 @@ the tag cleared instead of faulting.
 Instruction fetches always ignore tags and will never raise a
 capability page-fault exception.
 
-\section{Controlling Access to System Registers}
+\subsection{Controlling Access to System Registers}
 
 In CHERI-x86-64, \cappermASR{} would be required to directly access the
 following registers:
