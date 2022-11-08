@@ -28,7 +28,7 @@ following properties:
   pointers.
 
 \item Capability values should be intentionally used.  Instructions
-  should explciitly specify if a register operand should be used as a
+  should explicitly specify if a register operand should be used as a
   capability or an integer scalar.  Specifically, the presence (or
   lack) of a tag should not determine if a value is treated as a
   capability rather than an integer.
@@ -39,7 +39,7 @@ following properties:
   to 64-bit x86.
 \end{itemize}
 
-\subsection{Capability Registers versus Segments}
+\subsection{Capability Registers and Segment Tables}
 
 The x86 architecture first added virtual memory support via
 relocatable and variable-sized segments.  Each segment was assigned a
@@ -49,58 +49,27 @@ checking, and access checks.  Special segment types permitted transitions
 to and from different protection domains.
 
 These features are similar to features in CHERI capabilities.
-However, there are also some key differences.
+However, there are also some key implementation differences that, in aggregate, have limited the utility of x86 segments to the extent that they have been nearly deprecated in x86-64.
 
-First, x86 addresses are stored as a combination of an offset and a
-segment spanning two different registers.  General-purpose registers
-are used to hold offsets, and dedicated segment selector registers are
-used to hold information about a single segment.  The x86 architecture
-provides six segment selector registers -- three of which are reserved
-for code, stack, and general data accesses.  A fourth register is
-typically used to define the location of thread-local storage (TLS).
-This leaves two segment registers to use for fine-grained segments
-such as separate segments for individual stack variables.  These
-registers do not load a segment descriptor from arbitrary locations in
-memory.  Instead, each register selects a segment descriptor from a
-descriptor table with a limited number of entries.  One could treat
-the segment descriptor tables (or portions of these tables) as a cache
-of active segments.
+First, x86 segment descriptors do not contain an offset, so a full reference requires both a segment descriptor and an integer offset.
+Secondly, x86 segment descriptors cannot be manipulated by the user program, but are stored to a size-limited table by privileged code.
+As a result of these two factors, segment descriptors are not suitable to implement references to program objects.
+Indeed, x86 segments were thought to describe coarse-grained program objects; of the six segment selector registers, three are reserved for code, stack, and general data accesses, and a fourth register is typically used to define the location of thread-local storage (TLS).
 
-Second, more fine-grained segments are not derived from existing
-segments.  Instead, each entry in a descriptor table is independent.
-Write access to a descriptor table permits construction of arbitrary
-segments (including special segments that permit privilege
-transitions).  Restricting descriptor-table write access to kernel
-mode does not protect against construction of arbitrary segments in
-kernel mode due to bugs or vulnerabilities.  As a result, segment
-descriptors are not able to provide the same provenance guarantees as
-tagged capabilities.
-
-Third, existing segment descriptors do not have available bits for
-storing types or permissions more expressive than the existing
-read, write, and execute.
-
-Finally, x86 segmentation is typically not used in modern operating
+Due to these limitations, x86 segmentation is typically not used in modern operating
 systems.  On the 32-bit x86 architecture, systems generally create
 segments with infinite bounds and use a non-zero base address only
 for a single segment that provides TLS.  The 64-bit x86 architecture
 codifies this by removing segment bounds entirely and supporting non-zero-base
-addresses only for two segment registers.
-Software for x86 systems stores only the offset portion of virtual
-addresses in pointer variables.  Segment registers are set to fixed
-values at program startup, never change, and are largely ignored.
+addresses only for two segments, and these through a configuration register rather than through the descriptor table.
+Software for x86 systems implement pointers as virtual addresses in general-purpose registers directly, ignoring segmentation.
 
-One approach for providing a similar set of features to CHERI
-capabilities on x86 would be to extend the existing segment primitives
-to accommodate some of these differences.  For example, descriptor-table
-entries could be tagged, whereby loading an untagged segment would trigger
-an exception.  However, some other potential changes are broader in
-scope (e.g., whether segment selectors should contain an index into a
-table, versus a logical address of a segment descriptor).  Extending
-segments would also result in a very different model compared to CHERI
-capabilities on other architectures, limiting the ability to share code
-and algorithms.  Instead, we propose to add CHERI capabilities to 64-bit
-x86 by extending existing general-purpose integer registers.
+We propose to implement x86-CHERI capabilities in the
+style of the other CHERI architectures, for example, extending
+general-purpose integer registers to hold capabilities.
+While we will generally use the language of the CHERI architecture,
+we will also endeavor to allow for an architectural
+description in terms of segment pointers as an extension of x86 segmentation, which may integrate more naturally into a future x86 specification.
 
 \subsection{Common Architectural Features}
 
@@ -110,9 +79,7 @@ architectures:
 \begin{itemize}
 \item Tagged memory with capability-width tag granularity and alignment.
 \item Registers able to hold capabilities are tagged.
-\item \CIP{} transforms and controls program-counter-relative fetches.
-\item \DDC{} transforms and controls memory operands using integer addresses,
-  including relocating access addresses using the capability base and offset.
+\item \CIP{} transforms and controls program-counter-relative (i.e. Code Segment) fetches.
 \item Floating point is fully supported, including capability-relative
   floating-point load and store instructions.
 \item General-purpose registers are extended to hold capabilities.
@@ -128,6 +95,11 @@ architectures:
 The following changes are specific to CHERI-RISC-V:
 
 \begin{itemize}
+ \item \DDC{}, which transforms and controls memory operands using
+   integer addresses, is split into registers that constrain the
+   architectural segments. \CFS{}, \CGS{} constrain FS and GS accesses
+   respectively (aliasing \FSBASE{} and \GSBASE{}), and \CXS{} constrains
+   DS, SS, and ES.
  \item CHERI-x86-64 makes use of opcode prefixes to permit altering
    the addressing mode and operand size of individual instructions,
    both in 64-bit mode and capability mode.
@@ -141,8 +113,6 @@ The following changes are specific to CHERI-RISC-V:
    exceptions.
  \item New PTE bits and page fault exception code bits are defined for
    loading and store capabilities in memory.
- \item The \FSBASE{} and \GSBASE{} registers are extended as
-   capabilities.
  \item As with CHERI-RISC-V, the \cflags{} field contains a single bit
    used to enable capability mode in code capabilities installed into
    \CIP{}.
