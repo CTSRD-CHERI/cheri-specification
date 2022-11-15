@@ -52,11 +52,11 @@ These features are similar to features in CHERI capabilities.
 However, there are also some key implementation differences that, in aggregate, have limited the utility of x86 segments to the extent that they have been nearly deprecated in x86-64.
 
 First, x86 segment descriptors do not contain an offset, so a full reference requires both a segment descriptor and an integer offset.
-Secondly, x86 segment descriptors cannot be manipulated by the user program, but are stored to a size-limited table by privileged code.
-As a result of these two factors, segment descriptors are not suitable to implement references to program objects.
-Indeed, x86 segments were thought to describe coarse-grained program objects; of the six segment selector registers, three are reserved for code, stack, and general data accesses, and a fourth register is typically used to define the location of thread-local storage (TLS).
+Secondly, x86 segment descriptors cannot be manipulated by the user program, but are selected from a size-limited table that is populated by privileged code.
+As a result of these two factors, segment descriptors are not suitable to enforce memory safety for program objects.
+Indeed, x86 segments were thought to describe coarse memory regions; of the six segment selector registers, three are reserved for code, stack, and general data accesses, and a fourth register is typically used to define the location of thread-local storage (TLS).
 
-Due to these limitations, x86 segmentation is typically not used in modern operating
+Due to this limitation, x86 segmentation is typically not used in modern operating
 systems.  On the 32-bit x86 architecture, systems generally create
 segments with infinite bounds and use a non-zero base address only
 for a single segment that provides TLS.  The 64-bit x86 architecture
@@ -64,12 +64,8 @@ codifies this by removing segment bounds entirely and supporting non-zero-base
 addresses only for two segments, and these through a configuration register rather than through the descriptor table.
 Software for x86 systems implement pointers as virtual addresses in general-purpose registers directly, ignoring segmentation.
 
-We propose to implement x86-CHERI capabilities in the
-style of the other CHERI architectures, for example, extending
-general-purpose integer registers to hold capabilities.
-While we will generally use the language of the CHERI architecture,
-we will also endeavor to allow for an architectural
-description in terms of segment pointers as an extension of x86 segmentation, which may integrate more naturally into a future x86 specification.
+We propose to implement x86-CHERI capabilities in the style of pointers, as with all other CHERI architectures, leaving behind privileged table-based segment management.
+Nevertheless, we will also endeavor to integrate with x86 segmentation to the extent that CHERI-x86-64 could be be described as an improvement to x86 segmentation in order to fit more naturally into a future x86 specification.
 
 \subsection{Common Architectural Features}
 
@@ -86,26 +82,26 @@ architectures:
 \item It is never left ambiguous as to whether a register operand used
   as the base address of a memory operand or branch target
   is a capability and therefore must have a tag set.
+\item Requests for most non-monotonic capability transformations
+  clear the tag on the destination capability rather than raising an
+  exception.
 \item \cappermASR limits privileged ISA operations when within
   privileged rings.
 \end{itemize}
 
 \subsection{Unique Architectural Features}
 
-The following changes are specific to CHERI-RISC-V:
+The following changes are specific to CHERI-x86-64:
 
 \begin{itemize}
  \item \DDC{}, which transforms and controls memory operands using
    integer addresses, is split into registers that constrain the
-   architectural segments. \CFS{}, \CGS{} constrain FS and GS accesses
+   x86 architectural segments. \CFS{}, \CGS{} constrain FS and GS accesses
    respectively (aliasing \FSBASE{} and \GSBASE{}), and \CXS{} constrains
-   DS, SS, and ES.
+   CS, DS, ES, and SS.
  \item CHERI-x86-64 makes use of opcode prefixes to permit altering
    the addressing mode and operand size of individual instructions,
    both in 64-bit mode and capability mode.
- \item Requests for most non-monotonic capability transformations
-   clear the tag on the destination capability rather than raising an
-   exception.
  \item x86 exception handling is extended to support capabilities
    including a new architectural stack frame for exception entry and
    return.
@@ -164,13 +160,13 @@ Additional capability registers beyond those present in the general-purpose
 integer
 register set will also be required.
 
-A new register will be required to hold \DDC{} for controlling
-non-capability-aware memory accesses.
+A new capability register will be required to constrain integer offsets
+to the DS, SS, and ES segments, fulfilling the function of \DDC{}.
+We recommend calling this register \CXS{}.
 
-The x86 architecture currently uses the \FS{} and \GS{} segment selector registers
-to provide thread-local storage (TLS).  In the 64-bit x86 architecture,
-these selectors are mostly reduced to holding an alternate base address
-that is added as an offset to the virtual address of existing instructions.
+The x86-64 architecture uses the \FS.base{} and \GS.base{} model-specific registers (MSRs) to
+provide an offset for accesses through the \FS{} and \GS{} segments which are commonly used for
+thread-local storage (TLS).
 For CHERI-x86-64 we recommend replacing these segment registers with two
 new capability registers: \CFS{} and \CGS{}.
 
@@ -178,12 +174,12 @@ In addition, new capability control registers will be required to
 manage user to kernel transitions as described in
 Section~\ref{sec:x86:capability-control-registers}.
 
-These additional registers will be stored as a separate bank of
-capability registers.  As with other x86 register banks such as
-control registers and debug registers, additional capability registers
+These additional registers will be exposed as a new bank of special registers
+that can hold capabilities.
+As with other x86 register banks such as
+model-specific registers and debug registers, additional capability registers
 cannot be used
-as operands (with a limited exception for \CFS{} and \CGS{} described
-below) in existing instructions.
+as general-purpose operands in existing instructions, though various instruction behaviors may be affected by their value.
 
 \subsection{Capability Mode}
 
@@ -222,10 +218,12 @@ only valid in 64-bit mode.  A far call or jump which uses a 32-bit
 code segment along with a target code capability with this flag set
 will raise a General Protection Fault with the error code set to the
 target segment selector.
+A note on style: \CIP{} generally replaces the code segment descriptor (\CS{}), and the few functional fields of \CS{} that remain in x86-64 can be viewed as belonging with the \cflags{} field of \CIP{}, which allows unprivileged manipulation for convenience.
+Storing these legacy fields in the segment table rather than in code capabilities is awkward, but traditional and avoids complicating the capability format.
 
 In capability mode, instructions will use capabity-aware addressing
 (Section~\ref{sec:x86:capabity-addressing}) by default.  Some existing
-opcodes will also assume a capability sized operand in this mode.
+opcodes will also assume a capability-sized operand in this mode.
 Finally, instructions which work with the stack would use \CSP{} as
 the implicit stack pointer.
 
@@ -255,11 +253,13 @@ opcode prefix.  (In 32-bit x86, the 0x07 opcode is the
 \insnnoref{POP ES} instruction, which is invalid in 64-bit mode.)
 In capability mode, instructions will use
 the capability-aware addressing mode by default.  Individual
-instructions can toggle between capability-aware and ``plain''
-64-bit addressing via the 0x07 opcode prefix.  Addresses using the
-``plain'' 32-bit or 64-bit addressing will be treated as offsets
-relative to \DDC{}.  Instructions using capability-aware addressing
+instructions can toggle between capability addressing and segment-relative
+addressing via the 0x07 opcode prefix. 
+32-bit or 64-bit segment-relative addressing will be treated as offsets
+into the capability associated with the defined segment: \CFS{} for \FS{}; \CGS{} for \GS{}; \CXS{} for \CS{}, \DS{}, \ES{}, or \SS{}.
+Instructions using capability-aware addressing
 would always use 64-bit virtual addresses.
+A note on style: capability addressing could be viewed as extending segmentation to allow segment descriptors to be carried in-line with the pointer rather than indirected through a table.
 
 The 0x07 prefix would be a Group 4 prefix meaning that a single
 instruction would not be permitted to use both 0x67 and 0x07 prefixes.
