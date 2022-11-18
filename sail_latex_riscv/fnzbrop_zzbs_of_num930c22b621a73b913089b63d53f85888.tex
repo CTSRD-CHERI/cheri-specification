@@ -1,0 +1,6 @@
+function brop_zbs_of_num arg# = match arg# {
+  0 => RISCV_BCLR,
+  1 => RISCV_BEXT,
+  2 => RISCV_BINV,
+  _ => RISCV_BSET
+}

@@ -1,0 +1,5 @@
+function #\hyperref[sailRISCVzprocesszyfload16]{process\_fload16}#(rd, addr, value) =
+  match value {
+    #\hyperref[sailRISCVzMemValue]{MemValue}#(result) => { #\hyperref[sailRISCVzF]{F}#(rd) = #\hyperref[sailRISCVznanzybox]{nan\_box}#(result); RETIRE_SUCCESS },
+    #\hyperref[sailRISCVzMemException]{MemException}#(e)  => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL }
+  }

@@ -1,9 +1,9 @@
-let rs1_val_D = #\hyperref[sailRISCVzF]{F}#(rs1);
-let rs2_val_D = #\hyperref[sailRISCVzF]{F}#(rs2);
+let rs1_val_D = #\hyperref[sailRISCVzFzyorzyXzyD]{F\_or\_X\_D}#(rs1);
+let rs2_val_D = #\hyperref[sailRISCVzFzyorzyXzyD]{F\_or\_X\_D}#(rs2);
 
-let (fflags, rd_val) : (bits_fflags, bits_LU) =
+let (fflags, rd_val) : (bits_fflags, bool) =
     #\hyperref[sailRISCVzriscvzyf64Eq]{riscv\_f64Eq}# (rs1_val_D, rs2_val_D);
 
 #\hyperref[sailRISCVzwritezyfflags]{write\_fflags}#(fflags);
-#\hyperref[sailRISCVzX]{X}#(rd) = rd_val;
+#\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(rd_val));
 RETIRE_SUCCESS

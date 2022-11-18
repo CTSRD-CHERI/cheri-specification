@@ -1,9 +1,8 @@
-function pmp_mem_write forall 'n, 0 < 'n <= max_mem_access . (wk: write_kind, paddr : xlenbits, width : atom('n), data: #\hyperref[sailRISCVzbits]{bits}#(8 * 'n), ext_acc: ext_access_type, meta: mem_meta) -> #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) =
+function pmp_mem_write forall 'n, 0 < 'n <= max_mem_access . (wk: write_kind, paddr : xlenbits, width : atom('n), data: #\hyperref[sailRISCVzbits]{bits}#(8 * 'n), typ: #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), priv: Privilege, meta: mem_meta) -> #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) =
   if   (~ (#\hyperref[sailRISCVzplatzyenablezypmp]{plat\_enable\_pmp}# ()))
   then #\hyperref[sailRISCVzcheckedzymemzywrite]{checked\_mem\_write}#(wk, paddr, width, data, meta)
   else {
-    let typ : #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type) = #\hyperref[sailRISCVzWrite]{Write}#(ext_acc);
-    match #\hyperref[sailRISCVzpmpCheck]{pmpCheck}#(paddr, width, typ, #\hyperref[sailRISCVzeffectivePrivilege]{effectivePrivilege}#(typ, mstatus, cur_privilege)) {
+    match #\hyperref[sailRISCVzpmpCheck]{pmpCheck}#(paddr, width, typ, priv) {
       #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzcheckedzymemzywrite]{checked\_mem\_write}#(wk, paddr, width, data, meta),
       #\hyperref[sailRISCVzSome]{Some}#(e) => #\hyperref[sailRISCVzMemException]{MemException}#(e)
     }

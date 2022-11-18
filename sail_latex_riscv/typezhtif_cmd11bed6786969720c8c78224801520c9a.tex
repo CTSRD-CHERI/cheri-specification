@@ -1,1 +1,5 @@
-struct htif_cmd = {htif_cmd_chunk_0 : bitvector(64, dec)}
+bitfield htif_cmd : #\hyperref[sailRISCVzbits]{bits}#(64) = {
+  device  : 63 .. 56,
+  cmd     : 55 .. 48,
+  payload : 47 .. 0
+}

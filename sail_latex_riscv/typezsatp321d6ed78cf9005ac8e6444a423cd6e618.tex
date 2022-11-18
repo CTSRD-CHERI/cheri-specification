@@ -1,1 +1,5 @@
-struct Satp32 = {Satp32_chunk_0 : bitvector(32, dec)}
+bitfield Satp32 : #\hyperref[sailRISCVzbits]{bits}#(32) = {
+  Mode : 31,
+  Asid : 30 .. 22,
+  PPN  : 21 .. 0
+}

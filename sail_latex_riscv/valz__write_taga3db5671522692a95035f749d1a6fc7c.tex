@@ -1,1 +1,1 @@
-__write_tag : forall (constant 'addrsize : Int), 'addrsize in {32, 64}. (write_kind, bits('addrsize), bit) -> bool
+__write_tag : forall 'addrsize, 'addrsize in {32, 64}. (write_kind, bits('addrsize), bit) -> bool

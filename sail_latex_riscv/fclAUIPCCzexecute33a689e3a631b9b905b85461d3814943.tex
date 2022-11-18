@@ -1,7 +1,4 @@
 let off : xlenbits = #\hyperref[sailRISCVzEXTS]{EXTS}#(imm @ 0x000);
 let (representable, newCap) = #\hyperref[sailRISCVzsetCapAddr]{setCapAddr}#(PCC, PC + off);
-if representable then
-  #\hyperref[sailRISCVzC]{C}#(cd) = newCap
-else
-  #\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzinvalidateCap]{invalidateCap}#(newCap);
+#\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzclearTagIf]{clearTagIf}#(newCap, #\hyperref[sailRISCVznot]{not}#(representable));
 RETIRE_SUCCESS

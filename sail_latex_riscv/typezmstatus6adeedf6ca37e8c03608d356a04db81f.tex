@@ -1,1 +1,35 @@
-struct Mstatus = {Mstatus_chunk_0 : bitvector(64, dec)}
+bitfield Mstatus : xlenbits = {
+  SD   : xlen - 1,
+
+  // The MBE and SBE fields are in mstatus in RV64 and absent in RV32.
+  // On RV32, they are in mstatush, which doesn't exist in RV64.  For now,
+  // they are handled in an ad-hoc way.
+  // MBE  : 37
+  // SBE  : 36
+
+  // The SXL and UXL fields don't exist on RV32, so they are modelled
+  // via explicit getters and setters; see below.
+  // SXL  : 35 .. 34,
+  // UXL  : 33 .. 32,
+
+  TSR  : 22,
+  TW   : 21,
+  TVM  : 20,
+  MXR  : 19,
+  SUM  : 18,
+  MPRV : 17,
+
+  XS   : 16 .. 15,
+  FS   : 14 .. 13,
+
+  MPP  : 12 .. 11,
+  SPP  : 8,
+
+  MPIE : 7,
+  SPIE : 5,
+  UPIE : 4,
+
+  MIE  : 3,
+  SIE  : 1,
+  UIE  : 0
+}

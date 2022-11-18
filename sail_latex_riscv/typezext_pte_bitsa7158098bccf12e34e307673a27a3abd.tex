@@ -1,1 +1,4 @@
-struct Ext_PTE_Bits = {Ext_PTE_Bits_chunk_0 : bitvector(10, dec)}
+bitfield Ext_PTE_Bits : extPte = {
+  CapWrite     : 9, /* Permit capability stores */
+  CapRead      : 8, /* Permit capability loads */
+}

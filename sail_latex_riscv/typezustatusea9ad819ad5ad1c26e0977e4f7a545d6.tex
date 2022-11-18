@@ -1,1 +1,4 @@
-struct Ustatus = {Ustatus_chunk_0 : bitvector(64, dec)}
+bitfield Ustatus : xlenbits = {
+  UPIE : 4,
+  UIE  : 0
+}

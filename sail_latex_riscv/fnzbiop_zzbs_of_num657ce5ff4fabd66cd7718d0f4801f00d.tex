@@ -1,0 +1,6 @@
+function biop_zbs_of_num arg# = match arg# {
+  0 => RISCV_BCLRI,
+  1 => RISCV_BEXTI,
+  2 => RISCV_BINVI,
+  _ => RISCV_BSETI
+}

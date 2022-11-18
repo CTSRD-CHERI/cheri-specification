@@ -10,9 +10,10 @@ match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, off
       #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
       #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) => {
         let (aq, rl, res) = (false, false, false);
-        match (width, sizeof(xlen)) {
+        match (width, sizeof(flen)) {
           (BYTE, _)   => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
-          (HALF, _)   => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+          (HALF, _)   => 
+             #\hyperref[sailRISCVzprocesszyfload16]{process\_fload16}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 2, aq, rl, res)),
           (WORD, _)   =>
              #\hyperref[sailRISCVzprocesszyfload32]{process\_fload32}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), addr, 4, aq, rl, res)),
           (DOUBLE, 64) =>

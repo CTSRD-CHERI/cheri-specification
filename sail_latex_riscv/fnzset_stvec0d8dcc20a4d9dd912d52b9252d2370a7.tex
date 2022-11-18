@@ -1,5 +1,5 @@
 function #\hyperref[sailRISCVzsetzystvec]{set\_stvec}#(value : xlenbits) -> xlenbits = {
   let stv = #\hyperref[sailRISCVzlegalizzezytvec]{legalize\_tvec}#(#\hyperref[sailRISCVzMkzyMtvec]{Mk\_Mtvec}#(#\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(STCC)), value);
-  STCC = #\hyperref[sailRISCVzsetCapOffsetOrNull]{setCapOffsetOrNull}#(STCC, stv.#\hyperref[sailRISCVzbits]{bits}#());
+  STCC = #\hyperref[sailRISCVzsetCapOffsetChecked]{setCapOffsetChecked}#(STCC, stv.#\hyperref[sailRISCVzbits]{bits}#());
   stv.#\hyperref[sailRISCVzbits]{bits}#()
 }

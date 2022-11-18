@@ -1,13 +1,8 @@
 let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
 let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
-if cs1_val.tag & #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
-  RETIRE_FAIL
-} else {
-  let (success, newCap) = #\hyperref[sailRISCVzincCapOffset]{incCapOffset}#(cs1_val, rs2_val);
-  if success then
-    #\hyperref[sailRISCVzC]{C}#(cd) = newCap
-  else
-    #\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzinvalidateCap]{invalidateCap}#(newCap);
-  RETIRE_SUCCESS
-}
+
+let inCap = #\hyperref[sailRISCVzclearTagIfSealed]{clearTagIfSealed}#(cs1_val);
+let (success, newCap) = #\hyperref[sailRISCVzincCapOffset]{incCapOffset}#(inCap, rs2_val);
+
+#\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzclearTagIf]{clearTagIf}#(newCap, #\hyperref[sailRISCVznot]{not}#(success));
+RETIRE_SUCCESS

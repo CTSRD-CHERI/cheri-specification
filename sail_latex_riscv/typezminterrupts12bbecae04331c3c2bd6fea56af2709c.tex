@@ -1,1 +1,13 @@
-struct Minterrupts = {Minterrupts_chunk_0 : bitvector(64, dec)}
+bitfield Minterrupts : xlenbits = {
+  MEI : 11, /* external interrupts */
+  SEI : 9,
+  UEI : 8,
+
+  MTI : 7,  /* timers interrupts */
+  STI : 5,
+  UTI : 4,
+
+  MSI : 3,  /* software interrupts */
+  SSI : 1,
+  USI : 0,
+}

@@ -1,1 +1,15 @@
-struct Sstatus = {Sstatus_chunk_0 : bitvector(64, dec)}
+bitfield Sstatus : xlenbits = {
+  SD   : xlen - 1,
+  // The UXL field does not exist on RV32, so we define an explicit
+  // getter and setter below.
+  // UXL  : 30 .. 29,
+  MXR  : 19,
+  SUM  : 18,
+  XS   : 16 .. 15,
+  FS   : 14 .. 13,
+  SPP  : 8,
+  SPIE : 5,
+  UPIE : 4,
+  SIE  : 1,
+  UIE  : 0
+}

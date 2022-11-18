@@ -1,12 +1,17 @@
-let rs1_val_32b = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs1));
-let rs2_val_32b = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs2));
-let rm_3b       = #\hyperref[sailRISCVzencdeczyroundingzymode]{encdec\_rounding\_mode}# (#\hyperref[sailRISCVzselectzyinstrzyorzyfcsrzyrm]{select\_instr\_or\_fcsr\_rm}#  (rm));
-let (fflags, rd_val_32b) : (#\hyperref[sailRISCVzbits]{bits}#(5), #\hyperref[sailRISCVzbits]{bits}#(32)) = match op {
-  FADD_S  => #\hyperref[sailRISCVzriscvzyf32Add]{riscv\_f32Add}# (rm_3b, rs1_val_32b, rs2_val_32b),
-  FSUB_S  => #\hyperref[sailRISCVzriscvzyf32Sub]{riscv\_f32Sub}# (rm_3b, rs1_val_32b, rs2_val_32b),
-  FMUL_S  => #\hyperref[sailRISCVzriscvzyf32Mul]{riscv\_f32Mul}# (rm_3b, rs1_val_32b, rs2_val_32b),
-  FDIV_S  => #\hyperref[sailRISCVzriscvzyf32Div]{riscv\_f32Div}# (rm_3b, rs1_val_32b, rs2_val_32b)
-};
-#\hyperref[sailRISCVzwritezyfflags]{write\_fflags}#(fflags);
-#\hyperref[sailRISCVzF]{F}#(rd) = #\hyperref[sailRISCVznanzybox]{nan\_box}# (rd_val_32b);
-RETIRE_SUCCESS
+let rs1_val_32b = #\hyperref[sailRISCVzFzyorzyXzyS]{F\_or\_X\_S}#(rs1);
+let rs2_val_32b = #\hyperref[sailRISCVzFzyorzyXzyS]{F\_or\_X\_S}#(rs2);
+match (#\hyperref[sailRISCVzselectzyinstrzyorzyfcsrzyrm]{select\_instr\_or\_fcsr\_rm}# (rm)) {
+  #\hyperref[sailRISCVzNone]{None}#() => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+  #\hyperref[sailRISCVzSome]{Some}#(rm') => {
+    let rm_3b = #\hyperref[sailRISCVzencdeczyroundingzymode]{encdec\_rounding\_mode}#(rm');
+    let (fflags, rd_val_32b) : (#\hyperref[sailRISCVzbits]{bits}#(5), #\hyperref[sailRISCVzbits]{bits}#(32)) = match op {
+      FADD_S  => #\hyperref[sailRISCVzriscvzyf32Add]{riscv\_f32Add}# (rm_3b, rs1_val_32b, rs2_val_32b),
+      FSUB_S  => #\hyperref[sailRISCVzriscvzyf32Sub]{riscv\_f32Sub}# (rm_3b, rs1_val_32b, rs2_val_32b),
+      FMUL_S  => #\hyperref[sailRISCVzriscvzyf32Mul]{riscv\_f32Mul}# (rm_3b, rs1_val_32b, rs2_val_32b),
+      FDIV_S  => #\hyperref[sailRISCVzriscvzyf32Div]{riscv\_f32Div}# (rm_3b, rs1_val_32b, rs2_val_32b)
+    };
+    #\hyperref[sailRISCVzwritezyfflags]{write\_fflags}#(fflags);
+    #\hyperref[sailRISCVzFzyorzyXzyS]{F\_or\_X\_S}#(rd) = rd_val_32b;
+    RETIRE_SUCCESS
+  }
+}

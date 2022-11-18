@@ -1,0 +1,19 @@
+function #\hyperref[sailRISCVzmemzywritezyvaluezyprivzymeta]{mem\_write\_value\_priv\_meta}# (paddr, width, value, typ, priv, meta, aq, rl, con) = {
+  #\hyperref[sailRISCVzrvfizywrite]{rvfi\_write}#(paddr, width, value, meta);
+  if (rl | con) & (~ (#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(paddr, width)))
+  then #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#())
+  else {
+    let wk : write_kind = match (aq, rl, con) {
+      (false, false, false) => Write_plain,
+      (false, true,  false) => Write_RISCV_release,
+      (false, false, true)  => Write_RISCV_conditional,
+      (false, true , true)  => Write_RISCV_conditional_release,
+      (true,  true,  false) => Write_RISCV_strong_release,
+      (true,  true , true)  => Write_RISCV_conditional_strong_release,
+      // throw an illegal instruction here?
+      (true,  false, false) => throw(#\hyperref[sailRISCVzErrorzynotzyimplemented]{Error\_not\_implemented}#("store.aq")),
+      (true,  false, true)  => throw(#\hyperref[sailRISCVzErrorzynotzyimplemented]{Error\_not\_implemented}#("sc.aq"))
+    };
+    #\hyperref[sailRISCVzpmpzymemzywrite]{pmp\_mem\_write}#(wk, paddr, width, value, typ, priv, meta);
+  }
+}

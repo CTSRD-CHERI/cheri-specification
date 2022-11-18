@@ -1,1 +1,4 @@
-struct Mcause = {Mcause_chunk_0 : bitvector(64, dec)}
+bitfield Mcause : xlenbits = {
+  IsInterrupt : xlen - 1,
+  Cause       : xlen - 2 .. 0
+}

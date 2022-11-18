@@ -1,0 +1,6 @@
+function bropw_zba_of_num arg# = match arg# {
+  0 => RISCV_ADDUW,
+  1 => RISCV_SH1ADDUW,
+  2 => RISCV_SH2ADDUW,
+  _ => RISCV_SH3ADDUW
+}

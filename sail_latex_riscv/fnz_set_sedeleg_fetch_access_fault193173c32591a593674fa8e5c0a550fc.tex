@@ -1,5 +1,0 @@
-function _set_Sedeleg_Fetch_Access_Fault (r_ref, v) = {
-    r = __bitfield_deref(r_ref);
-    r.Sedeleg_chunk_0 = update_subrange_bits(r.Sedeleg_chunk_0, 1, 1, subrange_bits(v, 0, 0));
-    (*r_ref) = r
-}

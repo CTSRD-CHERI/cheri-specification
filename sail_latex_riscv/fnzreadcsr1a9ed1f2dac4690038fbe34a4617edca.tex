@@ -75,6 +75,9 @@ function readCSR csr : csreg -> xlenbits = {
     (0xC81, 32) => mtime[63 .. 32],
     (0xC82, 32) => minstret[63 .. 32],
 
+    /* user mode: Zkr */
+    (0x015,  _) => #\hyperref[sailRISCVzreadzyseedzycsr]{read\_seed\_csr}#(),
+
     _           => /* check extensions */
                    match #\hyperref[sailRISCVzextzyreadzyCSR]{ext\_read\_CSR}#(csr) {
                      #\hyperref[sailRISCVzSome]{Some}#(res) => res,

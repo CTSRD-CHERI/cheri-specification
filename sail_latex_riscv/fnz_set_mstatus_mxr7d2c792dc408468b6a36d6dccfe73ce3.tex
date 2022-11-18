@@ -1,5 +1,0 @@
-function _set_Mstatus_MXR (r_ref, v) = {
-    r = __bitfield_deref(r_ref);
-    r.Mstatus_chunk_0 = update_subrange_bits(r.Mstatus_chunk_0, 19, 19, subrange_bits(v, 0, 0));
-    (*r_ref) = r
-}

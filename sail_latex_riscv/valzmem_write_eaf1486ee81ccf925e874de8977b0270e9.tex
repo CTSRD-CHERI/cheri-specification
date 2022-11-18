@@ -1,2 +1,1 @@
-mem_write_ea : forall ('n : Int), (0 < 'n & 'n <= max_mem_access).
-  (xlenbits, int('n), bool, bool, bool) -> MemoryOpResult(unit)
+mem_write_ea : forall 'n, (0 < 'n & 'n <= max_mem_access). (xlenbits, int('n), bool, bool, bool) -> MemoryOpResult(unit)

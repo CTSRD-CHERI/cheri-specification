@@ -1,2 +1,2 @@
-function #\hyperref[sailRISCVzmemzyread]{mem\_read}# (typ, paddr, width, aq, rl, res) =
-  #\hyperref[sailRISCVzMemoryOpResultzydropzymeta]{MemoryOpResult\_drop\_meta}#(#\hyperref[sailRISCVzmemzyreadzymeta]{mem\_read\_meta}#(typ, paddr, width, aq, rl, res, false))
+function #\hyperref[sailRISCVzmemzyread]{mem\_read}# (typ, paddr, width, aq, rel, res) =
+  #\hyperref[sailRISCVzmemzyreadzypriv]{mem\_read\_priv}#(typ, #\hyperref[sailRISCVzeffectivePrivilege]{effectivePrivilege}#(typ, mstatus, cur_privilege), paddr, width, aq, rel, res)

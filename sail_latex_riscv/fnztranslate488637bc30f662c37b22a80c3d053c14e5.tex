@@ -15,7 +15,7 @@ function #\hyperref[sailRISCVztranslate48]{translate48}#(asid, ptb, vAddr, ac, p
           } else {
             w_pte : SV48_PTE = #\hyperref[sailRISCVzupdatezyBITS]{update\_BITS}#(pte, pbits.#\hyperref[sailRISCVzbits]{bits}#());
 	    w_pte : SV48_PTE = #\hyperref[sailRISCVzupdatezyExt]{update\_Ext}#(w_pte, ext);
-            match #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(pteAddr), 8, w_pte.#\hyperref[sailRISCVzbits]{bits}#(), false, false, false) {
+            match #\hyperref[sailRISCVzmemzywritezyvaluezypriv]{mem\_write\_value\_priv}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(pteAddr), 8, w_pte.#\hyperref[sailRISCVzbits]{bits}#(), Supervisor, false, false, false) {
               #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
                 #\hyperref[sailRISCVzaddzytozyTLB48]{add\_to\_TLB48}#(asid, vAddr, pAddr, w_pte, pteAddr, level, global);
                 #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(pAddr, ext_ptw)

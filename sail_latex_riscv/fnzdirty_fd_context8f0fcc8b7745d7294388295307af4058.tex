@@ -1,4 +1,5 @@
 function #\hyperref[sailRISCVzdirtyzyfdzycontext]{dirty\_fd\_context}#() -> unit = {
+  assert(#\hyperref[sailRISCVzsyszyenablezyfdext]{sys\_enable\_fdext}#());
   mstatus->#\hyperref[sailRISCVzFS]{FS}#() = #\hyperref[sailRISCVzextStatuszytozybits]{extStatus\_to\_bits}#(Dirty);
   mstatus->#\hyperref[sailRISCVzSD]{SD}#() = 0b1
 }

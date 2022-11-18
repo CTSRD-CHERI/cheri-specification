@@ -1,1 +1,4 @@
-struct Fcsr = {Fcsr_chunk_0 : bitvector(32, dec)}
+bitfield Fcsr : #\hyperref[sailRISCVzbits]{bits}#(32) = {
+  FRM    : 7 .. 5,
+  FFLAGS : 4 .. 0,
+}

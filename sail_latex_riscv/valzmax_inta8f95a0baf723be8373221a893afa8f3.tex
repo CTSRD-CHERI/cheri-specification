@@ -1,1 +1,1 @@
-max_int : forall ('x 'y : Int). (int('x), int('y)) -> {'z, ('x >= 'y & 'z == 'x | 'x < 'y & 'z == 'y). int('z)}
+max_int : forall 'x 'y. (int('x), int('y)) -> {'z, ('x >= 'y & 'z == 'x | 'x < 'y & 'z == 'y). int('z)}

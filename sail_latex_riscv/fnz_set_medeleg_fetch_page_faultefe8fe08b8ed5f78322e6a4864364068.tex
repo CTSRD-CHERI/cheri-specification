@@ -1,5 +1,0 @@
-function _set_Medeleg_Fetch_Page_Fault (r_ref, v) = {
-    r = __bitfield_deref(r_ref);
-    r.Medeleg_chunk_0 = update_subrange_bits(r.Medeleg_chunk_0, 12, 12, subrange_bits(v, 0, 0));
-    (*r_ref) = r
-}

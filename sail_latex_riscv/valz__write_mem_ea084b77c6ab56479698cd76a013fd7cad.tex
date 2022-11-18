@@ -1,2 +1,2 @@
-__write_mem_ea : forall ('n : Int)(constant 'addrsize : Int), ('n > 0 & 'addrsize in {32, 64}).
+__write_mem_ea : forall 'n 'addrsize, ('n > 0 & 'addrsize in {32, 64}).
   (write_kind, int('addrsize), bits('addrsize), int('n)) -> unit

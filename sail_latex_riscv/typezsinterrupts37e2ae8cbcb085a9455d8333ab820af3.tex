@@ -1,1 +1,10 @@
-struct Sinterrupts = {Sinterrupts_chunk_0 : bitvector(64, dec)}
+bitfield Sinterrupts : xlenbits = {
+  SEI : 9,  /* external interrupts */
+  UEI : 8,
+
+  STI : 5,  /* timers interrupts */
+  UTI : 4,
+
+  SSI : 1,  /* software interrupts */
+  USI : 0
+}

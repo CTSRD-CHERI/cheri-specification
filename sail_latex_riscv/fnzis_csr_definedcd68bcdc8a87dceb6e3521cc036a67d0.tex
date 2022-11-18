@@ -81,6 +81,9 @@ function #\hyperref[sailRISCVziszyCSRzydefined]{is\_CSR\_defined}# (csr : csreg,
     0xC81 => #\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#() & (sizeof(xlen) == 32),     // timeh
     0xC82 => #\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#() & (sizeof(xlen) == 32),     // instreth
 
+    /* user mode: Zkr */
+    0x015 => #\hyperref[sailRISCVzhaveZkr]{haveZkr}#(),
+
     /* check extensions */
     _     => #\hyperref[sailRISCVzextzyiszyCSRzydefined]{ext\_is\_CSR\_defined}#(csr, p)
   }

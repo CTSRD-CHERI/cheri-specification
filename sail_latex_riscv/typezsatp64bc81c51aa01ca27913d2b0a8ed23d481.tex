@@ -1,1 +1,5 @@
-struct Satp64 = {Satp64_chunk_0 : bitvector(64, dec)}
+bitfield Satp64 : #\hyperref[sailRISCVzbits]{bits}#(64) = {
+  Mode : 63 .. 60,
+  Asid : 59 .. 44,
+  PPN  : 43 .. 0
+}

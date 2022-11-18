@@ -1,5 +1,0 @@
-function _set_Satp32_PPN (r_ref, v) = {
-    r = __bitfield_deref(r_ref);
-    r.Satp32_chunk_0 = update_subrange_bits(r.Satp32_chunk_0, 21, 0, subrange_bits(v, 21, 0));
-    (*r_ref) = r
-}

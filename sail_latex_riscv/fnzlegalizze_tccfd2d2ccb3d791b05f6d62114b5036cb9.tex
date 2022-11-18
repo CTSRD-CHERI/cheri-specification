@@ -7,6 +7,6 @@ function #\hyperref[sailRISCVzlegalizzezytcc]{legalize\_tcc}#(o : Capability, v 
     /* legalize new TCC #\hyperref[sailRISCVzoffset]{offset}# (RISC-V tvec) */
     new_tvec = v.address - new_base;
     legalized_tvec = #\hyperref[sailRISCVzlegalizzezytvec]{legalize\_tvec}#(#\hyperref[sailRISCVzMkzyMtvec]{Mk\_Mtvec}#(#\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(o)), new_tvec);
-    #\hyperref[sailRISCVzsetCapOffsetOrNull]{setCapOffsetOrNull}#(v, legalized_tvec.#\hyperref[sailRISCVzbits]{bits}#())
+    #\hyperref[sailRISCVzsetCapOffsetChecked]{setCapOffsetChecked}#(v, legalized_tvec.#\hyperref[sailRISCVzbits]{bits}#())
   }
 }

@@ -1,1 +1,6 @@
-struct SV39_PTE = {SV39_PTE_chunk_0 : bitvector(64, dec)}
+bitfield SV39_PTE : pte64 = {
+  Ext   : 63 .. 54,
+  PPNi  : 53 .. 10,
+  RSW   : 9  .. 8,
+  BITS  : 7  .. 0
+}

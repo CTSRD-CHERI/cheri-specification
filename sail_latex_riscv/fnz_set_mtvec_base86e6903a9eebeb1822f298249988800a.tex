@@ -1,5 +1,0 @@
-function _set_Mtvec_Base (r_ref, v) = {
-    r = __bitfield_deref(r_ref);
-    r.Mtvec_chunk_0 = update_subrange_bits(r.Mtvec_chunk_0, 63, 2, subrange_bits(v, 61, 0));
-    (*r_ref) = r
-}

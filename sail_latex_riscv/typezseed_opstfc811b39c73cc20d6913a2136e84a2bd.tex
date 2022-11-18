@@ -1,0 +1,6 @@
+enum seed_opst = {
+  BIST, // Built-in-self-test. No randomness sampled.
+  ES16, // Entropy-sample-16. Valid 16-bits of randomness sampled.
+  WAIT, // Device still gathering entropy.
+  DEAD  // Fatal device compromise. No randomness sampled.
+}

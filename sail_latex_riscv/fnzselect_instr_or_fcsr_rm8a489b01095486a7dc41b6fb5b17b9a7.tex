@@ -1,4 +1,8 @@
-function  select_instr_or_fcsr_rm   instr_rm =
-  if   (instr_rm == RM_DYN)
-  then #\hyperref[sailRISCVzencdeczyroundingzymode]{encdec\_rounding\_mode}# (fcsr.#\hyperref[sailRISCVzFRM]{FRM}#())
-  else instr_rm
+function select_instr_or_fcsr_rm instr_rm =
+  if (instr_rm == RM_DYN)
+  then {
+    let fcsr_rm = fcsr.#\hyperref[sailRISCVzFRM]{FRM}#();
+    if (#\hyperref[sailRISCVzvalidzyroundingzymode]{valid\_rounding\_mode}#(fcsr_rm) & fcsr_rm != #\hyperref[sailRISCVzencdeczyroundingzymode]{encdec\_rounding\_mode}#(RM_DYN))
+      then #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzencdeczyroundingzymode]{encdec\_rounding\_mode}#(fcsr_rm)) else #\hyperref[sailRISCVzNone]{None}#()
+  }
+  else #\hyperref[sailRISCVzSome]{Some}#(instr_rm)

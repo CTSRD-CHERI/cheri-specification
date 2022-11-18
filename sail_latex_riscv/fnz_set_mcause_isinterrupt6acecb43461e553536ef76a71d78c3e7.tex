@@ -1,5 +1,0 @@
-function _set_Mcause_IsInterrupt (r_ref, v) = {
-    r = __bitfield_deref(r_ref);
-    r.Mcause_chunk_0 = update_subrange_bits(r.Mcause_chunk_0, 63, 63, subrange_bits(v, 0, 0));
-    (*r_ref) = r
-}

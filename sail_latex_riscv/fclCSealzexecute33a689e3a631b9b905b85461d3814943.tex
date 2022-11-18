@@ -1,32 +1,18 @@
 let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
 let cs2_val = #\hyperref[sailRISCVzC]{C}#(cs2);
+
 let cs2_cursor = #\hyperref[sailRISCVzgetCapCursor]{getCapCursor}#(cs2_val);
 let (cs2_base, cs2_top) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(cs2_val);
-if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_TagViolation, cs1);
-  RETIRE_FAIL
-} else if #\hyperref[sailRISCVznot]{not}# (cs2_val.tag) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_TagViolation, cs2);
-  RETIRE_FAIL
-} else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
-  RETIRE_FAIL
-} else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs2_val) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs2);
-  RETIRE_FAIL
-} else if #\hyperref[sailRISCVznot]{not}# (cs2_val.permit_seal) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_PermitSealViolation, cs2);
-  RETIRE_FAIL
-} else if cs2_cursor < cs2_base then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs2);
-  RETIRE_FAIL
-} else if cs2_cursor >= cs2_top then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs2);
-  RETIRE_FAIL
-} else if cs2_cursor > cap_max_otype then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs2);
-  RETIRE_FAIL
-} else {
-  #\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzsealCap]{sealCap}#(cs1_val, #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_otype_width, cs2_cursor));
-  RETIRE_SUCCESS
-}
+
+let permitted = cs2_val.tag
+              & #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs2_val))
+              & cs2_val.permit_seal
+              & (cs2_cursor >= cs2_base)
+              & (cs2_cursor < cs2_top)
+              & (cs2_cursor <= cap_max_otype);
+
+let inCap = #\hyperref[sailRISCVzclearTagIfSealed]{clearTagIfSealed}#(cs1_val);
+let newCap = #\hyperref[sailRISCVzsealCap]{sealCap}#(inCap, #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_otype_width, cs2_cursor));
+
+#\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzclearTagIf]{clearTagIf}#(newCap, #\hyperref[sailRISCVznot]{not}#(permitted));
+RETIRE_SUCCESS

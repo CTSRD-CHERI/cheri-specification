@@ -39,9 +39,7 @@ if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
                 let wres : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) = #\hyperref[sailRISCVzmemzywritezycap]{mem\_write\_cap}#(addr, cs2_val, aq & rl, rl, false);
                 match wres {
                   #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
-                    let cr = if ptw_info.ptw_lc == PTW_LC_CLEAR
-                      then {v with tag = false} /* strip the tag */
-                      else {v with tag = v.tag & auth_val.permit_load_cap};
+                    let cr = #\hyperref[sailRISCVzclearTagIf]{clearTagIf}#(v, ptw_info.ptw_lc == PTW_LC_CLEAR | #\hyperref[sailRISCVznot]{not}#(auth_val.permit_load_cap));
                     #\hyperref[sailRISCVzC]{C}#(cd) = cr;
                     RETIRE_SUCCESS
                   },

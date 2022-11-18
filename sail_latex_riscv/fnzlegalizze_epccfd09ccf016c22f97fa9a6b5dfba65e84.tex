@@ -4,5 +4,5 @@ function #\hyperref[sailRISCVzlegalizzezyepcc]{legalize\_epcc}# (v : Capability)
 
   if   legalized == voffset
   then v /* avoid possibly attempting to set the offset of a sentry */
-  else #\hyperref[sailRISCVzsetCapOffsetOrNull]{setCapOffsetOrNull}#(v, legalized)
+  else #\hyperref[sailRISCVzsetCapOffsetChecked]{setCapOffsetChecked}#(v, legalized)
 }

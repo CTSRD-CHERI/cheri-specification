@@ -1,0 +1,4 @@
+function nan_box_H   val_16b =
+  if (sizeof(flen) == 32)
+  then 0x_FFFF @ val_16b
+  else 0x_FFFF_FFFF_FFFF @ val_16b

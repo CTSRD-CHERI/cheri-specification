@@ -1,5 +1,0 @@
-function _set_Fcsr_FFLAGS (r_ref, v) = {
-    r = __bitfield_deref(r_ref);
-    r.Fcsr_chunk_0 = update_subrange_bits(r.Fcsr_chunk_0, 4, 0, subrange_bits(v, 4, 0));
-    (*r_ref) = r
-}

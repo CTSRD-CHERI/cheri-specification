@@ -1,8 +1,8 @@
-let rs1_val_D    = #\hyperref[sailRISCVzF]{F}#(rs1);
-let rs2_val_D    = #\hyperref[sailRISCVzF]{F}#(rs2);
+let rs1_val_D    = #\hyperref[sailRISCVzFzyorzyXzyD]{F\_or\_X\_D}#(rs1);
+let rs2_val_D    = #\hyperref[sailRISCVzFzyorzyXzyD]{F\_or\_X\_D}#(rs2);
 let (s1, e1, m1) = #\hyperref[sailRISCVzfsplitzyD]{fsplit\_D}# (rs1_val_D);
 let (s2, e2, m2) = #\hyperref[sailRISCVzfsplitzyD]{fsplit\_D}# (rs2_val_D);
 let rd_val_D     = #\hyperref[sailRISCVzfmakezyD]{fmake\_D}# (s1 ^ s2, e1, m1);
 
-#\hyperref[sailRISCVzF]{F}#(rd) = rd_val_D;
+#\hyperref[sailRISCVzFzyorzyXzyD]{F\_or\_X\_D}#(rd) = rd_val_D;
 RETIRE_SUCCESS

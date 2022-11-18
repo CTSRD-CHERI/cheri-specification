@@ -1,5 +1,0 @@
-function _set_Ext_PTE_Bits_CapRead (r_ref, v) = {
-    r = __bitfield_deref(r_ref);
-    r.Ext_PTE_Bits_chunk_0 = update_subrange_bits(r.Ext_PTE_Bits_chunk_0, 8, 8, subrange_bits(v, 0, 0));
-    (*r_ref) = r
-}

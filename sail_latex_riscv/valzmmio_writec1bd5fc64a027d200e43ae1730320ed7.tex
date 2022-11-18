@@ -1,2 +1,1 @@
-mmio_write : forall ('n : Int), (0 < 'n & 'n <= max_mem_access).
-  (xlenbits, int('n), bits(8 * 'n)) -> MemoryOpResult(bool)
+mmio_write : forall 'n, (0 < 'n & 'n <= max_mem_access). (xlenbits, int('n), bits(8 * 'n)) -> MemoryOpResult(bool)

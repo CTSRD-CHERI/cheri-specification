@@ -4,6 +4,6 @@ function #\hyperref[sailRISCVzaccruezyfflags]{accrue\_fflags}#(flags) = {
   then {
     fcsr->#\hyperref[sailRISCVzFFLAGS]{FFLAGS}#() = f;
     #\hyperref[sailRISCVzupdatezysoftfloatzyfflags]{update\_softfloat\_fflags}#(f);
-    #\hyperref[sailRISCVzdirtyzyfdzycontext]{dirty\_fd\_context}#();
+    #\hyperref[sailRISCVzdirtyzyfdzycontextzyifzypresent]{dirty\_fd\_context\_if\_present}#();
   }
 }

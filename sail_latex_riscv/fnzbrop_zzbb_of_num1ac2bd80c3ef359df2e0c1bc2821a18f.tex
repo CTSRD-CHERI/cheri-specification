@@ -1,0 +1,11 @@
+function brop_zbb_of_num arg# = match arg# {
+  0 => RISCV_ANDN,
+  1 => RISCV_ORN,
+  2 => RISCV_XNOR,
+  3 => RISCV_MAX,
+  4 => RISCV_MAXU,
+  5 => RISCV_MIN,
+  6 => RISCV_MINU,
+  7 => RISCV_ROL,
+  _ => RISCV_ROR
+}

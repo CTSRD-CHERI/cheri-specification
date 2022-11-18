@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzreadzyseedzycsr]{read\_seed\_csr}#() -> xlenbits = {
+  let reserved_bits : #\hyperref[sailRISCVzbits]{bits}#(6) = 0b000000;
+  let custom_bits : #\hyperref[sailRISCVzbits]{bits}#(8) = 0x00;
+  let seed : #\hyperref[sailRISCVzbits]{bits}#(16) = #\hyperref[sailRISCVzgetzy16zyrandomzybits]{get\_16\_random\_bits}#();
+  #\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzopstzycode]{opst\_code}#(ES16) @ reserved_bits @ custom_bits @ seed)
+}

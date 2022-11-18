@@ -1,4 +1,4 @@
-if #\hyperref[sailRISCVzhaveMulDiv]{haveMulDiv}#() then {
+if #\hyperref[sailRISCVzhaveMulDiv]{haveMulDiv}#() | #\hyperref[sailRISCVzhaveZmmul]{haveZmmul}#() then {
   let rs1_val = #\hyperref[sailRISCVzX]{X}#(rs1)[31..0];
   let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2)[31..0];
   let rs1_int : int = #\hyperref[sailRISCVzsigned]{signed}#(rs1_val);

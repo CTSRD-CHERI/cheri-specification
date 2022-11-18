@@ -1,1 +1,4 @@
-struct ccsr = {ccsr_chunk_0 : bitvector(64, dec)}
+bitfield ccsr : xlenbits = {
+  d       :  1,      /* dirty  */
+  e       :  0       /* enable */
+}

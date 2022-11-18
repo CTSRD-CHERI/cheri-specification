@@ -1,2 +1,2 @@
-match_TLB_Entry : forall ('asidlen 'valen 'palen 'ptelen : Int).
+match_TLB_Entry : forall 'asidlen 'valen 'palen 'ptelen.
   (TLB_Entry('asidlen, 'valen, 'palen, 'ptelen), bits('asidlen), bits('valen)) -> bool

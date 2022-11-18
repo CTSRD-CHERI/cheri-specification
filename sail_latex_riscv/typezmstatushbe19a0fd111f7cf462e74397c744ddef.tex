@@ -1,1 +1,4 @@
-struct Mstatush = {Mstatush_chunk_0 : bitvector(32, dec)}
+bitfield Mstatush : #\hyperref[sailRISCVzbits]{bits}#(32) = {
+  MBE  : 5,
+  SBE  : 4
+}

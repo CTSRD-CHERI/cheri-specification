@@ -1,1 +1,4 @@
-struct SV48_Vaddr = {SV48_Vaddr_chunk_0 : bitvector(48, dec)}
+bitfield SV48_Vaddr : vaddr48 = {
+  VPNi  : 47 .. 12,
+  PgOfs : 11 .. 0
+}

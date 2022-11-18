@@ -1,1 +1,1 @@
-write_ram_ea : forall ('n : Int), (0 < 'n & 'n <= max_mem_access). (write_kind, xlenbits, int('n)) -> unit
+write_ram_ea : forall 'n, (0 < 'n & 'n <= max_mem_access). (write_kind, xlenbits, int('n)) -> unit

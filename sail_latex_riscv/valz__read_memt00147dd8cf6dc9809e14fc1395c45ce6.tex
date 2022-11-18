@@ -1,2 +1,2 @@
-__read_memt : forall ('n : Int)(constant 'addrsize : Int), ('n > 0 & 'addrsize in {32, 64}).
+__read_memt : forall 'n 'addrsize, ('n > 0 & 'addrsize in {32, 64}).
   (read_kind, bits('addrsize), int('n)) -> (bits(8 * 'n), bit)

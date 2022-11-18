@@ -1,1 +1,5 @@
-struct Uinterrupts = {Uinterrupts_chunk_0 : bitvector(64, dec)}
+bitfield Uinterrupts : xlenbits = {
+  UEI : 8,  /* external interrupt */
+  UTI : 4,  /* timer interrupt    */
+  USI : 0   /* software interrupt */
+}

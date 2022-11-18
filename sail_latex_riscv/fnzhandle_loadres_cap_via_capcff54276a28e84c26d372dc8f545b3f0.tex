@@ -23,11 +23,11 @@ if #\hyperref[sailRISCVznot]{not}#(auth_val.tag) then {
       match c {
         #\hyperref[sailRISCVzMemValue]{MemValue}#(v) => {
           let cr = if ptw_info.ptw_lc == PTW_LC_CLEAR
-                   then {v with tag = false} /* strip the tag */
+                   then #\hyperref[sailRISCVzclearTag]{clearTag}#(v) /* strip the tag */
                    else {
                      /* the Sail model currently reserves virtual addresses */
                      #\hyperref[sailRISCVzloadzyreservation]{load\_reservation}#(addr);
-                     {v with tag = v.tag & auth_val.permit_load_cap}
+                     #\hyperref[sailRISCVzclearTagIf]{clearTagIf}#(v, #\hyperref[sailRISCVznot]{not}#(auth_val.permit_load_cap))
                    };
           #\hyperref[sailRISCVzC]{C}#(cd) = cr;
           RETIRE_SUCCESS

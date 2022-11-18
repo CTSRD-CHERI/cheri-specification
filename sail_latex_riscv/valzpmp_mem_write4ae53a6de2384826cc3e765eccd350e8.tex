@@ -1,2 +1,2 @@
-pmp_mem_write : forall ('n : Int), (0 < 'n & 'n <= max_mem_access).
-  (write_kind, xlenbits, int('n), bits(8 * 'n), ext_access_type, mem_meta) -> MemoryOpResult(bool)
+pmp_mem_write : forall 'n, (0 < 'n & 'n <= max_mem_access).
+  (write_kind, xlenbits, int('n), bits(8 * 'n), AccessType(ext_access_type), Privilege, mem_meta) -> MemoryOpResult(bool)

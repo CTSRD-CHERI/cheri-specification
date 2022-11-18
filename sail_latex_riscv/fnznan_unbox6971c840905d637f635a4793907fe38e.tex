@@ -1,6 +1,0 @@
-function nan_unbox   regval =
-  if (sizeof(flen) == 32)
-  then regval
-  else if regval [63..32] == 0x_FFFF_FFFF
-       then regval [31..0]
-       else #\hyperref[sailRISCVzcanonicalzyNaNzyS]{canonical\_NaN\_S}#()

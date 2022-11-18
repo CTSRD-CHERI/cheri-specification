@@ -1,16 +1,5 @@
 function #\hyperref[sailRISCVzmemzywritezyvaluezymeta]{mem\_write\_value\_meta}# (paddr, width, value, ext_acc, meta, aq, rl, con) = {
-  #\hyperref[sailRISCVzrvfizywrite]{rvfi\_write}#(paddr, width, value, meta);
-  if (rl | con) & (~ (#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(paddr, width)))
-  then #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#())
-  else match (aq, rl, con) {
-    (false, false, false) => #\hyperref[sailRISCVzpmpzymemzywrite]{pmp\_mem\_write}#(Write_plain, paddr, width, value, ext_acc, meta),
-    (false, true,  false) => #\hyperref[sailRISCVzpmpzymemzywrite]{pmp\_mem\_write}#(Write_RISCV_release, paddr, width, value, ext_acc, meta),
-    (false, false, true)  => #\hyperref[sailRISCVzpmpzymemzywrite]{pmp\_mem\_write}#(Write_RISCV_conditional, paddr, width, value, ext_acc, meta),
-    (false, true , true)  => #\hyperref[sailRISCVzpmpzymemzywrite]{pmp\_mem\_write}#(Write_RISCV_conditional_release, paddr, width, value, ext_acc, meta),
-    (true,  true,  false) => #\hyperref[sailRISCVzpmpzymemzywrite]{pmp\_mem\_write}#(Write_RISCV_strong_release, paddr, width, value, ext_acc, meta),
-    (true,  true , true)  => #\hyperref[sailRISCVzpmpzymemzywrite]{pmp\_mem\_write}#(Write_RISCV_conditional_strong_release, paddr, width, value, ext_acc, meta),
-    // throw an illegal instruction here?
-    (true,  false, false) => throw(#\hyperref[sailRISCVzErrorzynotzyimplemented]{Error\_not\_implemented}#("store.aq")),
-    (true,  false, true)  => throw(#\hyperref[sailRISCVzErrorzynotzyimplemented]{Error\_not\_implemented}#("sc.aq"))
-  }
+  let typ = #\hyperref[sailRISCVzWrite]{Write}#(ext_acc);
+  let ep = #\hyperref[sailRISCVzeffectivePrivilege]{effectivePrivilege}#(typ, mstatus, cur_privilege);
+  #\hyperref[sailRISCVzmemzywritezyvaluezyprivzymeta]{mem\_write\_value\_priv\_meta}#(paddr, width, value, typ, ep, meta, aq, rl, con)
 }

@@ -1,1 +1,10 @@
-struct PTE_Bits = {PTE_Bits_chunk_0 : bitvector(8, dec)}
+bitfield PTE_Bits : pteAttribs = {
+  D : 7,
+  A : 6,
+  G : 5,
+  U : 4,
+  X : 3,
+  W : 2,
+  R : 1,
+  V : 0
+}

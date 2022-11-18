@@ -12,7 +12,7 @@ match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, off
       #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, _) => {
         let eares : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(unit) = match width {
           BYTE   => #\hyperref[sailRISCVzMemValue]{MemValue}# () /* bogus placeholder for illegal size */,
-          HALF   => #\hyperref[sailRISCVzMemValue]{MemValue}# () /* bogus placeholder for illegal size */,
+          HALF   => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 2, aq, rl, false),
           WORD   => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 4, aq, rl, false),
           DOUBLE => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 8, aq, rl, false)
         };
@@ -20,9 +20,9 @@ match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, off
           #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL },
           #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
             let rs2_val = #\hyperref[sailRISCVzF]{F}#(rs2);
-            match (width, sizeof(xlen)) {
+            match (width, sizeof(flen)) {
               (BYTE, _)    => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
-              (HALF, _)    => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+              (HALF, _)    => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 2, rs2_val[15..0], aq, rl, con)),
               (WORD, _)    => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq, rl, con)),
               (DOUBLE, 64) => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq, rl, con))
             };

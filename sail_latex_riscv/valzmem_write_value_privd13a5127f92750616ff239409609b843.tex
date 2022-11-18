@@ -1,0 +1,2 @@
+mem_write_value_priv : forall 'n, (0 < 'n & 'n <= max_mem_access).
+  (xlenbits, int('n), bits(8 * 'n), Privilege, bool, bool, bool) -> MemoryOpResult(bool)

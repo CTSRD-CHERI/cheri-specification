@@ -1,23 +1,12 @@
 let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
 let rs2_val = #\hyperref[sailRISCVzX]{X}#(rs2);
+
 let newBase = cs1_val.address;
 let newTop : CapLenBits = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(newBase) + #\hyperref[sailRISCVzEXTZ]{EXTZ}#(rs2_val);
-if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_TagViolation, cs1);
-  RETIRE_FAIL
-} else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_SealViolation, cs1);
-  RETIRE_FAIL
-} else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(cs1_val, newBase, #\hyperref[sailRISCVzunsigned]{unsigned}#(rs2_val))) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs1);
-  RETIRE_FAIL
-} else {
-  let (exact, newCap) = #\hyperref[sailRISCVzsetCapBounds]{setCapBounds}#(cs1_val, newBase, newTop);
-  if #\hyperref[sailRISCVznot]{not}# (exact) then {
-    #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_InexactBounds, cs1);
-    RETIRE_FAIL
-  } else {
-    #\hyperref[sailRISCVzC]{C}#(cd) = newCap;
-    RETIRE_SUCCESS
-  }
-}
+let inBounds = #\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(cs1_val, newBase, #\hyperref[sailRISCVzunsigned]{unsigned}#(rs2_val));
+
+let inCap = #\hyperref[sailRISCVzclearTagIfSealed]{clearTagIfSealed}#(cs1_val);
+let (exact, newCap) = #\hyperref[sailRISCVzsetCapBounds]{setCapBounds}#(inCap, newBase, newTop);
+
+#\hyperref[sailRISCVzC]{C}#(cd) = #\hyperref[sailRISCVzclearTagIf]{clearTagIf}#(newCap, #\hyperref[sailRISCVznot]{not}#(inBounds & exact));
+RETIRE_SUCCESS

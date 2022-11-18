@@ -1,1 +1,1 @@
-htif_store : forall ('n : Int), (0 < 'n & 'n <= 8). (xlenbits, int('n), bits(8 * 'n)) -> MemoryOpResult(bool)
+htif_store : forall 'n, (0 < 'n & 'n <= 8). (xlenbits, int('n), bits(8 * 'n)) -> MemoryOpResult(bool)

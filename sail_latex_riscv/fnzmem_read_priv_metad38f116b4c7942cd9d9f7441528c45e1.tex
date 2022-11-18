@@ -1,0 +1,12 @@
+function #\hyperref[sailRISCVzmemzyreadzyprivzymeta]{mem\_read\_priv\_meta}# (typ, priv, paddr, width, aq, rl, res, meta) = {
+  let result : #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#((#\hyperref[sailRISCVzbits]{bits}#(8 * 'n), mem_meta)) =
+    if (aq | res) & (~ (#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(paddr, width)))
+    then #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyLoadzyAddrzyAlign]{E\_Load\_Addr\_Align}#())
+    else match (aq, rl, res) {
+      (false, true,  false) => throw(#\hyperref[sailRISCVzErrorzynotzyimplemented]{Error\_not\_implemented}#("load.rl")),
+      (false, true,  true)  => throw(#\hyperref[sailRISCVzErrorzynotzyimplemented]{Error\_not\_implemented}#("lr.rl")),
+      (_, _, _)             => #\hyperref[sailRISCVzpmpzymemzyread]{pmp\_mem\_read}#(typ, priv, paddr, width, aq, rl, res, meta)
+    };
+  #\hyperref[sailRISCVzrvfizyread]{rvfi\_read}#(paddr, width, result);
+  result
+}

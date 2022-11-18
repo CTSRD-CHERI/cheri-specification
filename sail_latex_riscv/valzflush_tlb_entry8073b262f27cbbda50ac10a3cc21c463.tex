@@ -1,2 +1,2 @@
-flush_TLB_Entry : forall ('asidlen 'valen 'palen 'ptelen : Int).
+flush_TLB_Entry : forall 'asidlen 'valen 'palen 'ptelen.
   (TLB_Entry('asidlen, 'valen, 'palen, 'ptelen), option(bits('asidlen)), option(bits('valen))) -> bool

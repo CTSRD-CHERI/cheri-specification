@@ -1,1 +1,11 @@
-struct Sedeleg = {Sedeleg_chunk_0 : bitvector(64, dec)}
+bitfield Sedeleg : xlenbits = {
+  UEnvCall          : 8,
+  SAMO_Access_Fault : 7,
+  SAMO_Addr_Align   : 6,
+  Load_Access_Fault : 5,
+  Load_Addr_Align   : 4,
+  Breakpoint        : 3,
+  Illegal_Instr     : 2,
+  Fetch_Access_Fault: 1,
+  Fetch_Addr_Align  : 0
+}

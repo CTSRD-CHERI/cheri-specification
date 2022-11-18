@@ -8,11 +8,13 @@ function #\hyperref[sailRISCVzlegalizzezymstatus]{legalize\_mstatus}#(o : Mstatu
 
   /* We don't have any extension context yet. */
   let m = #\hyperref[sailRISCVzupdatezyXS]{update\_XS}#(m, #\hyperref[sailRISCVzextStatuszytozybits]{extStatus\_to\_bits}#(Off));
+
   /* FS is WARL, and making FS writable can support the M-mode emulation of an FPU
-   * to support code running in S/U-modes.  Spike does this, and for now, we match it.
+   * to support code running in S/U-modes.  Spike does this, and for now, we match it,
+   * but only if Zfinx isn't enabled.
    * FIXME: This should be made a platform parameter.
    */
-
+  let m = if #\hyperref[sailRISCVzsyszyenablezyzzfinx]{sys\_enable\_zfinx}#() then #\hyperref[sailRISCVzupdatezyFS]{update\_FS}#(m, #\hyperref[sailRISCVzextStatuszytozybits]{extStatus\_to\_bits}#(Off)) else m;
   let dirty = #\hyperref[sailRISCVzextStatuszyofzybits]{extStatus\_of\_bits}#(m.#\hyperref[sailRISCVzFS]{FS}#()) == Dirty | #\hyperref[sailRISCVzextStatuszyofzybits]{extStatus\_of\_bits}#(m.#\hyperref[sailRISCVzXS]{XS}#()) == Dirty;
   let m = #\hyperref[sailRISCVzupdatezySD]{update\_SD}#(m, #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(dirty));
 

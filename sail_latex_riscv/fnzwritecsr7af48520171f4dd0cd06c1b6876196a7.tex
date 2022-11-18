@@ -63,6 +63,9 @@ function #\hyperref[sailRISCVzwriteCSR]{writeCSR}# (csr : csreg, value : xlenbit
     (0x144,  _) => { mip = #\hyperref[sailRISCVzlegalizzezysip]{legalize\_sip}#(mip, mideleg, value); #\hyperref[sailRISCVzSome]{Some}#(mip.#\hyperref[sailRISCVzbits]{bits}#()) },
     (0x180,  _) => { satp = #\hyperref[sailRISCVzlegalizzezysatp]{legalize\_satp}#(#\hyperref[sailRISCVzcurzyArchitecture]{cur\_Architecture}#(), satp, value); #\hyperref[sailRISCVzSome]{Some}#(satp) },
 
+    /* user mode: #\hyperref[sailRISCVzseed]{seed}# (entropy source). writes are ignored */
+    (0x015,  _) => #\hyperref[sailRISCVzwritezyseedzycsr]{write\_seed\_csr}#(),
+
     _           => #\hyperref[sailRISCVzextzywritezyCSR]{ext\_write\_CSR}#(csr, value)
   };
   match res {

@@ -1,1 +1,4 @@
-struct Mtvec = {Mtvec_chunk_0 : bitvector(64, dec)}
+bitfield Mtvec : xlenbits = {
+  Base : xlen - 1 .. 2,
+  Mode : 1 .. 0
+}

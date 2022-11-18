@@ -1,0 +1,6 @@
+function #\hyperref[sailRISCVzvalidDoubleRegs]{validDoubleRegs}#(n, regs) = {
+  if #\hyperref[sailRISCVzhaveZdinx]{haveZdinx}#() & sizeof(xlen) == 32 then
+    foreach (i from 0 #\hyperref[sailRISCVzto]{to}# (n - 1))
+      if (regs[i][0] == bitone) then return false;
+  true
+}

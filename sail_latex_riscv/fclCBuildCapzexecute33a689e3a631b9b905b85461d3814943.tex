@@ -1,42 +1,31 @@
-let (cs1_val, cs1_idx) = if #\hyperref[sailRISCVzunsigned]{unsigned}#(cs1) == 0 then (DDC, DDC_IDX)
-                                               else (#\hyperref[sailRISCVzC]{C}#(cs1), 0b0 @ cs1);
+let cs1_val = if #\hyperref[sailRISCVzunsigned]{unsigned}#(cs1) == 0 then DDC else #\hyperref[sailRISCVzC]{C}#(cs1);
 let cs2_val = #\hyperref[sailRISCVzC]{C}#(cs2);
-let (cs1_base, cs1_top) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(cs1_val);
-let (cs2_base, cs2_top) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(cs2_val);
-let cs1_perms = #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cs1_val);
-let cs2_perms = #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cs2_val);
-let cs2_flags = #\hyperref[sailRISCVzgetCapFlags]{getCapFlags}#(cs2_val);
-if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then {
-  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_TagViolation, cs1_idx);
-  RETIRE_FAIL
-} else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(cs1_val) then {
-  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_SealViolation, cs1_idx);
-  RETIRE_FAIL
-} else if cs2_base < cs1_base then {
-  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_LengthViolation, cs1_idx);
-  RETIRE_FAIL
-} else if cs2_top > cs1_top then {
-  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_LengthViolation, cs1_idx);
-  RETIRE_FAIL
-} else if cs2_base > cs2_top then { /* check for length < 0 - possible because cs2 might be untagged */
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs2);
-  RETIRE_FAIL
-} else if (cs2_perms & cs1_perms) != cs2_perms then {
-  #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_UserDefViolation, cs1_idx);
-  RETIRE_FAIL
-} else {
-  let (exact, cd1) = #\hyperref[sailRISCVzsetCapBounds]{setCapBounds}#(cs1_val, #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_addr_width, cs2_base), #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_len_width, cs2_top));
-  let (_, cd2) = #\hyperref[sailRISCVzsetCapOffset]{setCapOffset}#(cd1, #\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(cs2_val)); // Ignore representability check, since Fast Rep Check not relevant
-  let cd3 = #\hyperref[sailRISCVzsetCapPerms]{setCapPerms}#(cd2, cs2_perms);
-  let cd4 = #\hyperref[sailRISCVzsetCapFlags]{setCapFlags}#(cd3, cs2_flags);
-  if cd4 != {#\hyperref[sailRISCVzunsealCap]{unsealCap}#(cs2_val) with tag=true} then
-  {
-    #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs2);
-    RETIRE_FAIL
-  } else {
-    assert(exact, "CBuildCap: setCapBounds was not exact"); /* base and top came from cs2 originally so will be exact */
-    let cd5 = if #\hyperref[sailRISCVzsigned]{signed}#(cs2_val.otype) == otype_sentry then #\hyperref[sailRISCVzsealCap]{sealCap}#(cd4, #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_otype_width, otype_sentry)) else cd4;
-    #\hyperref[sailRISCVzC]{C}#(cd) = cd5;
-    RETIRE_SUCCESS
-  }
-}
+
+let authorityCap = cs1_val;
+let requestedCap' = {#\hyperref[sailRISCVzC]{C}#(cs2) with tag=true};
+let requestedSentry = #\hyperref[sailRISCVzsigned]{signed}#(requestedCap'.otype) == otype_sentry;
+let requestedCap = if requestedSentry then requestedCap' else #\hyperref[sailRISCVzunsealCap]{unsealCap}#(requestedCap');
+
+let (authorityBase, authorityTop) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(authorityCap);
+let (requestedBase, requestedTop) = #\hyperref[sailRISCVzgetCapBounds]{getCapBounds}#(requestedCap);
+let authorityPerms = #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(authorityCap);
+let requestedPerms = #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(requestedCap);
+let requestedFlags = #\hyperref[sailRISCVzgetCapFlags]{getCapFlags}#(requestedCap);
+
+let subset = (requestedBase >= authorityBase)
+           & (requestedTop <= authorityTop)
+           & (requestedBase <= requestedTop) /* check for length < 0 - possible because requested might be untagged */
+           & ((requestedPerms & authorityPerms) == requestedPerms);
+
+let inCap = #\hyperref[sailRISCVzclearTagIfSealed]{clearTagIfSealed}#(authorityCap);
+let (exact, cd1) = #\hyperref[sailRISCVzsetCapBounds]{setCapBounds}#(inCap, #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_addr_width, requestedBase), #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_len_width, requestedTop));
+let (_, cd2) = #\hyperref[sailRISCVzsetCapOffset]{setCapOffset}#(cd1, #\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(requestedCap)); /* Ignore representability check, since Fast Rep Check not relevant */
+let cd3 = #\hyperref[sailRISCVzsetCapPerms]{setCapPerms}#(cd2, requestedPerms);
+let cd4 = #\hyperref[sailRISCVzsetCapFlags]{setCapFlags}#(cd3, requestedFlags);
+let cd5 = if requestedSentry then #\hyperref[sailRISCVzsealCap]{sealCap}#(cd4, #\hyperref[sailRISCVztozybits]{to\_bits}#(cap_otype_width, otype_sentry)) else cd4;
+let derivable = cd5 == requestedCap; /* True iff requestedCap has bounds not exceeding address space and no reserved bits set, and authority was tagged and unsealed */
+assert(#\hyperref[sailRISCVznot]{not}#(derivable) | exact, "CBuildCap: setCapBounds was not exact"); /* If requestedCap was a derivable encoding then setBounds should be exact */
+let cd6 = if subset & derivable then cd5 else #\hyperref[sailRISCVzclearTag]{clearTag}#(requestedCap);
+
+#\hyperref[sailRISCVzC]{C}#(cd) = cd6;
+RETIRE_SUCCESS

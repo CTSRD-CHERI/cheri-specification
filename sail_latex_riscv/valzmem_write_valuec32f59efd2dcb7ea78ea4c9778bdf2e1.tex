@@ -1,2 +1,2 @@
-mem_write_value : forall ('n : Int), (0 < 'n & 'n <= max_mem_access).
+mem_write_value : forall 'n, (0 < 'n & 'n <= max_mem_access).
   (xlenbits, int('n), bits(8 * 'n), bool, bool, bool) -> MemoryOpResult(bool)

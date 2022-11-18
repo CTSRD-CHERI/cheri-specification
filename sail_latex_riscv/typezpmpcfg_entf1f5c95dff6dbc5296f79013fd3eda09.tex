@@ -1,1 +1,9 @@
-struct Pmpcfg_ent = {Pmpcfg_ent_chunk_0 : bitvector(8, dec)}
+bitfield Pmpcfg_ent : #\hyperref[sailRISCVzbits]{bits}#(8) = {
+  L : 7,        /* locking */
+  A : 4 .. 3,   /* address match type, encoded as above */
+
+  /* permissions */
+  X : 2,        /* execute */
+  W : 1,        /* write */
+  R : 0         /* read */
+}

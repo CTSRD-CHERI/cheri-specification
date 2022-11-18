@@ -1,4 +1,5 @@
 function #\hyperref[sailRISCVzwF]{wF}# (r, in_v) = {
+  assert(#\hyperref[sailRISCVzsyszyenablezyfdext]{sys\_enable\_fdext}#());
   let v = #\hyperref[sailRISCVzfregvalzyintozyfreg]{fregval\_into\_freg}#(in_v);
   match r {
     0  => f0 = v,

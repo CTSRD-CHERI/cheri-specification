@@ -1,1 +1,6 @@
-struct Counteren = {Counteren_chunk_0 : bitvector(32, dec)}
+bitfield Counteren : #\hyperref[sailRISCVzbits]{bits}#(32) = {
+  HPM  : 31 .. 3,
+  IR   : 2,
+  TM   : 1,
+  CY   : 0
+}

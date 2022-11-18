@@ -1,8 +1,8 @@
-let rs1_val_S    = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs1));
-let rs2_val_S    = #\hyperref[sailRISCVznanzyunbox]{nan\_unbox}# (#\hyperref[sailRISCVzF]{F}#(rs2));
+let rs1_val_S    = #\hyperref[sailRISCVzFzyorzyXzyS]{F\_or\_X\_S}#(rs1);
+let rs2_val_S    = #\hyperref[sailRISCVzFzyorzyXzyS]{F\_or\_X\_S}#(rs2);
 let (s1, e1, m1) = #\hyperref[sailRISCVzfsplitzyS]{fsplit\_S}# (rs1_val_S);
 let (s2, e2, m2) = #\hyperref[sailRISCVzfsplitzyS]{fsplit\_S}# (rs2_val_S);
 let rd_val_S     = #\hyperref[sailRISCVzfmakezyS]{fmake\_S}# (0b1 ^ s2, e1, m1);
 
-#\hyperref[sailRISCVzF]{F}#(rd) = #\hyperref[sailRISCVznanzybox]{nan\_box}# (rd_val_S);
+#\hyperref[sailRISCVzFzyorzyXzyS]{F\_or\_X\_S}#(rd) = rd_val_S;
 RETIRE_SUCCESS

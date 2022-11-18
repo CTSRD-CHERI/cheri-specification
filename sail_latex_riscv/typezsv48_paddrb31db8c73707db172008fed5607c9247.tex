@@ -1,1 +1,4 @@
-struct SV48_Paddr = {SV48_Paddr_chunk_0 : bitvector(56, dec)}
+bitfield SV48_Paddr : paddr64 = {
+  PPNi  : 55 .. 12,
+  PgOfs : 11 .. 0
+}

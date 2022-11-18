@@ -2,8 +2,10 @@ function checked_mem_read forall 'n, 0 < 'n <= max_mem_access . (t : #\hyperref[
   if   #\hyperref[sailRISCVzwithinzymmiozyreadable]{within\_mmio\_readable}#(paddr, width)
   then #\hyperref[sailRISCVzMemoryOpResultzyaddzymeta]{MemoryOpResult\_add\_meta}#(#\hyperref[sailRISCVzmmiozyread]{mmio\_read}#(t, paddr, width), default_meta)
   else if #\hyperref[sailRISCVzwithinzyphyszymem]{within\_phys\_mem}#(paddr, width)
-  then #\hyperref[sailRISCVzphyszymemzyread]{phys\_mem\_read}#(t, paddr, width, aq, rl, res, meta)
-  else match t {
+  then match #\hyperref[sailRISCVzextzycheckzyphyszymemzyread]{ext\_check\_phys\_mem\_read}#(t, paddr, width, aq, rl, res, meta) {
+    #\hyperref[sailRISCVzExtzyPhysAddrzyOK]{Ext\_PhysAddr\_OK}#()     => #\hyperref[sailRISCVzphyszymemzyread]{phys\_mem\_read}#(t, paddr, width, aq, rl, res, meta),
+    #\hyperref[sailRISCVzExtzyPhysAddrzyError]{Ext\_PhysAddr\_Error}#(e) => #\hyperref[sailRISCVzMemException]{MemException}#(e)
+  } else match t {
     #\hyperref[sailRISCVzExecute]{Execute}#()  => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyFetchzyAccesszyFault]{E\_Fetch\_Access\_Fault}#()),
     #\hyperref[sailRISCVzRead]{Read}#(Data) => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzyLoadzyAccesszyFault]{E\_Load\_Access\_Fault}#()),
     _          => #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#())

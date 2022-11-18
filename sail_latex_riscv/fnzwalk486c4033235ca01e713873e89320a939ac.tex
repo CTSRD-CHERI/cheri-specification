@@ -3,7 +3,7 @@ function #\hyperref[sailRISCVzwalk48]{walk48}#(vaddr, ac, priv, mxr, do_sum, ptb
   let pt_ofs : paddr64 = #\hyperref[sailRISCVzshiftl]{shiftl}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(#\hyperref[sailRISCVzshiftr]{shiftr}#(va.#\hyperref[sailRISCVzVPNi]{VPNi}#(), (level * SV48_LEVEL_BITS))[(SV48_LEVEL_BITS - 1) .. 0]),
                                 PTE48_LOG_SIZE);
   let pte_addr = ptb + pt_ofs;
-  match (#\hyperref[sailRISCVzmemzyread]{mem\_read}#(ac, #\hyperref[sailRISCVzEXTZ]{EXTZ}#(pte_addr), 8, false, false, false)) {
+  match (#\hyperref[sailRISCVzmemzyreadzypriv]{mem\_read\_priv}#(#\hyperref[sailRISCVzRead]{Read}#(Data), Supervisor, #\hyperref[sailRISCVzEXTZ]{EXTZ}#(pte_addr), 8, false, false, false)) {
     #\hyperref[sailRISCVzMemException]{MemException}#(_) => {
 /*    #\hyperref[sailRISCVzprint]{print}#("#\hyperref[sailRISCVzwalk48]{walk48}#(vaddr=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(vaddr) ^ " level=" ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(level)
             ^ " pt_base=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(ptb)

@@ -1,2 +1,2 @@
-make_TLB_Entry : forall ('asidlen 'valen 'palen 'ptelen : Int), 'valen > 0.
+make_TLB_Entry : forall 'asidlen 'valen 'palen 'ptelen, 'valen > 0.
   (bits('asidlen), bool, bits('valen), bits('palen), bits('ptelen), nat, bits('palen), nat) -> TLB_Entry('asidlen, 'valen, 'palen, 'ptelen)

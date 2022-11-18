@@ -1,1 +1,5 @@
-struct SV32_PTE = {SV32_PTE_chunk_0 : bitvector(32, dec)}
+bitfield SV32_PTE : pte32 = {
+  PPNi  : 31 .. 10,
+  RSW   : 9  .. 8,
+  BITS  : 7  .. 0
+}

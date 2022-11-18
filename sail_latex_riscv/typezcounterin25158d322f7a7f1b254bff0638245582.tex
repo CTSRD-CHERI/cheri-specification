@@ -1,1 +1,5 @@
-struct Counterin = {Counterin_chunk_0 : bitvector(32, dec)}
+bitfield Counterin : #\hyperref[sailRISCVzbits]{bits}#(32) = {
+  /* no HPM counters yet */
+  IR : 2,
+  CY : 0
+}
