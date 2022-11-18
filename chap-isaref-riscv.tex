@@ -60,10 +60,8 @@ can be found in the CHERI-RISC-V Sail model~\cite{sail-cheri-riscv}.
 \phantomsection\label{sailRISCVzcapzyotypezywidth}
 \sailRISCVtypecapOtypeWidth{}
 
-% Work around https://github.com/rems-project/sail/issues/101
-\begin{lstlisting}[language=sail,label=sailRISCVzmaxzyotype]
-let max_otype = MAX(cap_otype_width) - reserved_otypes
-\end{lstlisting}
+\phantomsection\label{sailRISCVzcapzymaxzyotype}
+\sailRISCVletcapMaxOtype{}
 
 \section{Function Definitions}
 
@@ -212,6 +210,11 @@ Even in the case of failure a capability is still returned, although it may not 
 \sailRISCVval{setCapAddr}
 \sailRISCVval{setCapOffset}
 \sailRISCVval{incCapOffset}
+
+\medskip
+\sailRISCVval{clearTag}
+\sailRISCVval{clearTagIf}
+\sailRISCVval{clearTagIfSealed}
 
 \medskip
 \sailRISCVval{getRepresentableAlignmentMask}
