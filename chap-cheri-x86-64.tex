@@ -48,16 +48,15 @@ specific segment including relocation to a base address, bounds
 checking, and access checks.  Special segment types permitted transitions
 to and from different protection domains.
 
-These features are similar to features in CHERI capabilities.
-However, there are also some key implementation differences that, in aggregate, have limited the utility of x86 segments to the extent that they have been nearly deprecated in x86-64.
+These features are superficially similar to features in CHERI capabilities.
+However, x86 segment manipulation and use do not match modern programming models to the extent that they fell out of use, were not supported by modern operating systems, and were nearly deprecated in the x86-64 architectural extension.
 
-First, x86 segment descriptors do not contain an offset, so a full reference requires both a segment descriptor and an integer offset.
-Secondly, x86 segment descriptors cannot be manipulated by the user program, but are selected from a size-limited table that is populated by privileged code.
-As a result of these two factors, segment descriptors are not suitable to enforce memory safety for program objects.
+Firstly, x86 segment descriptors cannot be manipulated by the user program, but are selected from a size-limited table that is populated by privileged code.
+Secondly, x86 segment descriptors do not contain an offset, so a full reference requires both a segment descriptor and an integer offset.
+As a result of these two factors, x86 segments are not efficient for use as general-purpose pointers, which is the primary use case for CHERI capabilities.
 Indeed, x86 segments were thought to describe coarse memory regions; of the six segment selector registers, three are reserved for code, stack, and general data accesses, and a fourth register is typically used to define the location of thread-local storage (TLS).
 
-Due to this limitation, x86 segmentation is typically not used in modern operating
-systems.  On the 32-bit x86 architecture, systems generally create
+On the 32-bit x86 architecture, operating systems generally create
 segments with infinite bounds and use a non-zero base address only
 for a single segment that provides TLS.  The 64-bit x86 architecture
 codifies this by removing segment bounds entirely and supporting non-zero-base
@@ -98,7 +97,7 @@ The following changes are specific to CHERI-x86-64:
    integer addresses, is split into registers that constrain the
    x86 architectural segments. \CFS{}, \CGS{} constrain FS and GS accesses
    respectively (aliasing \FSBASE{} and \GSBASE{}), and \CXS{} constrains
-   CS, DS, ES, and SS.
+   \CS{}, \DS{}, \ES{}, and \SS{}.
  \item CHERI-x86-64 makes use of opcode prefixes to permit altering
    the addressing mode and operand size of individual instructions,
    both in 64-bit mode and capability mode.
