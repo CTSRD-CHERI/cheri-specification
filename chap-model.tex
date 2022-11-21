@@ -1033,61 +1033,12 @@ protection model inevitably introduce the possibility of new ISA-visible
 failure modes when software violates rules imposed through capabilities
 (whether due to accident or malicious intent).
 We have selected to deliver failures as \textit{hardware exceptions}; for
-example, on attempts to perform disallowed load and store operations, to
-broaden bounds, and so on.
+example, on attempts to perform disallowed load and store operations.
 This allows the operating system (which in turn may delegate to the userspace
 language runtime or application) the ability to catch and handle failures in
 various ways -- such as by emulating disallowed accesses, converting to a
 language-visible exception, or performing some diagnostic or mitigation
 activity.
-
-Different architectures express differing design philosophies for when
-exceptions may be delivered, and there is flexibility in the CHERI model in
-when exceptions might be delivered.
-For example, while an attempt to broaden (rather than narrow) bounds could
-generate an immediate exception, the operation could instead generate a
-non-dereferenceable pointer as its output, in effect deferring an exception
-until the time of an attempted load, store, or instruction fetch.
-Both of these implementations ensure monotonicity by preventing derived
-pointers from improperly allowing increased access following guarded
-manipulation, and are consistent with the model.
-
-Initially, in our prototyping, we selected to deliver exceptions as early as
-possible when such events occur.
-However, all current CHERI ISA instantiations defer exceptions to the use
-of a capability's authority, instead clearing the tag on operations that
-would otherwise violate monotonicity.
-
-\pdrnote{The following two paragraphs perhaps belong in rationale?}
-The early exception approach offers slightly improved debuggability
-(by exposing the error earlier).
-However, early exceptions limit compiler optimization as instructions that may
-throw exceptions are restricted in how they can safely be reordered.
-For example, this prevents a bounds restriction performed within a loop from
-being hoisted outside the loop, unless that instruction is always executed.
-If the loop is not always entered, this could turn a conditional execution
-of a trapping instruction into an unconditional one.%
-\footnote{This is not just a theoretical possibility -- we observed this
- happening in the FreeBSD kernel and had to modify the compiler to avoid
- hoisting any potentially-trapping CHERI instructions.}
-In addition, code that manipulates untrusted capabilities is forced to branch
-when the operation would be illegal, or risk being vulnerable to
-denial-of-service attacks.
-This may require it to recreate the hardware-performed checks in software.
-
-With a deferred-exception approach, as well as avoiding these issues,
-microarchitecture is simplified by reducing the set of instructions that can
-throw exceptions.
-While it is initially tempting to delay performing the required checks,
-forwarding the common-case value and later flushing the pipeline if a check
-fails, this leads to exploitable speculative side channel attacks.
-As such, in either approach, microarchitecture must perform the checks
-before forwarding the result.
-Early exceptions can still be achieved if desired for debugging by
-instrumenting potentially tag-clearing instructions with assertions about
-the tag, either manually or in a compiler santitization pass.
-The CHERI ISA design can ensure these checks are cheap, for example by
-providing an instruction to throw an exception based on the tag.
 
 \subsection{Capability Revocation, Garbage Collection, and Flow Control}
 \label{sec:model-capability-revocation}
