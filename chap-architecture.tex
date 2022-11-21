@@ -2462,7 +2462,7 @@ Value & Description \\
 0x07 & \emph{reserved} \\
 0x08 & Software-defined Permission Violation \\
 0x09 & \emph{reserved} \\
-0x0a & Representability Violation \\
+0x0a & \emph{reserved} \\
 0x0b & Unaligned Base \tnote{1} \\
 0x0c & \emph{reserved} \\
 0x0d & \emph{reserved} \\
@@ -2475,11 +2475,11 @@ Value & Description \\
 0x14 & \cappermLC Violation \\
 0x15 & \cappermSC Violation \\
 0x16 & \cappermSLC Violation \\
-0x17 & \cappermSeal Violation \\
+0x17 & \emph{reserved} \\
 0x18 & \cappermASR Violation \\
 0x19 & \cappermInvoke Violation \\
 0x1a & \emph{reserved} \\
-0x1b & \cappermUnseal Violation \\
+0x1b & \emph{reserved} \\
 0x1c & \cappermCid Violation \\
 0x1d & \emph{reserved} \\
 0x1e & \emph{reserved} \\
@@ -2538,9 +2538,7 @@ Priority & Description \\
 2  & Tag Violation \\
 3  & Seal Violation \\
 4  & Type Violation \\
-5  & \cappermSeal Violation \\
-   & \cappermInvoke Violation \\
-   & \cappermUnseal Violation \\
+5  & \cappermInvoke Violation \\
    & \cappermCid Violation \\
 6  & \cappermX Violation \\
 7  & \cappermL Violation \\
@@ -2550,8 +2548,7 @@ Priority & Description \\
 9 & \cappermSLC Violation \\
 10 & \cappermG Violation \\
 11 & Length Violation \\
-12 & Requested bounds cannot be represented exactly \\
-13 & Software-defined Permission Violation \\
+12 & Software-defined Permission Violation \\
 \bottomrule
 \end{tabular}
 \end{center}
