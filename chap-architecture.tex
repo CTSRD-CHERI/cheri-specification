@@ -2056,7 +2056,7 @@ CHERI introduces several new potential failure modes:
   favored throwing an exception at the earliest possible point: the
   instruction attempting to violate guarded manipulation.
 
-  Another potential design choice is to instead strip the tag from the value
+  However, in all current architectures, we instead strip the tag from the value
   being written back to a target capability register, which maintains our
   security safety properties, but defers exception delivery until an attempted
   dereference -- e.g., an instruction load via the resulting invalid
@@ -2067,6 +2067,8 @@ CHERI introduces several new potential failure modes:
   exception delivery means that failures that could otherwise be easily
   detected and handled by a compiler or language run time via an explicit tag
   check are now complex to handle.
+  In addition, stripping the tag avoids encouraging implementations that
+  are vulnerable to speculative side channel attacks.
 %%%% STRANGE USAGE.  more difficult to handle?  more complex?
 
   When using tag stripping in ISAs with status registers (e.g., ARMv8-A), the
@@ -2075,11 +2077,6 @@ CHERI introduces several new potential failure modes:
   For ISAs without status registers, checking results can come at a
   significant cost, and a deferred exception delivery at time of dereference
   will be the best choice for performance-critical code.
-
-  We therefore make design choices about exception delivery for violations of
-  guarded manipulation in a case-by-case basis, taking into account more
-  general architectural design philosophies, and also specific use cases where
-  software may benefit from tag clearing rather than exception delivery.
 \end{description}
 
 %\subsection{Object-Capability Invocation}
@@ -2349,10 +2346,6 @@ For example:
 \item New capability-relative load and store instructions will trap if they
   attempt to access memory locations in a manner not authorized by the
   explicitly presented capability.
-
-\item New capability-manipulation instructions may trap if they violate
-  guarded-manipulation rules, such as by attempting to increase the bounds on
-  a capability.
 \end{itemize}
 
 \noindent

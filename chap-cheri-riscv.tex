@@ -180,6 +180,8 @@ CHERI-RISC-V shares the following features with other CHERI architectures:
 \item Capability-related violations (such as loads/stores/fetches via untagged
   capabilities, out-of-bound accesses, and so on) trigger immediate precise
   exceptions.
+\item Requests for non-monotonic capability transformations result in
+  the tag of the written back value being stripped.
 \item It is never left ambiguous as to whether a register index operand to a
   load or store instruction, or the register target of a jump instruction,
   is a capability and therefore must have a tag set.
@@ -195,8 +197,6 @@ CHERI-RISC-V shares the following features with other CHERI architectures:
 The following changes are specific to CHERI-RISC-V:
 
 \begin{itemize}
-\item Requests for non-monotonic capability transformations trigger
-  immediate precise exceptions.
 \item RISC-V exception handling -- including register banking, scratch
   registers, and cause mechanism -- is used.
 \item A new exception code, \riscvloadcappagefault{}, will be

@@ -469,7 +469,7 @@ Capability registers are suitable for describing both data and code, and can hen
 
 \item[Capability instructions] allow executing code to create, constrain (e.g., by reducing bounds or permissions), manage, and inspect capability register values.  Both unsealed (memory) and sealed (object) capabilities can be loaded and stored via memory capability registers (i.e., dereferencing).
 Object capabilities can be invoked, via special instructions, allowing a transition between protection domains, but are {\em immutable} and {\em non-dereferenceable}, providing encapsulation of the code or data that they refer to.
-  Capability instructions implement {\em guarded manipulation}: invalid capability manipulations (e.g., to increase rights or length) and invalid capability dereferences (e.g., to access outside of a bounds-checked region) result in an exception that can be handled by the supervisor or language runtime.
+  Capability instructions implement {\em guarded manipulation}: invalid capability manipulations (e.g., to increase rights or length) produce a capability with a cleared tag that can no longer be dereferenced, and invalid capability dereferences (e.g., to access outside of a bounds-checked region) result in an exception that can be handled by the supervisor or language runtime.
 A key aspect of the instruction-set design is \textit{intentional use of
   capabilities}: explicit capability registers, rather than ambient
 authority, are used to indicate exactly which rights should be exercised, to
