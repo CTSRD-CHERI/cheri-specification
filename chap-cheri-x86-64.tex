@@ -366,6 +366,11 @@ operand (registers and displacement) is interpeted as an integer
 offset relative to the \CFS{} or \CGS{} capability register,
 respectively.
 
+Other segment prefixes are not permitted in capability-aware
+addressing.  Attemping to use a segment fix other than \FS{} or
+\GS{} with a capablity-aware address should raise an illegal
+instruction exception.
+
 \subsubsection{Instructions with Implicit Memory Operands}
 
 Some x86 instructions have implicit memory operands addressed by a
