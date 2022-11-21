@@ -259,6 +259,23 @@ opcodes will also assume a capability sized operand in this mode.
 Finally, instructions which work with the stack would use \CSP{} as
 the implicit stack pointer.
 
+\subsubsection{Deprecated Instructions in Capability Mode}
+
+In capability mode, the following 64-bit mode instructions would no
+longer be valid:
+
+\begin{itemize}
+  \item \insnnoref{PUSH FS}
+  \item \insnnoref{POP FS}
+  \item \insnnoref{PUSH GS}
+  \item \insnnoref{POP GS}
+  \item \insnnoref{LFS}
+  \item \insnnoref{LGS}
+  \item \insnnoref{LSS}
+  \item \insnnoref{LAR}
+  \item \insnnoref{LSL}
+\end{itemize}
+
 \subsection{Using Capabilities with Memory Address Operands}
 \label{sec:x86:capability-addressing}
 
