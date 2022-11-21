@@ -452,7 +452,7 @@ operand when executed in capability mode:
 \end{itemize}
 
 This matches the approach used to select a default operand size of 64
-bits in 64-bit long mode.  For most of these instructions, the
+bits in 64-bit long mode.  For some of these instructions, the
 capability operand prefix could be used to revert to a smaller operand
 size.  The effective operand size would then determined by \texttt{REX.W}.
 
@@ -641,45 +641,31 @@ add %csp,$16
 
 \subsection{Control-Flow Instructions}
 
-Relative control-flow instructions such as \insnnoref{JMP},
-\insnnoref{CALL}, and conditional jumps (\insnnoref{Jcc}) would modify
-the offset of the \CIP{} capability.  If the resulting value of \CIP{}
+Near branches would be extended to support capability operands.
+In 64-bit long mode, a capability operand prefix would select a
+capability operand size.  In capability mode, near branches would
+only support capability operands.
+Relative near branches would always modify the offset of the \CIP{}
+capability regardless of operand size.
+Near branches which use an integer operand would set the offset of the
+\CIP{} capability while near branches using a capability operand would
+load a new capability into \CIP{}.
+
+The size of return addresses pushed to and popped from the
+stack for near branches would be determined by the operand size.
+Capability-sized branches would save and restore a full capability on
+the stack while integer-sized branches would save and restore an
+integer offset.
+
+If the resulting value of \CIP{} after a near branch
 is invalid, a capability violation fault would be raised when fetching
 the next instruction (see Section~\ref{sec:x86:capability-fault}).
 
-Absolute near branches would support capability operands
-via the capability operand prefix and would default to capability
-operands in capability mode.
-Near calls and jumps which used an integer operand
-would set the offset of the \CIP{} capability while instructions
-using a capability operand would load a new capability into \CIP{}.
-Near returns which used an integer operand would use the integer value
-popped from from the stack to set the offset of \CIP{} while a near
-return with a capability operand would pop a capability off of the
-stack and load it into \CIP{}.
-
-Far calls and jumps would support capability operands via the
-capability operand prefix, but would default to integer operands in
-capability mode.
-
-For far calls and jumps with a capability-sized operand,
-the memory address would point
-to a 16-bit segment selector followed by a capability.  Note that the
-low four bits of the memory address would have to be set to 14 to
-align the capability.  The current segment selector would be pushed
-onto the stack as a 16-byte value where the first two bytes contain
-the selector and the remaining 14 bytes' value is undefined.  Far
-calls and jumps with an integer operand would use the integer operand
-to set the offset of \CIP{}.
-
-A far \insnnoref{RETC} would pop a capability
-off of the stack and load it into \CIP{}.  It would also pop
-a 16-byte value off of the stack of which the low 16 bits would be used
-as the new code segment selector.
-
-The integer versions of
-\insnnoref{RET} would use the integer value popped off of the stack
-as the new offset of \CIP{}.
+Far calls, jumps, and returns would not support capability operands.
+Far branches would use the offset portion of the destination address
+to set the offset of \CIP{}.  An attempt to branch to a 32-bit code
+segment in capability mode should raise a General Protection fault
+with the error code set to the destination code segment.
 
 \insnnoref{IRETC} should pop a capability exception frame (see
 Section~\ref{sec:x86:interrupt-exception}) from the stack loading
@@ -1109,8 +1095,9 @@ following changes:
   \item As with 64-bit call gates, capability call gates would not support
     parameter copying.
 
-  \item Calls to a capability call gate would push a suitable ``far''
-    return frame with each stack push made in a 16-byte increment.
+  \item Calls to a capability call gate would need to push a modified
+    call frame containing both a code segment and code capability that
+    would be returned from via \insnnoref{RETFC}.
 \end{itemize}
 
 \subsection{Interrupt and Exception Handling}
@@ -1377,3 +1364,18 @@ A few other approaches are enumerated below:
     accessible via a a second set of opcodes such as \textbf{0F 26}
     and \textbf{0F 27} that were restricted to privilege level 0.
 \end{itemize}
+
+\subsection{Far Branches and Capabilities}
+
+Supporting far branches with capability operands would add additional
+complexity.  For example, far branches need to ensure that code
+capability pointers which enable capability mode are only used with
+64-bit code segments.  In-memory far capability pointers would also
+have odd alignment requirements due to the 16-bit code selector being
+adjacent to an aligned capability.  Far branches are also little used
+in existing 64-bit x86 progams.  Significantly, 64-bit x86 still
+defaults to 32-bit operands for far branches (unlike near branches
+which are commonly used and default to 64-bit operands).  It may make
+sense to deprecate far branches other than \insnnoref{IRET} completely
+in capability mode causing the instructions to raise an illegal
+instruction fault.
