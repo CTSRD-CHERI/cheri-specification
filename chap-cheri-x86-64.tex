@@ -440,9 +440,19 @@ prefix would have higher precedence than \texttt{REX.W}.
 
 In capability mode, most instructions which can operate on either
 integer or capability-sized values would follow the same logic in the
-previous paragraph to determine the operand size.  However, a few
-instructions would default to using a capability-sized operand when
-executed in capability mode.  For these instructions, the
+previous paragraph to determine the operand size.  However, two groups
+of existing instructions would default to using a capability-sized
+operand when executed in capability mode:
+
+\begin{itemize}
+  \item Near branches.
+
+  \item Instructions other than far branches that implicitly reference
+    the stack pointer (\CSP{}).
+\end{itemize}
+
+This matches the approach used to select a default operand size of 64
+bits in 64-bit long mode.  For most of these instructions, the
 capability operand prefix could be used to revert to a smaller operand
 size.  The effective operand size would then determined by \texttt{REX.W}.
 
@@ -637,13 +647,20 @@ the offset of the \CIP{} capability.  If the resulting value of \CIP{}
 is invalid, a capability violation fault would be raised when fetching
 the next instruction (see Section~\ref{sec:x86:capability-fault}).
 
-All other control-flow instructions would support capability operands
+Absolute near branches would support capability operands
 via the capability operand prefix and would default to capability
 operands in capability mode.
-
-Absolute near calls and jumps which used an integer operand
+Near calls and jumps which used an integer operand
 would set the offset of the \CIP{} capability while instructions
 using a capability operand would load a new capability into \CIP{}.
+Near returns which used an integer operand would use the integer value
+popped from from the stack to set the offset of \CIP{} while a near
+return with a capability operand would pop a capability off of the
+stack and load it into \CIP{}.
+
+Far calls and jumps would support capability operands via the
+capability operand prefix, but would default to integer operands in
+capability mode.
 
 For far calls and jumps with a capability-sized operand,
 the memory address would point
@@ -655,16 +672,19 @@ the selector and the remaining 14 bytes' value is undefined.  Far
 calls and jumps with an integer operand would use the integer operand
 to set the offset of \CIP{}.
 
-A near \insnnoref{RETC} would pop a capability off of the stack and
-load it into \CIP{}.  A far \insnnoref{RETC} would additionally pop
-a 16-byte value off of the stack of which the low 16 bits are used
-as the new code segment selector.  The integer versions of
+A far \insnnoref{RETC} would pop a capability
+off of the stack and load it into \CIP{}.  It would also pop
+a 16-byte value off of the stack of which the low 16 bits would be used
+as the new code segment selector.
+
+The integer versions of
 \insnnoref{RET} would use the integer value popped off of the stack
 as the new offset of \CIP{}.
 
 \insnnoref{IRETC} should pop a capability exception frame (see
 Section~\ref{sec:x86:interrupt-exception}) from the stack loading
-capabilities into \CIP{} and \CSP{}.
+capabilities into \CIP{} and \CSP{}.  This instruction would require
+the capability operand prefix.
 
 Note that attempting to push or pop a misaligned capability will raise
 an exception.  The stack pointer must be suitably aligned before the
