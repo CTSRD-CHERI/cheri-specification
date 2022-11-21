@@ -3193,40 +3193,6 @@ implementation in the CHERI architecture:
   requirements than for unsealed capabilities.
 
 \item
-  Add versions of \insnref{CSetOffset} and \insnref{CIncOffset}
-  that raise an exception, rather than clearing the tag bit, when the result
-  is not representable. This would assist in debugging, by causing an
-  exception to be raised at the point in the program when the capability
-  became unrepresentable, rather than later on when the capability is
-  dereferenced.
-
-  An alternative implementation (rather than having separate trapping and
-  non-trapping instructions) would be to add a status register that enables
-  the trapping behavior. This is similar to floating point, where the
-  FCSR controls whether a floating point overflow results in an IEEE
-  infinity value or an exception being thrown.
-
-  A cheap tag assertion instruction that can trigger a trap when a tag is lost
-  would allow special compilation modes to improve debuggability by detecting
-  unexpected tag loss sooner.
-
-  If MIPS had a user status register, a tag-loss bit could be set implicitly
-  on tag clear, allowing intermittent conditional-branch instructions to detect
-  and handle loss.
- \jhbnote{This all seems OBE by moving to tag-clearing semantics}
-
-\item
-  Add a version of \insnref{CUnseal} that returns NULL, rather than
-  raising an exception, if the security checks fail. A common use case
-  for \insnref{CUnseal} is that a protected subsystem is passed a sealed
-  capability by an untrusted (possibly malicious) caller, and the callee uses
-  \insnref{CUnseal} to unseal it. It would be quicker for the callee
-  to use a non-trapping \insnref{CUnseal} and then check that the result
-  is not NULL, rather than either (a) catching the exception in the case that
-  the untrusted caller has passed a bad capability; or (b) checking that
-  the capability is suitable for unsealing before attempting to unseal it.
-
-\item
   Add instructions for copying non-capability data from a capability register
   into a general-purpose integer register. A use case is when a function is called
   with a parameter whose type is the union of a pointer and a non-pointer type,
