@@ -557,14 +557,6 @@ been applied to two other architectures:
   We have ported our complete CHERI software stack to Morello.
 \end{description}
 
-Even when targeting a specific architecture, there are multiple ways to
-express CHERI's higher-level memory-protection and security-model goals.
-For example,
-CHERI provenance validity and monotonicity properties can be maintained by
-throwing an exception on attempted violation (e.g., an attempt to broaden
-bounds), or by clearing the tag and allowing a future attempted dereference
-to throw an exception.
-
 There is a high degree of source-level compatibility between software across
 all CHERI architectures.
 Compilers and low-level operating-system components necessarily have modest

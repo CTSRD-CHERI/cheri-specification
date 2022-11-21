@@ -2995,10 +2995,7 @@ to contrast between two types of changes:
   with the target ISA, including the specific blend of instructions and their
   encodings, whether the address embedded in a capability is physical or
   virtual, how to extend existing registers to hold capability values,
-  the specific number (or mix) of
-  capability registers, and whether violations of capability provenance or
-  monotonicity are prevented by an exception being thrown or the tag on the
-  target of an operation being cleared.
+  and the specific number (or mix) of capability registers.
 \end{description}
 
 Further, applications to an ISA are necessarily sensitive to existing choices
@@ -3054,6 +3051,8 @@ conditions
   additional permissions controlling the loading and storing of capabilities;
 \item That MMU-enforced permissions may clear tags or throw exceptions if
   violated (possibly as configurable option);
+\item That operations violating guarded manipulation clear the tag and yield a
+  later exception on use, rather than triggering an immediate exception;
 \item C-language compatibility is maintained through definitions of
   NULL to be untagged, zero-filled memory, instructions to convert between
   capabilities and integer pointers, and instructions providing C-compatible
@@ -3104,9 +3103,6 @@ ISAs:
 \item How capability-related permissions on MMU pages are indicated;
 \item How capabilities representing escalated privilege for exception
   handlers are stored;
-\item Whether specific capability-related failures (in particular, operations
-  violating guarded manipulation) lead to an immediate exception, or simply
-  clearing of the tag and a later exception on use;
 \item How tags are stored in the memory subsystem -- e.g., whether close to
   the DRAM they protect or in a partition of memory -- as long as they are
   presented with suitable protections and atomicity up the memory hierarchy;
