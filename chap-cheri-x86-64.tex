@@ -42,29 +42,32 @@ following properties:
 \subsection{Capability Registers and Segment Tables}
 
 The x86 architecture first added virtual memory support via
-relocatable and variable-sized segments.  Each segment was assigned a
-mask of permissions.  Memory references were resolved with respect to a
-specific segment including relocation to a base address, bounds
+relocatable and variable-sized segments with a
+mask of permissions.  Each memory reference resolved with respect to a
+segment for relocation from its base address, bounds
 checking, and access checks.  Special segment types permitted transitions
 to and from different protection domains.
 
-These features are superficially similar to features in CHERI capabilities.
+These features are superficially similar to CHERI capabilities.
 However, x86 segment manipulation and use do not match modern programming models to the extent that they fell out of use, were not supported by modern operating systems, and were nearly deprecated in the x86-64 architectural extension.
 
 Firstly, x86 segment descriptors cannot be manipulated by the user program, but are selected from a size-limited table that is populated by privileged code.
+Modern programming models expect objects to be created and destroyed in userspace, for example in malloc, and do not limit the number of objects beyond the available memory.
 Secondly, x86 segment descriptors do not contain an offset, so a full reference requires both a segment descriptor and an integer offset.
-As a result of these two factors, x86 segments are not efficient for use as general-purpose pointers, which is the primary use case for CHERI capabilities.
-Indeed, x86 segments were thought to describe coarse memory regions; of the six segment selector registers, three are reserved for code, stack, and general data accesses, and a fourth register is typically used to define the location of thread-local storage (TLS).
+This increases the cost of using segment references and motivates aggregating objects into a very few segments.
+Thirdly, only six x86 segment-selectors are currently supported, with dedicated prefixes for selecting each segment; four selectors have dedicated uses, and increasing the number of segment selectors is very expensive from an encoding perspective.
+This optimizes for a small number of in-use segments, further motivating object aggregation and discouraging use as general-purpose references.
 
 On the 32-bit x86 architecture, operating systems generally create
 segments with infinite bounds and use a non-zero base address only
 for a single segment that provides TLS.  The 64-bit x86 architecture
 codifies this by removing segment bounds entirely and supporting non-zero-base
 addresses only for two segments, and these through a configuration register rather than through the descriptor table.
-Software for x86 systems implement pointers as virtual addresses in general-purpose registers directly, ignoring segmentation.
+Software for x86 systems implement pointers as virtual addresses in general-purpose registers, ignoring segmentation.
 
-We propose to implement x86-CHERI capabilities in the style of pointers, as with all other CHERI architectures, leaving behind privileged table-based segment management.
-Nevertheless, we will also endeavor to integrate with x86 segmentation to the extent that CHERI-x86-64 could be be described as an improvement to x86 segmentation in order to fit more naturally into a future x86 specification.
+In contrast to x86 segments, CHERI capabilities are optimized for use as pointers.
+We propose to implement x86-CHERI capabilities as an extension of general-purpose registers, as with other CHERI architectures, leaving behind privileged table-based segment management.
+Nevertheless, we will also endeavor to integrate with x86 segmentation to the extent that CHERI-x86-64 could be be described as an extension of x86 segmentation, fitting more naturally into a future x86 specification.
 
 \subsection{Common Architectural Features}
 
