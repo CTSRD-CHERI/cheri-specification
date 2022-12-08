@@ -674,20 +674,23 @@ Capability-sized branches would save and restore a full capability on
 the stack while integer-sized branches would save and restore an
 integer offset.
 
-If the resulting value of \CIP{} after a near branch
-is invalid, a capability violation fault would be raised when fetching
-the next instruction (see Section~\ref{sec:x86:capability-fault}).
-
 Far calls, jumps, and returns would not support capability operands.
 Far branches would use the offset portion of the destination address
 to set the offset of \CIP{}.  An attempt to branch to a 32-bit code
 segment in capability mode should raise a General Protection fault
 with the error code set to the destination code segment.
 
+If the resulting value of \CIP{} after any branch
+is invalid, a capability violation fault would be raised on the branch
+instruction (see Section~\ref{sec:x86:capability-fault}).
+
 \insnnoref{IRETC} should pop a capability exception frame (see
 Section~\ref{sec:x86:interrupt-exception}) from the stack loading
 capabilities into \CIP{} and \CSP{}.  This instruction would require
-the capability operand prefix.
+the capability operand prefix.  An attempt to restore a 32-bit code
+segment paired with a \CIP{} which uses capability mode should raise a
+General Protection fault with the error code set to the destination
+code segment.
 
 Note that attempting to push or pop a misaligned capability will raise
 an exception.  The stack pointer must be suitably aligned before the
