@@ -1260,3 +1260,46 @@ in capability mode rather than removed.
 
 If the \insnxesref{XCHG} instructions \texttt{91} - \texttt{97} are not
 commonly used, they could be removed in capability mode.
+
+\section{Relationship to x86 Security Extensions}
+
+The x86 architecture has seen several security-focused extensions introduced
+in the recent past by Intel and also AMD.
+Of the four major extensions listed here, two have been deprecated
+and are therefore unlikely to coexist with a potential CHERI-x86-64.
+
+\subsection{Intel CET}
+Intel's Control-flow Enforcement Technology (CET) first shipped in Tiger Lake
+and AMD's Zen3 CPUs, and support has so-far continued.
+CET introduces a new ENDBRANCH landing pad instruction (from the NOP space) to
+assert that indirect branches arrive at an expected destination.
+In addition, CET introduces a somewhat complex shadow stack specification.
+While not a headline feature,
+CET also includes guarantees on speculative execution for control flow
+transitions that are protected by CET assertions.
+
+\subsubsection{Compatability with CHERI-x86-64}
+CET and CHERI-x86-64 are compatible technologies.
+CET landing pads can naturally be asserted on indirect jumps to capabilities.
+The guarantees of sentries and of landing pads largely overlap, but the
+mechanisms are different enough that paranoid applications can find comfort
+in using both.
+
+CHERI-x86-64 does not replicate the behavior of the shadow stack, and the
+shadow stack should be able to run with CHERI-x86-64 executables, though
+shadow stack pointer MSRs should need to be extended to be capabilities.
+
+\subsubsection{Synergy with CHERI-x86-64}
+
+The CET shadow stack can increase the guarantees of CHERI-x86-64,
+ensuring that an untrusted compartment returns to the expected
+caller without more costly manual bookkeeping.
+The shadow stack implementation might be extended to hold capabilities,
+though, even without extension, it would be useful to assert that the return
+virtual address matches the virtual address of the return capability.
+
+\subsection{AMD SME and SEV, and Intel TME and MKTME}
+
+\subsection{Intel MPX (deprecated)}
+
+\subsection{Intel SGX (deprecated)}
