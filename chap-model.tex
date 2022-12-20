@@ -536,22 +536,18 @@ CHERI enforces capability monotonicity via four mechanisms:
   For example, permissions on capabilities are modified using a bitwise `and'
   operation, and hence cannot express an increase in permissions.
 
-\item[Exceptions on monotonicity violation] Some instructions are able to
+\item[Stripping the tag in register write-back] Some instructions are able to
   represent non-monotonic operations, but attempts to use them
-  non-monotonically will lead to an exception being delivered.
-  For example, an attempt to broaden bounds on a capability might throw an
-  exception without writing back the non-monotonically modified capability.
-  Throwing an exception at the point of violation may ease debugging close to
-  the point of violation.
-
-\item[Stripping the tag in register write-back] As an alternative to throwing
-  an exception, a non-monotonic operation might succeed in writing back a new
-  capability -- but with the tag bit cleared, preventing future dereference.
+  non-monotonically will write back a capability with the tag bit
+  cleared, preventing future dereference.
   Clearing the tag allows the failure to be discovered by an explicit
   software check, or on the next attempt to dereference.
-  This may make debugging more expensive (if additional checks are introduced,
-  perhaps with help from the compiler) or more tricky (if loss of the tag is
-  only discovered substantially later).
+
+\item[Exceptions on monotonicity violation] As an alternative to stripping
+  the tag, attempts to use instructions non-monotonically could lead to an
+  exception being delivered.
+  We generally avoid this approach in favour of stripping the tag for the
+  reasons discussed in Section~\ref{sec:rationale:tag-clear-vs-exception}.
 
 \item[Stripping the tag in memory store] Tagged memory ensures that direct
   modification of capabilities stored in memory using data store instructions
@@ -642,9 +638,9 @@ the behavior of operations such as capability equality testing.
 \label{sec:model-sealedcapabilities}
 
 Capability \textit{sealing} allows capabilities to be marked as
-\textit{immutable} and \textit{non-deref\-erenceable}, causing hardware
-exceptions to be thrown if attempts are made to modify, dereference, or jump
-to them.
+\textit{immutable} and \textit{non-deref\-erenceable}, causing the tag to be
+cleared if attempts are made to modify them, and hardware exceptions to be
+thrown if attempts are made to modify, dereference, or jump to them.
 This enables capabilities to be used as unforgeable tokens of authority for
 higher-level software constructs grounded in \textit{encapsulation}, while
 still allowing them to fit within the pointer-centric framework offered by CHERI
@@ -1036,30 +1032,13 @@ Bounds checks, permissions, monotonicity, and other properties of the CHERI
 protection model inevitably introduce the possibility of new ISA-visible
 failure modes when software violates rules imposed through capabilities
 (whether due to accident or malicious intent).
-In general, in our prototyping, we have selected to deliver \textit{hardware
-exceptions} as early as possible when such events occur; for example, on
-attempts to perform disallowed load and store operations, to broaden bounds,
-and so on.
+We have selected to deliver failures as \textit{hardware exceptions}; for
+example, on attempts to perform disallowed load and store operations.
 This allows the operating system (which in turn may delegate to the userspace
 language runtime or application) the ability to catch and handle failures in
 various ways -- such as by emulating disallowed accesses, converting to a
 language-visible exception, or performing some diagnostic or mitigation
 activity.
-
-Different architectures express differing design philosophies for when
-exceptions may be delivered, and there is flexibility in the CHERI model in
-when exceptions might be delivered.
-For example, while an attempt to broaden (rather than narrow) bounds could
-generate an immediate exception (our prototyping choice), the operation could
-instead generate a non-dereferenceable pointer as its output, in effect
-deferring an exception until the time of an attempted load, store, or
-instruction fetch.
-The former offers slightly improved debuggability (by exposing the error
-earlier), whereas the latter can offer microarchitectural benefits by
-reducing the set of instructions that can throw exceptions.
-Both of these implementations ensure monotonicity by preventing derived
-pointers from improperly allowing increased access following guarded
-manipulation, and are consistent with the model.
 
 \subsection{Capability Revocation, Garbage Collection, and Flow Control}
 \label{sec:model-capability-revocation}

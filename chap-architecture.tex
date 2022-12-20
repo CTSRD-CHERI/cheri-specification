@@ -2056,7 +2056,7 @@ CHERI introduces several new potential failure modes:
   favored throwing an exception at the earliest possible point: the
   instruction attempting to violate guarded manipulation.
 
-  Another potential design choice is to instead strip the tag from the value
+  However, in all current architectures, we instead strip the tag from the value
   being written back to a target capability register, which maintains our
   security safety properties, but defers exception delivery until an attempted
   dereference -- e.g., an instruction load via the resulting invalid
@@ -2067,6 +2067,8 @@ CHERI introduces several new potential failure modes:
   exception delivery means that failures that could otherwise be easily
   detected and handled by a compiler or language run time via an explicit tag
   check are now complex to handle.
+  In addition, stripping the tag avoids encouraging implementations that
+  are vulnerable to speculative side channel attacks.
 %%%% STRANGE USAGE.  more difficult to handle?  more complex?
 
   When using tag stripping in ISAs with status registers (e.g., ARMv8-A), the
@@ -2075,11 +2077,6 @@ CHERI introduces several new potential failure modes:
   For ISAs without status registers, checking results can come at a
   significant cost, and a deferred exception delivery at time of dereference
   will be the best choice for performance-critical code.
-
-  We therefore make design choices about exception delivery for violations of
-  guarded manipulation in a case-by-case basis, taking into account more
-  general architectural design philosophies, and also specific use cases where
-  software may benefit from tag clearing rather than exception delivery.
 \end{description}
 
 %\subsection{Object-Capability Invocation}
@@ -2227,7 +2224,7 @@ In operating-system design, {\em privileges} are a special set of rights
 exempting a component from the normal protection and access-control models --
 perhaps for the purposes of system bootstrapping, system management, or
 low-level functionality such as direct hardware access.
-In CHERI, three notions of privilege are defined, complementing current
+In CHERI, two notions of privilege are defined, complementing current
 notions of architectural privilege:
 
 \begin{description}
@@ -2349,10 +2346,6 @@ For example:
 \item New capability-relative load and store instructions will trap if they
   attempt to access memory locations in a manner not authorized by the
   explicitly presented capability.
-
-\item New capability-manipulation instructions may trap if they violate
-  guarded-manipulation rules, such as by attempting to increase the bounds on
-  a capability.
 \end{itemize}
 
 \noindent
@@ -2469,7 +2462,7 @@ Value & Description \\
 0x07 & \emph{reserved} \\
 0x08 & Software-defined Permission Violation \\
 0x09 & \emph{reserved} \\
-0x0a & Representability Violation \\
+0x0a & \emph{reserved} \\
 0x0b & Unaligned Base \tnote{1} \\
 0x0c & \emph{reserved} \\
 0x0d & \emph{reserved} \\
@@ -2482,11 +2475,11 @@ Value & Description \\
 0x14 & \cappermLC Violation \\
 0x15 & \cappermSC Violation \\
 0x16 & \cappermSLC Violation \\
-0x17 & \cappermSeal Violation \\
+0x17 & \emph{reserved} \\
 0x18 & \cappermASR Violation \\
 0x19 & \cappermInvoke Violation \\
 0x1a & \emph{reserved} \\
-0x1b & \cappermUnseal Violation \\
+0x1b & \emph{reserved} \\
 0x1c & \cappermCid Violation \\
 0x1d & \emph{reserved} \\
 0x1e & \emph{reserved} \\
@@ -2545,9 +2538,7 @@ Priority & Description \\
 2  & Tag Violation \\
 3  & Seal Violation \\
 4  & Type Violation \\
-5  & \cappermSeal Violation \\
-   & \cappermInvoke Violation \\
-   & \cappermUnseal Violation \\
+5  & \cappermInvoke Violation \\
    & \cappermCid Violation \\
 6  & \cappermX Violation \\
 7  & \cappermL Violation \\
@@ -2557,8 +2548,7 @@ Priority & Description \\
 9 & \cappermSLC Violation \\
 10 & \cappermG Violation \\
 11 & Length Violation \\
-12 & Requested bounds cannot be represented exactly \\
-13 & Software-defined Permission Violation \\
+12 & Software-defined Permission Violation \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -3002,10 +2992,7 @@ to contrast between two types of changes:
   with the target ISA, including the specific blend of instructions and their
   encodings, whether the address embedded in a capability is physical or
   virtual, how to extend existing registers to hold capability values,
-  the specific number (or mix) of
-  capability registers, and whether violations of capability provenance or
-  monotonicity are prevented by an exception being thrown or the tag on the
-  target of an operation being cleared.
+  and the specific number (or mix) of capability registers.
 \end{description}
 
 Further, applications to an ISA are necessarily sensitive to existing choices
@@ -3061,6 +3048,8 @@ conditions
   additional permissions controlling the loading and storing of capabilities;
 \item That MMU-enforced permissions may clear tags or throw exceptions if
   violated (possibly as configurable option);
+\item That operations violating guarded manipulation clear the tag and yield a
+  later exception on use, rather than triggering an immediate exception;
 \item C-language compatibility is maintained through definitions of
   NULL to be untagged, zero-filled memory, instructions to convert between
   capabilities and integer pointers, and instructions providing C-compatible
@@ -3111,9 +3100,6 @@ ISAs:
 \item How capability-related permissions on MMU pages are indicated;
 \item How capabilities representing escalated privilege for exception
   handlers are stored;
-\item Whether specific capability-related failures (in particular, operations
-  violating guarded manipulation) lead to an immediate exception, or simply
-  clearing of the tag and a later exception on use;
 \item How tags are stored in the memory subsystem -- e.g., whether close to
   the DRAM they protect or in a partition of memory -- as long as they are
   presented with suitable protections and atomicity up the memory hierarchy;
@@ -3205,40 +3191,6 @@ implementation in the CHERI architecture:
   suitable for sealing with \insnref{CSeal}. In the 128-bit
   representation, the bounds of sealed capabilities have stronger alignment
   requirements than for unsealed capabilities.
-
-\item
-  Add versions of \insnref{CSetOffset} and \insnref{CIncOffset}
-  that raise an exception, rather than clearing the tag bit, when the result
-  is not representable. This would assist in debugging, by causing an
-  exception to be raised at the point in the program when the capability
-  became unrepresentable, rather than later on when the capability is
-  dereferenced.
-
-  An alternative implementation (rather than having separate trapping and
-  non-trapping instructions) would be to add a status register that enables
-  the trapping behavior. This is similar to floating point, where the
-  FCSR controls whether a floating point overflow results in an IEEE
-  infinity value or an exception being thrown.
-
-  A cheap tag assertion instruction that can trigger a trap when a tag is lost
-  would allow special compilation modes to improve debuggability by detecting
-  unexpected tag loss sooner.
-
-  If MIPS had a user status register, a tag-loss bit could be set implicitly
-  on tag clear, allowing intermittent conditional-branch instructions to detect
-  and handle loss.
- \jhbnote{This all seems OBE by moving to tag-clearing semantics}
-
-\item
-  Add a version of \insnref{CUnseal} that returns NULL, rather than
-  raising an exception, if the security checks fail. A common use case
-  for \insnref{CUnseal} is that a protected subsystem is passed a sealed
-  capability by an untrusted (possibly malicious) caller, and the callee uses
-  \insnref{CUnseal} to unseal it. It would be quicker for the callee
-  to use a non-trapping \insnref{CUnseal} and then check that the result
-  is not NULL, rather than either (a) catching the exception in the case that
-  the untrusted caller has passed a bad capability; or (b) checking that
-  the capability is suitable for unsealing before attempting to unseal it.
 
 \item
   Add instructions for copying non-capability data from a capability register

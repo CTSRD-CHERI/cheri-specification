@@ -1413,4 +1413,56 @@ once.
 Full details of the \insnref{CLoadTags} instruction may be found
 on \cpageref{\insnlabelname{cloadtags}}.
 
+\section{Attempted Montonicity Violations Clear Tags}
+\label{sec:rationale:tag-clear-vs-exception}
+
+To ensure pointer provenance, attempts to violate non-monotonicity, for example to broaden
+(rather than narrow) bounds, must be forbidden. This can be achieved in several ways.
+The instruction could throw a hardware exception, or generate a non-deferenceable pointer
+as its output, in effect deferring the exception until the time of an attempted load,
+store, or instruction fetch.
+Both of these implementations ensure monotonicity by preventing derived
+pointers from improperly allowing increased access following guarded
+manipulation, and are consistent with the CHERI model.
+
+Initially, in our prototyping, we selected to deliver exceptions as early as
+possible when such events occur.
+However, all current CHERI ISA instantiations defer exceptions to the use
+of a capability's authority, instead clearing the tag on operations that
+would otherwise violate monotonicity.
+
+The early exception approach offers slightly improved debuggability
+by exposing the error earlier.
+Clearing the capability tag may make debugging more expensive (if additional checks are
+introduced) or more tricky (if loss of the tag is only discovered substantially later).
+
+However, early exceptions limit compiler optimization as instructions that may
+throw exceptions are restricted in how they can safely be reordered.
+For example, this prevents a bounds restriction performed within a loop from
+being hoisted outside the loop, unless that instruction is always executed.
+If the loop is not always entered, this could turn a conditional execution
+of a trapping instruction into an unconditional one.%
+\footnote{This is not just a theoretical possibility -- we observed this
+ happening in the FreeBSD kernel and had to modify the compiler to avoid
+ hoisting any potentially-trapping CHERI instructions.}
+In addition, code that manipulates untrusted capabilities is forced to branch
+when the operation would be illegal, or risk being vulnerable to
+denial-of-service attacks.
+This may require it to recreate the hardware-performed checks in software.
+
+With a deferred-exception approach, as well as avoiding these issues,
+microarchitecture is simplified by reducing the set of instructions that can
+throw exceptions.
+While it is initially tempting to delay performing the required checks,
+forwarding the common-case value and later flushing the pipeline if a check
+fails, this leads to exploitable speculative side channel attacks.
+As such, in either approach, microarchitecture must perform the checks
+before forwarding the result.
+
+Early exceptions can still be achieved if desired for debugging by
+instrumenting potentially tag-clearing instructions with assertions about
+the tag, either manually or in a compiler santitization pass.
+The CHERI ISA instantiation can ensure these checks are cheap, for example by
+providing an instruction to throw an exception based on the tag.
+
 % >>>
