@@ -1350,6 +1350,35 @@ it fits neatly below CHERI.
 
 \subsubsection{Memory Encryption Synergy with CHERI-x86-64}
 
+CHERI could strengthen ME by controlling key access, or
+ME could enable user-space CHERI enclaves.
+
+CHERI capabilities could carry an encryption key selector (à la
+Intel TME) where the creation of the key is managed by hardware
+and the distribution of the selector is guarded by capabilities.
+This could bypass the operating system for key management, allowing
+meaningful key management and distribution directly from user space.
+This would also allow a light-weight CHERI enclave mechanism where
+the operating system would not have the ability to read the unencrypted
+contents of enclave memory despite managing the physical pages.
+In order to prevent keyed capabilities leaking to the OS, such a
+system would likely require storing keyed capabilities within the
+encrypted memory itself, and delegating register save and restore
+to trusted CPU state machines.
+
+Moving key management from physical pages to virtual addresses also
+allows ME to select keys on allocation granularity rather than on
+page granularity.
+When combined with capabilities, this could allow guarantees about
+memory sharing even where capability bounds overlap (by relying on
+encryption) and where keys are
+reused (by relying on capabilities).
+Allowing parts of a cache line to be encrypted with different keys
+could cause problems if we want to decrypt into the L1 cache, so the
+key selector would likely need to be treated like an extension of
+the physical address from the cache-tag perspective, with a distinct
+copy of the cache line held for each key. 
+
 \subsection{Intel MPX (deprecated)}
 
 \subsection{Intel SGX (deprecated)}
