@@ -769,8 +769,8 @@ extracted from the capability.
 \subsubsection{Capability-Modification Instructions}
 
 If these instructions fail, they should clear the tag in the resulting
-capability similar to Morello rather than raising an exception as is
-done for CHERI-RISC-V.
+capability similar to Morello and CHERI-RISC-V rather than raising an
+exception.
 
 \begin{itemize}
   \item \insnref{CSeal} r/mc, rc
@@ -1088,7 +1088,7 @@ information:
   implement.
 \end{enumerate}
 
-Unlike CHERI-RISC-V, we recommend that CHERI-x86-64
+Like Morello and CHERI-RISC-V, we recommend that CHERI-x86-64
 only raise capability violation faults when a invalid memory access is
 performed such as an out-of-bounds access or access via an untagged
 capability.  Specifically, we recommend that instructions which modify
