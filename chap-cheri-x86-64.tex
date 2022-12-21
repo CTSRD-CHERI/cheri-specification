@@ -1278,7 +1278,7 @@ While not a headline feature,
 CET also includes guarantees on speculative execution for CET-protected
 transitions.
 
-\subsubsection{Compatability with CHERI-x86-64}
+\subsubsection{CET Compatibility with CHERI-x86-64}
 CET and CHERI-x86-64 are compatible technologies.
 CET landing pads can naturally be asserted on indirect jumps to capabilities.
 The guarantees of sentries and of landing pads largely overlap, but the
@@ -1290,7 +1290,7 @@ return addresses pushed to the stack should be widened to capabilities,
 though even without extension, it would be useful to assert that the return
 virtual address matches the virtual address of the return capability.
 
-\subsubsection{Synergy with CHERI-x86-64}
+\subsubsection{CET Synergy with CHERI-x86-64}
 
 The CET shadow stack can increase the guarantees of CHERI-x86-64,
 ensuring that an untrusted compartment returns to the expected
@@ -1317,7 +1317,38 @@ Furthermore this clause serves as precedent for specifying
 limits of transient execution for all implementations of an architecture
 which should be considered for the CHERI specification more generally.
 
-\subsection{AMD SME and SEV, and Intel TME and MKTME}
+\subsection{Memory Encryption: AMD SME and SEV, and Intel TME and MKTME}
+
+AMD has introduced two stages of memory encryption (ME) technology,
+and Intel has specified two extensions that have not yet shipped.
+
+SME, introduced by AMD in 2017, can encrypt all memory with 128-bit
+AES using ephemeral keys produced by the processor.
+SEV is an extension that allows using distinct keys for different
+domains such that physical memory would be obscured
+if it were mistakenly mapped into a foreign domain.
+
+Intel has announced TME, which is quite similar to SME.
+MKTME is an extension of TME that allows a table of keys that are
+selected using upper bits of the physical address, allowing a number
+of protection models using page-granularity encryption keys.
+
+\subsubsection{Memory Encryption Compatibility with CHERI-x86-64}
+
+The various ME technologies are completely compatible
+with CHERI.
+CHERI prevents unauthorised access to virtual addresses, and ME
+encrypts data without preventing access.
+The ME technologies therefore fit neatly below CHERI enforcement
+between page translation and physical memory.
+
+Intel TME specifies use of upper bits of physical addresses to index a
+table to keys for that page.
+This enables selecting a distinct key for each physical page.
+Even with this richer behaviour, as TME uses physical addresses,
+it fits neatly below CHERI.
+
+\subsubsection{Memory Encryption Synergy with CHERI-x86-64}
 
 \subsection{Intel MPX (deprecated)}
 
