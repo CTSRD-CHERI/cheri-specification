@@ -1275,8 +1275,8 @@ CET introduces a new ENDBRANCH landing pad instruction (from the NOP space) to
 assert that indirect branches arrive at an expected destination.
 In addition, CET introduces a somewhat complex shadow stack specification.
 While not a headline feature,
-CET also includes guarantees on speculative execution for control flow
-transitions that are protected by CET assertions.
+CET also includes guarantees on speculative execution for CET-protected
+transitions.
 
 \subsubsection{Compatability with CHERI-x86-64}
 CET and CHERI-x86-64 are compatible technologies.
@@ -1285,18 +1285,37 @@ The guarantees of sentries and of landing pads largely overlap, but the
 mechanisms are different enough that paranoid applications can find comfort
 in using both.
 
-CHERI-x86-64 does not replicate the behavior of the shadow stack, and the
-shadow stack should be able to run with CHERI-x86-64 executables, though
-shadow stack pointer MSRs should need to be extended to be capabilities.
+The shadow stack should be useable with CHERI-x86-64 executables;
+return addresses pushed to the stack should be widened to capabilities,
+though even without extension, it would be useful to assert that the return
+virtual address matches the virtual address of the return capability.
 
 \subsubsection{Synergy with CHERI-x86-64}
 
 The CET shadow stack can increase the guarantees of CHERI-x86-64,
 ensuring that an untrusted compartment returns to the expected
 caller without more costly manual bookkeeping.
-The shadow stack implementation might be extended to hold capabilities,
-though, even without extension, it would be useful to assert that the return
-virtual address matches the virtual address of the return capability.
+A combination of shadow stack return tracking and hardware context
+save/restore may be sufficient to avoid a software intermediary
+for compartment switching in many cases.
+
+\subsubsection{CET and Transient Execution}
+The CET specification from Intel includes the following line:
+\begin{quote}
+Instructions at the target of a RET instruction will not execute,
+even speculatively, if the RET addresses (either from normal stack
+or shadow stack) are speculative-only or do not match, unless the
+target of the RET is also predicted (e.g., by a Return Stack Buffer
+prediction), when CET shadow stack is enabled.
+\end{quote}
+
+CET thus provides a handle on limiting transient execution
+between protection domains, which could be very useful
+for compartmentalized CHERI programs.
+
+Furthermore this clause serves as precedent for specifying
+limits of transient execution for all implementations of an architecture
+which should be considered for the CHERI specification more generally.
 
 \subsection{AMD SME and SEV, and Intel TME and MKTME}
 
