@@ -1319,8 +1319,8 @@ which should be considered for the CHERI specification more generally.
 
 \subsection{Memory Encryption: AMD SME and SEV, and Intel TME and MKTME}
 
-AMD has introduced two stages of memory encryption (ME) technology,
-and Intel has specified two extensions that have not yet shipped.
+AMD has introduced two levels of memory encryption (ME) extension,
+and Intel has specified two similar extensions that have not yet shipped.
 
 SME, introduced by AMD in 2017, can encrypt all memory with 128-bit
 AES using ephemeral keys produced by the processor.
@@ -1338,27 +1338,23 @@ of protection models using page-granularity encryption keys.
 The various ME technologies are completely compatible
 with CHERI.
 CHERI prevents unauthorised access to virtual addresses, and ME
-encrypts data without preventing access.
-The ME technologies therefore fit neatly below CHERI enforcement
+encrypts data in physical memory without preventing access.
+Therefore all ME technologies, even MKTME, fit neatly below CHERI enforcement
 between page translation and physical memory.
-
-Intel TME specifies use of upper bits of physical addresses to index a
-table to keys for that page.
-This enables selecting a distinct key for each physical page.
-Even with this richer behaviour, as TME uses physical addresses,
-it fits neatly below CHERI.
 
 \subsubsection{Memory Encryption Synergy with CHERI-x86-64}
 
-CHERI could strengthen ME by controlling key access, or
+CHERI could strengthen ME by controlling key access, and
 ME could enable user-space CHERI enclaves.
 
 CHERI capabilities could carry an encryption key selector (à la
 Intel TME) where the creation of the key is managed by hardware
 and the distribution of the selector is guarded by capabilities.
 This could bypass the operating system for key management, allowing
-meaningful key management and distribution directly from user space.
-This would also allow a light-weight CHERI enclave mechanism where
+meaningful key management and distribution with virtual addresses
+directly from user space.
+
+This could also enable a light-weight CHERI enclave mechanism where
 the operating system would not have the ability to read the unencrypted
 contents of enclave memory despite managing the physical pages.
 In order to prevent keyed capabilities leaking to the OS, such a
@@ -1377,8 +1373,90 @@ Allowing parts of a cache line to be encrypted with different keys
 could cause problems if we want to decrypt into the L1 cache, so the
 key selector would likely need to be treated like an extension of
 the physical address from the cache-tag perspective, with a distinct
-copy of the cache line held for each key. 
+copy of the cache line held for each key.
+
+ME could also enable light-weight temporal safety for CHERI, where
+the encryption key for new allocations is cycled while leaving the
+memory unchanged.
 
 \subsection{Intel MPX (deprecated)}
+
+Intel's Memory Protection Extension (MPX) was designed to accellerate
+bounds checking with various usage models.
+MPX shipped comercially in 2015 with Skylake, the only high-end
+processor that has supported the extension.
+MPX is a complex extension
+with new instructions, new special-purpose registers, new tables,
+as well as new configuration and status registers.
+
+MPX introduced instructions to create bounds and compare integer
+values to the bounds.
+Upper and lower bounds are compared separately with dedicated
+instructions.
+
+MPX also introduces instructions to move four new BND registers
+between one another and to and from memory.
+
+MPX further introduces two table access instructions
+for loading and storing bounds for any pointer in memory
+from a sparse table.
+Each entry in the table is 32-bytes; 8 bytes for each of the bounds
+and 8-bytes to hold a copy of the expected pointer value.
+Using these instructions, a program can be compiled to stash
+bounds for each pointer in memory in a shadow space, loading
+and storing them with the pointers themselves.
+
+\subsubsection{MPX Shortcomings}
+
+MPX had critical shortcomings from two directions: security and
+performance.
+
+MPX was designed to maximise compatibility and ease of use.
+As a result, MPX "failed open" in many cases where unexpected
+cases arose.
+If the pointer from the bounds table did not match the pointer
+from memory, bounds were left in state that would not fault.
+If the system did not have memory for the bounds table (which
+was up to four times the size of program memory), the system
+could disable bounds checking for this process such that all
+bounds-check operations become NOPs.
+Thus MPX was not usable for security from a determined attacker,
+but only to accellerate
+identification of memory safety vulnerabilities in a friendly
+enviornment.
+
+Secondly, MPX performance was very low.
+Code bloat was considerable, with new instructions
+for loading and storing bounds alongside pointers,
+and separate instructions for checking the lower
+and upper bounds.
+The table access mode could quintuple the memory footprint
+of a program.
+Furthermore, limitations on execution units that could
+execute bounds checks meant that instructions-per-cycle
+was usually lower for a MPX program than for a standard
+program despite the instruction bloat.
+
+With no hard security guarantees and performance that was
+barely faster than similar software schemes, MPX adoption
+was abysmal and was deprecated after one generation of
+hardware.
+
+\subsubsection{MPX Lessons for CHERI-x86-64}
+
+CHERI sacrifices ABI compatibility for firm security guarantees
+and performance.
+While the x86 community has placed great emphasis on backward
+compatability, CHERI-x86-64 must resist the pressure
+to cleverly maintain compatability in a way that creates a
+security loophole.
+
+In addition, CHERI-x86-64 implementators should resist the pressure
+to leave CHERI de-optimised under the assumption that security
+is a niche application.
+CHERI is designed for overheads within 5\% of unprotected
+performance in most cases, but a few corner cases in forwarding
+or branch prediction can easily push overheads over 20\% and
+greatly restrict adoption.
 
 \subsection{Intel SGX (deprecated)}
