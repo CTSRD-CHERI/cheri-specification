@@ -1381,37 +1381,37 @@ memory unchanged.
 
 \subsection{Intel MPX (deprecated)}
 
-Intel's Memory Protection Extension (MPX) was designed to accellerate
+Intel's Memory Protection Extension (MPX) was designed to accelerate
 bounds checking with various usage models.
-MPX shipped comercially in 2015 with Skylake, the only high-end
+MPX shipped commercially in 2015 with Skylake, the only high-end
 processor that has supported the extension.
 MPX is a complex extension
 with new instructions, new special-purpose registers, new tables,
 as well as new configuration and status registers.
 
-MPX introduced instructions to create bounds and compare integer
-values to the bounds.
-Upper and lower bounds are compared separately with dedicated
+MPX introduced four new 128-bit BND registers to hold both an
+upper and a lower bound for a range, along with instructions
+to move bounds between registers and memory.
+MPX also introduced instructions to create bounds and compare integer
+values to the bounds;
+upper and lower bounds are compared with separate
 instructions.
-
-MPX also introduces instructions to move four new BND registers
-between one another and to and from memory.
 
 MPX further introduces two table access instructions
 for loading and storing bounds for any pointer in memory
-from a sparse table.
-Each entry in the table is 32-bytes; 8 bytes for each of the bounds
-and 8-bytes to hold a copy of the expected pointer value.
+from a table.
+Each leaf entry in the table is 32-bytes, including 8 bytes for each
+of the bounds and 8-bytes to hold a copy of the expected pointer value.
 Using these instructions, a program can be compiled to stash
 bounds for each pointer in memory in a shadow space, loading
-and storing them with the pointers themselves.
+and storing bounds whenever pointers themselves are loaded and stored.
 
 \subsubsection{MPX Shortcomings}
 
 MPX had critical shortcomings from two directions: security and
 performance.
 
-MPX was designed to maximise compatibility and ease of use.
+MPX was designed to maximise compatibility.
 As a result, MPX "failed open" in many cases where unexpected
 cases arose.
 If the pointer from the bounds table did not match the pointer
@@ -1421,24 +1421,26 @@ was up to four times the size of program memory), the system
 could disable bounds checking for this process such that all
 bounds-check operations become NOPs.
 Thus MPX was not usable for security from a determined attacker,
-but only to accellerate
+but only to accelerate
 identification of memory safety vulnerabilities in a friendly
-enviornment.
+environment.
 
-Secondly, MPX performance was very low.
+Secondly, MPX performance overhead was high;
+over 50\% on SPEC using the Intel compiler.
 Code bloat was considerable, with new instructions
 for loading and storing bounds alongside pointers,
 and separate instructions for checking the lower
 and upper bounds.
 The table access mode could quintuple the memory footprint
-of a program.
+of a program, though SPEC averaged 100\% memory overhead
+due to the sparse table structure.
 Furthermore, limitations on execution units that could
 execute bounds checks meant that instructions-per-cycle
 was usually lower for a MPX program than for a standard
 program despite the instruction bloat.
 
-With no hard security guarantees and performance that was
-barely faster than similar software schemes, MPX adoption
+With no hard security guarantees and performance competitive
+With similar software schemes, MPX adoption
 was abysmal and was deprecated after one generation of
 hardware.
 
@@ -1447,11 +1449,11 @@ hardware.
 CHERI sacrifices ABI compatibility for firm security guarantees
 and performance.
 While the x86 community has placed great emphasis on backward
-compatability, CHERI-x86-64 must resist the pressure
-to cleverly maintain compatability in a way that creates a
-security loophole.
+compatibility, CHERI-x86-64 must resist the pressure
+to cleverly enable compatibility in any way that compromises
+security.
 
-In addition, CHERI-x86-64 implementators should resist the pressure
+In addition, CHERI-x86-64 implementors should resist the pressure
 to leave CHERI de-optimised under the assumption that security
 is a niche application.
 CHERI is designed for overheads within 5\% of unprotected
