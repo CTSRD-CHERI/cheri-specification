@@ -1317,7 +1317,7 @@ Furthermore this clause serves as precedent for specifying
 limits of transient execution for all implementations of an architecture
 which should be considered for the CHERI specification more generally.
 
-\subsection{Memory Encryption: AMD SME and SEV, and Intel TME and MKTME}
+\subsection{Memory Encryption: AMD SME and SEV; Intel TME and TME-MK}
 
 AMD has introduced two levels of memory encryption (ME) extension,
 and Intel has specified two similar extensions that have not yet shipped.
@@ -1328,10 +1328,11 @@ SEV is an extension that allows using distinct keys for different
 domains such that physical memory would be obscured
 if it were mistakenly mapped into a foreign domain.
 
-Intel has announced TME, which is quite similar to SME.
-MKTME is an extension of TME that allows a table of keys that are
-selected using upper bits of the physical address, allowing a number
-of protection models using page-granularity encryption keys.
+Intel introduced TME in 2019, which is quite similar to SME.  TME-MK,
+introduced in 2021, is an extension of TME that allows a table of
+Multiple Keys (MK) that are selected using upper bits of the physical
+address, allowing a number of protection models using page-granularity
+encryption keys.
 
 \subsubsection{Memory Encryption Compatibility with CHERI-x86-64}
 
@@ -1339,7 +1340,7 @@ The various ME technologies are completely compatible
 with CHERI.
 CHERI prevents unauthorised access to virtual addresses, and ME
 encrypts data in physical memory without preventing access.
-Therefore all ME technologies, even MKTME, fit neatly below CHERI enforcement
+Therefore all ME technologies, even TME-MK, fit neatly below CHERI enforcement
 between page translation and physical memory.
 
 \subsubsection{Memory Encryption Synergy with CHERI-x86-64}
