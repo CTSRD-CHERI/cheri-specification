@@ -28,7 +28,7 @@ following properties:
   pointers.
 
 \item Capability values should be intentionally used.  Instructions
-  should explciitly specify if a register operand should be used as a
+  should explicitly specify whether a register operand should be used as a
   capability or an integer scalar.  Specifically, the presence (or
   lack) of a tag should not determine if a value is treated as a
   capability rather than an integer.
@@ -139,7 +139,7 @@ The following changes are specific to CHERI-x86-64:
    return.
  \item A new exception code is used to report CHERI-related
    exceptions.
- \item New PTE bits and page fault exception code bits are defined for
+ \item New PTE bits and page-fault exception code bits are defined for
    loading and store capabilities in memory.
  \item The \FSBASE{} and \GSBASE{} registers are extended as
    capabilities.
@@ -155,10 +155,10 @@ The following changes are specific to CHERI-x86-64:
 \subsection{Tagged Capabilities and Memory}
 
 As with CHERI-RISC-V, we recommend that both memory and
-registers contain tagged, 128-bit capabilities.
-Since capabilities require 16 byte alignment in memory, attempts to
+registers contain tagged 128-bit capabilities.
+Since capabilities require 16-byte alignment in memory, attempts to
 load or store capabilities at misaligned addresses should raise a
-General Protection Fault with an error code of zero similar to
+General Protection Fault with an error code of zero, similar to
 misaligned loads and stores of SSE registers.
 
 \subsection{General-Purpose Capability Registers}
