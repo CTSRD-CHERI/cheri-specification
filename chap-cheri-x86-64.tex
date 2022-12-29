@@ -1463,3 +1463,38 @@ or branch prediction can easily push overheads over 20\% and
 greatly restrict adoption.
 
 \subsection{Intel SGX (deprecated)}
+Intel SGX is a very complex extension to enable a user-space
+application to trust the processor to provide enclave memory that is
+not readable or modifiable from the operating system or even
+outside the CPU package.
+Some instructions required for this extension are in the style
+of function calls.
+The ECREATE instruction takes a pointer to a struct as an argument,
+which requests a contiguous range of virtual address space.
+This causes the hardware to allocate a number of structures in a
+reserved region of DRAM to track memory for the enclave before
+executing the next instruction.
+The EADD instruction copies a page of common memory into a
+newly-allocated enclave page, keeping a running hash of its contents.
+
+CHERI relies on simple invariants that can be enforced within
+single-cycle instructions.
+Intel SGX instead trusts the correctness and atomicity of
+hyper-visor-like subroutine calls due to their being
+provided by processor firmware.
+
+On one hand, the SGX precedent suggests that trusted hyper-visor-like
+subroutines can be implemented in the CPU.
+On the other hand, Intel SGX was only implemented in a single Intel
+microarchitecture (Skylake) and its derivatives, with the last derivative
+launching in 2019.
+This could indicate that this style of instruction is undesirable from
+an implementation perspective, or, more likely, that this style of pulling
+management subroutines into hardware greatly increases the hardware attack
+surface, increasing the maintenance burden by requiring frequent firmware
+updates to work around security issues.
+
+While trusted low-level subroutines may be desirable to maintain
+advanced CHERI invariants such as temporal safety or enclave memory, we might
+seek an architecture that allows these to run in a verifiable firmware that
+is managed by trusted software but is verifiable by all users.
