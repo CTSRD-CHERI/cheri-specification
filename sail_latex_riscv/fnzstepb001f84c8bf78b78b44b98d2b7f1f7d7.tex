@@ -27,6 +27,7 @@ function #\hyperref[sailRISCVzstep]{step}#(step_no : int) -> bool = {
           },
           /* non-error cases: */
           #\hyperref[sailRISCVzFzyRVC]{F\_RVC}#(h) => {
+            instbits = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(h);
             let ast = #\hyperref[sailRISCVzdecodeCompressed]{decodeCompressed}#(h);
             if   #\hyperref[sailRISCVzgetzyconfigzyprintzyinstr]{get\_config\_print\_instr}#()
             then {
@@ -42,6 +43,7 @@ function #\hyperref[sailRISCVzstep]{step}#(step_no : int) -> bool = {
              }
           },
           #\hyperref[sailRISCVzFzyBase]{F\_Base}#(w) => {
+            instbits = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(w);
             let ast = #\hyperref[sailRISCVzdecode]{decode}#(w);
             if   #\hyperref[sailRISCVzgetzyconfigzyprintzyinstr]{get\_config\_print\_instr}#()
             then {
