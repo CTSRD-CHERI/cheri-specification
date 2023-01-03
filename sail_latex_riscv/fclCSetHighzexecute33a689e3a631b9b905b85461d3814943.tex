@@ -1,0 +1,6 @@
+let capVal = #\hyperref[sailRISCVzC]{C}#(cs1);
+let intVal = #\hyperref[sailRISCVzX]{X}#(rs2);
+let capLow : xlenbits = #\hyperref[sailRISCVzcapToMemBits]{capToMemBits}#(capVal)[sizeof(xlen) - 1 .. 0];
+let newCap : Capability = #\hyperref[sailRISCVzmemBitsToCapability]{memBitsToCapability}#(false, intVal @ capLow);
+#\hyperref[sailRISCVzC]{C}#(cd) = newCap;
+RETIRE_SUCCESS

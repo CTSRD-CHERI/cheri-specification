@@ -26,11 +26,7 @@
 \rvcherisrcdest[name=CGetFlags]{7}{rd}{cs1}
 \rvcherisrcdest[name=CGetAddr]{F}{rd}{cs1}
 \rvcherisrcdest[name=CGetTop]{18}{cd}{cs1}
-
-% Mark as noref and reserved until landing of
-% https://github.com/CTSRD-CHERI/sail-cheri-riscv/pull/55
-\rvcherisrcdest[name=CGetHigh,noref,tablesuffix=\rvcherireservedfootnotemark]{17}{cd}{cs1}
-\rvcherisrcsrcdest[name=CSetHigh,noref,tablesuffix=\rvcherireservedfootnotemark]{16}{cd}{cs1}{rs1}
+\rvcherisrcdest[name=CGetHigh]{17}{cd}{cs1}
 
 \rvcherisrcsrcdest[name=CSeal]{B}{cd}{cs1}{cs2}
 \rvcherisrcsrcdest[name=CUnseal]{C}{cd}{cs1}{cs2}
@@ -43,6 +39,7 @@
 \rvcherisrcsrcdest[name=CSetBounds]{8}{cd}{cs1}{rs2}
 \rvcherisrcsrcdest[name=CSetBoundsExact]{9}{cd}{cs1}{rs2}
 \rvcherisrcsrcdestimm[name=CSetBoundsImm]{2}{cd}{cs1}{uimm}
+\rvcherisrcsrcdest[name=CSetHigh]{16}{cd}{cs1}{rs1}
 \rvcherisrcdest[name=CClearTag]{B}{cd}{cs1}
 \rvcherisrcsrcdest[name=CBuildCap]{1D}{cd}{cs1}{cs2}
 \rvcherisrcsrcdest[name=CCopyType]{1E}{cd}{cs1}{cs2}

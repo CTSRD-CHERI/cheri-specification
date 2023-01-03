@@ -5233,6 +5233,30 @@ register \emph{cs1}.
 
 }{\lstinputlisting[language=sail]{sail_latex_riscv/fclCGetOffsetzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
+\newcommand{\sailRISCVfclCGetHighexecute}{\saildoclabelled{sailRISCVfclCGetHighzexecute}{\saildocfcl{Integer register \emph{rd} is set equal to the \textbf{high half} of capability
+register \emph{cs1}.
+
+The bits returned here are of the \textbf{in-memory} form of the capability, which
+may differ from microarchitectural forms in use within implementations.
+(Notably, in the sail implementation, see the distinction between \hyperref[sailRISCVzcapToBits]{\lstinline{capToBits}}
+and \hyperref[sailRISCVzcapToMemBits]{\lstinline{capToMemBits}}.)  That is, applying \hyperref[sailRISCVzCGetHigh]{\lstinline{CGetHigh}} to a capability loaded
+from address \emph{m} will yield the same result as loading the high half of the
+capability-sized granule at \emph{m} (that is, bits above \textbf{XLEN} when a
+capability is interpreted as a twice-\textbf{XLEN}-bit integer).
+
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCGetHighzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCSetHighexecute}{\saildoclabelled{sailRISCVfclCSetHighzexecute}{\saildocfcl{Capability register \emph{cd} comes to hold the capability from \emph{cs1} with its
+high bits replaced with the value in the integer register \emph{rs2}.  The tag
+of \emph{cd} is cleared.
+
+\emph{rs2} holds the \textbf{in-memory} form of capability bits.  That is, this
+instruction yields the same result as writing \emph{cs1} out to memory,
+overwriting the high word with \emph{rs2}, and loading that capability-sized
+granule into \emph{cd}, although without the memory mutation side-effects.
+
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCSetHighzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
 \newcommand{\sailRISCVfclCGetLenexecute}{\saildoclabelled{sailRISCVfclCGetLenzexecute}{\saildocfcl{Integer register \emph{rd} is set equal to the \textbf{length} field of capability
 register \emph{cs1}.
 
