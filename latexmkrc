@@ -53,7 +53,7 @@ if (latexmk_version_at_least("4.67")) {
   # Delete the copied file on failure:
   $failure_cmd = "rm -vf %D %R.pdf; " . $scan_logfile;
   # Otherwise copy it (and possibly the synctex.gz file) out of the build dir and scan the logfile.
-  $copy_files = "cp -v %D %R.pdf; test -f %R.synctex.gz && cp -fv %R.synctex.gz %R.synctex.gz";
+  $copy_files = "cp -v %D %R.pdf; test -f %Z%R.synctex.gz && cp -fv %Z%R.synctex.gz %R.synctex.gz";
   $warning_cmd = $copy_files . "; " . $scan_logfile;
   $success_cmd = $copy_files . "; " . $scan_logfile;
 } else {
