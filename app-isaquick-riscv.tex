@@ -727,6 +727,10 @@ Pseudoinstruction	& Base Instruction(s)	& Meaning \\
 \insnriscvlabel{clgc}
 \end{sidewaystable}
 
+	% Ensure that the mode-depedent tables are emitted before the encoding
+	% summary to avoid multiple lines
+	\FloatBarrier
+
 	\section{Encoding Summary}
 
 	CHERI-RISC-V general-purpose instructions use the 0x5b major opcode and use the RISC-V R-type or I-type encoding formats.
