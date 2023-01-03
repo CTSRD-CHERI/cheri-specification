@@ -1,5 +1,6 @@
 \providecommand\saildoclabelled[2]{\phantomsection\label{#1}#2}
 \providecommand\saildocval[2]{#1 #2}
+\providecommand\saildocoutcome[2]{#1 #2}
 \providecommand\saildocfcl[2]{#1 #2}
 \providecommand\saildoctype[2]{#1 #2}
 \providecommand\saildocfn[2]{#1 #2}
@@ -5244,6 +5245,19 @@ register \emph{cs1}.
  maximum value of $2^{\hyperref[sailRISCVzxlen]{{xlen}}}-1$ in this case.
 \end{itemize}
 }{\lstinputlisting[language=sail]{sail_latex_riscv/fclCGetLenzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCGetTopexecute}{\saildoclabelled{sailRISCVfclCGetTopzexecute}{\saildocfcl{Integer register \emph{rd} is set equal to the \textbf{top} field (\saildocabbrev{i.e.} one past the
+last addressable byte) of capability register \emph{cs1}.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item Due to the compressed representation of capabilities, the actual top
+ of capabilities can be $2^{\hyperref[sailRISCVzxlen]{{xlen}}}$; \hyperref[sailRISCVzCGetTop]{\lstinline{CGetTop}} will return the
+ maximum value of $2^{\hyperref[sailRISCVzxlen]{{xlen}}}-1$ in this case.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCGetTopzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
 \newcommand{\sailRISCVfclCGetTagexecute}{\saildoclabelled{sailRISCVfclCGetTagzexecute}{\saildocfcl{The low bit of integer register \emph{rd} is set to the \textbf{tag} field of \emph{cs1}.
 All other bits of \emph{rd} are cleared.
@@ -14380,3 +14394,9 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{x7}{\hyperref[sailRISCVregisterzx7]{#2}}{}%
   \ifstrequal{#1}{x8}{\hyperref[sailRISCVregisterzx8]{#2}}{}%
   \ifstrequal{#1}{x9}{\hyperref[sailRISCVregisterzx9]{#2}}{}}
+
+\newcommand{\sailRISCVoutcome}[1]{
+  }
+
+\newcommand{\sailRISCVrefoutcome}[2]{
+  }
