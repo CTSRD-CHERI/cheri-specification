@@ -5843,10 +5843,11 @@ An exception is raised if:
  cache line size in the system.
 
 
-\item Unlike \hyperref[sailRISCVzLC]{\lstinline{LC}}, this instuction traps if tags will always be unset due to
- lacking \textbf{Permit\_Load\_Capability} or page table entry permissions, since
- that is likely indicative of a software bug that could lead to temporal
- safety vulnerabilities if capabilities are erroneously missed.
+\item Unlike \hyperref[sailRISCVzLoadCapImm]{CLC}, this instruction traps if tags will always be
+ unset due to lacking \textbf{Permit\_Load\_Capability} or page table entry
+ permissions, since that is likely indicative of a software bug that could
+ lead to temporal safety vulnerabilities if capabilities are erroneously
+ missed.
 
 
 \end{itemize}
