@@ -115,9 +115,9 @@ function VnD#(CapFat) incOffsetFat( CapFat cap
   // The inRange test
   // ----------------
   // Conceptually, the inRange test checks the magnitude of 'offset' is less
-  // then the representable region’s size S. This ensures that the inLimits
+  // then the representable region's size S. This ensures that the inLimits
   // test result is meaningful. The test succeeds if the absolute value of
-  // 'offset' is less than S, that is −S < 'offset' < S. This test reduces to a
+  // 'offset' is less than S, that is -S < 'offset' < S. This test reduces to a
   // check that there are no significant bits in the high bits of 'offset',
   // that is they are all ones or all zeros.
   CapAddr offsetAddr = offset;
