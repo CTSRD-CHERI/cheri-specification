@@ -21,3 +21,5 @@
 
 /sail-cheri-riscv
 /sail-cheri-mips
+
+/cheri_concentrate_listings/cheri-cap-lib

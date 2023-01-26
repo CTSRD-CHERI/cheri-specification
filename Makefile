@@ -4,7 +4,7 @@ PREVEOUS=../branches/20150624-cheri-architecture-1-13
 
 SAIL_LATEX_RISCV_DIR=sail_latex_riscv
 
-SOURCES=$(wildcard *.tex insn-riscv/*.tex $(SAIL_LATEX_RISCV_DIR)/*.tex) cheri.bib LICENSE LICENSE-sail-cheri-riscv LICENSE-sail-riscv
+SOURCES=$(wildcard *.tex insn-riscv/*.tex $(SAIL_LATEX_RISCV_DIR)/*.tex cheri_concentrate_listings/*.bsv cheri_concentrate_listings/*.tex) cheri.bib LICENSE LICENSE-sail-cheri-riscv LICENSE-sail-riscv
 DIFFDIR=diff
 DIFFTEX=$(SOURCES:%=${DIFFDIR}/%)
 DIFFPARAM=--type=UNDERLINE --packages=amsmath,hyperref --math-markup=1
@@ -127,7 +127,10 @@ update-sail-defs-riscv: $(SAIL_CHERI_RISCV_DIR)
 
 update-sail-defs: update-sail-defs-riscv
 
-.PHONY: clean update-sail-defs sail-cheri-riscv-latex update-sail-defs-riscv
+update-concentrate-defs:
+	$(MAKE) -C cheri_concentrate_listings
+
+.PHONY: clean update-sail-defs sail-cheri-riscv-latex update-sail-defs-riscv update-concentrate-defs
 clean:
 	latexmk -C $(LATEXMK_COMMON_FLAGS) cheri-architecture.tex
 	latexmk -C $(LATEXMK_COMMON_FLAGS) fig-*.tex
