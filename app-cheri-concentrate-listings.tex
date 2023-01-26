@@ -8,7 +8,7 @@ These algorithms are well documented by their contents, so several are reproduce
 \label{sec:cheri-128-listings-gettop}
 
 This \emph{GetTop} function for compressed capabilities is very similar to the \emph{GetBase} function which uses \emph{baseBits} rather than \emph{topBits}.
-There is a significant divergence from line 12 where we discern between a top of 0 and a top of $2^{64}$.
+There is a significant divergence from line 11 where we discern between a top of 0 and a top of $2^{64}$.
 It has been non-trivial to develop an algorithm that is both correct and fast enough for all uses in our implementations.
 
 \lstinputlisting[language=bluespec]{cheri_concentrate_listings/conc_getTopFat.bsv}
