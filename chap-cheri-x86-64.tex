@@ -372,13 +372,13 @@ Capability-aware addressing must also permit addresses defined as
 offsets relative to \CFS{} and \CGS{} to support TLS with
 capability-aware addresses.  When an instruction uses the \FS{} or
 \GS{} segment prefix with capability-aware addressing, the memory
-operand (registers and displacement) is interpeted as an integer
+operand (registers and displacement) is interpreted as an integer
 offset relative to the \CFS{} or \CGS{} capability register,
 respectively.
 
 Other segment prefixes are not permitted in capability-aware
-addressing.  Attemping to use a segment fix other than \FS{} or
-\GS{} with a capablity-aware address should raise an illegal
+addressing.  Attempting to use a segment fix other than \FS{} or
+\GS{} with a capability-aware address should raise an illegal
 instruction exception.
 
 \subsubsection{Instructions with Implicit Memory Operands}
@@ -406,15 +406,8 @@ Instructions that work with the stack such as \insnnoref{PUSH} or
 \insnnoref{CALL} use the stack pointer as an implicit operand.  In
 32-bit x86, the `B' flag of the stack segment selector determines if
 the 16-bit or 32-bit stack pointer register is used.  In 64-bit long
-mode, \RSP{} is always used as the stack pointer.  In capability mode,
-\CSP{} would always be used as the stack pointer.
-
-Code which needs to use the alternate stack pointer
-interpretation would simulate these instructions using \insnnoref{MOV}
-instructions and adjusting the desired stack pointer using
-instructions such as \insnnoref{ADD} or \insnnoref{SUB}.  Emulation of
-\insnnoref{CALL} or \insnnoref{RET} would use \insnnoref{JMP} to
-adjust the instruction pointer.
+mode, \RSP{} is always used as the stack pointer. We will allow selecting \RSB{} or \CSP{} using the alternate-addressing-mode prefix (0x07).
+For example, hybrid code generation in 64-bit long mode could add the 0x07 prefix before \insnnoref{PUSH} and \insnnoref{CALL} instructions to maintain distinct bounds for the stack in \CSP{} and integer data references in \DDC{}.
 
 \subsection{Capability-Aware Instructions}
 
@@ -424,7 +417,7 @@ new variants of existing instructions that use an opcode which
 specifies a capability operation rather than an integer operation.
 Existing x86 toolchains already use instruction suffixes such as
 \texttt{b}, \texttt{w}, \texttt{l}, and \texttt{q} to explicitly state
-the operand size.  We recommand that the \texttt{c} suffix be used to
+the operand size.  We recommend that the \texttt{c} suffix be used to
 explicitly state a capability operand size.
 
 \subsubsection{Capability Operands for Existing Opcodes}
