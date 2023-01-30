@@ -110,9 +110,8 @@ architectures:
 \begin{itemize}
 \item Tagged memory with capability-width tag granularity and alignment.
 \item Registers able to hold capabilities are tagged.
-\item \CIP{} transforms and controls program-counter-relative fetches.
-\item \DDC{} transforms and controls memory operands using integer addresses,
-  including relocating access addresses using the capability base and offset.
+\item \CIP{} controls program-counter-relative fetches.
+\item \DDC{} bounds memory operands using integer addresses.
 \item Floating point is fully supported, including capability-relative
   floating-point load and store instructions.
 \item General-purpose registers are extended to hold capabilities.
@@ -134,13 +133,15 @@ The following changes are specific to CHERI-x86-64:
  \item Requests for most non-monotonic capability transformations
    clear the tag on the destination capability rather than raising an
    exception.
+ \item \RIP{} is the full integer value (virtual address) of \CIP{} and not \CIP{}.offset.
+ \item Integer addresses are treated as absolute virtual addresses bounded by \DDC{}, and are not treated as offsets to \DDC{}.base.
  \item x86 exception handling is extended to support capabilities
    including a new architectural stack frame for exception entry and
    return.
  \item A new exception code is used to report CHERI-related
    exceptions.
  \item New PTE bits and page-fault exception code bits are defined for
-   loading and store capabilities in memory.
+   loading and storing capabilities in memory.
  \item The \FSBASE{} and \GSBASE{} registers are extended as
    capabilities.
  \item As with CHERI-RISC-V, the \cflags{} field contains a single bit
@@ -184,8 +185,7 @@ The \RIP{} register (which contains the address of the current
 instruction in the existing x86 architecture)
 would also be extended into a \CIP{} capability.  This would function as
 the equivalent of \PCC{}.
-The value of \RIP{} should be the current offset of \CIP{} rather than the
-integer value (virtual address).
+The value of \RIP{} would be the integer value (virtual address) of \CIP{}.
 
 \subsection{Additional Capability Registers}
 \label{sec:x86:additional-caps}
@@ -218,12 +218,13 @@ below) in existing instructions.
 \subsection{Capability Mode}
 
 As with other CHERI architectures, CHERI-x86-64 should support running existing
-x86-64 code, capability-aware code, and hybrid code.  This
-requires the architecture to support an additional addressing mode
+x86-64 code, capability-aware code, and hybrid code.
+The x86 architecture uses prefixes to independently select \emph{addressing mode} (width of address to use for a memory operation) and \emph{operand mode} (width of value to use for any other operand).
+CHERI-x86-64 requires an additional addressing mode
 using capabilities as well as a new operand size for instructions
 which use capabilities as operands.
-The x86 architecture has supported similar extensions in the past when it was
-extended to support 32-bit operation.
+% The x86 architecture has supported similar extensions in the past when it was
+% extended to support 32-bit operation.
 
 When x86 was extended from 16 bits to 32 bits, the architecture
 included the ability to run existing 16-bit code without modification
@@ -254,7 +255,7 @@ will raise a General Protection Fault with the error code set to the
 target segment selector.
 
 In capability mode, instructions will use capabity-aware addressing
-(Section~\ref{sec:x86:capabity-addressing}) by default.  Some existing
+(Section~\ref{sec:x86:capability-addressing}) by default.  Some existing
 opcodes will also assume a capability sized operand in this mode.
 Finally, instructions which work with the stack would use \CSP{} as
 the implicit stack pointer.
@@ -287,8 +288,7 @@ In capability mode, instructions will use
 the capability-aware addressing mode by default.  Individual
 instructions can toggle between capability-aware and ``plain''
 64-bit addressing via the 0x07 opcode prefix.  Addresses using the
-``plain'' 32-bit or 64-bit addressing will be treated as offsets
-relative to \DDC{}.  Instructions using capability-aware addressing
+``plain'' 32-bit or 64-bit addressing will be bounds-checked against \DDC{}.  Instructions using capability-aware addressing
 would always use 64-bit virtual addresses.
 
 The 0x07 prefix would be a Group 4 prefix meaning that a single
@@ -300,7 +300,7 @@ be permitted.
 
 For instructions with register-based memory operands, capability-aware
 addressing would use the capability version of the register rather
-than the virtual address relative to \DDC{}.
+than the virtual address bounded by \DDC{}.
 
 For example:
 
@@ -317,7 +317,7 @@ On the other hand,
 mov 0x8(%rbp),%rax
 \end{verbatim}
 
-would read the 64-bit value at an offset of RBP+8 from the \DDC{} capability.
+would read the 64-bit value at address RBP+8, asserting that this address is between the bounds of the \DDC{} capability.
 Both instructions would use the same opcode aside from the addition of
 an 0x07 opcode prefix.  In capability mode, the second
 instruction would require the prefix.  In plain 64-bit mode,
@@ -355,23 +355,16 @@ This addressing mode uses an immediate offset
 relative to the current value of the instruction
 pointer.  These addresses are known as \RIP{}-relative addresses.
 
-To support existing code, \RIP{}-relative addresses should be resolved
-relative to \DDC{} when using ``plain'' 64-bit addressing.
-Specifically, the value of \RIP{} (offset of \CIP{}) would be added to
-the immediate offset.  The resulting value would then be used as an
-offset relative to \DDC{} for the load or store.
-
+To support existing code, when using ``plain'' 64-bit addressing, \RIP{}-relative addresses are constrained by the bounds and permissions of \DDC{}.
 When capability-aware addressing is used, \RIP{}-relative addresses
-should be resolved relative to \CIP{}.
-The immediate offset is applied to \CIP{} and the load
-or store is constrained by the bounds and permissions of \CIP{}.
+are constrained by the bounds and permissions of \CIP{}.
 
 \subsubsection{Absolute Addresses}
 
 Memory operands can be encoded without a base register, either as an
 absolute address, or an absolute address added to a scaled index
-register.  These operands are always evaluated as offsets relative to
-\DDC{} including in capability mode.
+register.  These operands are always checked against the bounds and permissions of
+\DDC{}, including in capability mode.
 
 \subsubsection{Addresses Relative to CFS and CGS}
 
@@ -675,13 +668,13 @@ the stack while integer-sized branches would save and restore an
 integer offset.
 
 Far calls, jumps, and returns would not support capability operands.
-Far branches would use the offset portion of the destination address
-to set the offset of \CIP{}.  An attempt to branch to a 32-bit code
+Far branches would set the address of \CIP{}.
+An attempt to branch to a 32-bit code
 segment in capability mode should raise a General Protection fault
 with the error code set to the destination code segment.
 
 If the resulting value of \CIP{} after any branch
-is invalid, a capability violation fault would be raised on the branch
+is invalid or out-of-bounds, a capability violation fault would be raised on the branch
 instruction (see Section~\ref{sec:x86:capability-fault}).
 
 \insnnoref{IRETC} should pop a capability exception frame (see
@@ -1308,7 +1301,7 @@ by sealing.  For example, a sentry capability could be used in either
 plain 64-bit mode or capability mode.  By storing the mode in
 capability metadata protected by sealing, sealed code capabilities can
 only be used in the intended mode.  Also, while it may be less
-flexible to permit the stack alignment to be chosen orthgonally to the
+flexible to permit the stack alignment to be chosen orthogonally to the
 default instruction encoding mode, it does not seem useful in
 practice.  Instead, capability mode is designed as a single knob to
 optimize pure capability code.
