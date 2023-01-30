@@ -274,6 +274,7 @@ longer be valid:
   \item \insnnoref{LSS}
   \item \insnnoref{LAR}
   \item \insnnoref{LSL}
+  \item Direct memory-offset \insnnoref{MOV}
 \end{itemize}
 
 \subsection{Using Capabilities with Memory Address Operands}
@@ -372,6 +373,19 @@ Memory operands can be encoded without a base register, either as an
 absolute address, or an absolute address added to a scaled index
 register.  These operands are always evaluated as offsets relative to
 \DDC{} including in capability mode.
+
+\subsubsection{Direct Memory-Offset MOVs}
+
+The direct memory-offset \insnnoref{MOV} instructions store the
+absolute address of a memory operand as an immediate operand.
+Extending these instructions to support capability immediates would
+require padding nops to align the capability immediate as well as text
+relocations (even for position-dependent code).  However, we do not
+anticipate wide use of these instructions so instead choose to
+deprecate them in capability mode and restrict them to using integer
+operands and integer addressing.  Attempting to use these instructions
+with capability-aware addressing would be reserved and raise a UD\#
+exception.
 
 \subsubsection{Addresses Relative to CFS and CGS}
 
@@ -488,9 +502,8 @@ capability operands:
     Note that these instructions would only permit a general-purpose
     register as the source (\texttt{89}) or destination (\texttt{8B}).
 
-    The \texttt{A1} and \texttt{A2} opcodes would be extended to use
-    \CAX{} as the implicit operand when used with the capability
-    operand prefix.
+    The \texttt{A1} and \texttt{A3} opcodes would not be extended to
+    support capabilities.
 
     To permit moving the contents of an additional capability register
     to a general-purpose register or vice versa, two
@@ -1399,3 +1412,13 @@ which are commonly used and default to 64-bit operands).  It may make
 sense to deprecate far branches other than \insnnoref{IRET} completely
 in capability mode causing the instructions to raise an illegal
 instruction fault.
+
+\subsection{Direct Memory-Offset MOVs}
+
+These four \insnnoref{MOV} instructions store the address of their
+memory operand inline as an immediate.  Currently, we propose
+deprecating these instructions in capability code and not extending
+them to support capability operands.  These instructions could instead
+be extended to support capabilities both as immediates for the memory
+offset and as operands.  In that case, the opcodes would be retained
+in capability mode rather than deprecated.
