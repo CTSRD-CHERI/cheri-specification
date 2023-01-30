@@ -1459,7 +1459,7 @@ capability pointers which enable capability mode are only used with
 64-bit code segments.  In-memory far capability pointers would also
 have odd alignment requirements due to the 16-bit code selector being
 adjacent to an aligned capability.  Far branches are also little used
-in existing 64-bit x86 progams.  Significantly, 64-bit x86 still
+in existing 64-bit x86 programs.  Significantly, 64-bit x86 still
 defaults to 32-bit operands for far branches (unlike near branches
 which are commonly used and default to 64-bit operands).  It may make
 sense to deprecate far branches other than \insnnoref{IRET} completely
