@@ -371,7 +371,9 @@ or store is constrained by the bounds and permissions of \CIP{}.
 
 Memory operands can be encoded without a base register, either as an
 absolute address, or an absolute address added to a scaled index
-register.  These operands are always evaluated as offsets relative to
+register.  If these addresses are not used as offsets relative to
+\CFS{} or \CGS{} as described below in Section~\ref{sec:x86:cfs-cgs},
+they are evaluated as offsets relative to
 \DDC{} including in capability mode.
 
 \subsubsection{Direct Memory-Offset MOVs}
@@ -388,6 +390,7 @@ with capability-aware addressing would be reserved and raise a UD\#
 exception.
 
 \subsubsection{Addresses Relative to CFS and CGS}
+\label{sec:x86:cfs-cgs}
 
 Capability-aware addressing must also permit addresses defined as
 offsets relative to \CFS{} and \CGS{} to support TLS with
