@@ -1434,3 +1434,9 @@ memory operand inline as an immediate.  These instructions could be
 extended to support capability immediates for the memory offset.  In
 that case, the opcodes would be retained in capability mode rather
 than deprecated.
+
+\subsection{Single-byte XCHG Opcodes}
+
+If the single-byte \insnnoref{XCHG} instructions other than
+\insnnoref{NOP} (\texttt{90}) are not commonly used, they could be
+deprecated in capability mode.
