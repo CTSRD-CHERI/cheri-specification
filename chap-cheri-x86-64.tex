@@ -465,9 +465,8 @@ Several existing instructions should be extended to support
 capability operands:
 
 \begin{itemize}
-  \item \insnnoref{MOVC} would handle loads and stores of
-    capabilities similar to \insnref{CLC} and \insnref{CSC} as well as
-    copying capabilities between registers similar to \insnref{CMove}.
+  \item \insnnoref{MOVC} would handle memory loads and stores of
+    capabilities as well as copies of capabilities between registers.
 
     The existing \texttt{89} and \texttt{8B} opcodes would be extended
     to support capability operands via the capability operand prefix.
@@ -495,6 +494,11 @@ capability operands:
     \insnnoref{MOV} should default to integer operands in capability
     mode except for \texttt{0F 24} and \texttt{0F 25} which would
     always use capability operands.
+
+    \insnnoref{MOVC} performs the function of \insnref{CLC} and
+    \insnref{CSC} instructions from CHERI-RISC-V which load and store
+    capabilities respectively, as well as \insnref{CMove}
+    which moves capabilities between registers.
 
   \item \insnnoref{MOVNTIC} would store a single capability to memory
     using a non-temporal hint.
