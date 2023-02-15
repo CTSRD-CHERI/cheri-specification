@@ -537,8 +537,9 @@ capability operands:
     capability mode.
 
   \item \insnnoref{ADDC} and \insnnoref{SUBC} would be used to adjust
-    the offset of a capability similar to \insnref{CIncOffset}.  Note
-    that for these instructions, the source operand would either be a
+    the offset of a capability similar to the \insnref{CIncOffset}
+    instruction in CHERI-RISC-V.
+    For these instructions, the source operand would either be a
     sign-extended immediate or a 64-bit integer register whose value
     is either added to or subtracted from the offset of the
     capability-sized destination operand.
@@ -562,6 +563,26 @@ add %csp,$16
 
     \insnnoref{ADD} and \insnnoref{SUB} should default to integer
     operands in capability mode.
+
+    For the register to register variants of the \insnnoref{ADDC}
+    instruction, we will also support using the
+    integer register operand as the capability destination register.
+    For this instruction, we suggest the following example assembly
+    representation:
+
+\begin{verbatim}
+add %cax,%csp,%ax
+\end{verbatim}
+
+    This emphasizes the width difference between \CAX{} and \RAX{},
+    though the destination and the second operand would be required
+    to map to the same register number.
+    The two versions of \insnnoref{ADDC} would be distinguished by the
+    two opcodes \texttt{01} (First register operand is the capability
+    operand and destination, and the second is the integer register)
+    and \texttt{03} (First register operand is the integer operand
+    and the capability destination and the second is the capability
+    operand).
 
     We do not anticipiate a need for capability-sized variants of
     \insnnoref{ADC} or \insnnoref{SBB}.
