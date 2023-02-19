@@ -406,7 +406,7 @@ Instructions that work with the stack such as \insnnoref{PUSH} or
 \insnnoref{CALL} use the stack pointer as an implicit operand.  In
 32-bit x86, the `B' flag of the stack segment selector determines if
 the 16-bit or 32-bit stack pointer register is used.  In 64-bit long
-mode, \RSP{} is always used as the stack pointer. We will allow selecting \RSB{} or \CSP{} using the alternate-addressing-mode prefix (0x07).
+mode, \RSP{} is always used as the stack pointer. We will allow selecting \RSP{} or \CSP{} using the alternate-addressing-mode prefix (0x07).
 For example, hybrid code generation in 64-bit long mode could add the 0x07 prefix before \insnnoref{PUSH} and \insnnoref{CALL} instructions to maintain distinct bounds for the stack in \CSP{} and integer data references in \DDC{}.
 
 \subsection{Capability-Aware Instructions}
