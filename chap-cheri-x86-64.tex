@@ -736,9 +736,8 @@ extensions:
 
 \subsubsection{Capability-Inspection Instructions}
 
-These instructions would set the \texttt{ZF} flag in \RFLAGS{}
-according to the integer field
-extracted from the capability.
+These instructions would set the \RFLAGS{} field
+according to the value written to an integer register.
 
 \begin{itemize}
   \item \insnref{CGetPerm} r64, r/mc
@@ -748,9 +747,7 @@ extracted from the capability.
 
   \item \insnref{CGetType} r64, r/mc
 
-    Set \emph{r64} to the \textbf{otype} field of \emph{r/mc}.  In
-    addition to \texttt{ZF}, this instruction should also set
-    \texttt{SF} in \RFLAGS{}.
+    Set \emph{r64} to the \textbf{otype} field of \emph{r/mc}.
 
   \item \insnref{CGetBase} r64, r/mc
 
@@ -830,8 +827,8 @@ exception.
     contained within the bounds of the original value of \emph{r/mc},
     clear the \textbf{tag} field in the resulting capability.
 
-    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    in the resulting value of \emph{r/mc}.
+    Set \RFLAGS{} according to the value of \textbf{tag} field
+    in the resulting value of \emph{r/mc} (only \texttt{ZF} is useful).
 
   \item \insnref{CSetBoundsExact} r/mc, r64
 
@@ -845,8 +842,8 @@ exception.
     resulting capability cannot be represented exactly, clear the
     \textbf{tag} field in the resulting capability.
 
-    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    in the resulting value of \emph{r/mc}.
+    Set \RFLAGS{} according to the value of \textbf{tag} field
+    in the resulting value of \emph{r/mc} (only \texttt{ZF} is useful).
 
   \item \insnref{CClearTag} r/mc
 
@@ -862,8 +859,8 @@ exception.
     construction of the desired capability, set \emph{rca} equal to
     \emph{rcb} with the \textbf{tag} field cleared.
 
-    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    of \emph{rca}.
+    Set \RFLAGS{} according to the value of \textbf{tag} field
+    in the resulting value of \emph{rca} (only \texttt{ZF} is useful).
 
   \item \insnref{CCopyType} rca, r/mc, rcb
 
@@ -873,60 +870,63 @@ exception.
     \emph{rca} to the \textbf{NULL} capability with the
     \textbf{address} field set to \emph{rcb}.\textbf{otype}.
 
-    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    of \emph{rca}.
+    Set \RFLAGS{} according to the value of \textbf{tag} field
+    in the resulting value of \emph{rca} (only \texttt{ZF} is useful).
 
   \item \insnref{CCSeal} rca, r/mc, rcb
 
     Set \emph{rca} to \emph{r/mc} conditionally sealed with
     \textbf{otype} equal to the \textbf{address} field of \emph{rcb}.
     If \emph{rca} is not sealed with \emph{rcb}.\textbf{otype}, it
-    will be set equal to \emph{r/mc}.  Set \texttt{ZF} in \RFLAGS{} to
-    1 if \emph{rca} is sealed with \emph{rcb}.\textbf{otype} or 0
-    otherwise.
+    will be set equal to \emph{r/mc}.  Set \RFLAGS{} according to
+    the resulting type field of \emph{rca} (e.g. \texttt{SF}
+    will be 1 if the result is unsealed).
 
   \item \insnref{CSealEntry} r/mc
 
     Seal \emph{r/mc} as a sentry.  On failure, leave \emph{r/mc}
-    unchanged.  Set \texttt{ZF} in \RFLAGS{} to 1 if \emph{r/mc} if
-    \emph{r/mc} is sealed as a sentry or 0 otherwise.
+    unchanged.  Set \texttt{ZF} in \RFLAGS{} to 1 if
+    \emph{r/mc} is sealed as a sentry or 0 otherwise; set the rest
+    of \RFLAGS{} according to the resulting type field of \emph{r/mc}.
 \end{itemize}
 
 \subsubsection{Pointer-Arithmetic Instructions}
 
-These instructions should set \texttt{ZF} in \RFLAGS{} to indicate
-success (set) or failure (clear).  If one of these instructions fails, it
+These instructions should set \RFLAGS{} to indicate
+success or failure.  If one of these instructions fails, it
 should not raise an exception.
 
 \begin{itemize}
   \item \insnref{CToPtr} r64, rc, r/mc
 
     If the \textbf{tag} field of \emph{r/mc} is not set or \emph{rc}
-    is sealed and tagged, then set \emph{r64} to 0 and clear
-    \texttt{ZF} in \RFLAGS{}.
+    is sealed and tagged, then set \emph{r64} to 0.
 
     If the \textbf{tag} field of \emph{rc} is not set, then set
-    \emph{r64} to 0 and set \texttt{ZF} in \RFLAGS{} to 1; otherwise,
+    \emph{r64} to 0; otherwise,
     set \emph{r64} to \emph{rc}.\textbf{address} -
-    \emph{r/mc}.\textbf{base} and set \texttt{ZF} in \RFLAGS{} to 1.
+    \emph{r/mc}.\textbf{base}.
+    
+    \RFLAGS{} is set according to the value of \emph{r64}.
 
   \item \insnref{CFromPtr} rc, r/mc, r64
 
-    If \emph{r64} is 0, then set \emph{rc} to \textbf{NULL} and set
-    \texttt{ZF} to 1.
+    If \emph{r64} is 0, then set \emph{rc} to \textbf{NULL}.
 
     If \emph{r/mc} is untagged or sealed, then set \emph{rc} to the
     \textbf{NULL} capability with the \textbf{address} field set to
-    \emph{r64} and set \texttt{ZF} to 0.
+    \emph{r64}.
 
     Otherwise, set \emph{rc} to \emph{r/mc} with its \textbf{offset}
-    replaced by \emph{r64} and set \texttt{ZF} to 1.
+    replaced by \emph{r64}.
+    
+    \RFLAGS{} is set according to the address field of \emph{rc}.
 \end{itemize}
 
 \subsubsection{Pointer-Comparison Instructions}
 
-For these instructions, the result of the comparison should be written
-to the \texttt{ZF} field of \RFLAGS{} instead of to a destination
+For these instructions, \RFLAGS{} should be updated according to
+the result of the comparison rather than using a destination
 register as is done in CHERI-RISC-V.
 
 \begin{itemize}
