@@ -10,7 +10,7 @@ hardware-software-formal co-design, used to develop the CHERI protection model a
 The CHERI protection model provides a sound and formally based architectural
 foundation for the principled development of highly
 trustworthy systems.
-The CHERI approach builds on and extends decades of research into hardware and 
+The CHERI approach builds on and extends decades of research into hardware and
 operating-system security.\footnote{Levy's {\em Capability-Based Computer Systems}~\cite{levy:capabilities} provides a
 detailed history of segment- and capability-based designs through the early
 1990s~\cite{levy:capabilities}.
@@ -19,11 +19,11 @@ Mach~\cite{accetta:mach}, L4~\cite{liedtke:l4}, and, later, seL4~\cite{klein:sel
 well as capability-influenced virtual machines such as the Java Virtual Machine~\cite{Gong99},
 begins.
 Chapter~\ref{chap:historical} discuss historical influences on our work in greater detail.}
-However, some of the historic approaches that CHERI incorporates (especially capability architectures) 
+However, some of the historic approaches that CHERI incorporates (especially capability architectures)
 have not been adopted in commodity hardware designs.
-In light of these past transition failures, a reasonable question 
+In light of these past transition failures, a reasonable question
 is ``Why now?''
-What has changed that could allow CHERI to succeed where 
+What has changed that could allow CHERI to succeed where
 so many previous efforts have failed?
 Several factors have motivated our decision to begin and carry out this project:
 
@@ -31,7 +31,7 @@ Several factors have motivated our decision to begin and carry out this project:
 \item Dramatic changes in threat models, resulting from ubiquitous
 connectivity and pervasive uses of computer technology in many
 diverse and widely used applications such as wireless mobile
-devices, automobiles, and critical infrastructure.  
+devices, automobiles, and critical infrastructure.
 In addition, cloud computing and storage, robotics, software-defined
 networking.  safety of autonomous systems, and the Internet of Things have
 significantly widened the range of vulnerabilities that can be exploited.
@@ -72,11 +72,11 @@ phones and tablet PCs, as well as appliances and embedded devices -- are
 much more diverse, running on a wide variety of instruction set architectures
 (especially ARM and MIPS).
 
-\item Similarly, 
+\item Similarly,
 new diversity in operating systems has arisen, in which commercial
 products such as Apple's iOS and Google's Android extend open-source systems
 such as FreeBSD, Mach~\cite{accetta:mach}, and Linux.
-These new platforms abandon many traditional constraints, requiring 
+These new platforms abandon many traditional constraints, requiring
 that rewritten
 applications conform to new security models, programming languages,
 hardware architectures, and user-input modalities.
@@ -126,7 +126,7 @@ must simultaneously provide strong isolation and appropriate sharing.
 The results present not only significant risks of compromise that lead to financial loss or
 disruption of critical infrastructure, but also frequent occurrences of such events.
 
-Software vulnerabilities appear inevitable; 
+Software vulnerabilities appear inevitable;
 indeed, an arms race has arisen in new
 (often probabilistic) software-based mitigation techniques and exploit
 techniques that bypass them.
@@ -152,13 +152,13 @@ domains: the practical application of the principle of least privilege to
 software.
 Historically, compartmentalization of TCB components such as operating system kernels
 and central system services has caused significant
-difficulty for software developers -- which limits its applicability for large-scale, 
+difficulty for software developers -- which limits its applicability for large-scale,
 real-world applications, and leads to the abandonment of promising research
 such as 1990s {\em microkernel} projects.
 A recent resurgence of compartmentalization, applied in userspace to system software and applications
 such as OpenSSH~\cite{provos:preventingprivesc} and Chromium~\cite{reis:chromium},
 and more recently in our own Capsicum project~\cite{Watson10}, has been motivated by a
-critical security need; however it has seen success only at very coarse separation granularity due to 
+critical security need; however it has seen success only at very coarse separation granularity due to
 the challenges involved.
 A more detailed history of work in this area can be found in
 Chapter~\ref{chap:historical}.
@@ -172,7 +172,7 @@ maintain, and extend; this raises serious questions about correctness, performan
 critically, security.
 
 These problems occur because current hardware provides strong separation
-only at coarse granularity via rings and virtual address spaces, making 
+only at coarse granularity via rings and virtual address spaces, making
 the isolation of complete applications (or even multiple operating systems)
 a simple task, but complicates
 efficient and easily expressed separation between tightly coupled software
@@ -190,7 +190,7 @@ intolerable: each TLB entry is an access-control list, with each object (page)
 requiring multiple TLB entries, one for each authorized security domain.
 
 High-end server CPUs typically have TLB entries in the low hundreds, and
-even recent network embedded devices reach 
+even recent network embedded devices reach
 the low thousands; the TLB
 footprint of fine-grained, compartmentalized software increases with the product of
 in-flight security domains and objects due to TLB aliasing, which may easily require
@@ -472,7 +472,7 @@ mechanism.
 \noindent
 Another key early design choice was the goal of using capabilities to
 implement C-language pointers -- initially discretionarily (i.e., as annotated
-in the language), and later ubiquitously (i.e., for all virtual addresses in a 
+in the language), and later ubiquitously (i.e., for all virtual addresses in a
 more-secure program).
 This required an inevitable negotiation between C-language semantics and the
 capability-system model, in order to ensure strong compatibility with current
@@ -533,7 +533,7 @@ to a set of rights cannot be broadened to include additional rights --
 directly supports the construction of confined components within address
 spaces.
 Using this approach, we can place code in execution with only limited
-access to virtual memory, constructing ``sandboxes'' (and other more complex 
+access to virtual memory, constructing ``sandboxes'' (and other more complex
 structures) within conventional processes.
 The CHERI exception model permits transition to a more privileged component
 -- e.g., the operating-system kernel or language runtime -- allowing the
@@ -545,7 +545,7 @@ In CHERI, this is implemented as a software-defined capability: one that has
 no hardware interpretation (i.e., cannot be dereferenced), and also strong
 encapsulation (i.e., whose fields are immutable).
 Other aspects of the model include a type mechanism allowing sealed code and
-data capabilities to be inextricably linked; pairs of sealed code 
+data capabilities to be inextricably linked; pairs of sealed code
 capabilities and data
 capabilities can then be used to efficiently describe protection domains via
 an object-capability model.
@@ -778,9 +778,9 @@ CHERI protections constrain code ``in execution'' and allow fine-grained managem
 of privilege within a framework for controlled separation and communication.
 Code in execution can represent the focus of many potentially malicious parties:
 subversion of legitimate code in violation of security policies, injection of malicious
-code via back doors, Trojan horses, and malware, and also 
+code via back doors, Trojan horses, and malware, and also
 denial-of-service attacks.
-CHERI's fine-grained memory protection mitigates 
+CHERI's fine-grained memory protection mitigates
 many common attack techniques by implementing bounds and permission checks,
 reducing opportunities for the conflation of code and data, corruption of
 control flow, and also catches many common exploitable programmer bugs;
@@ -791,7 +791,7 @@ Physical attacks on CHERI-based systems are explicitly excluded from our threat 
 although CHERI CPUs might easily be used in the context of tamper-evident or
 tamper-resistant systems.
 Similarly, no special steps have been taken in our design to counter undesired
-leakage of electromagnetic emanations and certain other side channels such as acoustic inferences: 
+leakage of electromagnetic emanations and certain other side channels such as acoustic inferences:
 we take for granted the presence of an
 electronic foundation on which CHERI can run.
 CHERI will provide a supportive framework for a broad variety of security-sensitive
@@ -804,7 +804,7 @@ In some sense, CHERI in fact increases exposure: the greater the offers of
 protection within a system, the greater the potential impact of unauthorized
 communication channels.
 As such, we hope side-channel attacks are a topic that we will be able to
-explore in future work.  
+explore in future work.
 Overall, we believe that our threat model is realistic and will
 lead to systems that can be substantially more trustworthy than
 today's commodity systems -- while recognizing that ISA-level protections must
@@ -840,7 +840,7 @@ for efficient SMT (Satisfiability Modulo Theories) modeling of designs
 %   These tools will allow us to verify low-level properties of the hardware design
 %   and use the power of model checking and satisfiability solvers to analyze
 %   related properties.
-% Ideally they will also help link ISA-level specifications with the CPU implementation. 
+% Ideally they will also help link ISA-level specifications with the CPU implementation.
 
 
 \item We then developed more complete CHERI-MIPS ISA models,
@@ -861,7 +861,7 @@ for efficient SMT (Satisfiability Modulo Theories) modeling of designs
 % PS: this is pasted from new intro text
 L3 and Sail support automatic generation of versions of the models in
 the definition languages of (variously) the
-HOL4, Isabelle, and Coq theorem provers. 
+HOL4, Isabelle, and Coq theorem provers.
 Key architectural verification goals including proving not just low-level
 properties, such as the monotonicity of each individual instruction
 and properties of the CHERI capability compression schemes, but also
@@ -881,7 +881,7 @@ documented in future papers and reports.
 
 \item From Sail, we also automatically generate SMT problems, which we
   have used to check properties of our capability compression
-  schemes. 
+  schemes.
 
 
 \item We have explored how CHERI impacts a formal specification of C-language

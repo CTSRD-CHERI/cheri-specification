@@ -12,21 +12,21 @@ IEEE Symposium on Security and Privacy in 2020~\cite{cheri-formal-SP2020}.
 \section{Unpredictable Behavior}
 
 In the semantics for the CHERI instructions
-we try 
-to avoid defining behavior as ``unpredictable''. There were several reasons 
+we try
+to avoid defining behavior as ``unpredictable''. There were several reasons
 for avoiding unpredictable behavior, including the difficulty it creates for
 formal verification.
-Although CHERI is based on the MIPS ISA, 
+Although CHERI is based on the MIPS ISA,
 the MIPS ISA specification (e.g., for the
 R4000) makes extensive use of ``unpredictable''. If ``unpredictable'' is
 modeled as ``anything could happen'', then clearly the system is not secure.
-As a 
+As a
 concrete example, imagine a hypothetical CHERI implementation that contains
 a Trojan horse such that when a sandboxed program executes an arithmetic
 instruction whose result is ``unpredictable'', it also changes the capability
 registers so that a capability granting access to the entire virtual address
 space is placed in a capability register. If ``unpredictable'' means that
-anything could happen, then this is compliant with the MIPS ISA; it is also 
+anything could happen, then this is compliant with the MIPS ISA; it is also
 obviously insecure. Later versions of the MIPS ISA (e.g., MIPS64 volume I) make
 it clear that ``unpredictable'' is more restrictive than this, saying that
 ``\emph{unpredictable} operations must not read, write, or modify the contents of
@@ -61,7 +61,7 @@ address. There are several ways to prevent this attack:
 In CheriBSD, user-space programs are unable to modify the TLB (except through
 system calls such as \ccode{mmap}), and thus cannot carry out this attack.
 This  security argument makes it explicit that the security of the capability
-mechanism depends on the correctness of the underlying operating system. 
+mechanism depends on the correctness of the underlying operating system.
 However, this may not be adequate for high-assurance systems.
 \item
 Similarly, a high-assurance microkernel could run untrusted code in user
@@ -92,7 +92,7 @@ the capability registers as a starting point. For example, with compressed
 128-bit capabilities, there are bit patterns corresponding to \cbase{} $+$
 \clength{} $> 2^{64}$.
 The capability registers are initialized on reset, so there will
-never be malformed capabilities in the initial register contents, and 
+never be malformed capabilities in the initial register contents, and
 a CHERI instruction will never create malformed capabilities from
 well-formed ones. However, DRAM is not cleared on system reset, so that it is
 possible that the initial memory might contain malformed capabilities with the
@@ -107,7 +107,7 @@ code should not be in a position to make use of malformed capabilities.
 
 There are (at least) two implementation choices. An implementation of the CHERI
 instructions could perform access-control checks in a way that would
-work on both well-formed and malformed capabilities.  
+work on both well-formed and malformed capabilities.
 Alternatively, the hardware could be
 slightly simplified by performing the checks in a way that might behave
 unexpectedly on malformed capabilities, and then rely on the capability
@@ -118,7 +118,7 @@ If the hardware is designed to guard against malformed capabilities, this
 presents special difficulties in testing. No program whose behavior
 is defined by the ISA specification will ever trigger the case of encountering
 a malformed capability. (Programs whose behavior is ``unpredictable'', because
-they access uninitialized memory, may encounter them). 
+they access uninitialized memory, may encounter them).
 However, some approaches to
 automatic test generation may have difficulty constructing such tests.
 
@@ -142,7 +142,7 @@ dereference, because there is no way to change the endianness).
 \section{Outline of Security Argument for a Reference Monitor}
 
 The CHERI ISA can be used to provide several different security properties (for
-example, control-flow integrity or sandboxing). This section provides the 
+example, control-flow integrity or sandboxing). This section provides the
 outline of a security argument for how the CHERI instructions can be used
 to implement a reference monitor.
 
@@ -170,7 +170,7 @@ proof of its correctness.
 We are assuming that the system operates in an environment where
 the attacker does not have physical access to the hardware, so that
 hardware-level attacks such as introducing memory errors~\cite{Govinda+03}
-are not applicable. 
+are not applicable.
 %%%% WE MIGHT ALSO MENTION the A2 best paper from IEEE SS&P 2016 on
 %%%% injecting analog circuit malware into the hardware.
 
@@ -193,7 +193,7 @@ the ``security domain'' provided for the reference monitor consists of a set of
 memory addresses ($S_K$) for the data, code, and stack segments of the trusted
 code, together with the CHERI reserved registers.
 
-Our security requirement of the hardware is that the untrusted code will run 
+Our security requirement of the hardware is that the untrusted code will run
 for a while, eventually returning control to the trusted code; and when the
 trusted code is re-entered, (a) it will be reentered at one of a small number
 of known entry points; (b) its code, data and stack will not have been modified
@@ -210,7 +210,7 @@ interpreted as meaning that there is no way within the ISA to modify the
 reference monitor's reserved memory or the reserved registers. That is, all
 memory accesses are checked against a capability register, and do not succeed
 unless the capability permits them. The untrusted code can access memory without
-returning control to the trusted code; 
+returning control to the trusted code;
 however, all of its memory access are mediated
 by the capability hardware, which is considered to be part of the reference
 monitor. Tampering with the reference monitor by making physical modifications
@@ -253,7 +253,7 @@ operation on uncached memory is defined as unpredictable in the MIPS ISA. While
 this probably can't be used to attack a real system, any unpredictable behavior
 has to prevent for provable security).
 \item
-All capability registers have \cbase{} $+$ \clength{} $\leq 2^{64}$ 
+All capability registers have \cbase{} $+$ \clength{} $\leq 2^{64}$
 \algorithmicor{} \ctag{} $=$ \algorithmicfalse{}.
 \item
 The above is also true of all capabilities contained within the set of memory
@@ -293,10 +293,10 @@ has been reentered at one of a small number of known entry points.
 We assume that \emph{SecureState} is true initially (i.e.,
 a requirement of
 the trusted code is that it puts the CPU into this state before calling the
-untrusted code). 
+untrusted code).
 We then wish to show that \emph{SecureState} $\Rightarrow$ \textbf{X}
  (\emph{SecureState} \algorithmicor{} \emph{TCBEntryState}) (where \textbf{X} is
-the next operator in linear temporal logic). By induction on states, 
+the next operator in linear temporal logic). By induction on states,
 \emph{SecureState} $\Rightarrow$ \emph{TCBEntryState} \textbf{R} \emph{SecureState}
 (where \textbf{R} is the release operator in linear temporal logic).
 
@@ -308,7 +308,7 @@ The argument that \emph{SecureState} $\Rightarrow$ \textbf{X} (\emph{SecureState
 Given that CP0.Status.KSU $\neq$ 0, CP0.Status.CU0 = \algorithmicfalse{},
 CP0.Status.EXL = \algorithmicfalse{} and CP0.Status.ERL = \algorithmicfalse{},
 all instructions will either raise an exception (\textbf{X}
-\emph{TCBEntryState}) or leave CP0 registers unchanged, leaving this 
+\emph{TCBEntryState}) or leave CP0 registers unchanged, leaving this
 part of the \emph{SecureState} invariant unchanged.
 \item
 Given that CP0.Status.KSU $\neq$ 0 (etc.), all instructions will
@@ -347,7 +347,7 @@ registers will not be modified.
 The theorem \emph{SecureState} $\Rightarrow$ \emph{TCBEntryState} \textbf{R}
 \emph{SecureState} uses the \textbf{R} operator, which is a weak form of
 ``until'': the system might continue in \emph{SecureState} indefinitely.
-Sometimes it is desirable to have the stronger property that 
+Sometimes it is desirable to have the stronger property that
 \emph{TCBEntryState} is guaranteed to be reached eventually. This can be
 ensured by having the trusted code enable timer interrupts, and use a
 timer interrupt to force return to \emph{TCBEntryState} if the untrusted
@@ -378,7 +378,7 @@ will be enabled and return to \emph{TCBEntryState} will occur:
 
 \emph{SecureStateTimer} $\Rightarrow$ \textbf{F} \emph{TCBEntryState}
 
-It then follows that \emph{SecureStateTimer} $\Rightarrow$ 
+It then follows that \emph{SecureStateTimer} $\Rightarrow$
 \emph{SecureStateTimer} \textbf{U} \emph{TCBEntryState}, where
 \textbf{U} is the until operator in linear temporal logic.
 

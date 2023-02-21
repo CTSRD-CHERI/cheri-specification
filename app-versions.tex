@@ -207,8 +207,8 @@ A short summary of key ISA versions is presented here:
   Satisfyingly, many `future work' items in earlier versions of the report
   were becoming completed work in this version!
 
-\item[1.3] The fourth version of the architecture document was released 
-  while 
+\item[1.3] The fourth version of the architecture document was released
+  while
   the first functional CHERI prototype was in testing.  It reflects on
   initial experiences adapting a microkernel to exploit CHERI capability
   features.
@@ -400,7 +400,7 @@ A short summary of key ISA versions is presented here:
   A new \insnref{CIncOffset} instruction has been added, which avoids the
   need to read the offset into a general-purpose integer register for frequent
   arithmetic operations on pointers.
-   
+
   Interactions between \EPC{} and \EPCC{} are now better specified, including
     that use of untagged capabilities has undefined behavior.
   \insnnoref{CBTS} and \insnnoref{CBTU} are now defined to use
@@ -918,7 +918,7 @@ A short summary of key ISA versions is presented here:
   A new \insnnoref{CCall} selector 1 has been added that provides a jump-like
   domain transition without use of an architectural exception.
   In this mode of operation, \insnnoref{CCall} unseals the sealed code and
-  data capabilities to enter the new domain, offering a different set of 
+  data capabilities to enter the new domain, offering a different set of
   hardware and software tradeoffs from the existing selector-0 semantics.
   For example, complex exception-related mechanism is avoided in hardware for
   domain switches, with the potential to substantially improve performance.
