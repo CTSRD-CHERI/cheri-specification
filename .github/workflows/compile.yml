@@ -11,10 +11,11 @@ env:
 
 jobs:
   build:
-    # TODO: Run on Docker image that has latex pre-installed?
-    runs-on: [ubuntu-18.04]
+    runs-on: [ubuntu-20.04]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
+    - name: Basic checks
+      run: pip install pre-commit && pre-commit run --all-files --show-diff-on-failure --color=always
     - name: Install latex
       run: sudo apt-get update && sudo apt-get install -y --no-install-recommends make texlive-plain-generic texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-science texlive-fonts-recommended texlive-fonts-extra texlive-bibtex-extra texlive-extra-utils biber latexmk
     - name: Build document
