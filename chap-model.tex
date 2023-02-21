@@ -75,7 +75,7 @@ design:
 \end{description}
 
 \noindent
-These principles, which offer 
+These principles, which offer
 substantial mitigations against
  software vulnerabilities or malicious code, guide the integration
 of a capability-system model with the general-purpose instruction set -- and
@@ -138,7 +138,7 @@ The rationale for this approach is two-fold:
 Consequently, \textit{CHERI capabilities} are designed to represent
 language-level pointers with additional metadata to protect their integrity
 and provenance, enforce bounds checks and permissions (and their
-monotonicity), and hold additional fields supporting undereferenceable 
+monotonicity), and hold additional fields supporting undereferenceable
 (i.e., sealed) software-defined
 pointers suitable to implement higher-level protection models such as
 separation and efficient compartmentalization.
@@ -157,7 +157,7 @@ OS kernels and language runtimes, and also with conventional MMUs and
 virtual-memory models -- which see wide use today and continue to operate on
 CHERI-enabled systems.
 This is possible by virtue of CHERI having a \textit{hybrid capability model}
-that 
+that
 securely
 composes a capability-system model with conventional architectural
 features and programming-language pointer interpretation.
@@ -406,7 +406,7 @@ Implementing C pointers as tagged capabilities allows them to be reliably
 identified in the address space, which can help support techniques
 such as garbage collection.
 
-Our CHERI 
+Our CHERI
 prototypes implement tagged memory using partitioned memory, with tags and
 associated capability-sized units linked close to the memory controller, and
 propagated by the cache hierarchy in order to provide strong atomicity with
@@ -463,7 +463,7 @@ For example, the run-time linker or compiler may set a capability's
 permissions so that pointers to data cannot be reused for instruction fetch,
 or so that pointers to code cannot be used to store data.
 Further permissions control the ability to load and store capabilities
-themselves, allowing the compiler to implement policies such as 
+themselves, allowing the compiler to implement policies such as
 \textit{dereferenceable code and data pointers cannot be loaded from character
 strings.}
 Permissions can also be made accessible to higher-level aspects of the
@@ -521,7 +521,7 @@ CHERI enforces capability monotonicity via four mechanisms:
 %  defining what ``vast majority'' means, \textit{capability
 %    monotonicity} could also be replaced by \textit{capability bounds
 %    monotonicity} and \textit{capability permission monotonicity}.}
-%by 
+%by
 %\psnote{think we can just delete this: ``virtue of \textit{guarded manipulation}: they cannot
 %represent non-monotonic transformations.
 %This is accomplished via''.  I don't see a need to introduce the
@@ -825,7 +825,7 @@ capabilities can be constrained:
   be used only for data access -- if suitably configured.
   This can be used to create regions of shared memory within an address
   space through which capabilities cannot flow.
-  For example, it can 
+  For example, it can
 prevent
   two separated compartments from
   delegating access to one another's memory regions, instead limiting
@@ -867,7 +867,7 @@ Software that wishes to copy only data from a source capability (excluding tag
 bits due to a non-propagation goal) can simply remove the load-capability
 permission from the source capability before beginning a memory copy.
 %%%% THIS only SEEMS TO BE IN THE RIGHT PLACE: only specific data,
-%%%% RATHER THAN data only from a source capability!!! 
+%%%% RATHER THAN data only from a source capability!!!
 
 On the other hand, it is often desirable to detect stripping of a capability on
 store\psnote{this may also appear cryptic} via a hardware exception, to ease debugging.
@@ -885,7 +885,7 @@ offer functional improvements -- for example, the ability to avoid exceptions on
 a capability-oblivious memory copy via a capability that does not authorize
 capability store, or the ability to transparently strip tags on store to a
 shared memory page.
-However, we have not yet found these particular combinations valuable in our software experimentation, 
+However, we have not yet found these particular combinations valuable in our software experimentation,
 
 \subsection{Capability Compression}
 \label{sec:model-compression}
@@ -1065,7 +1065,7 @@ revocation:
   capability mechanism.
   Combined with a policy of either non-reuse of virtual address space (as
   distinct from non-reuse of physical address space), sweeping revocation, or
-  garbage collection, this 
+  garbage collection, this
   allows all outstanding capabilities (and any further capabilities derived
   from them) to be revoked without the need to search for those capabilities
   in the register file or memory.
@@ -1220,11 +1220,11 @@ describing the high-level semantics
 by the ISA and how they are mapped
 into programmer-visible constructs such as C-language features.
 The description in this chapter is intended to be agnostic to the specific
-Instruction-Set Architecture (ISA) in which CHERI is implemented.  
+Instruction-Set Architecture (ISA) in which CHERI is implemented.
 In particular, it is important that programmers be able to rely on the
 properties described in this chapter -- regardless of the ISA-level
-implementation -- 
-and that software abstractions built over these properties have 
+implementation --
+and that software abstractions built over these properties have
 consistent behavior that can be depended upon to mitigate vulnerabilities.
 
 \subsection{Abstract Capabilities}
@@ -1281,8 +1281,8 @@ simply sweeping all of physical memory.
 \item[Software compartmentalization]
 CHERI provides hardware foundations for highly efficient
 \textit{software compartmentalization}, the fine-grained decomposition of
-larger software packages into 
-smaller isolated components that are 
+larger software packages into
+smaller isolated components that are
 granted access
 only to the memory (and also software-defined) resources they actually require.
 
@@ -1296,13 +1296,13 @@ robustly link C++ objects with their corresponding vtables).
 \end{description}
 
 \noindent
-CHERI protections are implemented by a blend of 
+CHERI protections are implemented by a blend of
 functionality:
 
 \begin{description}
 
 \item[Compiler and linker] responsible for generating code that manipulates
-  and dereferences code and data pointers, compile-time linkage, and 
+  and dereferences code and data pointers, compile-time linkage, and
   stack allocation.
 
 \item[Language runtime] responsible for ensuring that program run-time
@@ -1324,8 +1324,8 @@ functionality:
 
 \subsubsection{Data-Pointer Protection}
 
-Depending on 
-the desired 
+Depending on
+the desired
 compilation mode, some or all data pointers will be implemented
 using capabilities.
 We anticipate that memory allocation (whether from the stack or heap, or via
@@ -1414,7 +1414,7 @@ There are many possible use cases, including:
 \begin{itemize}
 \item Using CHERI capabilities to represent hardware resources such as
   physical addresses, interrupt numbers, and so on, where software will
-  provide implementation (e.g., allocation, mapping, masking), but 
+  provide implementation (e.g., allocation, mapping, masking), but
 where capabilities
   can be stored and delegated.
 
@@ -1440,7 +1440,7 @@ entries (PTEs), reusing capability permissions as PTE permissions, though some
 additional permissions would be necessary (e.g. dirty).
 
 \paragraph{Synergy with linear capabilities and enclaves}
-Linear physical capabilities could support low-overhead enclaves. 
+Linear physical capabilities could support low-overhead enclaves.
 If a physical capability could be linear, such that each instance is guaranteed
 to be the unique reference to that physical memory, an enclave could be certain
 that its virtual memory mapping is the only route to access that
@@ -1709,7 +1709,7 @@ used in combination, might be:
   processor, initializes register state during context creation, and
   saves/restores capability state during context switches, with the goal of
   supporting use of capabilities in userspace.
-  Virtual memory is extended to maintain tag 
+  Virtual memory is extended to maintain tag
 integrity
   across swapping, and to prevent
   tags from being used with objects that cannot support them persistently
@@ -1723,7 +1723,7 @@ integrity
   programs.
 
 \item[Capability domain switching in userspace] Similar
-  to the minimally modified kernel model, 
+  to the minimally modified kernel model,
   only modest changes are made to the kernel itself.
   However, some additional extensions are made to the process model in order
   to support multiple mutually distrusting security domains within user

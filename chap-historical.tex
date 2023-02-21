@@ -45,8 +45,8 @@ by Nancy Leveson and William Young has unified security and human safety
 as overarching emergent system properties~\cite{LevesonYoung14}, and allows
 the threat model to fall out of the top-down analysis, rather than driving
 it.  This work in some sense
-unifies a long thread of work that considers trustworthiness as a property 
-encompassing security, integrity, reliability, survivability, human safety, 
+unifies a long thread of work that considers trustworthiness as a property
+encompassing security, integrity, reliability, survivability, human safety,
 and so on (e.g.,~\cite{Neumann06holistic,PSOS}, among others).
 
 The Security Research community also blossomed outside of MIT:
@@ -96,7 +96,7 @@ our thinking for CTSRD: capability security, microkernel OS design, and
 language-based constraints.
 These apparently disparate areas of research are linked by a duality,
 observed by Jim Morris
-in 1973, between the enforcement of data types and safety goals in programming languages on one hand, 
+in 1973, between the enforcement of data types and safety goals in programming languages on one hand,
 and the hardware and software protection techniques explored in operating
 systems~\cite{morris:protectionprogramming} on the other hand.
 Each of these approaches blends a combination of limits defined by static analysis
@@ -463,7 +463,7 @@ Carnegie Mellon's HYDRA~\cite{CohenJefferson75,Wulf81} embodied this approach, i
 message passing between separate tasks stood in for hardware-assisted security domain crossings
 at capability invocation.
 HYDRA developed a number of ideas, including the relationship between
-capabilities and object references, refined the {\em object-capability} paradigm, 
+capabilities and object references, refined the {\em object-capability} paradigm,
 and
 further pursued the separation of policy and mechanism.\footnote{Miller has expanded on the
 object-capability philosophy in considerable depth in his 2006 PhD dissertation,
@@ -545,7 +545,7 @@ security server.
 NSA and SCC eventually migrated FLASK to the FLUX microkernel developed by the University of
 Utah in the search for improved performance.
 Invigorated by the rise of
-microkernels and their congruence with security kernels, 
+microkernels and their congruence with security kernels,
 this flurry of operating system security research also faced the limitations
 (and eventual rejection) of the microkernel approach by the computer industry --
 which perceived the performance overheads as too great.
@@ -571,8 +571,8 @@ microkernel, has also continued along this avenue.
 General-purpose systems also have adopted elements of the microkernel capability design
 philosophy, such as Apple's Mac OS X~\cite{apple:macosx}
 (which uses Mach interprocess communication (IPC)
-objects as capabilities) and 
-Cambridge's Capsicum~\cite{Watson10} research project 
+objects as capabilities) and
+Cambridge's Capsicum~\cite{Watson10} research project
 (which attempts to blend capability-oriented design with UNIX).
 
 More influentially, Morris's suggestion of capabilities at the programming language
@@ -592,7 +592,7 @@ language-level exploration of capability security~\cite{miller:caja}.
 % >>>
 \section{Language and Runtime Approaches} % <<<
 
-Direct reliance on hardware for enforcement (which is central to both historic 
+Direct reliance on hardware for enforcement (which is central to both historic
 and current systems) is not the only approach to isolation enforcement.
 The notion that limits on expressibility in a programming language can be used to
 enforce security properties is frequently deployed in contemporary systems to
@@ -621,8 +621,8 @@ NaCl is closely related to Software Fault Isolation (SFI)~\cite{wahbe:sfi}, in w
 properties of machine code are enforced through instrumentation to ensure no unsafe access,
 and Proof-Carrying Code (PCC), in which the safe properties of code are demonstrated through
 attached and easily verifiable proofs~\cite{necula:pcc}.
-As mentioned in the previous section, the 
-Java Virtual Machine (JVM) model is similar; 
+As mentioned in the previous section, the
+Java Virtual Machine (JVM) model is similar;
 it combines runtime execution constraints of a
 restricted, capability-oriented bytecode with a static verifier run over
 Java classes before they can be loaded into the execution environment; this
@@ -631,14 +631,14 @@ C subsets, such as Cyclone~\cite{trevor:cyclone}, and type-safe languages such a
 Ruby~\cite{ruby}, offer similar safety guarantees, which can be leveraged to provide
 security confinement of potentially malicious code without hardware support.
 
-These techniques offer a variety of trade-offs relative to CPU enforcement 
-of the process model.  For example, some (BPF, D) limit expressibility that 
+These techniques offer a variety of trade-offs relative to CPU enforcement
+of the process model.  For example, some (BPF, D) limit expressibility that
 may prevent potentially useful constructs from being used, such as loops
-bounded by invariants rather than instruction limits; in doing so, 
-this can typically impose potentially significant performance overhead. 
-Systems such as FreeBSD often support just-in-time compilers (JITs) that 
-convert less efficient virtual-machine bytecode into native code subject to 
-similar constraints, addressing performance but not expressibility 
+bounded by invariants rather than instruction limits; in doing so,
+this can typically impose potentially significant performance overhead.
+Systems such as FreeBSD often support just-in-time compilers (JITs) that
+convert less efficient virtual-machine bytecode into native code subject to
+similar constraints, addressing performance but not expressibility
 concerns~\cite{mckusick:freebsd}.
 
 Systems like PCC that rely on proof techniques have had limited impact in
@@ -668,8 +668,8 @@ However, running these existing software designs is critical to improve the odds
 transfer, and to allow us to incrementally apply ideas in CHERI to large-scale contemporary applications
 such as office suites.
 CHERI's hybrid approach allows a gradual transition from virtual address separation to capability-based
-separation within a single address space, 
-thus 
+separation within a single address space,
+thus
 restoring programmability and performance so as to facilitate
 fine-grained compartmentalization throughout the system and its applications.
 
@@ -701,7 +701,7 @@ avoided buffer overflows.
 % >>>
 \paragraph{PSOS} % <<<
 SRI's Provably Secure Operating System hardware-software design was formally
-specified in a single language (SPECIAL), 
+specified in a single language (SPECIAL),
 with encapsulated modular abstraction, interlayer state mappings,
 and abstract programs relating each layer to those on which it
 depended~\cite{PSOS,NeumannFeiertag03}.
@@ -711,7 +711,7 @@ for the lifetime of the system.  In addition to a
 few primitive types, application-specific object types could be defined and
 their properties enforced with the hardware assistance provided by the
 capability-based access controls.  The design allowed application layers to
-efficiently execute instructions, with object-oriented 
+efficiently execute instructions, with object-oriented
 capability-based addressing directly to the hardware -- despite appearing at
 a much higher layer of abstraction in the design specifications.
 
@@ -727,7 +727,7 @@ systems such as Juniper Junos and McAfee Sidewinder~\cite{watson13}.
 Developed in the DARPA CHATS program, the MAC Framework allows static and
 dynamic extension of the kernel's access-control model, supporting
 implementation of {\em security localization} --
-that is,  
+that is,
  %%% IS THIS CORRECT?  IT WAS UNGRAMMATICAL AND AMBIGUOUS
 the adaptation of the OS
 security to product and deployment-specific requirements.
@@ -735,15 +735,15 @@ The MAC Framework (although originally targeted at classical mandatory access
 control models) found significant use in application sandboxing, especially in
 Junos, Mac OS X, and iOS.
 One key lesson from this work is the importance of longer-term thinking about
-security-interface design, 
+security-interface design,
 including
 interface stability and
 support for multiple policy models; these are especially important in
 instruction-set design.
 Another important lesson is the increasing criticality of extensibility of not
 just the access-control model, but also the means by which remote principals
-are identified and execute within local systems: 
-not only is consideration of classical UNIX users inadequate, 
+are identified and execute within local systems:
+not only is consideration of classical UNIX users inadequate,
 but also there is a need to allow widely varying policies and
 notions of remote users executing local code across systems.
 These lessons are taken to heart in capability systems, which carefully
@@ -781,18 +781,18 @@ that the current decade has been the time to revisit these
 ideas, albeit through the lens of contemporary problems and with insight gained through decades of research into security and systems design.
 As described in Chapter~\ref{chap:introduction}, a transformed threat
 environment deriving from ubiquitous computing and networking, and the
-practical reality of  widespread exploitation of software vulnerabilities, 
+practical reality of  widespread exploitation of software vulnerabilities,
 both
 provide a strong motivation to investigate improved processor foundations for
 software security.
-This change in environment has coincided with improved 
+This change in environment has coincided with improved
 and more rapid
 hardware prototyping
 techniques and higher-level hardware-definition languages that facilitate
 academic hardware-software system research at larger scales; without them we
 would have been unable to explore the CHERI approach in such detail.
 Simultaneously, our understanding of operating-system and programming-language
-security has been vastly enhanced by several decades of research; 
+security has been vastly enhanced by several decades of research;
 in particular, recent
 development of the hybrid capability-system Capsicum model suggests a strong alignment between
 capability-based techniques and successful mitigation approaches that can be

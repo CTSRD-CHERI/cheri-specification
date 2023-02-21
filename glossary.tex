@@ -14,7 +14,7 @@
     maintenance of capability lifespan across operations that violate
     architectural \gls{capability provenance}.
     For example, if an OS kernel
-    swaps a page containing a capability to and from disk, 
+    swaps a page containing a capability to and from disk,
     it will have to have its \gls{capability tag}
     restored through re-derivation, so there is no longer an
     architectural provenance relationship between the two, but for
@@ -134,13 +134,13 @@
     that any requested manipulation of a \gls{capability}, whether in a
     \gls{capability register} or in memory, either leads to strictly
     non-increasing rights, clearing of the \gls{capability tag}, or a
-    hardware exception.    
+    hardware exception.
     \knnote{I presume that the ``rights'' of a capability are
     determined by its permissions and its bounds, but not by its
     sealedness. In other words, increasing the permissions or bounds
     of a capability would increase its rights, but unsealing a
     capability would not increase its right. If this is correct,
-    perhaps it could help to explicitly state this here.}    
+    perhaps it could help to explicitly state this here.}
     Controlled violation of monotonicity can be achieved via the exception
     delivery mechanism, which grants rights to additional capability
     register, and also by the \gls{CInvoke} instruction, which may
@@ -213,15 +213,15 @@ The property that a valid-for-use \gls{capability} can only be
 % PS: not totally clear what a ``valid capability operation'' is.  An
 % execution of a capability instruction that doesn't raise an exception?
     Provenance is implemented using a \gls{capability tag} combined with
-    \gls{capability monotonicity}, 
+    \gls{capability monotonicity},
 % PS: the text (both previous version and mine) defines provenance as
 % a property of the architecture, not ``the provenance of a
 % capability'' as the source capability or derivation chain, so we
-% can't say ``will be preserved'' like the text did. 
+% can't say ``will be preserved'' like the text did.
 % Maybe we should define that more explicit notion of provenance, and
 % replace this glossary entry with one for ``capability provenance
-% preservation'', but I've not for now. 
-irrespective of 
+% preservation'', but I've not for now.
+irrespective of
 %
 whether a
     capability is held in a \gls{capability register} or \gls{tagged memory}}
@@ -256,7 +256,7 @@ whether a
     \glslink{dereference}{dereferenced} via the ISA.
     If the tag is clear, then the capability is invalid and cannot be
     dereferenced via the ISA.
-    Tags are preserved 
+    Tags are preserved
 by ISA
 operations that conform to \gls{capability
     provenance} and \gls{capability monotonicity} rules -- for example,
@@ -728,7 +728,7 @@ operations that conform to \gls{capability
 {
   name=sealing capability,
   plural=sealing capabilities,
-  description={A sealing capability is one with the \cappermSeal 
+  description={A sealing capability is one with the \cappermSeal
     permission, allowing it to be used to create \glspl{sealed capability}
     using a \gls{capability object type} set to the sealing capability's
     \gls{address}, and subject to its bounds}
