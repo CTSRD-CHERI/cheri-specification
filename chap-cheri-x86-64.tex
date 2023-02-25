@@ -1034,18 +1034,17 @@ memory operations, and clear tags for any arithmetic operation.
 Loads of
 vector registers should preserve a tag for contiguous, aligned
 128-bit words, and stores of vector
-registers to memory should preserve tags if there was no change.
+registers to memory should preserve tags if the store is aligned
+and there had been no intervening change to the register.
 Existing vector
 instructions which manipulate vector register contents will clear
 all tags in the destination register.
 
 \subsubsection{Memory Copies}
 
+In CHERI C, \ccode{memcpy()} must preserve tags.
 Vector loads and stores are often used to implement \ccode{memcpy()}.
-In CHERI C, \ccode{memcpy()} must preserve tags.  A \ccode{memcpy()}
-implementation which uses \insnnoref{MOVC} will operate at the same
-width as existing memory copies implemented using SSE which may
-mitigate some of the cost.  Another option may be to support an
+Another option may be to support an
 optimized \insnnoref{REP MOVSC} similar to the existing optimization
 for \insnnoref{REP MOVSB} where the former instruction would preserve
 tags during a copy unlike the latter.
@@ -1228,17 +1227,17 @@ mode would swap the \CGS{} and \KGS{} registers.
 \subsection{FS and GS Aliases}
 
 The \FS{} and \GS{} segment descriptors have grown several related
-aliases over time such as the \FSBASE{} and \GSBASE{} MSRs and
+aliases over time such as the \FSBASE{} and \GSBASE{} MSRs and the
 \insnnoref{RDFSBASE} family of instructions.  These aliases should be
 implemented as the addresses of the appropriate capability register.
 Reads of the \FSBASE{}, \GSBASE{}, and \KGSBASE{} MSRs should return
-the address of the \CFS{}, \CGS{}, and \KGS{} capabilities,
-respectively.  Writes to these MSRs should set the address of the
+the address field of the \CFS{}, \CGS{}, and \KGS{} capabilities,
+respectively.  Writes to these MSRs should set the address field of the
 respective capability equivalent to \insnref{CSetAddr}.  Similarly,
 the \insnnoref{RDFSBASE} and \insnnoref{RDGSBASE} instructions should
-return the address of the \CFS{} and \CGS{} capabilities,
+return the address field of the \CFS{} and \CGS{} capabilities,
 respectively.  The \insnnoref{WRFSBASE} and \insnnoref{WRGSBASE}
-instructions should set the address of the respective capability
+instructions should set the address field of the respective capability
 equivalent to \insnref{CSetAddr}.  If a new address is set which makes
 the capability unrepresentable, the capability's tag should be
 cleared.
