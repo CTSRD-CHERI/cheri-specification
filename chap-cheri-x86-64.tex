@@ -1029,13 +1029,15 @@ x86 architecture including MMX, SSE, AVX, and AVX-512.
 
 \subsubsection{Vector Registers and Memory Tags}
 
-We propose that vector registers should not contain tags.  Loads of
-vector registers should ignore tags in memory, and stores of vector
-registers to memory should always clear tags.  Existing vector
-instructions which manipulate vector register contents do not make
-sense for tagged capability values.  However, vector extensions are
-also used to perform certain classes of memory loads and stores which
-may require additional care.
+We propose that vector registers should preserve tags for simple
+memory operations, and clear tags for any arithmetic operation.
+Loads of
+vector registers should preserve a tag for contiguous, aligned
+128-bit words, and stores of vector
+registers to memory should preserve tags if there was no change.
+Existing vector
+instructions which manipulate vector register contents will clear
+all tags in the destination register.
 
 \subsubsection{Memory Copies}
 
