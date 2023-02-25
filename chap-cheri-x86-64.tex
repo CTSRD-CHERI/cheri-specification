@@ -539,8 +539,8 @@ capability operands:
   \item \insnnoref{ADDC} and \insnnoref{SUBC} would be used to adjust
     the offset of a capability similar to the \insnref{CIncOffset}
     instruction in CHERI-RISC-V.
-    For these instructions, the source operand would either be a
-    sign-extended immediate or a 64-bit integer register whose value
+    For these instructions, the source operand would be an
+    integer whose value
     is either added to or subtracted from the offset of the
     capability-sized destination operand.
 
@@ -571,7 +571,7 @@ add %csp,$16
     representation:
 
 \begin{verbatim}
-add %cax,%csp,%ax
+add %cax,%csp,%rax
 \end{verbatim}
 
     This emphasizes the width difference between \CAX{} and \RAX{},
@@ -878,16 +878,16 @@ exception.
     Set \emph{rca} to \emph{r/mc} conditionally sealed with
     \textbf{otype} equal to the \textbf{address} field of \emph{rcb}.
     If \emph{rca} is not sealed with \emph{rcb}.\textbf{otype}, it
-    will be set equal to \emph{r/mc}.  Set \RFLAGS{} according to
-    the resulting type field of \emph{rca} (e.g. \texttt{SF}
-    will be 1 if the result is unsealed).
+    will be set equal to \emph{r/mc}.  Set \texttt{ZF} in \RFLAGS{} to 1 if
+    \emph{r/mc} is sealing is successful or 0 otherwise; set the rest
+    of \RFLAGS{} according to the resulting \emph{r/mc}.\textbf{otype}..
 
   \item \insnref{CSealEntry} r/mc
 
     Seal \emph{r/mc} as a sentry.  On failure, leave \emph{r/mc}
     unchanged.  Set \texttt{ZF} in \RFLAGS{} to 1 if
     \emph{r/mc} is sealed as a sentry or 0 otherwise; set the rest
-    of \RFLAGS{} according to the resulting type field of \emph{r/mc}.
+    of \RFLAGS{} according to the resulting \emph{r/mc}.\textbf{otype}.
 \end{itemize}
 
 \subsubsection{Pointer-Arithmetic Instructions}
