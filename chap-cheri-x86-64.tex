@@ -140,7 +140,7 @@ The following changes are specific to CHERI-x86-64:
  \item A new exception code is used to report CHERI-related
    exceptions.
  \item New PTE bits and page-fault exception code bits are defined for
-   loading and store capabilities in memory.
+   loading and storing capabilities in memory.
  \item The \FSBASE{} and \GSBASE{} registers are extended as
    capabilities.
  \item As with CHERI-RISC-V, the \cflags{} field contains a single bit
@@ -253,8 +253,8 @@ code segment along with a target code capability with this flag set
 will raise a General Protection Fault with the error code set to the
 target segment selector.
 
-In capability mode, instructions will use capabity-aware addressing
-(Section~\ref{sec:x86:capabity-addressing}) by default.  Some existing
+In capability mode, instructions will use capability-aware addressing
+(Section~\ref{sec:x86:capability-addressing}) by default.  Some existing
 opcodes will also assume a capability sized operand in this mode.
 Finally, instructions which work with the stack would use \CSP{} as
 the implicit stack pointer.
@@ -1401,7 +1401,7 @@ by sealing.  For example, a sentry capability could be used in either
 plain 64-bit mode or capability mode.  By storing the mode in
 capability metadata protected by sealing, sealed code capabilities can
 only be used in the intended mode.  Also, while it may be less
-flexible to permit the stack alignment to be chosen orthgonally to the
+flexible to permit the stack alignment to be chosen orthogonally to the
 default instruction encoding mode, it does not seem useful in
 practice.  Instead, capability mode is designed as a single knob to
 optimize pure capability code.
