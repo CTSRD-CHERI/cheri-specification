@@ -622,6 +622,15 @@ add %csp,$16
     \insnnoref{CMPXCHG} should default to integer operands in
     capability mode.
 
+  \item \insnnoref{CMPXCHG2C} will be required to support atomic
+    operations on pairs of capabilities.
+
+    The opcode \texttt{0F C7 /1} would be extended to support
+    capability operands via the capability operand prefix.
+
+    \insnnoref{CMPXCHG16B} should default to integer operands in
+    capability mode.
+
   \item \insnnoref{XCHGC} will also be required to support atomic
     operations on capabilities.
 
