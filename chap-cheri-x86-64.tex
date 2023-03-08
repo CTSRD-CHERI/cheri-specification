@@ -662,12 +662,18 @@ add %csp,$16
     operands in capability mode.
 
   \item \insnnoref{LEAC} would store the resulting address in a
-    destination capability register.  If the instruction is using ``plain''
-    addressing, the resulting capability would be a NULL-derived
-    capability with the computed address.
+    destination capability register.
 
     The opcode \texttt{8D} would be extended to support capability
     operands via the capability operand prefix.
+
+    \insnnoref{LEA} would not support the 0x07 opcode prefix.  The
+    address size would always match the operand size.  Storing an
+    integer address in a capability register would have the same
+    effect as the equivalent version of \insnnoref{LEA} storing the
+    integer address to the integer alias register.  Using a
+    capability-aware address with an integer \insnnoref{LEA} would
+    also be identical in effect to using ``plain'' addressing.
 
     \insnnoref{LEA} should default to integer operands in
     capability mode.
