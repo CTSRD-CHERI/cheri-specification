@@ -396,13 +396,13 @@ Capability-aware addressing must also permit addresses defined as
 offsets relative to \CFS{} and \CGS{} to support TLS with
 capability-aware addresses.  When an instruction uses the \FS{} or
 \GS{} segment prefix with capability-aware addressing, the memory
-operand (registers and displacement) is interpeted as an integer
+operand (registers and displacement) is interpreted as an integer
 offset relative to the \CFS{} or \CGS{} capability register,
 respectively.
 
 Other segment prefixes are not permitted in capability-aware
-addressing.  Attemping to use a segment fix other than \FS{} or
-\GS{} with a capablity-aware address should raise an illegal
+addressing.  Attempting to use a segment fix other than \FS{} or
+\GS{} with a capability-aware address should raise an illegal
 instruction exception.
 
 \subsubsection{Instructions with Implicit Memory Operands}
@@ -448,7 +448,7 @@ new variants of existing instructions that use an opcode which
 specifies a capability operation rather than an integer operation.
 Existing x86 toolchains already use instruction suffixes such as
 \texttt{b}, \texttt{w}, \texttt{l}, and \texttt{q} to explicitly state
-the operand size.  We recommand that the \texttt{c} suffix be used to
+the operand size.  We recommend that the \texttt{c} suffix be used to
 explicitly state a capability operand size.
 
 \subsubsection{Capability Operands for Existing Opcodes}
@@ -979,7 +979,7 @@ single operand \insnnoref{CTestTag} which copies the tag value to
     (see Section~\ref{sec:x86:capability-fault}).
 \end{itemize}
 
-\subsubsection{Adjusting to Compresssed Capability Precision
+\subsubsection{Adjusting to Compressed Capability Precision
   Instructions}
 
 \begin{itemize}
@@ -999,7 +999,7 @@ single operand \insnnoref{CTestTag} which copies the tag value to
 \subsubsection{Tag-Memory Access Instructions}
 
 These instructions permit bulk access to a set of in-memory tags.
-Each instruction accesses the tags in a ``stride'' of capabilties.
+Each instruction accesses the tags in a ``stride'' of capabilities.
 The size of a stride is implementation dependent.  It must be a power
 of two, and it is suggested that a stride contain the number of tags
 in a single cache line.  The stride size should either be reported in
@@ -1009,7 +1009,7 @@ returned by an existing \insnnoref{CPUID} leaf.
 \begin{itemize}
   \item \insnref{CLoadTags} r64, m
 
-    Set \emph{r64} to a bitmask of tags for a stride of capabilties
+    Set \emph{r64} to a bitmask of tags for a stride of capabilities
     located in memory at and above the memory addressed by \emph{m}.
     Bit 0 corresponds to tag for the capability at the address
     \emph{m}.  The authorizing capability for \emph{m} (either \DDC{}
@@ -1071,7 +1071,7 @@ contains pointers.  We believe that permitting a non-temporal store of
 a single capability via \insnnoref{MOVNTIC} is sufficient for cases
 requiring non-temporal stores of tagged capabilities.
 
-\subsubsection{Memory Addresssing}
+\subsubsection{Memory Addressing}
 
 Vector instructions with memory operands would support
 capability-aware addressing in the same manner as general-purpose
@@ -1201,7 +1201,7 @@ following changes:
   \item Extending the global and local descriptor table format to
     support a new capability call gate which stored a full capability
     rather than a 64-bit offset.  This will be more invasive than the
-    64-bit call gate which depends on the abillity to force a number
+    64-bit call gate which depends on the ability to force a number
     of reserved bits in the fourth double word to zero as a sentinel
     type for the second half of a 64-bit call gate.
 
@@ -1354,7 +1354,7 @@ permission (such as a store of a tagged capability to a page where the
 \texttt{CW} bit is clear), a page-fault (PF\#) exception should be
 raised.  Bit 8 (currently reserved) should be set in the page-fault
 error code provided by the processor indicating that the fault was
-caused by a capabilty permission violation.  Other bits in the page
+caused by a capability permission violation.  Other bits in the page
 fault error code such as \texttt{P}, \texttt{W/R}, \texttt{U/S}, and
 \texttt{I/D} should be set to indicate the type of memory access.  In
 addition, the virtual address of the memory access should be provided
@@ -1420,7 +1420,7 @@ to additional capability registers beyond the use of the existing
 
 One approach to expand register selector fields would be to make use
 of existing segment prefixes to indicate a set 5th bit for a specific
-field.  For example, the \GS{} prefix could be used in capablity-aware
+field.  For example, the \GS{} prefix could be used in capability-aware
 addressing mode to indicate that the base capability register used in
 a memory operand would be an additional capability register with an
 index of 16 or higher.  The lower four bits of the register selector
