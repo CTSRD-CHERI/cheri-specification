@@ -577,8 +577,8 @@ add %csp,$16
 
     would move the capability stack pointer up by 16 bytes.
 
-    These instructions should set flag bits in \RFLAGS{} according to
-    the integer value of the resulting capability.
+    These instructions should set status flag bits in \RFLAGS{}
+    according to the integer value of the resulting capability.
 
     The \insnnoref{ADD} opcodes \texttt{01}, \texttt{03}, \texttt{05},
     \texttt{81 /0}, and \texttt{83 /0} and the \insnnoref{SUB}
@@ -597,8 +597,8 @@ add %csp,$16
     with \insnnoref{ADDC}, the second operand would always be an
     integer operand.
 
-    These instructions should set flag bits in \RFLAGS{} according to
-    the integer value of the resulting capability.
+    These instructions should set status flag bits in \RFLAGS{}
+    according to the integer value of the resulting capability.
 
     The \insnnoref{AND} opcodes \texttt{21}, \texttt{23}, \texttt{25},
     \texttt{81 /4} and \texttt{83 /4}; the \insnnoref{OR} opcodes
@@ -653,8 +653,8 @@ add %csp,$16
     The opcode \texttt{0F C0} would be extended to support capability
     operands via the capability operand prefix.
 
-    \insnnoref{XADDC} should set flag bits in \RFLAGS{} according to
-    the integer value of the resulting capability.
+    \insnnoref{XADDC} should set status flag bits in \RFLAGS{}
+    according to the integer value of the resulting capability.
 
     \insnnoref{XADD} should default to integer operands in
     capability mode.
@@ -770,6 +770,9 @@ extensions:
 These instructions would set the \texttt{ZF} flag in \RFLAGS{}
 according to the integer field
 extracted from the capability.
+The value of other status flags (\texttt{CF}, \texttt{PF},
+\texttt{AF}, \texttt{SF}, and \texttt{OF}) would be undefined unless
+otherwise stated.
 
 \begin{itemize}
   \item \insnref{CGetPerm} r64, r/mc
@@ -821,7 +824,9 @@ exception.
     field of \empty{rc}.  If the sealing operation fails, set
     \emph{r/mc} to its original value with the \textbf{tag} field
     cleared and clear \texttt{ZF}.  If the sealing operation succeeds,
-    set \texttt{ZF} to 1.
+    set \texttt{ZF} to 1.  The value of other status flags
+    (\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and
+    \texttt{OF}) would be undefined.
 
   \item \insnref{CUnSeal} r/mc, rc
 
@@ -829,7 +834,9 @@ exception.
     unsealing operation.  If the unsealing operation fails, set
     \emph{r/mc} to its original value with the \textbf{tag} field
     cleared and clear \texttt{ZF}.  If the unsealing operation
-    succeeds, set \texttt{ZF} to 1.
+    succeeds, set \texttt{ZF} to 1.  The value of other status flags
+    (\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and
+    \texttt{OF}) would be undefined.
 
   \item \insnref{CAndPerm} r/mc, r64
 
@@ -862,7 +869,9 @@ exception.
     clear the \textbf{tag} field in the resulting capability.
 
     Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    in the resulting value of \emph{r/mc}.
+    in the resulting value of \emph{r/mc}.   The value of other status
+    flags (\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and
+    \texttt{OF}) would be undefined.
 
   \item \insnref{CSetBoundsExact} r/mc, r64
 
@@ -877,7 +886,9 @@ exception.
     \textbf{tag} field in the resulting capability.
 
     Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    in the resulting value of \emph{r/mc}.
+    in the resulting value of \emph{r/mc}.  The value of other status
+    flags (\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and
+    \texttt{OF}) would be undefined.
 
   \item \insnref{CClearTag} r/mc
 
@@ -894,7 +905,9 @@ exception.
     \emph{rcb} with the \textbf{tag} field cleared.
 
     Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    of \emph{rca}.
+    of \emph{rca}.  The value of other status flags (\texttt{CF},
+    \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF}) would be
+    undefined.
 
   \item \insnref{CCopyType} rca, r/mc, rcb
 
@@ -905,7 +918,9 @@ exception.
     \textbf{address} field set to \emph{rcb}.\textbf{otype}.
 
     Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    of \emph{rca}.
+    of \emph{rca}.  The value of other status flags (\texttt{CF},
+    \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF}) would be
+    undefined.
 
   \item \insnref{CCSeal} rca, r/mc, rcb
 
@@ -914,20 +929,26 @@ exception.
     If \emph{rca} is not sealed with \emph{rcb}.\textbf{otype}, it
     will be set equal to \emph{r/mc}.  Set \texttt{ZF} in \RFLAGS{} to
     1 if \emph{rca} is sealed with \emph{rcb}.\textbf{otype} or 0
-    otherwise.
+    otherwise.  The value of other status flags (\texttt{CF},
+    \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF}) would be
+    undefined.
 
   \item \insnref{CSealEntry} r/mc
 
     Seal \emph{r/mc} as a sentry.  On failure, leave \emph{r/mc}
     unchanged.  Set \texttt{ZF} in \RFLAGS{} to 1 if \emph{r/mc} if
-    \emph{r/mc} is sealed as a sentry or 0 otherwise.
+    \emph{r/mc} is sealed as a sentry or 0 otherwise.  The value of
+    other status flags (\texttt{CF}, \texttt{PF}, \texttt{AF},
+    \texttt{SF}, and \texttt{OF}) would be undefined.
 \end{itemize}
 
 \subsubsection{Pointer-Arithmetic Instructions}
 
 These instructions should set \texttt{ZF} in \RFLAGS{} to indicate
 success (set) or failure (clear).  If one of these instructions fails, it
-should not raise an exception.
+should not raise an exception.  The value of other status flags
+(\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF})
+would be undefined.
 
 \begin{itemize}
   \item \insnref{CToPtr} r64, rc, r/mc
@@ -958,7 +979,9 @@ should not raise an exception.
 
 For these instructions, the result of the comparison should be written
 to the \texttt{ZF} field of \RFLAGS{} instead of to a destination
-register as is done in CHERI-RISC-V.
+register as is done in CHERI-RISC-V.  The value of other status flags
+(\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF})
+would be undefined.
 
 \begin{itemize}
   \item \insnref{CSetEqualExact} r/mc, rc
