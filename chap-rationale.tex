@@ -616,11 +616,6 @@ have been with the \ctag{} bit set, and zero in the \cbase{} field and
 \clength{} fields.  Effectively, NULL would have been a capability for
 an array of length zero.
 
-Many CHERI instructions are agnostic as to which of these two
-conventions for NULL is employed, but the \insnref{CFromPtr} and
-\insnref{CToPtr} operations are aware of the
-convention.
-
 The advantages of NULL's \ctag{} bit being unset are:
 
 \begin{itemize}
@@ -1464,5 +1459,85 @@ instrumenting potentially tag-clearing instructions with assertions about
 the tag, either manually or in a compiler santitization pass.
 The CHERI ISA instantiation can ensure these checks are cheap, for example by
 providing an instruction to throw an exception based on the tag.
+
+\section{\DDC{} and \PCC{} Offsetting}
+
+Originally, CHERI always treated integer pointers used for legacy
+memory accesses as offsets.  For example, loads and stores using an
+integer pointer treated integer address as an offset relative to the
+base of \DDC{}.  Similarly, branch instructions which targeted an
+absolute integer pointer set the offset of \PCC{} to the value of the
+integer pointer.
+
+Offsetting also impacted CHERI C in multiple ways.
+Casts of a capability to an integer value returned the offset of the
+capability rather than its address.  Similarly, casts between
+capability pointers and integer pointers used special instructions
+(\insnnoref{CFromPtr} and \insnnoref{CToPtr}) which took the offset of
+\DDC{} into account.  Specifically, the compiler would use
+\insnnoref{CFromPtr} to generate integer pointers which were not an
+absolute virtual address of an object, but the offset of an object's
+address relative to the base of \DDC{}.  Similarly, capability
+pointers created via casts were derived from \DDC{} assuming that the
+integer pointer was an offset.
+
+To provide consistent semantics with pointer casts, arithmetic
+operations performed on integer values of capabilities (uintcap\_t)
+used the offset of the capability as the scalar value.  For example,
+to mask off the low bits of a pointer, the compiler fetched the
+offset, applied the requested mask, and saved the result as the new
+offset.
+
+Finally, offsetting affected sub-language integer pointers.  Integer
+function pointers, such as those stored in GOT entries, had to store
+offsets relative to the base of \PCC{} rather than absolute addresses.
+Similarly, pointers to data objects were stored as offsets relative to
+\DDC{}.
+
+As CHERI matured and developers gained more experience, several
+caveats of this approach arose:
+
+\begin{itemize}
+\item Using offset interpretation for arithmetic operations on
+  uintcap\_t broke several common idioms in pure-capability CHERI C
+  (where uintptr\_t is the same as uintcap\_t).  Aligning pointers did
+  not work reliably since the offset of a misaligned capability was
+  still zero.  Code using the integer value of pointers as a key for
+  hash tables would see far more collisions.  Due to these types of
+  issues CHERI LLVM switched the default interpretation for arithmetic
+  operations to work with addresses.
+
+  However, this did result in inconsistent semantics compared to
+  pointer casts.  In particular, converting between capabilities and
+  integers can have different results if intermediate uintcap\_t
+  values are used compared to direct casts.
+
+\item Adding the base of \DDC{} to the effective address of legacy
+  loads and stores can have a prohibitive cost in microarchitecture.
+
+\item Tight bounds for \DDC{} and \PCC{} for hybrid code required that
+  the hybrid code be relocatable and position independent.  For simple
+  support of legacy 64-bit processes for which \DDC{} and \PCC{}
+  bounds covered the entire user portion of the address space with a
+  base address of 0 this did not matter.  However, this was a hurdle
+  for hybrid operating system kernels which tended to run in a higher
+  range of virtual addresses and were not always relocatable.  In
+  practice hybrid kernels ran with \DDC{} and \PCC{} whose bounds
+  spanned the entire address space.
+
+\item The Morello architecture shipped with knobs to toggle the
+  offsetting behavior of \DDC{} and \PCC{}.  When offsetting was
+  disabled, \DDC{} and \PCC{} still constrained legacy memory accesses
+  via bounds and permissions, but legacy integer pointers were
+  interpreted as addresses rather than offsets.
+\end{itemize}
+
+CHERI no longer mandates \DDC{} and \PCC{} offsetting by default.
+CHERI architectures may provide it as an optional feature which can be
+enabled at runtime or may omit it entirely.  CHERI compilers always
+treat integer pointers as addresses using \insnref{CGetAddr} and
+\insnref{CSetAddr} to handle conversions between capabilities and
+integers.  The \insnref{CFromPtr} and \insnref{CToPtr} instructions
+may be provided on architectures supporting offsetting.
 
 % >>>
