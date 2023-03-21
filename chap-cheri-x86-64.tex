@@ -774,6 +774,10 @@ The value of other status flags (\texttt{CF}, \texttt{PF},
 \texttt{AF}, \texttt{SF}, and \texttt{OF}) would be undefined unless
 otherwise stated.
 
+Note that unlike CHERI-RISC-V, CHERI-x86-64 would not add a
+\insnref{CGetAddr} instruction since the \textbf{address} field of a
+capability can be obtained via a 64-bit \insnnoref{MOV} instruction.
+
 \begin{itemize}
   \item \insnref{CGetPerm} r64, r/mc
 
@@ -805,10 +809,6 @@ otherwise stated.
   \item \insnref{CGetOffset} r64, r/mc
 
     Set \emph{r64} to the \textbf{offset} field of \emph{r/mc}.
-
-  \item \insnref{CGetAddr} r64, r/mc
-
-    Set \emph{r64} to the \textbf{address} field of \emph{r/mc}.
 \end{itemize}
 
 \subsubsection{Capability-Modification Instructions}
