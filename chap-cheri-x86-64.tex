@@ -818,11 +818,7 @@ capability.
     \emph{r/mc} is sealed and tagged, set \emph{r/mc} to its original
     value with the \textbf{tag} field cleared.
 
-  \item \insnref{CSetAddr} r/mc, r64
-
-    Set the \textbf{address} field of \emph{r/mc} to \emph{r64}.  If
-    \emph{r/mc} is sealed and tagged, set \emph{r/mc} to its original
-    value with the \textbf{tag} field cleared.
+  \item \insnxesref{SCADDR} - Set Capability Address
 
   \item \insnref{CSetBounds} r/mc, r64
   \item \insnref{CSetBounds} r/mc, uimm16
@@ -1249,12 +1245,12 @@ implemented as the addresses of the appropriate capability register.
 Reads of the \FSBASE{}, \GSBASE{}, and \KGSBASE{} MSRs should return
 the address of the \CFS{}, \CGS{}, and \KGS{} capabilities,
 respectively.  Writes to these MSRs should set the address of the
-respective capability equivalent to \insnref{CSetAddr}.  Similarly,
+respective capability equivalent to \insnxesref{SCADDR}.  Similarly,
 the \insnnoref{RDFSBASE} and \insnnoref{RDGSBASE} instructions should
 return the address of the \CFS{} and \CGS{} capabilities,
 respectively.  The \insnnoref{WRFSBASE} and \insnnoref{WRGSBASE}
 instructions should set the address of the respective capability
-equivalent to \insnref{CSetAddr}.  If a new address is set which makes
+equivalent to \insnxesref{SCADDR}.  If a new address is set which makes
 the capability unrepresentable, the capability's tag should be
 cleared.
 

@@ -102,6 +102,7 @@ instructions which we believe may either be used frequently or in
 frequently-accessed code paths.
 
 \input{insn-x86-64/movcap}
+\input{insn-x86-64/scaddr}
 
 \clearpage
 \section{Summary of New Opcodes}
@@ -113,6 +114,8 @@ available in capability mode.
 \noindent
 \begin{tabular}{| l | l |} \hline
   \textbf{Opcode} & \textbf{Instruction}\\
+  \hline
+  16 \emph{/r} & \insnxesref{SCADDR} \emph{r/mc, r64}\\
   \hline
   0F 24 \emph{/r} & \insnxesref[movcap]{MOV} \emph{rc,} CFS/CGS/DDC\\
   \hline
