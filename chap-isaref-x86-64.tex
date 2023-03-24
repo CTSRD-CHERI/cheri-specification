@@ -103,6 +103,8 @@ frequently-accessed code paths.
 
 \input{insn-x86-64/movcap}
 \input{insn-x86-64/scaddr}
+\input{insn-x86-64/scbnd}
+\input{insn-x86-64/scbnde}
 
 \clearpage
 \section{Summary of New Opcodes}
@@ -116,6 +118,14 @@ available in capability mode.
   \textbf{Opcode} & \textbf{Instruction}\\
   \hline
   16 \emph{/r} & \insnxesref{SCADDR} \emph{r/mc, r64}\\
+  \hline
+  17 \emph{/r} & \insnxesref{SCBND} \emph{r/mc, r64}\\
+  \hline
+  27 \emph{/r} & \insnxesref{SCBNDE} \emph{r/mc, r64}\\
+  \hline
+  37 /0 \emph{id} & \insnxesref{SCBND} \emph{r/mc, imm32}\\
+  \hline
+  37 /1 \emph{id} & \insnxesref{SCBNDE} \emph{r/mc, imm32}\\
   \hline
   0F 24 \emph{/r} & \insnxesref[movcap]{MOV} \emph{rc,} CFS/CGS/DDC\\
   \hline
