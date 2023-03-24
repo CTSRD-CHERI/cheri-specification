@@ -1,0 +1,32 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CINVOKE - Invoke Sealed Capability Pair}
+\insnxeslabel{cinvoke}
+\subsection*{CINVOKE - Invoke Sealed Capability Pair}
+
+\begin{x86opcodetable}
+  \xopcode{EA \emph{/r}}{CINVOKE \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Set CAX to \emph{r/mc} and jump to \emph{rc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:reg (r)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Jumps to a pair of sealed capabilities.  The first source operand can
+be a register; the second source operand can be a register or memory
+location.
+
+If both operands are sealed with the same \textbf{otype}, sets \CIP{}
+to the unsealed first operand and sets \CAX{} to the unsealed second
+operand.  Note that this control transfer is a jump and does not push
+any values onto the stack.  If this instruction fails, it raises a
+Capability Violation Fault (see
+Section~\ref{sec:x86:capability-fault}).
+
+\subsubsection*{Flags Affected}
+
+None
