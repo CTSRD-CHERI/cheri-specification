@@ -1,0 +1,43 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{SCBNDE - Set Exact Capability Bounds}
+\insnxeslabel{scbnde}
+\subsection*{SCBNDE - Set Exact Capability Bounds}
+
+\begin{x86opcodetable}
+  \xopcode{27 \emph{/r}}{SCBNDE \emph{r/mc, r64}}
+  {MR}{Valid}{Valid}
+  {Set bounds of \emph{r/mc} to \emph{r64}.}
+  \xopcode{37 /1 \emph{id}}{SCBNDE \emph{r/mc, imm32}}
+  {MI}{Valid}{Valid}
+  {Set bounds of \emph{r/mc} to zero-extended \emph{imm32}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (r, w)}{ModRM:reg (r)}{NA}{NA}
+  \xopen{MI}{ModRM:r/m (r, w)}{imm32}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Derives a new capability from the destination operand and source
+operand and then store the result in the destination operand.  The
+destination operand can be a register or memory location; the source
+operand can be an immediate or a register.  When an immediate value is
+used as an operand, it is zero-extended.
+
+The new capability's \textbf{base} field is set to the current
+\textbf{address} field of the destination operand, and the
+\textbf{length} field is set to the source operand.  If the resulting
+capability cannot be represented exactly, the \textbf{tag} field will
+be cleared, the \textbf{base} will be rounded down, and the
+\textbf{length} will be rounded up by the smallest amount needed to
+form a representable capability covering the requested bounds.  If the
+original capability is sealed or the bounds of the new capability
+exceed the original capability, the \textbf{tag} field in the
+resulting capability is cleared.
+
+\subsubsection*{Flags Affected}
+
+The ZF flag is set to the value of the \textbf{tag} field in the
+resulting capability.  The CF, PF, AF, SF, and OF flags are undefined.

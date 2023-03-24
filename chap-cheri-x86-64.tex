@@ -724,9 +724,6 @@ extensions:
   \item \textbf{r/mc} { }---{ } A capability operand that is either
     the contents of one of the capability registers for \textbf{rc} or
     a capability in memory.
-
-   \item \textbf{uimm16} { }---{ } An unsigned immediate value.  This
-     is a number between 0 and 65,535 inclusive.
 \end{itemize}
 
 Note that all of these instructions would only be valid in 64-bit mode
@@ -820,38 +817,9 @@ capability.
 
   \item \insnxesref{SCADDR} - Set Capability Address
 
-  \item \insnref{CSetBounds} r/mc, r64
-  \item \insnref{CSetBounds} r/mc, uimm16
+  \item \insnxesref{SCBND} - Set Capability Bounds
 
-    Set the \textbf{base} field of \emph{r/mc} to the current
-    \textbf{address} field of \emph{r/mc}, and set the \textbf{length}
-    field of \emph{r/mc} to the second operand.  If the \emph{r/mc} is
-    sealed and tagged, set \emph{r/mc} to its original value with the
-    \textbf{tag} field cleared.  If the resulting capability is not
-    contained within the bounds of the original value of \emph{r/mc},
-    clear the \textbf{tag} field in the resulting capability.
-
-    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    in the resulting value of \emph{r/mc}.   The value of other status
-    flags (\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and
-    \texttt{OF}) would be undefined.
-
-  \item \insnref{CSetBoundsExact} r/mc, r64
-
-    Set the \textbf{base} field of \emph{r/mc} to the current
-    \textbf{address} field of \emph{r/mc}, and set the \textbf{length}
-    field of \emph{r/mc} to \emph{r64}.  If the \emph{r/mc} is sealed
-    and tagged, set \emph{r/mc} to its original value with the
-    \textbf{tag} field cleared.  If the resulting capability is not
-    contained within the bounds of the original value of \emph{r/mc},
-    clear the \textbf{tag} field in the resulting capability.  If the
-    resulting capability cannot be represented exactly, clear the
-    \textbf{tag} field in the resulting capability.
-
-    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    in the resulting value of \emph{r/mc}.  The value of other status
-    flags (\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and
-    \texttt{OF}) would be undefined.
+  \item \insnxesref{SCBNDE} - Set Exact Capability Bounds
 
   \item \insnref{CClearTag} r/mc
 
