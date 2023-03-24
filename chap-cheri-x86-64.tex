@@ -883,17 +883,8 @@ capability.
   Instructions}
 
 \begin{itemize}
-  \item \insnref{CRRL} r64, r/m64
-
-    Set \emph{r64} to the smallest value greater or equal to
-    \emph{r/m64} that can be used as a length to set exact bounds on a
-    capability with a suitably aligned base.
-
-  \item \insnref{CRAM} r64, r/m64
-
-    Set \emph{r64} to a mask that can be used to round addresses down
-    to a value that is sufficiently aligned to set exact bounds for
-    the nearest representable length of \emph{r/m64}.
+  \item \insnxesref{CRRL} - Round Representable Length
+  \item \insnxesref{CRAM} - Representable Alignment Mask
 \end{itemize}
 
 \subsubsection{Tag-Memory Access Instructions}
