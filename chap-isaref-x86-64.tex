@@ -102,6 +102,8 @@ instructions which we believe may either be used frequently or in
 frequently-accessed code paths.
 
 \input{insn-x86-64/cinvoke}
+\input{insn-x86-64/cram}
+\input{insn-x86-64/crrl}
 \input{insn-x86-64/movcap}
 \input{insn-x86-64/scaddr}
 \input{insn-x86-64/scbnd}
@@ -121,6 +123,10 @@ available in capability mode.
   16 \emph{/r} & \insnxesref{SCADDR} \emph{r/mc, r64}\\
   \hline
   17 \emph{/r} & \insnxesref{SCBND} \emph{r/mc, r64}\\
+  \hline
+  1E \emph{/r} & \insnxesref{CRRL} \emph{r64, r/m64}\\
+  \hline
+  1F \emph{/r} & \insnxesref{CRAM} \emph{r64, r/m64}\\
   \hline
   27 \emph{/r} & \insnxesref{SCBNDE} \emph{r/mc, r64}\\
   \hline
