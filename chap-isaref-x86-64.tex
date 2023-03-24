@@ -101,6 +101,7 @@ and subject to change.  Single byte opcodes have been used for
 instructions which we believe may either be used frequently or in
 frequently-accessed code paths.
 
+\input{insn-x86-64/cinvoke}
 \input{insn-x86-64/movcap}
 \input{insn-x86-64/scaddr}
 \input{insn-x86-64/scbnd}
@@ -126,6 +127,8 @@ available in capability mode.
   37 /0 \emph{id} & \insnxesref{SCBND} \emph{r/mc, imm32}\\
   \hline
   37 /1 \emph{id} & \insnxesref{SCBNDE} \emph{r/mc, imm32}\\
+  \hline
+  EA \emph{/r} & \insnxesref{CINVOKE} \emph{rc, r/mc}\\
   \hline
   0F 24 \emph{/r} & \insnxesref[movcap]{MOV} \emph{rc,} CFS/CGS/DDC\\
   \hline

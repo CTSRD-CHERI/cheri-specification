@@ -876,14 +876,7 @@ capability.
 \subsubsection{Control-Flow Instructions}
 
 \begin{itemize}
-  \item \insnref{CInvoke} rc, r/mc
-
-    If \emph{rc} and \emph{r/mc} are sealed with the same
-    \textbf{otype}, set \CIP{} to the unsealed \emph{rc} and set
-    \CAX{} to the unsealed \emph{r/mc}.  Note that this control
-    transfer is a jump and does not push any values onto the stack.
-    If this instruction fails, it raises a Capability Violation Fault
-    (see Section~\ref{sec:x86:capability-fault}).
+  \item \insnxesref{CINVOKE} - Invoke sealed capability pair
 \end{itemize}
 
 \subsubsection{Adjusting to Compressed Capability Precision
