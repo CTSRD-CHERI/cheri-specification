@@ -1,0 +1,26 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{GCPERM - Get Capability Permissions}
+\insnxeslabel{gcperm}
+\subsection*{GCPERM - Get Capability Permissions}
+
+\begin{x86opcodetable}
+  \xopcode{NP 0F 7A \emph{/r}}{GCPERM \emph{r64, r/mc}}
+  {RM}{Valid}{Valid}
+  {Store the permissions mask of \emph{r/mc} in \emph{r64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Sets the destination operand to the combined \textbf{perms} and
+\textbf{uperms} fields of the source operand.  The source operand can
+be a register or memory location.
+
+\subsubsection*{Flags Affected}
+
+ZF is set to 1 if the result is zero.  The CF, PF, AF, SF, and OF
+flags are undefined.

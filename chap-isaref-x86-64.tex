@@ -104,6 +104,12 @@ frequently-accessed code paths.
 \input{insn-x86-64/cinvoke}
 \input{insn-x86-64/cram}
 \input{insn-x86-64/crrl}
+\input{insn-x86-64/gcbase}
+\input{insn-x86-64/gclen}
+\input{insn-x86-64/gcoff}
+\input{insn-x86-64/gcperm}
+\input{insn-x86-64/gctag}
+\input{insn-x86-64/gctype}
 \input{insn-x86-64/movcap}
 \input{insn-x86-64/scaddr}
 \input{insn-x86-64/scbnd}
@@ -139,5 +145,17 @@ available in capability mode.
   0F 24 \emph{/r} & \insnxesref[movcap]{MOV} \emph{rc,} CFS/CGS/DDC\\
   \hline
   0F 25 \emph{/r} & \insnxesref[movcap]{MOV} CFS/CGS/DDC\emph{, rc}\\
+  \hline
+  NP 0F 7A \emph{/r} & \insnxesref{GCPERM} \emph{r64, r/mc}\\
+  \hline
+  66 0F 7A \emph{/r} & \insnxesref{GCTYPE} \emph{r64, r/mc}\\
+  \hline
+  F2 0F 7A \emph{/r} & \insnxesref{GCBASE} \emph{r64, r/mc}\\
+  \hline
+  F3 0F 7A \emph{/r} & \insnxesref{GCLEN} \emph{r64, r/mc}\\
+  \hline
+  NP 0F 7B \emph{/r} & \insnxesref{GCTAG} \emph{r64, r/mc}\\
+  \hline
+  66 0F 7B \emph{/r} & \insnxesref{GCOFF} \emph{r64, r/mc}\\
   \hline
 \end{tabular}
