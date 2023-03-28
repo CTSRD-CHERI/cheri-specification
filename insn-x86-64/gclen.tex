@@ -1,0 +1,26 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{GCLEN - Get Capability Length}
+\insnxeslabel{gclen}
+\subsection*{GCLEN - Get Capability Length}
+
+\begin{x86opcodetable}
+  \xopcode{F3 0F 7A \emph{/r}}{GCLEN \emph{r64, r/mc}}
+  {RM}{Valid}{Valid}
+  {Store the bounds length of \emph{r/mc} in \emph{r64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Sets the destination operand to the \textbf{length} field of the
+source operand.  The source operand can be a register or memory
+location.
+
+\subsubsection*{Flags Affected}
+
+ZF is set to 1 if the result is zero.  The CF, PF, AF, SF, and OF
+flags are undefined.

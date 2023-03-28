@@ -731,49 +731,23 @@ and capability mode.
 
 \subsubsection{Capability-Inspection Instructions}
 
-These instructions would set the \texttt{ZF} flag in \RFLAGS{}
-according to the integer field
-extracted from the capability.
-The value of other status flags (\texttt{CF}, \texttt{PF},
-\texttt{AF}, \texttt{SF}, and \texttt{OF}) would be undefined unless
-otherwise stated.
-
+These instructions fetch a single field from a capability.
 Note that unlike CHERI-RISC-V, CHERI-x86-64 would not add a
 \insnref{CGetAddr} instruction since the \textbf{address} field of a
 capability can be obtained via a 64-bit \insnnoref{MOV} instruction.
 
 \begin{itemize}
-  \item \insnref{CGetPerm} r64, r/mc
-
-    Set \emph{r64} to the combined \textbf{perms} and \textbf{uperms}
-    fields of \emph{r/mc}.
-
-  \item \insnref{CGetType} r64, r/mc
-
-    Set \emph{r64} to the \textbf{otype} field of \emph{r/mc}.  In
-    addition to \texttt{ZF}, this instruction should also set
-    \texttt{SF} in \RFLAGS{}.
-
-  \item \insnref{CGetBase} r64, r/mc
-
-    Set \emph{r64} to the \textbf{base} field of \emph{r/mc}.
-
-  \item \insnref{CGetLen} r64, r/mc
-
-    Set \emph{r64} to the \textbf{length} field of \emph{r/mc}.
-
-  \item \insnref{CGetTag} r64, r/mc
-
-    Set \emph{r64} to the \textbf{tag} field of \emph{r/mc}.
-
-  \item \insnref{CGetOffset} r64, r/mc
-
-    Set \emph{r64} to the \textbf{offset} field of \emph{r/mc}.
+  \item \insnxesref{GCPERM} - Get Capability Permissions
+  \item \insnxesref{GCTYPE} - Get Capability Object Type
+  \item \insnxesref{GCBASE} - Get Capability Base
+  \item \insnxesref{GCLEN} - Get Capability Length
+  \item \insnxesref{GCTAG} - Get Capability Tag
+  \item \insnxesref{GCOFF} - Get Capability Offset
 \end{itemize}
 
 Additionally, to support efficient tag checks without overwriting an
-integer register with the result as is done in \insnref{CGetTag}, a
-single operand \insnnoref{CTestTag} which copies the tag value to
+integer register with the result as is done in \insnxesref{GCTAG}, a
+single operand \insnnoref{TESTCTAG} which copies the tag value to
 \texttt{ZF} may be desired.
 
 \subsubsection{Capability-Modification Instructions}

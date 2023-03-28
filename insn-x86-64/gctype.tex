@@ -1,0 +1,25 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{GCTYPE - Get Capability Object Type}
+\insnxeslabel{gctype}
+\subsection*{GCTYPE - Get Capability Object Type}
+
+\begin{x86opcodetable}
+  \xopcode{66 0F 7A \emph{/r}}{GCTYPE \emph{r64, r/mc}}
+  {RM}{Valid}{Valid}
+  {Store the object type of \emph{r/mc} in \emph{r64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Sets the destination operand to the \textbf{otype} field of the source
+operand.  The source operand can be a register or memory location.
+
+\subsubsection*{Flags Affected}
+
+ZF is set to 1 if the result is zero.  SF is set to 1 if the result is
+less than zero. The CF, PF, AF, and OF flags are undefined.

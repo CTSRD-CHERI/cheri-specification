@@ -1,0 +1,25 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{GCBASE - Get Capability Base}
+\insnxeslabel{gcbase}
+\subsection*{GCBASE - Get Capability Base}
+
+\begin{x86opcodetable}
+  \xopcode{F2 0F 7A \emph{/r}}{GCBASE \emph{r64, r/mc}}
+  {RM}{Valid}{Valid}
+  {Store the base field of \emph{r/mc} in \emph{r64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Sets the destination operand to the \textbf{base} field of the source
+operand.  The source operand can be a register or memory location.
+
+\subsubsection*{Flags Affected}
+
+ZF is set to 1 if the result is zero.  The CF, PF, AF, SF, and OF
+flags are undefined.
