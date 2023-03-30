@@ -1,0 +1,44 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{MOV - Move}
+\insnxeslabel{mov}
+\subsection*{MOV - Move}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + 89 \emph{/r}}{MOV \emph{r/mc, rc}}
+  {MR}{Valid}{Valid}
+  {Move \emph{rc} to \emph{r/mc}.}
+  \xopcode{CAP + 8B \emph{/r}}{MOV \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move \emph{r/mc} to \emph{rc}.}
+  \xopcode{CAP + C7 \emph{/0 id}}{MOV \emph{r/mc, imm32}}
+  {MI}{Valid}{Valid}
+  {Move \emph{imm32 sign-extended to 64-bits} to \emph{r/mc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (w)}{ModRM:reg (r)}{NA}{NA}
+  \xopen{RM}{ModRM:Reg (w)}{ModRM:r/m (r)}{NA}{NA}
+  \xopen{MI}{ModRM:r/m (w)}{imm32}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Copies the source operand to the destination operand. The destination
+operand can be a register or a memory location. The source operand can
+be an immediate, a register, or a memory location.  If the source
+operand is an immediate, the value is sign-extended to 64-bits and
+used as the address of a NULL-derived capability.
+
+Note that some \insnnoref{MOV} opcodes such as \texttt{B8+ rw} and
+\texttt{C6 /0} are not extended to support the \insnnoref{CAP} prefix
+as the behavior would be identical.  The \texttt{C7 /0} opcode is
+extended primarily to support storing constants such as NULL to
+capabilities in memory without requiring an intermediate register.
+
+The \texttt{A1} and \texttt{A3} opcodes are not extended to support
+capabilities.
+
+\subsubsection*{Flags Affected}
+
+None

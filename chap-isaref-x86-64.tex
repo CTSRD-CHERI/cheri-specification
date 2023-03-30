@@ -83,6 +83,8 @@ Manual.  Many of the instruction descriptions in this section reuse
 language from Intel's manual to highlight the similarity in semantics
 between the base instructions and their CHERI extensions.
 
+\input{insn-x86-64/mov}
+
 \clearpage
 \section{CHERI-x86-64 Instructions}
 
@@ -91,6 +93,8 @@ capabilities.  The opcode assignments in this section are tentative
 and subject to change.  Single byte opcodes have been used for
 instructions which we believe may either be used frequently or in
 frequently-accessed code paths.
+
+\input{insn-x86-64/movcap}
 
 \clearpage
 \section{Summary of New Opcodes}
@@ -102,5 +106,9 @@ available in capability mode.
 \noindent
 \begin{tabular}{| l | l |} \hline
   \textbf{Opcode} & \textbf{Instruction}\\
+  \hline
+  0F 24 \emph{/r} & \insnxesref[movcap]{MOV} \emph{rc,} CFS/CGS/DDC\\
+  \hline
+  0F 25 \emph{/r} & \insnxesref[movcap]{MOV} CFS/CGS/DDC\emph{, rc}\\
   \hline
 \end{tabular}

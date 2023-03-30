@@ -430,7 +430,7 @@ mode, \RSP{} is always used as the stack pointer.  In capability mode,
 \CSP{} would always be used as the stack pointer.
 
 Code which needs to use the alternate stack pointer
-interpretation would simulate these instructions using \insnnoref{MOV}
+interpretation would simulate these instructions using \insnxesref{MOV}
 instructions and adjusting the desired stack pointer using
 instructions such as \insnnoref{ADD} or \insnnoref{SUB}.  Emulation of
 \insnnoref{CALL} or \insnnoref{RET} would use \insnnoref{JMP} to
@@ -492,35 +492,16 @@ Several existing instructions should be extended to support
 capability operands:
 
 \begin{itemize}
-  \item \insnnoref{MOVC} would handle loads and stores of
-    capabilities similar to \insnref{CLC} and \insnref{CSC} as well as
-    copying capabilities between registers similar to \insnref{CMove}.
-
-    The existing \texttt{89} and \texttt{8B} opcodes would be extended
-    to support capability operands via the capability operand prefix.
-    Note that these instructions would  permit a general-purpose
-    register only as the source (\texttt{89}) or destination (\texttt{8B}).
-
-    The \texttt{A1} and \texttt{A3} opcodes would not be extended to
-    support capabilities.
+  \item \insnxesref[mov]{MOVC} would handle loads and stores of
+    capabilities similar to \insnriscvref{CLC} and \insnriscvref{CSC} as well as
+    copying capabilities between registers similar to \insnriscvref{CMove}.
 
     To permit moving the contents of an additional capability register
-    to a general-purpose register or vice versa, two
-    new opcodes (\texttt{0F 24} and \texttt{0F 25}) would be
+    to a general-purpose register or vice versa, two new
+    \insnxesref[movcap]{MOV} opcodes would be
     used.  These opcodes would permit access to \CFS{}, \CGS{}, and
     \DDC{} in all privilege levels.  Access to other additional
     capability registers would be permitted only in privilege level 0.
-
-    To support efficiently storing NULL pointers to memory, the \texttt{C7 /0}
-    opcode would be extended to support capability operands via
-    the capability operand prefix.  When extended to a capability
-    operand, this instruction should store a NULL-derived capability
-    using the immediate operand sign-extended to 64 bits as the
-    integer value of the resulting capability.
-
-    \insnnoref{MOV} should default to integer operands in capability
-    mode except for \texttt{0F 24} and \texttt{0F 25} which would
-    always use capability operands.
 
   \item \insnnoref{MOVNTIC} would store a single capability to memory
     using a non-temporal hint.
@@ -1051,7 +1032,7 @@ may require additional care.
 
 Vector loads and stores are often used to implement \ccode{memcpy()}.
 In CHERI C, \ccode{memcpy()} must preserve tags.  A \ccode{memcpy()}
-implementation which uses \insnnoref{MOVC} will operate at the same
+implementation which uses \insnxesref[mov]{MOVC} will operate at the same
 width as existing memory copies implemented using SSE which may
 mitigate some of the cost.  Another option may be to support an
 optimized \insnnoref{REP MOVSC} similar to the existing optimization
@@ -1401,7 +1382,7 @@ optimize pure capability code.
 We considered various options for using additional capability
 registers such as \CGS{} as explicit operands in instructions rather
 than as a separate bank of registers accessed only via
-\insnnoref{MOV}.  All of these approaches add complexity to
+\insnxesref[movcap]{MOV}.  All of these approaches add complexity to
 instruction decoding, but we do not anticipate frequent direct access
 to additional capability registers beyond the use of the existing
 \FS{} and \GS{} segment prefixes.
