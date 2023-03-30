@@ -432,7 +432,7 @@ mode, \RSP{} is always used as the stack pointer.  In capability mode,
 Code which needs to use the alternate stack pointer
 interpretation would simulate these instructions using \insnxesref{MOV}
 instructions and adjusting the desired stack pointer using
-instructions such as \insnnoref{ADD} or \insnnoref{SUB}.  Emulation of
+instructions such as \insnxesref{ADD} or \insnxesref{SUB}.  Emulation of
 \insnnoref{CALL} or \insnnoref{RET} would use \insnnoref{JMP} to
 adjust the instruction pointer.
 
@@ -517,11 +517,11 @@ capability operands:
   \item \insnxesref[cmov]{CMOVC} would handle conditional loads and stores of
     capabilities.
 
-  \item \insnnoref{ADDC} and \insnnoref{SUBC} would be used to adjust
-    the offset of a capability similar to \insnref{CIncOffset}.  Note
+  \item \insnxesref[add]{ADDC} and \insnxesref[sub]{SUBC} would be used to adjust
+    the address of a capability similar to \insnriscvref{CIncOffset}.  Note
     that for these instructions, the source operand would either be a
     sign-extended immediate or a 64-bit integer register whose value
-    is either added to or subtracted from the offset of the
+    is either added to or subtracted from the address of the
     capability-sized destination operand.
 
     For example:
@@ -532,24 +532,12 @@ add %csp,$16
 
     would move the capability stack pointer up by 16 bytes.
 
-    These instructions should set status flag bits in \RFLAGS{}
-    according to the integer value of the resulting capability.
-
-    The \insnnoref{ADD} opcodes \texttt{01}, \texttt{03}, \texttt{05},
-    \texttt{81 /0}, and \texttt{83 /0} and the \insnnoref{SUB}
-    opcodes \texttt{29}, \texttt{2B}, \texttt{2D}, \texttt{81 /5} and
-    \texttt{83 /5} would be extended to support capability operands
-    via the capability operand prefix.
-
-    \insnnoref{ADD} and \insnnoref{SUB} should default to integer
-    operands in capability mode.
-
     We do not anticipiate a need for capability-sized variants of
     \insnnoref{ADC} or \insnnoref{SBB}.
 
   \item \insnnoref{ANDC}, \insnnoref{ORC}, and \insnnoref{XORC} would
     permit bit manipulation of the integer value of a capability.  As
-    with \insnnoref{ADDC}, the second operand would always be an
+    with \insnxesref[add]{ADDC}, the second operand would always be an
     integer operand.
 
     These instructions should set status flag bits in \RFLAGS{}
@@ -572,7 +560,7 @@ add %csp,$16
     somewhat different than the existing variants of \insnnoref{CMP}
     which perform the equivalent \insnnoref{SUB} instruction and then
     discard the result as in this case the flags set would not be
-    identical to the flags set as a result of \insnnoref{SUBC}.
+    identical to the flags set as a result of \insnxesref[sub]{SUBC}.
 
     The \insnnoref{CMP} opcodes \texttt{39} and \texttt{3B} would be
     extended to support capability operands via the capability operand
