@@ -1,0 +1,106 @@
+\chapter{The CHERI-x86-64 Instruction-Set Reference}
+\label{chap:isaref-x86-64}
+
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcolumntype{Z}{>{\raggedright\arraybackslash}X}
+
+\newenvironment{x86opcodetable}{%
+  \tabularx{\textwidth}{| l | l | p{2.0em} | p{2.5em} | p{2.5em} | Z |} \hline
+    \textbf{Opcode} & \textbf{Instruction} & \textbf{Op/ En} &
+    \textbf{Cap Mode} & \textbf{64-bit Mode} & \textbf{Description}\\
+    \hline
+}{%
+  \endtabularx
+}
+
+\newcommand{\xopcode}[6]{%
+  #1 & #2 & #3 & #4 & #5 & #6\\
+  \hline
+}
+
+\newenvironment{x86opentable}{%
+  \bigskip
+  \noindent
+  \tabularx{\textwidth}{| c | Y | Y | Y | Y |}
+    \multicolumn{5}{c}{\bfseries Instruction Operand Encoding}\\
+    \hline
+    Op/En & Operand 1 & Operand 2 & Operand 3 & Operand 4\\
+    \hline
+}{%
+  \endtabularx
+}
+
+\newcommand{\xopen}[5]{%
+  #1 & #2 & #3 & #4 & #5\\
+  \hline
+}
+
+In this chapter, we specify new CHERI instructions as well as
+extensions to existing instructions to support capability-sized
+operands.  Instructions are described using similar syntax to Volume 2
+of Intel's Software Developer's Manual~\cite{intel-sdm-vol2} with a
+few extensions.
+
+An additional symbol is defined to represent object code in the
+``Opcode'' column:
+
+\begin{itemize}
+  \item \textbf{CAP} { }---{ } Indicates the use of the capability
+    operand prefix.
+\end{itemize}
+
+Additional symbols are defined to represent operands in the
+``Instruction'' column:
+
+\begin{itemize}
+  \item \textbf{rc} { }---{ } One of the general-purpose capability
+    registers: \CAX{}, \CBX{}, \CCX{}, \CDX{}, \CDI{}, \CSI{}, \CBP{},
+    \CSP{}, \creg{8}-\creg{15}.
+
+  \item \textbf{r/mc} { }---{ } A capability operand that is either
+    the contents of one of the capability registers for \textbf{rc} or
+    a capability in memory.
+\end{itemize}
+
+In addition, all of these instructions are either invalid or not
+encodable in Compatibility/Legacy mode, so that column is omitted from
+opcode tables.  However, a new column is added to describe capability
+mode support using one of the following annotations:
+
+\begin{itemize}
+  \item \textbf{V} { }---{ } Supported.
+  \item \textbf{I} { }---{ } Not supported.
+\end{itemize}
+
+\clearpage
+\section{Extensions to x86-64 Instructions}
+
+This section contains extensions to existing instructions to support
+capability operands.  For each of these instructions, the instruction
+description should be treated as an extension to the description of
+the existing instruction in Volume 2 of Intel's Software Developer's
+Manual.  Many of the instruction descriptions in this section reuse
+language from Intel's manual to highlight the similarity in semantics
+between the base instructions and their CHERI extensions.
+
+\clearpage
+\section{CHERI-x86-64 Instructions}
+
+This section contains new instructions added to support operations on
+capabilities.  The opcode assignments in this section are tentative
+and subject to change.  Single byte opcodes have been used for
+instructions which we believe may either be used frequently or in
+frequently-accessed code paths.
+
+\clearpage
+\section{Summary of New Opcodes}
+
+The following new opcodes are added in 64-bit mode and are also
+available in capability mode.
+
+\bigskip
+\noindent
+\begin{tabular}{| l | l |} \hline
+  \textbf{Opcode} & \textbf{Instruction}\\
+  \hline
+\end{tabular}

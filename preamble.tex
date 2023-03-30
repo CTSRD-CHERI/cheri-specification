@@ -10,6 +10,7 @@
 \usepackage{bitset}
 \usepackage{comment}
 \usepackage{graphicx}
+\usepackage{tabularx}
 \usepackage{marginnote}
 \usepackage{booktabs}
 \usepackage{ifthen}
@@ -436,6 +437,8 @@
 \newcommand{\@makeinsncmds}[1]{\@makeinsncmds@explicit{#1}{#1}}
 
 \@makeinsncmds{riscv}
+% Cannot use more intuitive x86 in command names
+\@makeinsncmds{xes}
 
 \newcommand{\definsnarch}[1]{\def\@definsnarch{#1}}
 \@makeinsncmds@explicit{}{\@definsnarch}
