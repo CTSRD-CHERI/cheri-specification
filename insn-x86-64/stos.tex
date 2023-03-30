@@ -1,0 +1,31 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{STOS/STOSC - Store String}
+\insnxeslabel{stos}
+\subsection*{STOS/STOSC - Store String}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + AB}{STOS \emph{mc}}
+  {ZO}{Valid}{Valid}
+  {Store CAX at address (C|R)DI.}
+  \xopcode{CAP + AB}{STOSC}
+  {ZO}{Valid}{Valid}
+  {Store CAX at address (C|R)DI.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{ZO}{NA}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Stores capability in the \CAX{} register into the destination operand.
+The destination operand is a memory location identified by the \RDI{}
+or \CDI{} register (depending on the addressing mode).  After the
+capability is stored to memory, the address register is incremented or
+decremented by the size of a capability according to the setting of
+\texttt{DF} in \RFLAGS{}.
+
+\subsubsection*{Flags Affected}
+
+None
