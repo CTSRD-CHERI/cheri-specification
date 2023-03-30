@@ -1,0 +1,24 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{MOVNTI - Store Using Non-Temporal Hint}
+\insnxeslabel{movnti}
+\subsection*{MOVNTI - Store Using Non-Temporal Hint}
+
+\begin{x86opcodetable}
+  \xopcode{NP CAP + 0F C3 \emph{/r}}{MOV \emph{mc, rc}}
+  {MR}{Valid}{Valid}
+  {Move \emph{rc} to \emph{mc} using non-temporal hint.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (w)}{ModRM:reg (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Moves the capability in the source operand to the destination operand
+using a non-temporal hint.
+
+\subsubsection*{Flags Affected}
+
+None
