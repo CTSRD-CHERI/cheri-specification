@@ -1,0 +1,39 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{MOV - Move to/from Additional Capability Registers}
+\insnxeslabel{movcap}
+\subsection*{MOV - Move to/from Additional Capability Registers}
+
+\begin{x86opcodetable}
+  \xopcode{0F 24 \emph{/r}}{MOV \emph{rc,} CFS/CGS/DDC}
+  {MR}{Valid}{Valid}
+  {Move additional capability register to \emph{rc}.}
+  \xopcode{0F 25 \emph{/r}}{MOV CFS/CGS/DDC\emph{, rc}}
+  {RM}{Valid}{Valid}
+  {Move \emph{rc} to additional capability register.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (w)}{ModRM:reg (r)}{NA}{NA}
+  \xopen{RM}{ModRM:reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Moves the contents of an additional capability register to a
+general-purpose capability register or vice versa.
+
+Similar to the \insnnoref{MOV} opcodes for control and debug
+registers, the \textbf{reg} field of the ModRM byte always identifies
+the additional capability register to read or write.  The \textbf{mod}
+field of ModRM is ignored, and the \textbf{r/m} field identifies the
+general-purpose capability register.  Attempts to reference invalid
+additional capability registers will raise a UD\# exception.
+
+Attempts to access additional capability registers other than \CFS{},
+\CGS{}, or \DDC{} from a privilege level other than 0 will raise a
+GP\#(0) exception.
+
+\subsubsection*{Flags Affected}
+
+None
