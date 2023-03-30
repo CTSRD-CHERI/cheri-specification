@@ -410,7 +410,7 @@ capabilities.
 The ``string''
 instructions use \RSI{} as source address and \RDI{} as a destination address.
 For example, the
-\insnnoref{STOS} instruction stores the value in \AL{}/\AX{}/\EAX{}/\RAX{} to the address in
+\insnxesref{STOS} instruction stores the value in \AL{}/\AX{}/\EAX{}/\RAX{} to the address in
 \RDI{}, and then either increments or decrements the destination
 index register (depending on the Direction Flag).  When capability
 addressing mode is enabled,
@@ -506,21 +506,13 @@ capability operands:
   \item \insnxesref[movnti]{MOVNTIC} would store a single capability to memory
     using a non-temporal hint.
 
-  \item The string instructions \insnnoref{LODS}, \insnnoref{MOVS},
-    and \insnnoref{STOS} would be extended to support capability
+  \item The string instructions \insnxesref{LODS}, \insnxesref{MOVS},
+    and \insnxesref{STOS} would be extended to support capability
     operands.
-
-    The opcodes \texttt{A5}, \texttt{AB}, and \texttt{AD} would be
-    extended to support capability operands via the capability operand
-    prefix.  For \insnnoref{LODSC} and \insnnoref{STOSC}, \CAX{} would
-    be used as the implicit operand.
-
-    These instructions should default to integer operands in
-    capability mode.
 
     We do not currently foresee a need to extend \insnnoref{CMPS} and
     \insnnoref{SCAS} with support for capability operands.  If that
-    did prove necessary, they could be extended in the same manner.
+    did prove necessary, they could be extended.
 
   \item \insnnoref{CMOVC} would handle conditional loads and stores of
     capabilities.  Existing opcodes for \insnnoref{CMOV} would be
@@ -1027,7 +1019,7 @@ In CHERI C, \ccode{memcpy()} must preserve tags.  A \ccode{memcpy()}
 implementation which uses \insnxesref[mov]{MOVC} will operate at the same
 width as existing memory copies implemented using SSE which may
 mitigate some of the cost.  Another option may be to support an
-optimized \insnnoref{REP MOVSC} similar to the existing optimization
+optimized \insnxesref[movs]{REP MOVSC} similar to the existing optimization
 for \insnnoref{REP MOVSB} where the former instruction would preserve
 tags during a copy unlike the latter.
 

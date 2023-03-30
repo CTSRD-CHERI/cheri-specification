@@ -1,0 +1,34 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{MOVS/MOVSC - Move Data from String
+  to String}
+\insnxeslabel{movs}
+\subsection*{MOVS/MOVSC - Move Data from String to String}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + A5}{MOVS \emph{mc, mc}}
+  {ZO}{Valid}{Valid}
+  {Move capability from address (C|R)SI to (C|R)DI.}
+  \xopcode{CAP + A5}{MOVSC}
+  {ZO}{Valid}{Valid}
+  {Move capability from address (C|R)SI to (C|R)DI.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{ZO}{NA}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Moves a capablity from the source operand to the destination operand.
+The source operand is a memory location identified by the \RSI{} or
+\CSI{} register (depending on the addressing mode).  The destination
+operand is a memory location identified by the \RDI{} or \CDI{}
+register (depending on the addressing mode).  After the capability is
+copied, the address registers are incremented or decremented by the
+size of a capability according to the setting of \texttt{DF} in
+\RFLAGS{}.
+
+\subsubsection*{Flags Affected}
+
+None

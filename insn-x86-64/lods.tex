@@ -1,0 +1,31 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{LODS/LODSC - Load String}
+\insnxeslabel{lods}
+\subsection*{LODS/LODSC - Load String}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + AD}{LODS \emph{mc}}
+  {ZO}{Valid}{Valid}
+  {Load capability at address (C|R)SI into CAX.}
+  \xopcode{CAP + AD}{LODSC}
+  {ZO}{Valid}{Valid}
+  {Load capability at address (C|R)SI into CAX.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{ZO}{NA}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Loads a capablity from the source operand into the \CAX{} register.
+The source operand is a memory location identified by the \RSI{} or
+\CSI{} register (depending on the addressing mode).  After the
+capability is loaded from memory, the address register is incremented
+or decremented by the size of a capability according to the setting of
+\texttt{DF} in \RFLAGS{}.
+
+\subsubsection*{Flags Affected}
+
+None
