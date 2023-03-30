@@ -503,16 +503,8 @@ capability operands:
     \DDC{} in all privilege levels.  Access to other additional
     capability registers would be permitted only in privilege level 0.
 
-  \item \insnnoref{MOVNTIC} would store a single capability to memory
+  \item \insnxesref[movnti]{MOVNTIC} would store a single capability to memory
     using a non-temporal hint.
-
-    The existing \texttt{0F C3} opcode would be extended to support
-    capability operands via the capability operand prefix.  Note that
-    this would support only stores of general-purpose capability
-    registers.
-
-    \insnnoref{MOVNTI} should default to integer operands in
-    capability mode.
 
   \item The string instructions \insnnoref{LODS}, \insnnoref{MOVS},
     and \insnnoref{STOS} would be extended to support capability
@@ -1045,7 +1037,7 @@ Blocks of data stored to memory mapped with write-combining (WC) are
 often written via non-temporal vector register stores.  However, such
 data is generally consumed by an I/O device via DMA and rarely
 contains pointers.  We believe that permitting a non-temporal store of
-a single capability via \insnnoref{MOVNTIC} is sufficient for cases
+a single capability via \insnxesref[movnti]{MOVNTIC} is sufficient for cases
 requiring non-temporal stores of tagged capabilities.
 
 \subsubsection{Memory Addressing}
