@@ -1,0 +1,50 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{ADD - Add}
+\insnxeslabel{add}
+\subsection*{ADD - Add}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + 05 \emph{id}}{ADD CAX\emph{, imm32}}
+  {I}{Valid}{Valid}
+  {Add \emph{imm32 sign-extended to 64-bits} to the address field of
+    CAX.}
+  \xopcode{CAP + 81 /0 \emph{id}}{ADD \emph{r/mc, imm32}}
+  {MI}{Valid}{Valid}
+  {Add \emph{imm32 sign-extended to 64-bits} to the address field of
+    \emph{r/mc}.}
+  \xopcode{CAP + 83 /0 \emph{ib}}{ADD \emph{r/mc, imm8}}
+  {MI}{Valid}{Valid}
+  {Add \emph{sign}-extended \emph{imm8} to the address field of
+    \emph{r/mc}.}
+  \xopcode{CAP + 01 \emph{/r}}{ADD \emph{r/mc, r64}}
+  {MR}{Valid}{Valid}
+  {Add \emph{r64} to the address field of \emph{r/mc}.}
+  \xopcode{CAP + 03 \emph{/r}}{ADD \emph{rc, r/m64}}
+  {RM}{Valid}{Valid}
+  {Add \emph{r/m64} to the address field of \emph{rc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:Reg (r,w)}{ModRM:r/m (r)}{NA}{NA}
+  \xopen{MR}{ModRM:r/m (r,w)}{ModRM:reg (r)}{NA}{NA}
+  \xopen{MI}{ModRM:r/m (r,w)}{imm8/32}{NA}{NA}
+  \xopen{I}{CAX}{imm32}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Adds the source operand to the \textbf{address} field of the
+destination operand and then stores the result in the destination
+operand. The destination operand can be a register or a memory
+location. The source operand can be an immediate, a register, or a
+memory location.
+
+If the new value of the \textbf{address} field makes the resulting
+capability unrepresentable, the \textbf{tag} field in the resulting
+capability is cleared.
+
+\subsubsection*{Flags Affected}
+
+The OF, SF, ZF, AF, CF, and PF flags are set according to the value of
+the resulting \textbf{address} field.
