@@ -4,7 +4,7 @@ PREVEOUS=../branches/20150624-cheri-architecture-1-13
 
 SAIL_LATEX_RISCV_DIR=sail_latex_riscv
 
-SOURCES=$(wildcard *.tex insn-riscv/*.tex $(SAIL_LATEX_RISCV_DIR)/*.tex cheri_concentrate_listings/*.bsv cheri_concentrate_listings/*.tex) cheri.bib LICENSE LICENSE-sail-cheri-riscv LICENSE-sail-riscv
+SOURCES=$(wildcard *.tex insn-riscv/*.tex insn-x86-64/*.tex $(SAIL_LATEX_RISCV_DIR)/*.tex cheri_concentrate_listings/*.bsv cheri_concentrate_listings/*.tex) cheri.bib LICENSE LICENSE-sail-cheri-riscv LICENSE-sail-riscv
 DIFFDIR=diff
 DIFFTEX=$(SOURCES:%=${DIFFDIR}/%)
 DIFFPARAM=--type=UNDERLINE --packages=amsmath,hyperref --math-markup=1
@@ -67,6 +67,7 @@ diffdir:
 	@(test -d ${DIFFDIR} || mkdir ${DIFFDIR})
 	@(test -d ${DIFFDIR}/cheri_concentrate_listings || mkdir ${DIFFDIR}/cheri_concentrate_listings)
 	@(test -d ${DIFFDIR}/insn-riscv || mkdir ${DIFFDIR}/insn-riscv)
+	@(test -d ${DIFFDIR}/insn-x86-64 || mkdir ${DIFFDIR}/insn-x86-64)
 	@(test -d ${DIFFDIR}/sail_latex_riscv || mkdir ${DIFFDIR}/sail_latex_riscv)
 
 ${DIFFDIR}/$(TARGET): $(DIFFTEX)
