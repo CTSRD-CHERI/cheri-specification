@@ -1,0 +1,71 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CMOVcc - Conditional Move}
+\insnxeslabel{cmov}
+\subsection*{CMOV\emph{cc} - Conditional Move}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + 0F 40 \emph{/r}}{CMOVO \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if overflow (OF=1).}
+  \xopcode{CAP + 0F 41 \emph{/r}}{CMOVNO \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if not overflow (OF=0).}
+  \xopcode{CAP + 0F 42 \emph{/r}}{CMOVC \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if carry (CF=1).}
+  \xopcode{CAP + 0F 43 \emph{/r}}{CMOVNC \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if not carry (CF=0).}
+  \xopcode{CAP + 0F 44 \emph{/r}}{CMOVZ \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if zero (ZF=1).}
+  \xopcode{CAP + 0F 45 \emph{/r}}{CMOVNZ \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if not zero (ZF=0).}
+  \xopcode{CAP + 0F 46 \emph{/r}}{CMOVBE \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if below or equal (CF=1 or ZF=1).}
+  \xopcode{CAP + 0F 47 \emph{/r}}{CMOVA \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if above (CF=0 and ZF=0).}
+  \xopcode{CAP + 0F 48 \emph{/r}}{CMOVS \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if sign (SF=1).}
+  \xopcode{CAP + 0F 49 \emph{/r}}{CMOVNS \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if not sign (SF=0).}
+  \xopcode{CAP + 0F 4A \emph{/r}}{CMOVP \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if parity (PF=1).}
+  \xopcode{CAP + 0F 4B \emph{/r}}{CMOVNP \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if no parity (PF=0).}
+  \xopcode{CAP + 0F 4C \emph{/r}}{CMOVL \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if less (SF$\neq{}$OF).}
+  \xopcode{CAP + 0F 4D \emph{/r}}{CMOVGE \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if greater or equal (SF=OF).}
+  \xopcode{CAP + 0F 4E \emph{/r}}{CMOVLE \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if less or equal (ZF=1 or SF$\neq{}$OF).}
+  \xopcode{CAP + 0F 4F \emph{/r}}{CMOVG \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Move if greater (ZF=0 and SF=OF).}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:Reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Copies the source operand to the destination operand if one or more
+status flags in the \RFLAGS{} register are in the required state. The
+destination operand is a register.  The source operand can be a
+register or memory location.
+
+\subsubsection*{Flags Affected}
+
+None

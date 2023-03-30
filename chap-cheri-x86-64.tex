@@ -514,14 +514,8 @@ capability operands:
     \insnnoref{SCAS} with support for capability operands.  If that
     did prove necessary, they could be extended.
 
-  \item \insnnoref{CMOVC} would handle conditional loads and stores of
-    capabilities.  Existing opcodes for \insnnoref{CMOV} would be
-    extended to support capability operands via the capability operand
-    prefix.  Note that this would support only moves to and from
-    general-purpose capability registers.
-
-    \insnnoref{CMOV} should default to integer operands in
-    capability mode.
+  \item \insnxesref[cmov]{CMOVC} would handle conditional loads and stores of
+    capabilities.
 
   \item \insnnoref{ADDC} and \insnnoref{SUBC} would be used to adjust
     the offset of a capability similar to \insnref{CIncOffset}.  Note
