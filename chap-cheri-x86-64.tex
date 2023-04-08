@@ -1265,7 +1265,7 @@ commonly used, they could be removed in capability mode.
 
 The x86 architecture has seen several security-focused extensions introduced
 in the recent past by Intel and also AMD.
-Of the four major extensions listed here, two have been deprecated
+Of the five major extensions listed here, two have been deprecated
 and are therefore unlikely to coexist with a potential CHERI-x86-64.
 
 \subsection{Intel CET}
@@ -1379,6 +1379,62 @@ copy of the cache line held for each key.
 ME could also enable light-weight temporal safety for CHERI, where
 the encryption key for new allocations is cycled while leaving the
 memory unchanged.
+
+\subsection{Intel MPK}
+
+Intel's Memory Protection Keys (MPK) enables userspace filtering
+of read/write permissions of 15 sets of pages.
+The page table leaf entries themselves have a new 4-bit field to
+identify a page set (or key), with the value 0 wired to unfiltered.
+MPK was introduced with Skylake in 2015, and only appears to have
+been enabled for Xeon processors.
+AMD's Zen3 processors also appear to have MPK support since 2020,
+presumably enabled for both consumer and professional variants.
+
+In userspace, a thread may write its PKRU register, which maps
+16 pairs of read/write permissions coorosponding to the 16 possible
+keys.
+By writing this register, a thread may quickly remove access to subsets
+of pages.
+Current implementations appear to flush the back end of the pipeline,
+incuring a cycle penalty of roughly 20 cycles.
+This filtering is naturally per-thread, unlike the page table iteself
+which is per-process, so it can be used for fine-grained thread-local
+access for a few sensitive structures.
+For example, secret keys might be stored in a region of memory that
+is only briefly made accessible when necessary.
+
+MPK has 3 major disadvantages compared to CHERI capabilities:
+scaling, PKRU protection, and buffer sharing.
+
+While MPK appears to be extremely unscalable on the surface, work
+has been done to virtualise the page sets with an API similar to
+memprotect so that sets of pages can have their access permissions
+modified arbitrarily.
+This can actually be implemented in the backend with mprotect
+(with process-global semantics), or can be implemented with MPK
+for sets whose permissions are changed frequently.
+Nevertheless, there are likely to be serious scaling problems
+if the abstraction library needs to resort to system calls that
+traverse page tables to adjust permissions or mask ids.
+
+PKRU register is freely writable in user-mode.
+An obvious use of MPK would be compartmentalisation, where
+sets of pages in the address space can be enabled fairly efficiently.
+As the instruction that writes PKRU is unprivileged, any
+user code can change the set of page permissions.
+Publications suggest using complex binary analysis to ensure
+that WRPKRU cannot be executed by a compartment.
+
+Finally, it us awkward to pass memory buffers between
+compartments in MPK.
+The most natural solution would be to use a new key
+for memory that is shared between compartments, but
+a compartment would need to explicitly allocate any
+object that will be shared in this space which is not
+as natural as CHERI which allows any local object
+to be passed as an argument to another compartment.
+
 
 \subsection{Intel MPX (deprecated)}
 
