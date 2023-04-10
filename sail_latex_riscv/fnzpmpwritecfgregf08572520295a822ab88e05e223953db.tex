@@ -20,9 +20,10 @@ function #\hyperref[sailRISCVzpmpWriteCfgReg]{pmpWriteCfgReg}#(n, v) = {
                 pmp13cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp13cfg, v[15..8]);
                 pmp14cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp14cfg, v[23..16]);
                 pmp15cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp15cfg, v[31..24]);
-              }
+              },
+         _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Unexpected pmp config reg write")
        }
-  else if sizeof(xlen) == 64
+  else if sizeof(xlen) >= 64
   then match n {
          0 => { pmp0cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp0cfg,  v[7 ..0]);
                 pmp1cfg  = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp1cfg,  v[15..8]);
@@ -41,6 +42,7 @@ function #\hyperref[sailRISCVzpmpWriteCfgReg]{pmpWriteCfgReg}#(n, v) = {
                 pmp13cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp13cfg, v[47..40]);
                 pmp14cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp14cfg, v[55..48]);
                 pmp15cfg = #\hyperref[sailRISCVzpmpWriteCfg]{pmpWriteCfg}#(pmp15cfg, v[63..56])
-              }
+              },
+         _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Unexpected pmp config reg write")
        }
 }

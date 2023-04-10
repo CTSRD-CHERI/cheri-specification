@@ -1,0 +1,15 @@
+function #\hyperref[sailRISCVzreportzyinvalidzywidth]{report\_invalid\_width}#(f , l, w, k) -> 'a = {
+  /*
+   * Ideally we would call internal_error here but this triggers a Sail bug,
+   * https://github.com/rems-project/sail/issues/203 in versions < 0.15.1, so
+   * we work around this by manually inlining.
+   * TODO when we are happy to require Sail >= 0.15.1 uncomment the following
+   * and remove the rest of the function.
+   */
+  // #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(f, l, "Invalid width, " ^ #\hyperref[sailRISCVzsizzezymnemonic]{size\_mnemonic}#(w) ^ ", for " ^ k ^
+  //   " with xlen=" ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(sizeof(xlen)));
+  assert (false, f ^ ":" ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(l) ^ ": " ^ "Invalid width, "
+    ^ #\hyperref[sailRISCVzsizzezymnemonic]{size\_mnemonic}#(w) ^ ", for " ^ k ^ " with xlen="
+    ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(sizeof(xlen)));
+  throw #\hyperref[sailRISCVzErrorzyinternalzyerror]{Error\_internal\_error}#()
+}

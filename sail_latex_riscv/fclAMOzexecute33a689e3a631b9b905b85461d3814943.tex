@@ -13,7 +13,7 @@ if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
             (HALF, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 2, aq & rl, rl, true),
             (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 4, aq & rl, rl, true),
             (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 8, aq & rl, rl, true),
-            _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Unexpected AMO width")
+            _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Unexpected AMO width")
           };
           let is_unsigned : bool = match op {
             AMOMINU => true,
@@ -34,7 +34,7 @@ if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
                 (HALF, _)    => #\hyperref[sailRISCVzextendzyvalue]{extend\_value}#(is_unsigned, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data), addr, 2, aq, aq & rl, true)),
                 (WORD, _)    => #\hyperref[sailRISCVzextendzyvalue]{extend\_value}#(is_unsigned, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data), addr, 4, aq, aq & rl, true)),
                 (DOUBLE, 64) => #\hyperref[sailRISCVzextendzyvalue]{extend\_value}#(is_unsigned, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data), addr, 8, aq, aq & rl, true)),
-                _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Unexpected AMO width")
+                _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Unexpected AMO width")
               };
               match (mval) {
                 #\hyperref[sailRISCVzMemException]{MemException}#(e)  => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL },
@@ -66,11 +66,11 @@ if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
                     (HALF, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 2, result[15..0], aq & rl, rl, true),
                     (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, result[31..0], aq & rl, rl, true),
                     (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, result,        aq & rl, rl, true),
-                    _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Unexpected AMO width")
+                    _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Unexpected AMO width")
                   };
                   match (wval) {
                     #\hyperref[sailRISCVzMemValue]{MemValue}#(true)  => { #\hyperref[sailRISCVzX]{X}#(rd) = rval; RETIRE_SUCCESS },
-                    #\hyperref[sailRISCVzMemValue]{MemValue}#(false) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("AMO got false from mem_write_value") },
+                    #\hyperref[sailRISCVzMemValue]{MemValue}#(false) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "AMO got false from mem_write_value") },
                     #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL }
                   }
                 }

@@ -1,4 +1,4 @@
-function #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(s) = {
-    assert (false, s);
+function #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(file, line, s) = {
+    assert (false, file ^ ":" ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(line) ^ ": " ^ s);
     throw #\hyperref[sailRISCVzErrorzyinternalzyerror]{Error\_internal\_error}#()
 }

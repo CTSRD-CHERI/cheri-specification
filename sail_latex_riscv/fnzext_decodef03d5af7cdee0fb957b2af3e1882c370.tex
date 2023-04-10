@@ -1,0 +1,9 @@
+function #\hyperref[sailRISCVzextzydecode]{ext\_decode}#(bv : #\hyperref[sailRISCVzbits]{bits}#(32)) -> ast = {
+  if (PCC.flag_cap_mode) then {
+    match(#\hyperref[sailRISCVzencdeczycapmode]{encdec\_capmode}#(bv)) {
+      /* Use the default decoding for non-capmode encodings. */
+      #\hyperref[sailRISCVzNOTzyCAPMODE]{NOT\_CAPMODE}#(_) => #\hyperref[sailRISCVzencdec]{encdec}#(bv),
+      CAPMODE_AST => CAPMODE_AST
+    }
+  } else #\hyperref[sailRISCVzencdec]{encdec}#(bv)
+}

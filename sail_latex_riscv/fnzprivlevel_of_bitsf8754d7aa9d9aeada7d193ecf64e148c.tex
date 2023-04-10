@@ -2,5 +2,6 @@ function #\hyperref[sailRISCVzprivLevelzyofzybits]{privLevel\_of\_bits}# (p) =
   match (p) {
     0b00 => User,
     0b01 => Supervisor,
-    0b11 => Machine
+    0b11 => Machine,
+    0b10 => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Invalid privilege level: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(p))
   }

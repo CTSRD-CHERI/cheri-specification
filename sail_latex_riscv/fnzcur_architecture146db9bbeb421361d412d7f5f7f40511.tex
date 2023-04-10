@@ -7,6 +7,6 @@ function #\hyperref[sailRISCVzcurzyArchitecture]{cur\_Architecture}#() -> Archit
     };
   match #\hyperref[sailRISCVzarchitecture]{architecture}#(a) {
     #\hyperref[sailRISCVzSome]{Some}#(a) => a,
-    #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Invalid current architecture")
+    #\hyperref[sailRISCVzNone]{None}#()  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Invalid current architecture")
   }
 }

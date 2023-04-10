@@ -2,7 +2,7 @@ function #\hyperref[sailRISCVzloop]{loop}# () : unit -> unit = {
   let insns_per_tick = #\hyperref[sailRISCVzplatzyinsnszyperzytick]{plat\_insns\_per\_tick}#();
   i : int = 0;
   step_no : int = 0;
-  #\hyperref[sailRISCVzwhile]{while}# (~ (htif_done)) do {
+  while #\hyperref[sailRISCVznot]{not}#(htif_done) do {
     let stepped = #\hyperref[sailRISCVzstep]{step}#(step_no);
     if stepped then step_no = step_no + 1;
 

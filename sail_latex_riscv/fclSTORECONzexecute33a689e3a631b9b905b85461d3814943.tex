@@ -24,7 +24,7 @@ if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == f
             WORD   => vaddr[1..0] == 0b00,
             DOUBLE => vaddr[2..0] == 0b000
           };
-        if (~ (aligned))
+        if #\hyperref[sailRISCVznot]{not}#(aligned)
         then { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, #\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#()); RETIRE_FAIL }
         else {
           if #\hyperref[sailRISCVzmatchzyreservation]{match\_reservation}#(vaddr) == false then {
@@ -40,7 +40,7 @@ if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == f
                   (HALF, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 2, aq & rl, rl, true),
                   (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 4, aq & rl, rl, true),
                   (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}#(addr, 8, aq & rl, rl, true),
-                  _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORECON expected word or double")
+                  _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "STORECON expected word or double")
                 };
                 match (eares) {
                   #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL },
@@ -51,7 +51,7 @@ if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == f
                       (HALF, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 2, rs2_val[15..0], aq & rl, rl, true),
                       (WORD, _)    => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq & rl, rl, true),
                       (DOUBLE, 64) => #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq & rl, rl, true),
-                      _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORECON expected word or double")
+                      _            => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "STORECON expected word or double")
                     };
                     match (res) {
                       #\hyperref[sailRISCVzMemValue]{MemValue}#(true)  => { #\hyperref[sailRISCVzX]{X}#(rd) = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0); #\hyperref[sailRISCVzcancelzyreservation]{cancel\_reservation}#(); RETIRE_SUCCESS },

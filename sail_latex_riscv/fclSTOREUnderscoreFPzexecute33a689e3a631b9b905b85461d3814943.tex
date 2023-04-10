@@ -20,11 +20,13 @@ match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, off
           #\hyperref[sailRISCVzMemException]{MemException}#(e) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(addr, e); RETIRE_FAIL },
           #\hyperref[sailRISCVzMemValue]{MemValue}#(_) => {
             let rs2_val = #\hyperref[sailRISCVzF]{F}#(rs2);
-            match (width, sizeof(flen)) {
-              (BYTE, _)    => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
-              (HALF, _)    => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 2, rs2_val[15..0], aq, rl, con)),
-              (WORD, _)    => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq, rl, con)),
-              (DOUBLE, 64) => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val,        aq, rl, con))
+            match (width) {
+              BYTE => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
+              HALF => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 2, rs2_val[15..0], aq, rl, con)),
+              WORD => #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 4, rs2_val[31..0], aq, rl, con)),
+              DOUBLE if sizeof(flen) >= 64 =>
+                #\hyperref[sailRISCVzprocesszyfstore]{process\_fstore}# (vaddr, #\hyperref[sailRISCVzmemzywritezyvalue]{mem\_write\_value}#(addr, 8, rs2_val, aq, rl, con)),
+              _ => #\hyperref[sailRISCVzreportzyinvalidzywidth]{report\_invalid\_width}#(__FILE__, __LINE__, width, "floating point store"),
             };
           }
         }

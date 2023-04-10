@@ -7,16 +7,16 @@ if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
   } else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(auth_val) then {
     #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_SealViolation, auth_idx);
     RETIRE_FAIL
-  } else if #\hyperref[sailRISCVznot]{not}# (auth_val.permit_load) then {
+  } else if #\hyperref[sailRISCVznot]{not}#(auth_val.permit_load) then {
     #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_PermitLoadViolation, auth_idx);
     RETIRE_FAIL
-  } else if #\hyperref[sailRISCVznot]{not}# (auth_val.permit_store) then {
+  } else if #\hyperref[sailRISCVznot]{not}#(auth_val.permit_store) then {
     #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_PermitStoreViolation, auth_idx);
     RETIRE_FAIL
-  } else if #\hyperref[sailRISCVznot]{not}# (auth_val.permit_store_cap) & cs2_val.tag then {
+  } else if #\hyperref[sailRISCVznot]{not}#(auth_val.permit_store_cap) & cs2_val.tag then {
     #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_PermitStoreCapViolation, auth_idx);
     RETIRE_FAIL
-  } else if #\hyperref[sailRISCVznot]{not}# (auth_val.permit_store_local_cap) & cs2_val.tag & #\hyperref[sailRISCVznot]{not}#(cs2_val.global) then {
+  } else if #\hyperref[sailRISCVznot]{not}#(auth_val.permit_store_local_cap) & cs2_val.tag & #\hyperref[sailRISCVznot]{not}#(cs2_val.global) then {
     #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_PermitStoreLocalCapViolation, auth_idx);
     RETIRE_FAIL
   } else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(auth_val, vaddr, cap_size)) then {

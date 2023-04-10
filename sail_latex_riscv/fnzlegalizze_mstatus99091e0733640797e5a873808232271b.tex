@@ -28,13 +28,13 @@ function #\hyperref[sailRISCVzlegalizzezymstatus]{legalize\_mstatus}#(o : Mstatu
           } else m;
 
   /* Hardwired to zero in the absence of 'U' or 'N'. */
-  let m = if (~ (#\hyperref[sailRISCVzhaveNExt]{haveNExt}#())) then {
+  let m = if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzhaveNExt]{haveNExt}#()) then {
              let m = #\hyperref[sailRISCVzupdatezyUPIE]{update\_UPIE}#(m, 0b0);
              let m = #\hyperref[sailRISCVzupdatezyUIE]{update\_UIE}#(m, 0b0);
              m
           } else m;
 
-  if (~ (#\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#())) then {
+  if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#()) then {
     let m = #\hyperref[sailRISCVzupdatezyMPRV]{update\_MPRV}#(m, 0b0);
     m
   } else m

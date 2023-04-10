@@ -5,7 +5,7 @@ match cur_privilege {
   Supervisor => match (#\hyperref[sailRISCVzarchitecture]{architecture}#(#\hyperref[sailRISCVzgetzymstatuszySXL]{get\_mstatus\_SXL}#(mstatus)), mstatus.#\hyperref[sailRISCVzTVM]{TVM}#()) {
                   (#\hyperref[sailRISCVzSome]{Some}#(_), 0b1)  => { #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#(); RETIRE_FAIL },
                   (#\hyperref[sailRISCVzSome]{Some}#(_), 0b0) => { #\hyperref[sailRISCVzflushzyTLB]{flush\_TLB}#(asid, addr); RETIRE_SUCCESS },
-                  (_, _)           => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unimplemented sfence architecture")
+                  (_, _)           => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "unimplemented sfence architecture")
                 },
   Machine    => { #\hyperref[sailRISCVzflushzyTLB]{flush\_TLB}#(asid, addr); RETIRE_SUCCESS }
 }

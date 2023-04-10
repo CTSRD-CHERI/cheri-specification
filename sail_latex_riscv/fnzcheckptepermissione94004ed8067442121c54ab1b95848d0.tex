@@ -23,7 +23,7 @@ function #\hyperref[sailRISCVzcheckPTEPermission]{checkPTEPermission}#(ac : #\hy
     (#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_), Supervisor) => (p.#\hyperref[sailRISCVzU]{U}#() == 0b0 | do_sum) & p.#\hyperref[sailRISCVzW]{W}#() == 0b1 & (p.#\hyperref[sailRISCVzR]{R}#() == 0b1 | (p.#\hyperref[sailRISCVzX]{X}#() == 0b1 & mxr)),
     (#\hyperref[sailRISCVzExecute]{Execute}#(),    Supervisor) => p.#\hyperref[sailRISCVzU]{U}#() == 0b0 & p.#\hyperref[sailRISCVzX]{X}#() == 0b1,
 
-    (_,            Machine)    => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("m-mode mem perm check")
+    (_,            Machine)    => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "m-mode mem perm check")
   };
 
   let e = #\hyperref[sailRISCVzMkzyExtzyPTEzyBits]{Mk\_Ext\_PTE\_Bits}#(ext);

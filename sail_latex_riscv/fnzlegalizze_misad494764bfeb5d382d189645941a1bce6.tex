@@ -4,11 +4,11 @@ function #\hyperref[sailRISCVzlegalizzezymisa]{legalize\_misa}#(m : Misa, v : xl
          let  v = #\hyperref[sailRISCVzMkzyMisa]{Mk\_Misa}#(v);
          /* Suppress changing C if nextPC would become misaligned or an extension vetoes or C was disabled at #\hyperref[sailRISCVzboot]{boot}# (i.e. not supported). */
          let m =
-           if   (v.#\hyperref[sailRISCVzC]{C}#() == 0b0 & (nextPC[1] == bitone | #\hyperref[sailRISCVzextzyvetozydisablezyC]{ext\_veto\_disable\_C}#())) | ~(#\hyperref[sailRISCVzsyszyenablezyrvc]{sys\_enable\_rvc}#())
+           if   (v.#\hyperref[sailRISCVzC]{C}#() == 0b0 & (nextPC[1] == bitone | #\hyperref[sailRISCVzextzyvetozydisablezyC]{ext\_veto\_disable\_C}#())) | #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzsyszyenablezyrvc]{sys\_enable\_rvc}#())
            then m
            else #\hyperref[sailRISCVzupdatezyC]{update\_C}#(m, v.#\hyperref[sailRISCVzC]{C}#());
          /* Handle updates for F/D. */
-         if   ~(#\hyperref[sailRISCVzsyszyenablezyfdext]{sys\_enable\_fdext}#()) | (v.#\hyperref[sailRISCVzD]{D}#() == 0b1 & v.#\hyperref[sailRISCVzF]{F}#() == 0b0)
+         if   #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzsyszyenablezyfdext]{sys\_enable\_fdext}#()) | (v.#\hyperref[sailRISCVzD]{D}#() == 0b1 & v.#\hyperref[sailRISCVzF]{F}#() == 0b0)
          then m
          else #\hyperref[sailRISCVzupdatezyD]{update\_D}#(#\hyperref[sailRISCVzupdatezyF]{update\_F}#(m, v.#\hyperref[sailRISCVzF]{F}#()), v.#\hyperref[sailRISCVzD]{D}#())
        }

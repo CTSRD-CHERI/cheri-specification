@@ -7,10 +7,10 @@ function #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(base_
     #\hyperref[sailRISCVzRead]{Read}#(Data)            => (auth_val.permit_load, true                 ),
     #\hyperref[sailRISCVzWrite]{Write}#(Data)           => (true                , auth_val.permit_store),
     #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(Data, Data) => (auth_val.permit_load, auth_val.permit_store),
-    #\hyperref[sailRISCVzExecute]{Execute}#()             => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("ext_data_get_addr for Execute"),
-    #\hyperref[sailRISCVzRead]{Read}#(_)               => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("ext_data_get_addr for #\hyperref[sailRISCVzRead]{Read}#(_)"),
-    #\hyperref[sailRISCVzWrite]{Write}#(_)              => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("ext_data_get_addr for #\hyperref[sailRISCVzWrite]{Write}#(_)"),
-    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _)       => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("ext_data_get_addr for #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _)")
+    #\hyperref[sailRISCVzExecute]{Execute}#()             => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "ext_data_get_addr for Execute"),
+    #\hyperref[sailRISCVzRead]{Read}#(_)               => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "ext_data_get_addr for #\hyperref[sailRISCVzRead]{Read}#(_)"),
+    #\hyperref[sailRISCVzWrite]{Write}#(_)              => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "ext_data_get_addr for #\hyperref[sailRISCVzWrite]{Write}#(_)"),
+    #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _)       => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "ext_data_get_addr for #\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _)")
   };
 
   if #\hyperref[sailRISCVznot]{not}#(auth_val.tag) then

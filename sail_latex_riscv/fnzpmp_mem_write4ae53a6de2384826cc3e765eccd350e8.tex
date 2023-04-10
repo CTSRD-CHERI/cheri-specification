@@ -1,5 +1,5 @@
 function pmp_mem_write forall 'n, 0 < 'n <= max_mem_access . (wk: write_kind, paddr : xlenbits, width : atom('n), data: #\hyperref[sailRISCVzbits]{bits}#(8 * 'n), typ: #\hyperref[sailRISCVzAccessType]{AccessType}#(ext_access_type), priv: Privilege, meta: mem_meta) -> #\hyperref[sailRISCVzMemoryOpResult]{MemoryOpResult}#(bool) =
-  if   (~ (#\hyperref[sailRISCVzplatzyenablezypmp]{plat\_enable\_pmp}# ()))
+  if   #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzplatzyenablezypmp]{plat\_enable\_pmp}#())
   then #\hyperref[sailRISCVzcheckedzymemzywrite]{checked\_mem\_write}#(wk, paddr, width, data, meta)
   else {
     match #\hyperref[sailRISCVzpmpCheck]{pmpCheck}#(paddr, width, typ, priv) {

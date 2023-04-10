@@ -6,7 +6,7 @@ if #\hyperref[sailRISCVznot]{not}#(auth_val.tag) then {
   } else if #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(auth_val) then {
     #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_SealViolation, auth_idx);
     RETIRE_FAIL
-  } else if #\hyperref[sailRISCVznot]{not}# (auth_val.permit_load) then {
+  } else if #\hyperref[sailRISCVznot]{not}#(auth_val.permit_load) then {
     #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(CapEx_PermitLoadViolation, auth_idx);
     RETIRE_FAIL
   } else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(auth_val, vaddrBits, cap_size)) then {
@@ -16,7 +16,7 @@ if #\hyperref[sailRISCVznot]{not}#(auth_val.tag) then {
     #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, #\hyperref[sailRISCVzEzyLoadzyAddrzyAlign]{E\_Load\_Addr\_Align}#());
     RETIRE_FAIL
   } else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddrBits, #\hyperref[sailRISCVzRead]{Read}#(Cap)) {
-    #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(_), _) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unexpected cheri exception for cap load") },
+    #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(_), _) => { #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "unexpected cheri exception for cap load") },
     #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddrBits, e); RETIRE_FAIL },
     #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(addr, ptw_info) => {
       let c = #\hyperref[sailRISCVzmemzyreadzycap]{mem\_read\_cap}#(addr, aq, aq & rl, false);

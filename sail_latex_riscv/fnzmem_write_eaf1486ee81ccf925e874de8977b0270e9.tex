@@ -1,5 +1,5 @@
 function #\hyperref[sailRISCVzmemzywritezyea]{mem\_write\_ea}# (addr, width, aq, rl, con) = {
-  if (rl | con) & (~ (#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(addr, width)))
+  if (rl | con) & #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(addr, width))
   then #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#())
   else match (aq, rl, con) {
     (false, false, false) => #\hyperref[sailRISCVzMemValue]{MemValue}#(#\hyperref[sailRISCVzwritezyramzyea]{write\_ram\_ea}#(Write_plain, addr, width)),

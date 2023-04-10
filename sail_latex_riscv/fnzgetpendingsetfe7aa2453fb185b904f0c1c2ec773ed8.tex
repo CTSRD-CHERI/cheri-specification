@@ -14,7 +14,7 @@ function #\hyperref[sailRISCVzgetPendingSet]{getPendingSet}#(priv : Privilege) -
       #\hyperref[sailRISCVzIntszyEmpty]{Ints\_Empty}#()      => #\hyperref[sailRISCVzNone]{None}#(),
       #\hyperref[sailRISCVzIntszyPending]{Ints\_Pending}#(p)   => let r = (p, Machine) in #\hyperref[sailRISCVzSome]{Some}#(r),
       #\hyperref[sailRISCVzIntszyDelegated]{Ints\_Delegated}#(d) =>
-        if (~ (#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#())) then {
+        if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzhaveSupMode]{haveSupMode}#()) then {
           if uIE then let r = (d, User) in #\hyperref[sailRISCVzSome]{Some}#(r)
           else                             #\hyperref[sailRISCVzNone]{None}#()
         } else {

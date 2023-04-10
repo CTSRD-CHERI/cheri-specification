@@ -2,8 +2,8 @@ function #\hyperref[sailRISCVzflushzyTLBzyEntry]{flush\_TLB\_Entry}#(e, asid, ad
   match(asid, addr) {
     ( #\hyperref[sailRISCVzNone]{None}#(),  #\hyperref[sailRISCVzNone]{None}#()) => true,
     ( #\hyperref[sailRISCVzNone]{None}#(), #\hyperref[sailRISCVzSome]{Some}#(a)) => e.vAddr == (e.vMatchMask & a),
-    (#\hyperref[sailRISCVzSome]{Some}#(i),  #\hyperref[sailRISCVzNone]{None}#()) => (e.asid == i) & (~ (e.global)),
+    (#\hyperref[sailRISCVzSome]{Some}#(i),  #\hyperref[sailRISCVzNone]{None}#()) => (e.asid == i) & #\hyperref[sailRISCVznot]{not}#(e.global),
     (#\hyperref[sailRISCVzSome]{Some}#(i), #\hyperref[sailRISCVzSome]{Some}#(a)) => (  (e.asid == i) & (e.vAddr == (a & e.vMatchMask))
-                           & (~ (e.global)))
+                           & #\hyperref[sailRISCVznot]{not}#(e.global))
   }
 }

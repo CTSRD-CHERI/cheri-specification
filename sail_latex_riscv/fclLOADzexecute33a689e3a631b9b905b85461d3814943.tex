@@ -9,15 +9,16 @@ match #\hyperref[sailRISCVzextzydatazygetzyaddr]{ext\_data\_get\_addr}#(rs1, off
     else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(vaddr, #\hyperref[sailRISCVzRead]{Read}#(Data)) {
       #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _) => { #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(vaddr, e); RETIRE_FAIL },
       #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(paddr, _) =>
-        match (width, sizeof(xlen)) {
-          (BYTE, _)   =>
-             #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 1, aq, rl, false), is_unsigned),
-          (HALF, _)   =>
-             #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 2, aq, rl, false), is_unsigned),
-          (WORD, _)   =>
-             #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 4, aq, rl, false), is_unsigned),
-          (DOUBLE, 64) =>
-             #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 8, aq, rl, false), is_unsigned)
+        match (width) {
+          BYTE =>
+            #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 1, aq, rl, false), is_unsigned),
+          HALF =>
+            #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 2, aq, rl, false), is_unsigned),
+          WORD =>
+            #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 4, aq, rl, false), is_unsigned),
+          DOUBLE if sizeof(xlen) >= 64 =>
+            #\hyperref[sailRISCVzprocesszyload]{process\_load}#(rd, vaddr, #\hyperref[sailRISCVzmemzyread]{mem\_read}#(#\hyperref[sailRISCVzRead]{Read}#(Data), paddr, 8, aq, rl, false), is_unsigned),
+          _ => #\hyperref[sailRISCVzreportzyinvalidzywidth]{report\_invalid\_width}#(__FILE__, __LINE__, width, "load")
         }
     }
 }

@@ -8,7 +8,7 @@ function #\hyperref[sailRISCVztranslate48]{translate48}#(asid, ptb, vAddr, ac, p
           #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(pAddr, ext_ptw)
         },
         #\hyperref[sailRISCVzSome]{Some}#(pbits, ext) =>
-          if ~ (#\hyperref[sailRISCVzplatzyenablezydirtyzyupdate]{plat\_enable\_dirty\_update}# ())
+          if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzplatzyenablezydirtyzyupdate]{plat\_enable\_dirty\_update}#())
           then {
             /* pte needs dirty/accessed update but that is not enabled */
             #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzPTWzyPTEzyUpdate]{PTW\_PTE\_Update}#(), ext_ptw)

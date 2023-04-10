@@ -1,9 +1,0 @@
-function #\hyperref[sailRISCVzextzypostzydecodezyhook]{ext\_post\_decode\_hook}#(x) : ast -> ast = {
-  if (PCC.flag_cap_mode) then match(x) {
-    #\hyperref[sailRISCVzUTYPE]{UTYPE}#(imm, cd, RISCV_AUIPC) => #\hyperref[sailRISCVzAUIPCC]{AUIPCC}#(imm, cd),
-    #\hyperref[sailRISCVzRISCVzyJAL]{RISCV\_JAL}#(imm, cd) => #\hyperref[sailRISCVzCJAL]{CJAL}#(imm, cd),
-    #\hyperref[sailRISCVzRISCVzyJALR]{RISCV\_JALR}#(imm, cs1, cd) => #\hyperref[sailRISCVzCJALR]{CJALR}#(imm, cs1, cd),
-    OTHERS => OTHERS
-  } else
-    x
-}

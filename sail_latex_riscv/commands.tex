@@ -453,6 +453,8 @@ The most general shift operations also allow negative shifts which go in the opp
 
 \newcommand{\sailRISCVoverloadKKzW}{\saildoclabelled{sailRISCVoverloadKKzzW}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadKKzzw805a9067649c7cfeedcb41b57a7e2c86.tex}}}}
 
+\newcommand{\sailRISCVvalnot}{\saildoclabelled{sailRISCVznot}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valznotcbe861867f25b28c34f5ae99957794ed.tex}}}}
+
 \newcommand{\sailRISCVvalneqVec}{\saildoclabelled{sailRISCVzneqzyvec}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzneq_vecefa97ba9877d7fde3cd929d8ec7a401a.tex}}}}
 
 \newcommand{\sailRISCVfnneqVec}{\saildoclabelled{sailRISCVfnzneqzyvec}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzneq_vecefa97ba9877d7fde3cd929d8ec7a401a.tex}}}}
@@ -1329,7 +1331,7 @@ The most general shift operations also allow negative shifts which go in the opp
 
 \newcommand{\sailRISCVfnMAX}{\saildoclabelled{sailRISCVfnzMAX}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzmax84a1c708b7c8789c33f72b5bb9ee31e8.tex}}}}
 
-\newcommand{\sailRISCVvalnot}{\saildoclabelled{sailRISCVznot}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valznotcbe861867f25b28c34f5ae99957794ed.tex}}}}
+
 
 \newcommand{\sailRISCVvalboolToBit}{\saildoclabelled{sailRISCVzboolzytozybit}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzbool_to_bit5cc99dc0718457cc8a182fa8507f045a.tex}}}}
 
@@ -1842,6 +1844,16 @@ otypes.
 
 \newcommand{\sailRISCVfnarchToBits}{\saildoclabelled{sailRISCVfnzarchzytozybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzarch_to_bits5b82edd15605cd21ec0f9d9dc63af541.tex}}}}
 
+\newcommand{\sailRISCVtypeexception}{\saildoclabelled{sailRISCVtypezexception}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezexceptionfaa4db8fab65c538edad4222e766a71a.tex}}}}
+
+\newcommand{\sailRISCVvalnotImplemented}{\saildoclabelled{sailRISCVznotzyimplemented}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valznot_implementedde41164205ef21773733c511f05a2946.tex}}}}
+
+\newcommand{\sailRISCVfnnotImplemented}{\saildoclabelled{sailRISCVfnznotzyimplemented}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnznot_implementedde41164205ef21773733c511f05a2946.tex}}}}
+
+\newcommand{\sailRISCVvalinternalError}{\saildoclabelled{sailRISCVzinternalzyerror}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzinternal_error92c3548c19282819d20d44565303aa89.tex}}}}
+
+\newcommand{\sailRISCVfninternalError}{\saildoclabelled{sailRISCVfnzinternalzyerror}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzinternal_error92c3548c19282819d20d44565303aa89.tex}}}}
+
 \newcommand{\sailRISCVtypeprivLevel}{\saildoclabelled{sailRISCVtypezprivzylevel}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezpriv_leveld5cdc3b186bdc20eb05333efc3cfd01c.tex}}}}
 
 \newcommand{\sailRISCVtypePrivilege}{\saildoclabelled{sailRISCVtypezPrivilege}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezprivilege9997cec8360c7da9f3608ad36bf538cc.tex}}}}
@@ -1858,7 +1870,10 @@ otypes.
 
 \newcommand{\sailRISCVfnprivLevelToBits}{\saildoclabelled{sailRISCVfnzprivLevelzytozybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzprivlevel_to_bits4b6f72dec94db401093759e81957be6b.tex}}}}
 
-\newcommand{\sailRISCVvalprivLevelOfBits}{\saildoclabelled{sailRISCVzprivLevelzyofzybits}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzprivlevel_of_bitsf8754d7aa9d9aeada7d193ecf64e148c.tex}}}}
+\newcommand{\sailRISCVvalprivLevelOfBits}{\saildoclabelled{sailRISCVzprivLevelzyofzybits}{\saildocval{Converts the given 2-bit privilege level code to the \hyperref[sailRISCVzPrivilege]{\lstinline{Privilege}} enum.
+Calling with a reserved code will result in an internal error.
+
+}{\lstinputlisting[language=sail]{sail_latex_riscv/valzprivlevel_of_bitsf8754d7aa9d9aeada7d193ecf64e148c.tex}}}}
 
 \newcommand{\sailRISCVfnprivLevelOfBits}{\saildoclabelled{sailRISCVfnzprivLevelzyofzybits}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzprivlevel_of_bitsf8754d7aa9d9aeada7d193ecf64e148c.tex}}}}
 
@@ -1919,16 +1934,6 @@ otypes.
 \newcommand{\sailRISCVfnexceptionTypeToStr}{\saildoclabelled{sailRISCVfnzexceptionTypezytozystr}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzexceptiontype_to_str566b70f16fdf6ed4d1850ec75465ec4b.tex}}}}
 
 \newcommand{\sailRISCVoverloadEEEtoStr}{\saildoclabelled{sailRISCVoverloadEEEztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadEEEzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
-
-\newcommand{\sailRISCVtypeexception}{\saildoclabelled{sailRISCVtypezexception}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezexceptionfaa4db8fab65c538edad4222e766a71a.tex}}}}
-
-\newcommand{\sailRISCVvalnotImplemented}{\saildoclabelled{sailRISCVznotzyimplemented}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valznot_implementedde41164205ef21773733c511f05a2946.tex}}}}
-
-\newcommand{\sailRISCVfnnotImplemented}{\saildoclabelled{sailRISCVfnznotzyimplemented}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnznot_implementedde41164205ef21773733c511f05a2946.tex}}}}
-
-\newcommand{\sailRISCVvalinternalError}{\saildoclabelled{sailRISCVzinternalzyerror}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzinternal_error92c3548c19282819d20d44565303aa89.tex}}}}
-
-\newcommand{\sailRISCVfninternalError}{\saildoclabelled{sailRISCVfnzinternalzyerror}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzinternal_error92c3548c19282819d20d44565303aa89.tex}}}}
 
 \newcommand{\sailRISCVtypetvMode}{\saildoclabelled{sailRISCVtypeztvzymode}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typeztv_modea724d5138c36f1ab6005c9051bd94ea0.tex}}}}
 
@@ -2168,7 +2173,16 @@ otypes.
 
 \newcommand{\sailRISCVfnwordWidthBytes}{\saildoclabelled{sailRISCVfnzwordzywidthzybytes}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzword_width_bytes3499487c0f03a80d8659fa504a62261f.tex}}}}
 
-\newcommand{\sailRISCVlethaveSplitRegFile}{\saildoclabelled{sailRISCVletzhaveSplitRegFile}{\saildoclet{}{\lstinputlisting[language=sail]{sail_latex_riscv/letzhavesplitregfilec09adbb1baa006c868c3305835dc10f9.tex}}}}
+\newcommand{\sailRISCVvalreportInvalidWidth}{\saildoclabelled{sailRISCVzreportzyinvalidzywidth}{\saildocval{Raise an internal error reporting that width w is invalid for access kind, k,
+and current xlen. The file name and line number should be passed in as the
+first two arguments using the \textbf{FILE} and \textbf{LINE} built-in macros.
+This is mainly used to supress Sail warnings about incomplete matches and
+should be unreachable. See https://github.com/riscv/sail-riscv/issues/194
+and https://github.com/riscv/sail-riscv/pull/197 .
+
+}{\lstinputlisting[language=sail]{sail_latex_riscv/valzreport_invalid_width165132666941c3d73a3d109480ae38d3.tex}}}}
+
+\newcommand{\sailRISCVfnreportInvalidWidth}{\saildoclabelled{sailRISCVfnzreportzyinvalidzywidth}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzreport_invalid_width165132666941c3d73a3d109480ae38d3.tex}}}}
 
 \newcommand{\sailRISCVtyperegtype}{\saildoclabelled{sailRISCVtypezregtype}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezregtype0be936c0d9e150ad1beff99e08691cf8.tex}}}}
 
@@ -4893,6 +4907,10 @@ in cap cause).
 
 \newcommand{\sailRISCVvalfUnTypeMnemonicD}{\saildoclabelled{sailRISCVzfzyunzytypezymnemoniczyD}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzf_un_type_mnemonic_d67aa9b49056aabdddaa065ba03ecbadb.tex}}}}
 
+\newcommand{\sailRISCVvalencdecCapmode}{\saildoclabelled{sailRISCVzencdeczycapmode}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzencdec_capmodea00a284ef6aeb6ad5291b1a1885b9f63.tex}}}}
+
+\newcommand{\sailRISCVvalencdecCompressedCapmode}{\saildoclabelled{sailRISCVzencdeczycompressedzycapmode}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzencdec_compressed_capmodea936938df9f8c926ac76addeee8e4cf9.tex}}}}
+
 \newcommand{\sailRISCVvalhandleLoadDataViaCap}{\saildoclabelled{sailRISCVzhandlezyloadzydatazyviazycap}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzhandle_load_data_via_capf2827ba9c795213ba1703c9ae04ec80e.tex}}}}
 
 \newcommand{\sailRISCVfnhandleLoadDataViaCap}{\saildoclabelled{sailRISCVfnzhandlezyloadzydatazyviazycap}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzhandle_load_data_via_capf2827ba9c795213ba1703c9ae04ec80e.tex}}}}
@@ -5065,6 +5083,30 @@ in cap cause).
 
 \newcommand{\sailRISCVfclREMWexecute}{\saildoclabelled{sailRISCVfclREMWzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclREMWzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
+\newcommand{\sailRISCVfclURETexecute}{\saildoclabelled{sailRISCVfclURETzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclURETzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreNOPUnderscoreHINTexecute}{\saildoclabelled{sailRISCVfclCUnderscoreNOPUnderscoreHINTzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreNOPUnderscoreHINTzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreADDIUnderscoreHINTexecute}{\saildoclabelled{sailRISCVfclCUnderscoreADDIUnderscoreHINTzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreADDIUnderscoreHINTzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreLIUnderscoreHINTexecute}{\saildoclabelled{sailRISCVfclCUnderscoreLIUnderscoreHINTzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreLIUnderscoreHINTzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreLUIUnderscoreHINTexecute}{\saildoclabelled{sailRISCVfclCUnderscoreLUIUnderscoreHINTzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreLUIUnderscoreHINTzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreMVUnderscoreHINTexecute}{\saildoclabelled{sailRISCVfclCUnderscoreMVUnderscoreHINTzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreMVUnderscoreHINTzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreADDUnderscoreHINTexecute}{\saildoclabelled{sailRISCVfclCUnderscoreADDUnderscoreHINTzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreADDUnderscoreHINTzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreSLLIUnderscoreHINTexecute}{\saildoclabelled{sailRISCVfclCUnderscoreSLLIUnderscoreHINTzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreSLLIUnderscoreHINTzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreSRLIUnderscoreHINTexecute}{\saildoclabelled{sailRISCVfclCUnderscoreSRLIUnderscoreHINTzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreSRLIUnderscoreHINTzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreSRAIUnderscoreHINTexecute}{\saildoclabelled{sailRISCVfclCUnderscoreSRAIUnderscoreHINTzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreSRAIUnderscoreHINTzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclFENCEUnderscoreRESERVEDexecute}{\saildoclabelled{sailRISCVfclFENCEUnderscoreRESERVEDzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclFENCEUnderscoreRESERVEDzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclFENCEIUnderscoreRESERVEDexecute}{\saildoclabelled{sailRISCVfclFENCEIUnderscoreRESERVEDzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclFENCEIUnderscoreRESERVEDzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
 \newcommand{\sailRISCVfclCSRexecute}{\saildoclabelled{sailRISCVfclCSRzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCSRzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
 \newcommand{\sailRISCVfclLOADUnderscoreFPexecute}{\saildoclabelled{sailRISCVfclLOADUnderscoreFPzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclLOADUnderscoreFPzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
@@ -5115,6 +5157,14 @@ in cap cause).
 
 \newcommand{\sailRISCVfclFUnderscoreUNUnderscoreTYPEUnderscoreSBexecute}{\saildoclabelled{sailRISCVfclFUnderscoreUNUnderscoreTYPEUnderscoreSBzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclFUnderscoreUNUnderscoreTYPEUnderscoreSBzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
+\newcommand{\sailRISCVfclCUnderscoreFLWSPexecute}{\saildoclabelled{sailRISCVfclCUnderscoreFLWSPzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreFLWSPzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreFSWSPexecute}{\saildoclabelled{sailRISCVfclCUnderscoreFSWSPzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreFSWSPzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreFLWexecute}{\saildoclabelled{sailRISCVfclCUnderscoreFLWzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreFLWzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreFSWexecute}{\saildoclabelled{sailRISCVfclCUnderscoreFSWzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreFSWzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
 \newcommand{\sailRISCVfclFUnderscoreMADDUnderscoreTYPEUnderscoreDexecute}{\saildoclabelled{sailRISCVfclFUnderscoreMADDUnderscoreTYPEUnderscoreDzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclFUnderscoreMADDUnderscoreTYPEUnderscoreDzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
 \newcommand{\sailRISCVfclFUnderscoreBINUnderscoreRMUnderscoreTYPEUnderscoreDexecute}{\saildoclabelled{sailRISCVfclFUnderscoreBINUnderscoreRMUnderscoreTYPEUnderscoreDzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclFUnderscoreBINUnderscoreRMUnderscoreTYPEUnderscoreDzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
@@ -5162,6 +5212,14 @@ in cap cause).
 \newcommand{\sailRISCVfclFUnderscoreUNUnderscoreTYPEUnderscoreDAexecute}{\saildoclabelled{sailRISCVfclFUnderscoreUNUnderscoreTYPEUnderscoreDAzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclFUnderscoreUNUnderscoreTYPEUnderscoreDAzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
 \newcommand{\sailRISCVfclFUnderscoreUNUnderscoreTYPEUnderscoreDBexecute}{\saildoclabelled{sailRISCVfclFUnderscoreUNUnderscoreTYPEUnderscoreDBzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclFUnderscoreUNUnderscoreTYPEUnderscoreDBzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreFLDSPexecute}{\saildoclabelled{sailRISCVfclCUnderscoreFLDSPzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreFLDSPzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreFSDSPexecute}{\saildoclabelled{sailRISCVfclCUnderscoreFSDSPzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreFSDSPzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreFLDexecute}{\saildoclabelled{sailRISCVfclCUnderscoreFLDzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreFLDzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreFSDexecute}{\saildoclabelled{sailRISCVfclCUnderscoreFSDzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreFSDzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
 \newcommand{\sailRISCVfclAUIPCCexecute}{\saildoclabelled{sailRISCVfclAUIPCCzexecute}{\saildocfcl{Capability register \emph{cd} is replaced with the contents of \textbf{PCC}, with the
 \textbf{address} replaced with \textbf{PCC}.\textbf{address} $+$ \emph{imm} $\times$ 4096.
@@ -5439,23 +5497,6 @@ the \textbf{tag} field cleared.
 \newcommand{\sailRISCVfclCMoveexecute}{\saildoclabelled{sailRISCVfclCMovezexecute}{\saildocfcl{Capability register \emph{cd} is replaced with the contents of \emph{cs1}.
 
 }{\lstinputlisting[language=sail]{sail_latex_riscv/fclCMovezexecute33a689e3a631b9b905b85461d3814943.tex}}}}
-
-\newcommand{\sailRISCVfclClearexecute}{\saildoclabelled{sailRISCVfclClearzexecute}{\saildocfcl{Integer registers 8 $\times$ \emph{q} $+$ \emph{i} are each set to 0 if the \emph{i}th bit
-of \emph{m} is set. This instruction is only present on implementations with a
-split register file. On implementations with a merged register file the
-functionality of this instruction is covered by \hyperref[sailRISCVzCClear]{\lstinline{CClear}}.
-
-\subsection*{Notes}
-
-
-\begin{itemize}
-\item This instruction is designed to accelerate the register clearing that is
- required for secure domain transitions. It is expected that it can be
- implemented efficiently in hardware using a single `valid' bit per
- register that is cleared by this instruction and set on any subsequent
- write to the register.
-\end{itemize}
-}{\lstinputlisting[language=sail]{sail_latex_riscv/fclClearzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
 \newcommand{\sailRISCVfclCClearexecute}{\saildoclabelled{sailRISCVfclCClearzexecute}{\saildocfcl{Capability registers 8 $\times$ \emph{q} $+$ \emph{i} are each set to \textbf{NULL} if the
 \emph{i}th bit of \emph{m} is set, with the exception that the 0th bit of \emph{m} refers
@@ -6028,6 +6069,117 @@ In capability mode, an exception is raised if:
 
 \newcommand{\sailRISCVfclAMOSwapCapexecute}{\saildoclabelled{sailRISCVfclAMOSwapCapzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclAMOSwapCapzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
+\newcommand{\sailRISCVfclCUnderscoreCLCexecute}{\saildoclabelled{sailRISCVfclCUnderscoreCLCzexecute}{\saildocfcl{Compressed 16-bit encoding for \hyperref[sailRISCVzLoadCapImm]{CLC}.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item This instruction is only available in capability encoding mode.
+\item For RV32 this replaces the encoding of \hyperref[sailRISCVzCzEFLW]{\lstinline{C.FLW}}, RV64 uses \hyperref[sailRISCVzCzEFLD]{\lstinline{C.FLD}}.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreCLCzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreCLCSPexecute}{\saildoclabelled{sailRISCVfclCUnderscoreCLCSPzexecute}{\saildocfcl{Compressed 16-bit encoding for a stack-pointer-relative \hyperref[sailRISCVzLoadCapImm]{CLC}.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item This instruction is only available in capability encoding mode.
+\item For RV32 this replaces the encoding of \hyperref[sailRISCVzCzEFLWSP]{\lstinline{C.FLWSP}}, RV64 uses \hyperref[sailRISCVzCzEFLDSP]{\lstinline{C.FLDSP}}.
+\item The encoding with \lstinline`cd == 0` is reserved and will raise an illegal
+ instruction trap.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreCLCSPzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreCSCexecute}{\saildoclabelled{sailRISCVfclCUnderscoreCSCzexecute}{\saildocfcl{Compressed 16-bit encoding for \hyperref[sailRISCVzStoreCapImm]{CSC}.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item This instruction is only available in capability encoding mode.
+\item For RV32 this replaces the encoding of \hyperref[sailRISCVzCzEFSW]{\lstinline{C.FSW}}, RV64 uses \hyperref[sailRISCVzCzEFSD]{\lstinline{C.FSD}}.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreCSCzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreCSCSPexecute}{\saildoclabelled{sailRISCVfclCUnderscoreCSCSPzexecute}{\saildocfcl{Compressed 16-bit encoding for a stack-pointer-relative \hyperref[sailRISCVzStoreCapImm]{CSC}.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item This instruction is only available in capability encoding mode.
+\item For RV32 this replaces the encoding of \hyperref[sailRISCVzCzEFSWSP]{\lstinline{C.FSWSP}}, RV64 uses \hyperref[sailRISCVzCzEFSDSP]{\lstinline{C.FSDSP}}.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreCSCSPzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreCIncOffsetOneSixCSPexecute}{\saildoclabelled{sailRISCVfclCUnderscoreCIncOffsetOneSixCSPzexecute}{\saildocfcl{Compressed 16-bit encoding for \hyperref[sailRISCVzCIncOffsetImmediate]{\lstinline{CIncOffsetImmediate}} with source and
+destination registers set to \lstinline`csp` and an immediate scaled by 16.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item This instruction is only available in capability encoding mode.
+\item This instruction replaces the encoding of \hyperref[sailRISCVzCzEADDI16SP]{\lstinline{C.ADDI16SP}}.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreCIncOffsetOneSixCSPzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreCIncOffsetFourCSPNexecute}{\saildoclabelled{sailRISCVfclCUnderscoreCIncOffsetFourCSPNzexecute}{\saildocfcl{Compressed 16-bit encoding for \hyperref[sailRISCVzCIncOffsetImmediate]{\lstinline{CIncOffsetImmediate}} with the source register
+set to \lstinline`csp` and an immediate scaled by 4.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item This instruction is only available in capability encoding mode.
+\item This instruction replaces the encoding of \hyperref[sailRISCVzCzEADDI4SPN]{\lstinline{C.ADDI4SPN}}.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreCIncOffsetFourCSPNzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreCJALRexecute}{\saildoclabelled{sailRISCVfclCUnderscoreCJALRzexecute}{\saildocfcl{Compressed 16-bit encoding for \hyperref[sailRISCVzCJALR]{\lstinline{CJALR}} with the destination register set
+to \lstinline`cra`.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item This instruction is only available in capability encoding mode.
+\item This instruction replaces the encoding of \hyperref[sailRISCVzCzEJALR]{\lstinline{C.JALR}}.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreCJALRzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreCJRexecute}{\saildoclabelled{sailRISCVfclCUnderscoreCJRzexecute}{\saildocfcl{Compressed 16-bit encoding for \hyperref[sailRISCVzCJALR]{\lstinline{CJALR}} with the source register set to
+\lstinline`cnull` and destination register set to \lstinline`cra`.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item This instruction is only available in capability encoding mode.
+\item This instruction replaces the encoding of \hyperref[sailRISCVzCzEJR]{\lstinline{C.JR}}.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreCJRzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclCUnderscoreCJALexecute}{\saildoclabelled{sailRISCVfclCUnderscoreCJALzexecute}{\saildocfcl{Compressed 16-bit encoding for \hyperref[sailRISCVzCJAL]{\lstinline{CJAL}} with the destination register set
+to \lstinline`cra`.
+
+\subsection*{Notes}
+
+
+\begin{itemize}
+\item This instruction is only available in capability encoding mode.
+\item This instruction is only available in RV32.
+\item This instruction replaces the encoding of \hyperref[sailRISCVzCzEJAL]{\lstinline{C.JAL}}.
+\end{itemize}
+}{\lstinputlisting[language=sail]{sail_latex_riscv/fclCUnderscoreCJALzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclNOTUnderscoreCAPMODEexecute}{\saildoclabelled{sailRISCVfclNOTUnderscoreCAPMODEzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclNOTUnderscoreCAPMODEzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
+\newcommand{\sailRISCVfclNOTUnderscoreCUnderscoreCAPMODEexecute}{\saildoclabelled{sailRISCVfclNOTUnderscoreCUnderscoreCAPMODEzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclNOTUnderscoreCUnderscoreCAPMODEzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
+
 \newcommand{\sailRISCVfclRISCVUnderscoreJALRexecute}{\saildoclabelled{sailRISCVfclRISCVUnderscoreJALRzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclRISCVUnderscoreJALRzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
 
 \newcommand{\sailRISCVfclILLEGALexecute}{\saildoclabelled{sailRISCVfclILLEGALzexecute}{\saildocfcl{}{\lstinputlisting[language=sail]{sail_latex_riscv/fclILLEGALzexecute33a689e3a631b9b905b85461d3814943.tex}}}}
@@ -6041,14 +6193,6 @@ In capability mode, an exception is raised if:
 \newcommand{\sailRISCVfnprintInsn}{\saildoclabelled{sailRISCVfnzprintzyinsn}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzprint_insn34adb9871c343ddeeb08d9e768ad4c92.tex}}}}
 
 \newcommand{\sailRISCVoverloadUUUtoStr}{\saildoclabelled{sailRISCVoverloadUUUztozystr}{\saildocoverload{}{\lstinputlisting[language=sail]{sail_latex_riscv/overloadUUUzto_str8b7a6895ae35945bd4740e9f790c43ee.tex}}}}
-
-\newcommand{\sailRISCVvaldecode}{\saildoclabelled{sailRISCVzdecode}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzdecodec2b8e713fb767e340b7b488fdcba3aab.tex}}}}
-
-\newcommand{\sailRISCVfndecode}{\saildoclabelled{sailRISCVfnzdecode}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzdecodec2b8e713fb767e340b7b488fdcba3aab.tex}}}}
-
-\newcommand{\sailRISCVvaldecodeCompressed}{\saildoclabelled{sailRISCVzdecodeCompressed}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzdecodecompresseda0c5feab498dd29a69efe0353146e981.tex}}}}
-
-\newcommand{\sailRISCVfndecodeCompressed}{\saildoclabelled{sailRISCVfnzdecodeCompressed}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzdecodecompresseda0c5feab498dd29a69efe0353146e981.tex}}}}
 
 \newcommand{\sailRISCVtypeFetchResult}{\saildoclabelled{sailRISCVtypezFetchResult}{\saildoctype{}{\lstinputlisting[language=sail]{sail_latex_riscv/typezfetchresult170a566bc6b6cd6bbb373e14725091ab.tex}}}}
 
@@ -6068,9 +6212,13 @@ In capability mode, an exception is raised if:
 
 \newcommand{\sailRISCVfnextPostStepHook}{\saildoclabelled{sailRISCVfnzextzypostzystepzyhook}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzext_post_step_hook12041b61939f7dc96fabf0eb4cecd40e.tex}}}}
 
-\newcommand{\sailRISCVvalextPostDecodeHook}{\saildoclabelled{sailRISCVzextzypostzydecodezyhook}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzext_post_decode_hook0ea81b52fdd64a9c28fe27bce7cc93bb.tex}}}}
+\newcommand{\sailRISCVvalextDecodeCompressed}{\saildoclabelled{sailRISCVzextzydecodezycompressed}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzext_decode_compressedfbec87e2d4f623ebb23ef7e78027c9d5.tex}}}}
 
-\newcommand{\sailRISCVfnextPostDecodeHook}{\saildoclabelled{sailRISCVfnzextzypostzydecodezyhook}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzext_post_decode_hook0ea81b52fdd64a9c28fe27bce7cc93bb.tex}}}}
+\newcommand{\sailRISCVfnextDecodeCompressed}{\saildoclabelled{sailRISCVfnzextzydecodezycompressed}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzext_decode_compressedfbec87e2d4f623ebb23ef7e78027c9d5.tex}}}}
+
+\newcommand{\sailRISCVvalextDecode}{\saildoclabelled{sailRISCVzextzydecode}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzext_decodef03d5af7cdee0fb957b2af3e1882c370.tex}}}}
+
+\newcommand{\sailRISCVfnextDecode}{\saildoclabelled{sailRISCVfnzextzydecode}{\saildocfn{}{\lstinputlisting[language=sail]{sail_latex_riscv/fnzext_decodef03d5af7cdee0fb957b2af3e1882c370.tex}}}}
 
 \newcommand{\sailRISCVvalisRVC}{\saildoclabelled{sailRISCVzisRVC}{\saildocval{}{\lstinputlisting[language=sail]{sail_latex_riscv/valzisrvcd64dda5fc24513d78f480d3583dee004.tex}}}}
 
@@ -6377,8 +6525,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{dec\_str}{\sailRISCVvaldecStr}{}%
   \ifstrequal{#1}{decimal_string_of_bits}{\sailRISCVvaldecimalStringOfBits}{}%
   \ifstrequal{#1}{decimal\_string\_of\_bits}{\sailRISCVvaldecimalStringOfBits}{}%
-  \ifstrequal{#1}{decode}{\sailRISCVvaldecode}{}%
-  \ifstrequal{#1}{decodeCompressed}{\sailRISCVvaldecodeCompressed}{}%
   \ifstrequal{#1}{def_spc}{\sailRISCVvaldefSpc}{}%
   \ifstrequal{#1}{def\_spc}{\sailRISCVvaldefSpc}{}%
   \ifstrequal{#1}{def_spc_backwards}{\sailRISCVvaldefSpcBackwards}{}%
@@ -6409,8 +6555,12 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{encdec\_amoop}{\sailRISCVvalencdecAmoop}{}%
   \ifstrequal{#1}{encdec_bop}{\sailRISCVvalencdecBop}{}%
   \ifstrequal{#1}{encdec\_bop}{\sailRISCVvalencdecBop}{}%
+  \ifstrequal{#1}{encdec_capmode}{\sailRISCVvalencdecCapmode}{}%
+  \ifstrequal{#1}{encdec\_capmode}{\sailRISCVvalencdecCapmode}{}%
   \ifstrequal{#1}{encdec_compressed}{\sailRISCVvalencdecCompressed}{}%
   \ifstrequal{#1}{encdec\_compressed}{\sailRISCVvalencdecCompressed}{}%
+  \ifstrequal{#1}{encdec_compressed_capmode}{\sailRISCVvalencdecCompressedCapmode}{}%
+  \ifstrequal{#1}{encdec\_compressed\_capmode}{\sailRISCVvalencdecCompressedCapmode}{}%
   \ifstrequal{#1}{encdec_csrop}{\sailRISCVvalencdecCsrop}{}%
   \ifstrequal{#1}{encdec\_csrop}{\sailRISCVvalencdecCsrop}{}%
   \ifstrequal{#1}{encdec_iop}{\sailRISCVvalencdecIop}{}%
@@ -6468,6 +6618,10 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ext\_control\_check\_pc}{\sailRISCVvalextControlCheckPc}{}%
   \ifstrequal{#1}{ext_data_get_addr}{\sailRISCVvalextDataGetAddr}{}%
   \ifstrequal{#1}{ext\_data\_get\_addr}{\sailRISCVvalextDataGetAddr}{}%
+  \ifstrequal{#1}{ext_decode}{\sailRISCVvalextDecode}{}%
+  \ifstrequal{#1}{ext\_decode}{\sailRISCVvalextDecode}{}%
+  \ifstrequal{#1}{ext_decode_compressed}{\sailRISCVvalextDecodeCompressed}{}%
+  \ifstrequal{#1}{ext\_decode\_compressed}{\sailRISCVvalextDecodeCompressed}{}%
   \ifstrequal{#1}{ext_exc_type_of_num}{\sailRISCVvalextExcTypeOfNum}{}%
   \ifstrequal{#1}{ext\_exc\_type\_of\_num}{\sailRISCVvalextExcTypeOfNum}{}%
   \ifstrequal{#1}{ext_exc_type_to_bits}{\sailRISCVvalextExcTypeToBits}{}%
@@ -6494,8 +6648,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ext\_init\_regs}{\sailRISCVvalextInitRegs}{}%
   \ifstrequal{#1}{ext_is_CSR_defined}{\sailRISCVvalextIsCSRDefined}{}%
   \ifstrequal{#1}{ext\_is\_CSR\_defined}{\sailRISCVvalextIsCSRDefined}{}%
-  \ifstrequal{#1}{ext_post_decode_hook}{\sailRISCVvalextPostDecodeHook}{}%
-  \ifstrequal{#1}{ext\_post\_decode\_hook}{\sailRISCVvalextPostDecodeHook}{}%
   \ifstrequal{#1}{ext_post_step_hook}{\sailRISCVvalextPostStepHook}{}%
   \ifstrequal{#1}{ext\_post\_step\_hook}{\sailRISCVvalextPostStepHook}{}%
   \ifstrequal{#1}{ext_pre_step_hook}{\sailRISCVvalextPreStepHook}{}%
@@ -7854,6 +8006,8 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{rem\_round\_zero}{\sailRISCVvalremRoundZero}{}%
   \ifstrequal{#1}{replicate_bits}{\sailRISCVvalreplicateBits}{}%
   \ifstrequal{#1}{replicate\_bits}{\sailRISCVvalreplicateBits}{}%
+  \ifstrequal{#1}{report_invalid_width}{\sailRISCVvalreportInvalidWidth}{}%
+  \ifstrequal{#1}{report\_invalid\_width}{\sailRISCVvalreportInvalidWidth}{}%
   \ifstrequal{#1}{reset_htif}{\sailRISCVvalresetHtif}{}%
   \ifstrequal{#1}{reset\_htif}{\sailRISCVvalresetHtif}{}%
   \ifstrequal{#1}{retire_instruction}{\sailRISCVvalretireInstruction}{}%
@@ -8520,8 +8674,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{dec\_str}{\hyperref[sailRISCVzdeczystr]{#2}}{}%
   \ifstrequal{#1}{decimal_string_of_bits}{\hyperref[sailRISCVzdecimalzystringzyofzybits]{#2}}{}%
   \ifstrequal{#1}{decimal\_string\_of\_bits}{\hyperref[sailRISCVzdecimalzystringzyofzybits]{#2}}{}%
-  \ifstrequal{#1}{decode}{\hyperref[sailRISCVzdecode]{#2}}{}%
-  \ifstrequal{#1}{decodeCompressed}{\hyperref[sailRISCVzdecodeCompressed]{#2}}{}%
   \ifstrequal{#1}{def_spc}{\hyperref[sailRISCVzdefzyspc]{#2}}{}%
   \ifstrequal{#1}{def\_spc}{\hyperref[sailRISCVzdefzyspc]{#2}}{}%
   \ifstrequal{#1}{def_spc_backwards}{\hyperref[sailRISCVzdefzyspczybackwards]{#2}}{}%
@@ -8552,8 +8704,12 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{encdec\_amoop}{\hyperref[sailRISCVzencdeczyamoop]{#2}}{}%
   \ifstrequal{#1}{encdec_bop}{\hyperref[sailRISCVzencdeczybop]{#2}}{}%
   \ifstrequal{#1}{encdec\_bop}{\hyperref[sailRISCVzencdeczybop]{#2}}{}%
+  \ifstrequal{#1}{encdec_capmode}{\hyperref[sailRISCVzencdeczycapmode]{#2}}{}%
+  \ifstrequal{#1}{encdec\_capmode}{\hyperref[sailRISCVzencdeczycapmode]{#2}}{}%
   \ifstrequal{#1}{encdec_compressed}{\hyperref[sailRISCVzencdeczycompressed]{#2}}{}%
   \ifstrequal{#1}{encdec\_compressed}{\hyperref[sailRISCVzencdeczycompressed]{#2}}{}%
+  \ifstrequal{#1}{encdec_compressed_capmode}{\hyperref[sailRISCVzencdeczycompressedzycapmode]{#2}}{}%
+  \ifstrequal{#1}{encdec\_compressed\_capmode}{\hyperref[sailRISCVzencdeczycompressedzycapmode]{#2}}{}%
   \ifstrequal{#1}{encdec_csrop}{\hyperref[sailRISCVzencdeczycsrop]{#2}}{}%
   \ifstrequal{#1}{encdec\_csrop}{\hyperref[sailRISCVzencdeczycsrop]{#2}}{}%
   \ifstrequal{#1}{encdec_iop}{\hyperref[sailRISCVzencdeczyiop]{#2}}{}%
@@ -8611,6 +8767,10 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ext\_control\_check\_pc}{\hyperref[sailRISCVzextzycontrolzycheckzypc]{#2}}{}%
   \ifstrequal{#1}{ext_data_get_addr}{\hyperref[sailRISCVzextzydatazygetzyaddr]{#2}}{}%
   \ifstrequal{#1}{ext\_data\_get\_addr}{\hyperref[sailRISCVzextzydatazygetzyaddr]{#2}}{}%
+  \ifstrequal{#1}{ext_decode}{\hyperref[sailRISCVzextzydecode]{#2}}{}%
+  \ifstrequal{#1}{ext\_decode}{\hyperref[sailRISCVzextzydecode]{#2}}{}%
+  \ifstrequal{#1}{ext_decode_compressed}{\hyperref[sailRISCVzextzydecodezycompressed]{#2}}{}%
+  \ifstrequal{#1}{ext\_decode\_compressed}{\hyperref[sailRISCVzextzydecodezycompressed]{#2}}{}%
   \ifstrequal{#1}{ext_exc_type_of_num}{\hyperref[sailRISCVzextzyexczytypezyofzynum]{#2}}{}%
   \ifstrequal{#1}{ext\_exc\_type\_of\_num}{\hyperref[sailRISCVzextzyexczytypezyofzynum]{#2}}{}%
   \ifstrequal{#1}{ext_exc_type_to_bits}{\hyperref[sailRISCVzextzyexczytypezytozybits]{#2}}{}%
@@ -8637,8 +8797,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ext\_init\_regs}{\hyperref[sailRISCVzextzyinitzyregs]{#2}}{}%
   \ifstrequal{#1}{ext_is_CSR_defined}{\hyperref[sailRISCVzextzyiszyCSRzydefined]{#2}}{}%
   \ifstrequal{#1}{ext\_is\_CSR\_defined}{\hyperref[sailRISCVzextzyiszyCSRzydefined]{#2}}{}%
-  \ifstrequal{#1}{ext_post_decode_hook}{\hyperref[sailRISCVzextzypostzydecodezyhook]{#2}}{}%
-  \ifstrequal{#1}{ext\_post\_decode\_hook}{\hyperref[sailRISCVzextzypostzydecodezyhook]{#2}}{}%
   \ifstrequal{#1}{ext_post_step_hook}{\hyperref[sailRISCVzextzypostzystepzyhook]{#2}}{}%
   \ifstrequal{#1}{ext\_post\_step\_hook}{\hyperref[sailRISCVzextzypostzystepzyhook]{#2}}{}%
   \ifstrequal{#1}{ext_pre_step_hook}{\hyperref[sailRISCVzextzyprezystepzyhook]{#2}}{}%
@@ -9997,6 +10155,8 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{rem\_round\_zero}{\hyperref[sailRISCVzremzyroundzyzzero]{#2}}{}%
   \ifstrequal{#1}{replicate_bits}{\hyperref[sailRISCVzreplicatezybits]{#2}}{}%
   \ifstrequal{#1}{replicate\_bits}{\hyperref[sailRISCVzreplicatezybits]{#2}}{}%
+  \ifstrequal{#1}{report_invalid_width}{\hyperref[sailRISCVzreportzyinvalidzywidth]{#2}}{}%
+  \ifstrequal{#1}{report\_invalid\_width}{\hyperref[sailRISCVzreportzyinvalidzywidth]{#2}}{}%
   \ifstrequal{#1}{reset_htif}{\hyperref[sailRISCVzresetzyhtif]{#2}}{}%
   \ifstrequal{#1}{reset\_htif}{\hyperref[sailRISCVzresetzyhtif]{#2}}{}%
   \ifstrequal{#1}{retire_instruction}{\hyperref[sailRISCVzretirezyinstruction]{#2}}{}%
@@ -10544,8 +10704,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{curPTB64}{\sailRISCVfncurPTBSixFour}{}%
   \ifstrequal{#1}{cur_Architecture}{\sailRISCVfncurArchitecture}{}%
   \ifstrequal{#1}{cur\_Architecture}{\sailRISCVfncurArchitecture}{}%
-  \ifstrequal{#1}{decode}{\sailRISCVfndecode}{}%
-  \ifstrequal{#1}{decodeCompressed}{\sailRISCVfndecodeCompressed}{}%
   \ifstrequal{#1}{def_spc_backwards}{\sailRISCVfndefSpcBackwards}{}%
   \ifstrequal{#1}{def\_spc\_backwards}{\sailRISCVfndefSpcBackwards}{}%
   \ifstrequal{#1}{def_spc_forwards}{\sailRISCVfndefSpcForwards}{}%
@@ -10593,6 +10751,10 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ext\_control\_check\_pc}{\sailRISCVfnextControlCheckPc}{}%
   \ifstrequal{#1}{ext_data_get_addr}{\sailRISCVfnextDataGetAddr}{}%
   \ifstrequal{#1}{ext\_data\_get\_addr}{\sailRISCVfnextDataGetAddr}{}%
+  \ifstrequal{#1}{ext_decode}{\sailRISCVfnextDecode}{}%
+  \ifstrequal{#1}{ext\_decode}{\sailRISCVfnextDecode}{}%
+  \ifstrequal{#1}{ext_decode_compressed}{\sailRISCVfnextDecodeCompressed}{}%
+  \ifstrequal{#1}{ext\_decode\_compressed}{\sailRISCVfnextDecodeCompressed}{}%
   \ifstrequal{#1}{ext_exc_type_of_num}{\sailRISCVfnextExcTypeOfNum}{}%
   \ifstrequal{#1}{ext\_exc\_type\_of\_num}{\sailRISCVfnextExcTypeOfNum}{}%
   \ifstrequal{#1}{ext_exc_type_to_bits}{\sailRISCVfnextExcTypeToBits}{}%
@@ -10617,8 +10779,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ext\_init}{\sailRISCVfnextInit}{}%
   \ifstrequal{#1}{ext_init_regs}{\sailRISCVfnextInitRegs}{}%
   \ifstrequal{#1}{ext\_init\_regs}{\sailRISCVfnextInitRegs}{}%
-  \ifstrequal{#1}{ext_post_decode_hook}{\sailRISCVfnextPostDecodeHook}{}%
-  \ifstrequal{#1}{ext\_post\_decode\_hook}{\sailRISCVfnextPostDecodeHook}{}%
   \ifstrequal{#1}{ext_post_step_hook}{\sailRISCVfnextPostStepHook}{}%
   \ifstrequal{#1}{ext\_post\_step\_hook}{\sailRISCVfnextPostStepHook}{}%
   \ifstrequal{#1}{ext_pre_step_hook}{\sailRISCVfnextPreStepHook}{}%
@@ -11498,6 +11658,8 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{regval\_from\_reg}{\sailRISCVfnregvalFromReg}{}%
   \ifstrequal{#1}{regval_into_reg}{\sailRISCVfnregvalIntoReg}{}%
   \ifstrequal{#1}{regval\_into\_reg}{\sailRISCVfnregvalIntoReg}{}%
+  \ifstrequal{#1}{report_invalid_width}{\sailRISCVfnreportInvalidWidth}{}%
+  \ifstrequal{#1}{report\_invalid\_width}{\sailRISCVfnreportInvalidWidth}{}%
   \ifstrequal{#1}{reset_htif}{\sailRISCVfnresetHtif}{}%
   \ifstrequal{#1}{reset\_htif}{\sailRISCVfnresetHtif}{}%
   \ifstrequal{#1}{retire_instruction}{\sailRISCVfnretireInstruction}{}%
@@ -11944,8 +12106,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{curPTB64}{\hyperref[sailRISCVfnzcurPTB64]{#2}}{}%
   \ifstrequal{#1}{cur_Architecture}{\hyperref[sailRISCVfnzcurzyArchitecture]{#2}}{}%
   \ifstrequal{#1}{cur\_Architecture}{\hyperref[sailRISCVfnzcurzyArchitecture]{#2}}{}%
-  \ifstrequal{#1}{decode}{\hyperref[sailRISCVfnzdecode]{#2}}{}%
-  \ifstrequal{#1}{decodeCompressed}{\hyperref[sailRISCVfnzdecodeCompressed]{#2}}{}%
   \ifstrequal{#1}{def_spc_backwards}{\hyperref[sailRISCVfnzdefzyspczybackwards]{#2}}{}%
   \ifstrequal{#1}{def\_spc\_backwards}{\hyperref[sailRISCVfnzdefzyspczybackwards]{#2}}{}%
   \ifstrequal{#1}{def_spc_forwards}{\hyperref[sailRISCVfnzdefzyspczyforwards]{#2}}{}%
@@ -11993,6 +12153,10 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ext\_control\_check\_pc}{\hyperref[sailRISCVfnzextzycontrolzycheckzypc]{#2}}{}%
   \ifstrequal{#1}{ext_data_get_addr}{\hyperref[sailRISCVfnzextzydatazygetzyaddr]{#2}}{}%
   \ifstrequal{#1}{ext\_data\_get\_addr}{\hyperref[sailRISCVfnzextzydatazygetzyaddr]{#2}}{}%
+  \ifstrequal{#1}{ext_decode}{\hyperref[sailRISCVfnzextzydecode]{#2}}{}%
+  \ifstrequal{#1}{ext\_decode}{\hyperref[sailRISCVfnzextzydecode]{#2}}{}%
+  \ifstrequal{#1}{ext_decode_compressed}{\hyperref[sailRISCVfnzextzydecodezycompressed]{#2}}{}%
+  \ifstrequal{#1}{ext\_decode\_compressed}{\hyperref[sailRISCVfnzextzydecodezycompressed]{#2}}{}%
   \ifstrequal{#1}{ext_exc_type_of_num}{\hyperref[sailRISCVfnzextzyexczytypezyofzynum]{#2}}{}%
   \ifstrequal{#1}{ext\_exc\_type\_of\_num}{\hyperref[sailRISCVfnzextzyexczytypezyofzynum]{#2}}{}%
   \ifstrequal{#1}{ext_exc_type_to_bits}{\hyperref[sailRISCVfnzextzyexczytypezytozybits]{#2}}{}%
@@ -12017,8 +12181,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{ext\_init}{\hyperref[sailRISCVfnzextzyinit]{#2}}{}%
   \ifstrequal{#1}{ext_init_regs}{\hyperref[sailRISCVfnzextzyinitzyregs]{#2}}{}%
   \ifstrequal{#1}{ext\_init\_regs}{\hyperref[sailRISCVfnzextzyinitzyregs]{#2}}{}%
-  \ifstrequal{#1}{ext_post_decode_hook}{\hyperref[sailRISCVfnzextzypostzydecodezyhook]{#2}}{}%
-  \ifstrequal{#1}{ext\_post\_decode\_hook}{\hyperref[sailRISCVfnzextzypostzydecodezyhook]{#2}}{}%
   \ifstrequal{#1}{ext_post_step_hook}{\hyperref[sailRISCVfnzextzypostzystepzyhook]{#2}}{}%
   \ifstrequal{#1}{ext\_post\_step\_hook}{\hyperref[sailRISCVfnzextzypostzystepzyhook]{#2}}{}%
   \ifstrequal{#1}{ext_pre_step_hook}{\hyperref[sailRISCVfnzextzyprezystepzyhook]{#2}}{}%
@@ -12898,6 +13060,8 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{regval\_from\_reg}{\hyperref[sailRISCVfnzregvalzyfromzyreg]{#2}}{}%
   \ifstrequal{#1}{regval_into_reg}{\hyperref[sailRISCVfnzregvalzyintozyreg]{#2}}{}%
   \ifstrequal{#1}{regval\_into\_reg}{\hyperref[sailRISCVfnzregvalzyintozyreg]{#2}}{}%
+  \ifstrequal{#1}{report_invalid_width}{\hyperref[sailRISCVfnzreportzyinvalidzywidth]{#2}}{}%
+  \ifstrequal{#1}{report\_invalid\_width}{\hyperref[sailRISCVfnzreportzyinvalidzywidth]{#2}}{}%
   \ifstrequal{#1}{reset_htif}{\hyperref[sailRISCVfnzresetzyhtif]{#2}}{}%
   \ifstrequal{#1}{reset\_htif}{\hyperref[sailRISCVfnzresetzyhtif]{#2}}{}%
   \ifstrequal{#1}{retire_instruction}{\hyperref[sailRISCVfnzretirezyinstruction]{#2}}{}%
@@ -13906,7 +14070,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{default\_write\_acc}{\sailRISCVletdefaultWriteAcc}{}%
   \ifstrequal{#1}{haveRV128}{\sailRISCVlethaveRVOneTwoEight}{}%
   \ifstrequal{#1}{haveRV64}{\sailRISCVlethaveRVSixFour}{}%
-  \ifstrequal{#1}{haveSplitRegFile}{\sailRISCVlethaveSplitRegFile}{}%
   \ifstrequal{#1}{init_ext_ptw}{\sailRISCVletinitExtPtw}{}%
   \ifstrequal{#1}{init\_ext\_ptw}{\sailRISCVletinitExtPtw}{}%
   \ifstrequal{#1}{internal_E_take_bits}{\sailRISCVletinternalETakeBits}{}%
@@ -14031,7 +14194,6 @@ In capability mode, an exception is raised if:
   \ifstrequal{#1}{default\_write\_acc}{\hyperref[sailRISCVletzdefaultzywritezyacc]{#2}}{}%
   \ifstrequal{#1}{haveRV128}{\hyperref[sailRISCVletzhaveRV128]{#2}}{}%
   \ifstrequal{#1}{haveRV64}{\hyperref[sailRISCVletzhaveRV64]{#2}}{}%
-  \ifstrequal{#1}{haveSplitRegFile}{\hyperref[sailRISCVletzhaveSplitRegFile]{#2}}{}%
   \ifstrequal{#1}{init_ext_ptw}{\hyperref[sailRISCVletzinitzyextzyptw]{#2}}{}%
   \ifstrequal{#1}{init\_ext\_ptw}{\hyperref[sailRISCVletzinitzyextzyptw]{#2}}{}%
   \ifstrequal{#1}{internal_E_take_bits}{\hyperref[sailRISCVletzinternalzyEzytakezybits]{#2}}{}%

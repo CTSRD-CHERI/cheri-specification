@@ -13,7 +13,7 @@ match #\hyperref[sailRISCVzextzycontrolzycheckzyaddr]{ext\_control\_check\_addr}
   },
   #\hyperref[sailRISCVzExtzyControlAddrzyOK]{Ext\_ControlAddr\_OK}#(addr) => {
     let target = [addr with 0 = bitzero];  /* clear addr[0] */
-    if #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(target[1]) & ~(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()) then {
+    if #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(target[1]) & #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()) then {
       #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(target, #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#());
       RETIRE_FAIL
     } else {

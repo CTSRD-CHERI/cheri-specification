@@ -5,7 +5,7 @@ function #\hyperref[sailRISCVzfetch]{fetch}#() -> FetchResult =
   match #\hyperref[sailRISCVzextzyfetchzycheckzypc]{ext\_fetch\_check\_pc}#(PC, PC) {
     #\hyperref[sailRISCVzExtzyFetchAddrzyError]{Ext\_FetchAddr\_Error}#(e)   => #\hyperref[sailRISCVzFzyExtzyError]{F\_Ext\_Error}#(e),
     #\hyperref[sailRISCVzExtzyFetchAddrzyOK]{Ext\_FetchAddr\_OK}#(use_pc) => {
-      if   (use_pc[0] != bitzero | (use_pc[1] != bitzero & (~ (#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()))))
+      if   (use_pc[0] != bitzero | (use_pc[1] != bitzero & #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#())))
       then #\hyperref[sailRISCVzFzyError]{F\_Error}#(#\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#(), PC)
       else match #\hyperref[sailRISCVztranslateAddr]{translateAddr}#(use_pc, #\hyperref[sailRISCVzExecute]{Execute}#()) {
         #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(e, _)     => #\hyperref[sailRISCVzFzyError]{F\_Error}#(e, PC),

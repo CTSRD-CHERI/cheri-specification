@@ -50,7 +50,7 @@ function #\hyperref[sailRISCVzinitialzyanalysis]{initial\_analysis}# (instr:ast)
                    _      => if is_imm then #\hyperref[sailRISCVzunsigned]{unsigned}#(rs1) != 0 else #\hyperref[sailRISCVzunsigned]{unsigned}#(rs1) != 0
                };
                iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzcsrzyname]{csr\_name}#(csr)) :: iR;
-               if ~(is_imm) then {
+               if #\hyperref[sailRISCVznot]{not}#(is_imm) then {
                   iR = #\hyperref[sailRISCVzRFull]{RFull}#(#\hyperref[sailRISCVzGPRstr]{GPRstr}#(rs1)) :: iR;
                };
                if isWrite then {
@@ -68,7 +68,7 @@ function #\hyperref[sailRISCVzinitialzyanalysis]{initial\_analysis}# (instr:ast)
                  (true,  false) => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_acquire),
                  (true,  true)  => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_strong_acquire),
 
-                 _  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("LOAD type not implemented in initial_analysis")
+                 _  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "LOAD type not implemented in initial_analysis")
                }
       },
       #\hyperref[sailRISCVzSTORE]{STORE}#(imm, rs2, rs1, width, aq, rl) => {
@@ -81,7 +81,7 @@ function #\hyperref[sailRISCVzinitialzyanalysis]{initial\_analysis}# (instr:ast)
                  (false, true)  => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_RISCV_release),
                  (true,  true)  => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_RISCV_strong_release),
 
-                 _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORE type not implemented in initial_analysis")
+                 _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "STORE type not implemented in initial_analysis")
                }
       },
       #\hyperref[sailRISCVzADDIW]{ADDIW}#(imm, rs, rd) => {
@@ -112,14 +112,14 @@ function #\hyperref[sailRISCVzinitialzyanalysis]{initial\_analysis}# (instr:ast)
 
                  (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b00) => #\hyperref[sailRISCVzIKzysimple]{IK\_simple}# (),
 
-                 _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("barrier type not implemented in initial_analysis")
+                 _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "barrier type not implemented in initial_analysis")
                };
       },
       #\hyperref[sailRISCVzFENCEzyTSO]{FENCE\_TSO}#(pred, succ) => {
              ik =
                match (pred, succ) {
 		 (_ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11, _ : #\hyperref[sailRISCVzbits]{bits}#(2) @ 0b11) => #\hyperref[sailRISCVzIKzybarrier]{IK\_barrier}# (#\hyperref[sailRISCVzBarrierzyRISCVzytso]{Barrier\_RISCV\_tso}# ()),
-                 _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("barrier type not implemented in initial_analysis")
+                 _ => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "barrier type not implemented in initial_analysis")
                };
       },
      #\hyperref[sailRISCVzFENCEI]{FENCEI}#() => {
@@ -133,7 +133,7 @@ function #\hyperref[sailRISCVzinitialzyanalysis]{initial\_analysis}# (instr:ast)
               (false, false) => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_reserved),
               (true,  false) => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_reserved_acquire),
               (true,  true)  => #\hyperref[sailRISCVzIKzymemzyread]{IK\_mem\_read}# (Read_RISCV_reserved_strong_acquire),
-              (false, true)  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("LOADRES type not implemented in initial_analysis")
+              (false, true)  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "LOADRES type not implemented in initial_analysis")
             };
      },
      #\hyperref[sailRISCVzSTORECON]{STORECON}#(aq, rl, rs2, rs1, width, rd) => {
@@ -146,7 +146,7 @@ function #\hyperref[sailRISCVzinitialzyanalysis]{initial\_analysis}# (instr:ast)
                (false, true)  => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_RISCV_conditional_release),
                (true,  true)  => #\hyperref[sailRISCVzIKzymemzywrite]{IK\_mem\_write}# (Write_RISCV_conditional_strong_release),
 
-               (true,  false) => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("STORECON type not implemented in initial_analysis")
+               (true,  false) => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "STORECON type not implemented in initial_analysis")
              };
       },
       #\hyperref[sailRISCVzAMO]{AMO}#(op, aq, rl, rs2, rs1, width, rd) => {

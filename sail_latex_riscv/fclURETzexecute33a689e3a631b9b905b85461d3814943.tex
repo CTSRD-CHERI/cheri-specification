@@ -1,0 +1,6 @@
+if   #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzhaveUsrMode]{haveUsrMode}#()) | #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzsyszyenablezynext]{sys\_enable\_next}#())
+then #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#()
+else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzextzycheckzyxretzypriv]{ext\_check\_xret\_priv}#(User))
+then #\hyperref[sailRISCVzextzyfailzyxretzypriv]{ext\_fail\_xret\_priv}#()
+else #\hyperref[sailRISCVzsetzynextzypc]{set\_next\_pc}#(#\hyperref[sailRISCVzexceptionzyhandler]{exception\_handler}#(cur_privilege, #\hyperref[sailRISCVzCTLzyURET]{CTL\_URET}#(), PC));
+RETIRE_FAIL

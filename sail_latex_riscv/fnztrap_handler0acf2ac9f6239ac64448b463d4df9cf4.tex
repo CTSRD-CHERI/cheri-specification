@@ -39,7 +39,7 @@ function #\hyperref[sailRISCVztrapzyhandler]{trap\_handler}#(del_priv : Privileg
        mstatus->#\hyperref[sailRISCVzSPP]{SPP}#()  = match cur_privilege {
                            User => 0b0,
                            Supervisor => 0b1,
-                           Machine => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("invalid privilege for s-mode trap")
+                           Machine => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "invalid privilege for s-mode trap")
                          };
        stval           = #\hyperref[sailRISCVztval]{tval}#(info);
        sepc            = pc;

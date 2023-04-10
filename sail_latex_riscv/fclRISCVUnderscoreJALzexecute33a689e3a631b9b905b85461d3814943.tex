@@ -7,7 +7,7 @@ match #\hyperref[sailRISCVzextzycontrolzycheckzypc]{ext\_control\_check\_pc}#(t)
   },
   #\hyperref[sailRISCVzExtzyControlAddrzyOK]{Ext\_ControlAddr\_OK}#(target) => {
     /* Perform standard alignment check */
-    if #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(target[1]) & (~ (#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()))
+    if #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(target[1]) & #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#())
     then {
       #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(target, #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#());
       RETIRE_FAIL

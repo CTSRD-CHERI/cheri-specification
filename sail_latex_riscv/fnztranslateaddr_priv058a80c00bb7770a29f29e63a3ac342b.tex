@@ -25,6 +25,6 @@ function #\hyperref[sailRISCVztranslateAddrzypriv]{translateAddr\_priv}#(vAddr, 
                     }
                else #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVztranslationException]{translationException}#(ac, #\hyperref[sailRISCVzPTWzyInvalidzyAddr]{PTW\_Invalid\_Addr}#()), ext_ptw)
              },
-    _     => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("unsupported address translation scheme")
+    _     => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "unsupported address translation scheme")
   }
 }

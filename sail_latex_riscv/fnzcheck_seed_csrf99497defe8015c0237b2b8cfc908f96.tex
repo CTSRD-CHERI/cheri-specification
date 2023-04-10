@@ -1,7 +1,7 @@
 function #\hyperref[sailRISCVzcheckzyseedzyCSR]{check\_seed\_CSR}# (csr : csreg, p : Privilege, isWrite : bool) -> bool = {
-  if ~(csr == 0x015) then {
+  if #\hyperref[sailRISCVznot]{not}#(csr == 0x015) then {
     true
-  } else if ~(isWrite) then {
+  } else if #\hyperref[sailRISCVznot]{not}#(isWrite) then {
     /* Read-only access to the seed CSR is not allowed */
     false
   } else {

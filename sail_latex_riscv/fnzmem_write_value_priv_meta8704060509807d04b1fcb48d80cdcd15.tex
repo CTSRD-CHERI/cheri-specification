@@ -1,6 +1,6 @@
 function #\hyperref[sailRISCVzmemzywritezyvaluezyprivzymeta]{mem\_write\_value\_priv\_meta}# (paddr, width, value, typ, priv, meta, aq, rl, con) = {
   #\hyperref[sailRISCVzrvfizywrite]{rvfi\_write}#(paddr, width, value, meta);
-  if (rl | con) & (~ (#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(paddr, width)))
+  if (rl | con) & #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVziszyalignedzyaddr]{is\_aligned\_addr}#(paddr, width))
   then #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAddrzyAlign]{E\_SAMO\_Addr\_Align}#())
   else {
     let wk : write_kind = match (aq, rl, con) {

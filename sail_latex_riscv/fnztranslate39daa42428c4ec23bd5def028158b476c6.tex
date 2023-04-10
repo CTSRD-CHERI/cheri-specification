@@ -11,7 +11,7 @@ function #\hyperref[sailRISCVztranslate39]{translate39}#(asid, ptb, vAddr, ac, p
           match #\hyperref[sailRISCVzupdatezyPTEzyBits]{update\_PTE\_Bits}#(pteBits, ac, ext_pte) {
             #\hyperref[sailRISCVzNone]{None}#()           => #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(ent.pAddr | #\hyperref[sailRISCVzEXTZ]{EXTZ}#(vAddr & ent.vAddrMask), ext_ptw),
             #\hyperref[sailRISCVzSome]{Some}#(pbits, ext) => {
-              if ~ (#\hyperref[sailRISCVzplatzyenablezydirtyzyupdate]{plat\_enable\_dirty\_update}# ())
+              if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzplatzyenablezydirtyzyupdate]{plat\_enable\_dirty\_update}#())
               then {
                 /* pte needs dirty/accessed update but that is not enabled */
                 #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzPTWzyPTEzyUpdate]{PTW\_PTE\_Update}#(), ext_ptw)
@@ -25,7 +25,7 @@ function #\hyperref[sailRISCVztranslate39]{translate39}#(asid, ptb, vAddr, ac, p
                 /* update page table */
                 match #\hyperref[sailRISCVzmemzywritezyvaluezypriv]{mem\_write\_value\_priv}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(ent.pteAddr), 8, n_pte.#\hyperref[sailRISCVzbits]{bits}#(), Supervisor, false, false, false) {
                   #\hyperref[sailRISCVzMemValue]{MemValue}#(_)     => (),
-                  #\hyperref[sailRISCVzMemException]{MemException}#(e) => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("invalid physical address in TLB")
+                  #\hyperref[sailRISCVzMemException]{MemException}#(e) => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "invalid physical address in TLB")
                 };
                 #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(ent.pAddr | #\hyperref[sailRISCVzEXTZ]{EXTZ}#(vAddr & ent.vAddrMask), ext_ptw)
               }
@@ -44,7 +44,7 @@ function #\hyperref[sailRISCVztranslate39]{translate39}#(asid, ptb, vAddr, ac, p
               #\hyperref[sailRISCVzTRzyAddress]{TR\_Address}#(pAddr, ext_ptw)
             },
             #\hyperref[sailRISCVzSome]{Some}#(pbits, ext) =>
-              if ~ (#\hyperref[sailRISCVzplatzyenablezydirtyzyupdate]{plat\_enable\_dirty\_update}# ())
+              if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzplatzyenablezydirtyzyupdate]{plat\_enable\_dirty\_update}#())
               then {
                 /* pte needs dirty/accessed update but that is not enabled */
                 #\hyperref[sailRISCVzTRzyFailure]{TR\_Failure}#(#\hyperref[sailRISCVzPTWzyPTEzyUpdate]{PTW\_PTE\_Update}#(), ext_ptw)

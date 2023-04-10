@@ -28,7 +28,7 @@ function #\hyperref[sailRISCVzstep]{step}#(step_no : int) -> bool = {
           /* non-error cases: */
           #\hyperref[sailRISCVzFzyRVC]{F\_RVC}#(h) => {
             instbits = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(h);
-            let ast = #\hyperref[sailRISCVzdecodeCompressed]{decodeCompressed}#(h);
+            let ast = #\hyperref[sailRISCVzextzydecodezycompressed]{ext\_decode\_compressed}#(h);
             if   #\hyperref[sailRISCVzgetzyconfigzyprintzyinstr]{get\_config\_print\_instr}#()
             then {
               #\hyperref[sailRISCVzprintzyinstr]{print\_instr}#("[" ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(step_no) ^ "] [" ^ #\hyperref[sailRISCVztozystr]{to\_str}#(cur_privilege) ^ "]: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(PC) ^ " (" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(h) ^ ") " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(ast));
@@ -36,7 +36,7 @@ function #\hyperref[sailRISCVzstep]{step}#(step_no : int) -> bool = {
             /* check for RVC once here instead of every RVC execute clause. */
             if #\hyperref[sailRISCVzhaveRVC]{haveRVC}#() then {
               nextPC = PC + 2;
-              (#\hyperref[sailRISCVzexecute]{execute}#(#\hyperref[sailRISCVzextzypostzydecodezyhook]{ext\_post\_decode\_hook}#(ast)), true)
+              (#\hyperref[sailRISCVzexecute]{execute}#(ast), true)
              } else {
               #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();
               (RETIRE_FAIL, true)
@@ -44,13 +44,13 @@ function #\hyperref[sailRISCVzstep]{step}#(step_no : int) -> bool = {
           },
           #\hyperref[sailRISCVzFzyBase]{F\_Base}#(w) => {
             instbits = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(w);
-            let ast = #\hyperref[sailRISCVzdecode]{decode}#(w);
+            let ast = #\hyperref[sailRISCVzextzydecode]{ext\_decode}#(w);
             if   #\hyperref[sailRISCVzgetzyconfigzyprintzyinstr]{get\_config\_print\_instr}#()
             then {
               #\hyperref[sailRISCVzprintzyinstr]{print\_instr}#("[" ^ #\hyperref[sailRISCVzstringzyofzyint]{string\_of\_int}#(step_no) ^ "] [" ^ #\hyperref[sailRISCVztozystr]{to\_str}#(cur_privilege) ^ "]: " ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(PC) ^ " (" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(w) ^ ") " ^ #\hyperref[sailRISCVztozystr]{to\_str}#(ast));
             };
             nextPC = PC + 4;
-            (#\hyperref[sailRISCVzexecute]{execute}#(#\hyperref[sailRISCVzextzypostzydecodezyhook]{ext\_post\_decode\_hook}#(ast)), true)
+            (#\hyperref[sailRISCVzexecute]{execute}#(ast), true)
           }
         }
       }

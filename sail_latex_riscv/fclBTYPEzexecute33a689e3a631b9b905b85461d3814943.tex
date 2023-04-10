@@ -17,7 +17,7 @@ if taken then {
       RETIRE_FAIL
     },
     #\hyperref[sailRISCVzExtzyControlAddrzyOK]{Ext\_ControlAddr\_OK}#(target) => {
-      if #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(target[1]) & (~ (#\hyperref[sailRISCVzhaveRVC]{haveRVC}#())) then {
+      if #\hyperref[sailRISCVzbitzytozybool]{bit\_to\_bool}#(target[1]) & #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()) then {
         #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(target, #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#());
         RETIRE_FAIL;
       } else {

@@ -12,7 +12,7 @@ function #\hyperref[sailRISCVzinitzysys]{init\_sys}#() -> unit = {
   misa->#\hyperref[sailRISCVzS]{S}#()   = 0b1;                            /* supervisor-mode */
 
   if   #\hyperref[sailRISCVzsyszyenablezyfdext]{sys\_enable\_fdext}#() & #\hyperref[sailRISCVzsyszyenablezyzzfinx]{sys\_enable\_zfinx}#()
-  then #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("F and Zfinx cannot both be enabled!");
+  then #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "F and Zfinx cannot both be enabled!");
 
   /* We currently support both F and D */
   misa->#\hyperref[sailRISCVzF]{F}#()   = #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(#\hyperref[sailRISCVzsyszyenablezyfdext]{sys\_enable\_fdext}#());      /* single-precision */

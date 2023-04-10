@@ -2,7 +2,7 @@ let cs2_val = if #\hyperref[sailRISCVzunsigned]{unsigned}#(cs2) == 0 then DDC el
 let cs1_val = #\hyperref[sailRISCVzC]{C}#(cs1);
 
 /* Note: returning zero for untagged values breaks magic constants such as SIG_IGN */
-#\hyperref[sailRISCVzX]{X}#(rd) = if #\hyperref[sailRISCVznot]{not}# (cs1_val.tag) then
+#\hyperref[sailRISCVzX]{X}#(rd) = if #\hyperref[sailRISCVznot]{not}#(cs1_val.tag) then
           #\hyperref[sailRISCVzzzeros]{zeros}#()
         else
           cs1_val.address - #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(cs2_val);

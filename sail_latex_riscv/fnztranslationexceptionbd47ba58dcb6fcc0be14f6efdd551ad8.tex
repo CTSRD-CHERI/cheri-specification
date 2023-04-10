@@ -7,7 +7,7 @@ function #\hyperref[sailRISCVztranslationException]{translationException}#(a : #
     (#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, Cap), #\hyperref[sailRISCVzPTWzyExtzyError]{PTW\_Ext\_Error}#(AT_CAP_ERR)) => #\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(EXC_SAMO_CAP_PAGE_FAULT),
 
     /* No other operations should raise CHERI-specific page faults */
-    (_, #\hyperref[sailRISCVzPTWzyExtzyError]{PTW\_Ext\_Error}#(_))                          => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Unexpected PTW Extension Error"),
+    (_, #\hyperref[sailRISCVzPTWzyExtzyError]{PTW\_Ext\_Error}#(_))                          => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Unexpected PTW Extension Error"),
 
     /* For other exceptions, Cap and Data accesses fault in the same way. */
     (#\hyperref[sailRISCVzReadWrite]{ReadWrite}#(_, _), #\hyperref[sailRISCVzPTWzyAccess]{PTW\_Access}#())                => #\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#(),

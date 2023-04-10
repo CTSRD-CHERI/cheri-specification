@@ -32,7 +32,7 @@ function #\hyperref[sailRISCVzwC]{wC}# (r, v) = {
     29 => x29 = v,
     30 => x30 = v,
     31 => x31 = v,
-    _  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Invalid capability register")
+    _  => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Invalid capability register")
   };
   if (r != 0) then {
      #\hyperref[sailRISCVzrvfizywX]{rvfi\_wX}#(r, v.address);

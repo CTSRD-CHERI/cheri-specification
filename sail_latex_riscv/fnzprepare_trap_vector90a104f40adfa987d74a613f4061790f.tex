@@ -10,6 +10,6 @@ function #\hyperref[sailRISCVzpreparezytrapzyvector]{prepare\_trap\_vector}#(p :
      be the same because we enforce aligned tcc base. */
   match #\hyperref[sailRISCVztveczyaddr]{tvec\_addr}#(#\hyperref[sailRISCVzMkzyMtvec]{Mk\_Mtvec}#(tcc.address), c) { 
     #\hyperref[sailRISCVzSome]{Some}#(addr) => { nextPCC = tcc; addr },
-    #\hyperref[sailRISCVzNone]{None}#()     => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#("Invalid tvec mode")
+    #\hyperref[sailRISCVzNone]{None}#()     => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Invalid tvec mode")
   }
 }
