@@ -1,0 +1,51 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{XOR - Logical Exclusive OR}
+\insnxeslabel{xor}
+\subsection*{XOR - Logical Exclusive OR}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + 35 \emph{id}}{XOR CAX\emph{, imm32}}
+  {I}{Valid}{Valid}
+  {Bitwise exclusive OR of \emph{imm32 sign-extended to 64-bits} with
+    the address field of CAX.}
+  \xopcode{CAP + 81 /6 \emph{id}}{XOR \emph{r/mc, imm32}}
+  {MI}{Valid}{Valid}
+  {Bitwise exclusive OR of \emph{imm32 sign-extended to 64-bits} with
+    the address field of \emph{r/mc}.}
+  \xopcode{CAP + 83 /6 \emph{ib}}{XOR \emph{r/mc, imm8}}
+  {MI}{Valid}{Valid}
+  {Bitwise exclusive OR of \emph{sign}-extended \emph{imm8} with the
+    address field of \emph{r/mc}.}
+  \xopcode{CAP + 31 \emph{/r}}{XOR \emph{r/mc, r64}}
+  {MR}{Valid}{Valid}
+  {Bitwise exclusive OR of \emph{r64} with the address field of \emph{r/mc}.}
+  \xopcode{CAP + 33 \emph{/r}}{XOR \emph{rc, r/m64}}
+  {RM}{Valid}{Valid}
+  {Bitwise exclusive OR of \emph{r/m64} with the address field of \emph{rc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:Reg (r,w)}{ModRM:r/m (r)}{NA}{NA}
+  \xopen{MR}{ModRM:r/m (r,w)}{ModRM:reg (r)}{NA}{NA}
+  \xopen{MI}{ModRM:r/m (r,w)}{imm8/32}{NA}{NA}
+  \xopen{I}{CAX}{imm32}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Derives a new capability from the destination operand whose
+\textbf{address} field is set to the bitwise exclusive OR of the
+source operand and the \textbf{address} field of the destination
+operand and then stores the result in the destination operand. The
+destination operand can be a register or a memory location. The source
+operand can be an immediate, a register, or a memory location.
+
+If the new value of the \textbf{address} field makes the resulting
+capability unrepresentable, the \textbf{tag} field in the resulting
+capability is cleared.
+
+\subsubsection*{Flags Affected}
+
+The OF, SF, ZF, AF, CF, and PF flags are set according to the value of
+the resulting \textbf{address} field.
