@@ -1,0 +1,37 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{XADD - Exchange and Add}
+\insnxeslabel{xadd}
+\subsection*{XADD - Exchange and Add}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + 0F C1 \emph{/r}}{XADD \emph{r/mc, rc, r64}}
+  {MRR}{Valid}{Valid}
+  {Load original value of \emph{r/mc} into \emph{rc}.  Add \emph{r64}
+    to the address field of \emph{r/mc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MRR}{ModRM:r/m (r,w)}{ModRM:reg (w)}{ModRM:reg (r)}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Stores the original value of the destination (first) operand in the second
+operand.  Derives a new capability value by adding the third operand
+to the \textbf{address} field of the destination operand and stores
+the result in the destination operand.  Note that the third operand
+must be the 64-bit register which aliases the low 64-bits of the
+second operand.
+
+If the new value of the \textbf{address} field makes the resulting
+capability unrepresentable, the \textbf{tag} field in the resulting
+capability is cleared.
+
+The instruction can be used with a \insnnoref{LOCK} prefix to execute
+atomically.
+
+\subsubsection*{Flags Affected}
+
+The OF, SF, ZF, AF, CF, and PF flags are set according to the value of
+the resulting \textbf{address} field.

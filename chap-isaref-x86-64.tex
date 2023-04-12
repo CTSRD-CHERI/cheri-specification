@@ -47,6 +47,10 @@ An additional symbol is defined to represent object code in the
 \begin{itemize}
   \item \textbf{CAP} { }---{ } Indicates the use of the capability
     operand prefix.
+
+  \item \textbf{+rc} { }---{ } Indicates the lower 3 bits of the
+    opcode byte is used to encode the register operand without a
+    modR/M byte.
 \end{itemize}
 
 Additional symbols are defined to represent operands in the
@@ -60,6 +64,9 @@ Additional symbols are defined to represent operands in the
   \item \textbf{r/mc} { }---{ } A capability operand that is either
     the contents of one of the capability registers for \textbf{rc} or
     a capability in memory.
+
+  \item \textbf{m2c} { }---{ } A pair of adjacent capabilities in
+    memory.
 \end{itemize}
 
 In addition, all of these instructions are either invalid or not
@@ -87,6 +94,8 @@ between the base instructions and their CHERI extensions.
 \input{insn-x86-64/and}
 \input{insn-x86-64/cmov}
 \input{insn-x86-64/cmp}
+\input{insn-x86-64/cmpxchg}
+\input{insn-x86-64/cmpxchg2c}
 \input{insn-x86-64/lods}
 \input{insn-x86-64/mov}
 \input{insn-x86-64/movnti}
@@ -94,6 +103,8 @@ between the base instructions and their CHERI extensions.
 \input{insn-x86-64/or}
 \input{insn-x86-64/stos}
 \input{insn-x86-64/sub}
+\input{insn-x86-64/xadd}
+\input{insn-x86-64/xchg}
 \input{insn-x86-64/xor}
 
 \clearpage

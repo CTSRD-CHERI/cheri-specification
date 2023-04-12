@@ -1,0 +1,40 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{XCHG - Exchange}
+\insnxeslabel{xchg}
+\subsection*{XCHG - Exchange}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + 90+\emph{rc}}{XCHG CAX, \emph{rc}}
+  {O}{Valid}{Valid}
+  {Exchange \emph{rc} with CAX.}
+  \xopcode{CAP + 90+\emph{rc}}{XCHG \emph{rc}, CAX}
+  {O}{Valid}{Valid}
+  {Exchange CAX with \emph{rc}.}
+  \xopcode{CAP + 87 \emph{/r}}{XCHG \emph{r/mc, rc}}
+  {MR}{Valid}{Valid}
+  {Exchange \emph{rc} with \emph{r/mc}.}
+  \xopcode{CAP + 87 \emph{/r}}{XCHG \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Exchange \emph{r/mc} with \emph{rc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{O}{CAX (r,w)}{opcode + rc (r, w)}{NA}{NA}
+  \xopen{O}{opcode + rc (r, w)}{CAX (r,w)}{NA}{NA}
+  \xopen{MR}{ModRM:r/m (r,w)}{ModRM:reg (r, w)}{NA}{NA}
+  \xopen{RM}{ModRM:reg (r,w)}{ModRM:r/m (r, w)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Exchanges the contents of the source and destination operands.  The
+operands can be two general-purpose registers or a general-purpose
+register and a memory location.
+
+The specific opcode \texttt{90} would remain a single byte
+\insnnoref{NOP} that would not alter the value of \CAX{}.
+
+\subsubsection*{Flags Affected}
+
+None
