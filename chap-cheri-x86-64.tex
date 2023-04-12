@@ -535,24 +535,10 @@ add %csp,$16
     We do not anticipiate a need for capability-sized variants of
     \insnnoref{ADC} or \insnnoref{SBB}.
 
-  \item \insnnoref{ANDC}, \insnnoref{ORC}, and \insnnoref{XORC} would
+  \item \insnxesref[and]{ANDC}, \insnxesref[or]{ORC}, and \insnxesref[xor]{XORC} would
     permit bit manipulation of the integer value of a capability.  As
     with \insnxesref[add]{ADDC}, the second operand would always be an
     integer operand.
-
-    These instructions should set status flag bits in \RFLAGS{}
-    according to the integer value of the resulting capability.
-
-    The \insnnoref{AND} opcodes \texttt{21}, \texttt{23}, \texttt{25},
-    \texttt{81 /4} and \texttt{83 /4}; the \insnnoref{OR} opcodes
-    \texttt{09}, \texttt{0B}, \texttt{0D}, \texttt{81 /1}, and
-    \texttt{81 /3}; and the \insnnoref{XOR} opcodes \texttt{31},
-    \texttt{33}, \texttt{35}, \texttt{81 /6}, and \texttt{83 /6} would
-    be extended to support capability operands via the capability
-    operand prefix.
-
-    \insnnoref{AND}, \insnnoref{OR}, and \insnnoref{XOR} should
-    default to integer operands in capability mode.
 
   \item \insnnoref{CMPC} would permit comparison of capability values
     including the functionality of both \insnref{CSetEqualExact} (via
