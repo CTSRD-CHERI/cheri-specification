@@ -1,0 +1,71 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{POP - Pop Value from the Stack}
+\insnxeslabel{pop}
+\subsection*{POP - Pop Value from the Stack}
+
+\begin{x86opcodetable}
+  \xopcode{8F /0}{POP \emph{r/m16}}
+  {M}{N.E.}{Valid}
+  {Pop \emph{r/m16}.}
+  \xopcode{8F /0}{POP \emph{r/m32}}
+  {M}{N.E.}{N.E.}
+  {Pop \emph{r/m32}.}
+  \xopcode{8F /0}{POP \emph{r/m64}}
+  {M}{Valid}{Valid}
+  {Pop \emph{r/m64}.}
+  \xopcode{8F /0}{POP \emph{r/mc}}
+  {M}{Valid}{Valid}
+  {Pop \emph{r/mc}.}
+  \xopcode{58+\emph{rw}}{POP \emph{r16}}
+  {O}{N.E.}{Valid}
+  {Pop \emph{r16}.}
+  \xopcode{58+\emph{rd}}{POP \emph{r32}}
+  {O}{N.E.}{N.E.}
+  {Pop \emph{r32}.}
+  \xopcode{58+\emph{ro}}{POP \emph{r64}}
+  {O}{Valid}{Valid}
+  {Pop \emph{r64}.}
+  \xopcode{58+\emph{rc}}{POP \emph{rc}}
+  {O}{Valid}{Valid}
+  {Pop \emph{rc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{M}{ModRM:r/m (w)}{NA}{NA}{NA}
+  \xopen{O}{opcode + rd (w)}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Stores the value at the top of the stack in the destination operand
+and increments the stack pointer.  The following extensions apply to
+these instructions in 64-bit mode:
+
+\begin{itemize}
+  \item Address size: The 0x07 prefix selects a capability-aware
+    address.
+
+  \item Operand size: The \insnnoref{CAP} prefix selects a capability
+    operand size.
+\end{itemize}
+
+In capability mode, the various sizes are:
+
+\begin{itemize}
+  \item Address size: The default addressing mode uses
+    capability-aware addressing.  64-bit addresses can be used by
+    specifying the 0x07 prefix.
+
+  \item Operand size: The default operand size is a capability.  If
+    the \insnnoref{CAP} prefix is specified, the operand size is
+    64-bits.  16-bit and 32-bit operands cannot be used in capability
+    mode.
+
+  \item Stack-address size: In capability mode the stack pointer is
+    always \CSP{}.
+\end{itemize}
+
+\subsubsection*{Flags Affected}
+
+None
