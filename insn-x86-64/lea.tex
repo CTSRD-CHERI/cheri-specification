@@ -1,0 +1,26 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{LEA - Load Effective Address}
+\insnxeslabel{lea}
+\subsection*{LEA - Load Effective Address}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + 8D \emph{/r}}{LEA \emph{rc, m}}
+  {RM}{Valid}{Valid}
+  {Store effective capability address of \emph{m} in \emph{rc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Computes the effective capability of the second operand and stores the
+result in the first operand.  When used with the \insnnoref{CAP}
+prefix, the effective address is always computed using
+capability-aware addressing.
+
+\subsubsection*{Flags Affected}
+
+None
