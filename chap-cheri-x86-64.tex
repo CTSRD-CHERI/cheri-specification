@@ -551,53 +551,24 @@ add %csp,$16
     We do not anticipate a need for a capability-sized variant of
     \insnnoref{TEST}.
 
-  \item \insnnoref{CMPXCHGC} will be required to support atomic
+  \item \insnxesref[cmpxchg]{CMPXCHGC} will be required to support atomic
     operations on capabilities.  (Note that \insnnoref{CMPXCHG16B}'s
     existing semantics are not suitable for capabilities as it divides
     the values into register pairs.)
 
-    The opcodes \texttt{0F B0} and \texttt{0F B1} would be extended to
-    support capability operands via the capability operand prefix.
-
-    \insnnoref{CMPXCHG} should default to integer operands in
-    capability mode.
-
-  \item \insnnoref{CMPXCHG2C} will be required to support atomic
+  \item \insnxesref{CMPXCHG2C} will be required to support atomic
     operations on pairs of capabilities.
 
-    The opcode \texttt{0F C7 /1} would be extended to support
-    capability operands via the capability operand prefix.
-
-    \insnnoref{CMPXCHG16B} should default to integer operands in
-    capability mode.
-
-  \item \insnnoref{XCHGC} will also be required to support atomic
+  \item \insnxesref[xchg]{XCHGC} will also be required to support atomic
     operations on capabilities.
 
-    The opcodes \texttt{87} and \texttt{90 + rd} would be extended to
-    support capability operands via the capability operand prefix.
-    The specific opcode \texttt{90} would remain a single byte
-    \insnnoref{NOP} which would not alter the value of \CAX{}.
-
-    \insnnoref{XCHG} should default to integer operands in capability
-    mode.
-
-  \item It may also be desirable to support \insnnoref{XADDC}.  For
+  \item It may also be desirable to support \insnxesref[xadd]{XADDC}.  For
     this instruction, only the integer portion of the second (source)
-    operand would be added to the integer value of the first
+    operand would be added to the first
     (destination) operand to determine the value stored to the
     destination.  Any tag or capability metadata in the second operand
     would be ignored and would be overwritten with the original value
     of the first operand.
-
-    The opcode \texttt{0F C0} would be extended to support capability
-    operands via the capability operand prefix.
-
-    \insnnoref{XADDC} should set status flag bits in \RFLAGS{}
-    according to the integer value of the resulting capability.
-
-    \insnnoref{XADD} should default to integer operands in
-    capability mode.
 
   \item \insnnoref{PUSHC} and \insnnoref{POPC} would be used to save
     and restore capability registers on the stack.
@@ -1343,5 +1314,5 @@ in capability mode rather than removed.
 
 \subsection{XCHG [ER]AX Opcodes}
 
-If the \insnnoref{XCHG} instructions \texttt{91} - \texttt{97} are not
+If the \insnxesref{XCHG} instructions \texttt{91} - \texttt{97} are not
 commonly used, they could be removed in capability mode.
