@@ -422,7 +422,7 @@ using capability-aware addressing.
 
 \subsubsection{Stack Address Size}
 
-Instructions that work with the stack such as \insnnoref{PUSH} or
+Instructions that work with the stack such as \insnxesref{PUSH} or
 \insnnoref{CALL} use the stack pointer as an implicit operand.  In
 32-bit x86, the `B' flag of the stack segment selector determines if
 the 16-bit or 32-bit stack pointer register is used.  In 64-bit long
@@ -570,16 +570,8 @@ add %csp,$16
     would be ignored and would be overwritten with the original value
     of the first operand.
 
-  \item \insnnoref{PUSHC} and \insnnoref{POPC} would be used to save
+  \item \insnxesref[push]{PUSHC} and \insnxesref[pop]{POPC} would be used to save
     and restore capability registers on the stack.
-
-    The \insnnoref{PUSH} opcodes \texttt{50} and \texttt{FF / 0} and the
-    \insnnoref{POP} opcodes \texttt{58} and \texttt{8F / 0} would be
-    extended to support capability operands via the capability operand
-    prefix.
-
-    \insnnoref{PUSH} and \insnnoref{POP} should default to capability
-    operands in capability mode.
 
   \item \insnxesref[lea]{LEAC} would store the resulting address in a
     destination capability register.

@@ -1,0 +1,84 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{PUSH - Push Value Onto the Stack}
+\insnxeslabel{push}
+\subsection*{PUSH - Push Value Onto the Stack}
+
+\begin{x86opcodetable}
+  \xopcode{FF /6}{PUSH \emph{r/m16}}
+  {M}{N.E.}{Valid}
+  {Push \emph{r/m16}.}
+  \xopcode{FF /6}{PUSH \emph{r/m32}}
+  {M}{N.E.}{N.E.}
+  {Push \emph{r/m32}.}
+  \xopcode{FF /6}{PUSH \emph{r/m64}}
+  {M}{Valid}{Valid}
+  {Push \emph{r/m64}.}
+  \xopcode{FF /6}{PUSH \emph{r/mc}}
+  {M}{Valid}{Valid}
+  {Push \emph{r/mc}.}
+  \xopcode{50+\emph{rw}}{PUSH \emph{r16}}
+  {O}{N.E.}{Valid}
+  {Push \emph{r16}.}
+  \xopcode{50+\emph{rd}}{PUSH \emph{r32}}
+  {O}{N.E.}{N.E.}
+  {Push \emph{r32}.}
+  \xopcode{50+\emph{ro}}{PUSH \emph{r64}}
+  {O}{Valid}{Valid}
+  {Push \emph{r64}.}
+  \xopcode{50+\emph{rc}}{PUSH \emph{rc}}
+  {O}{Valid}{Valid}
+  {Push \emph{rc}.}
+  \xopcode{6A \emph{ib}}{PUSH \emph{imm8}}
+  {I}{Valid}{Valid}
+  {Push \emph{imm8}.}
+  \xopcode{68 \emph{iw}}{PUSH \emph{imm16}}
+  {I}{Valid}{Valid}
+  {Push \emph{imm16}.}
+  \xopcode{68 \emph{id}}{PUSH \emph{imm32}}
+  {I}{Valid}{Valid}
+  {Push \emph{imm32}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{M}{ModRM:r/m (r)}{NA}{NA}{NA}
+  \xopen{O}{opcode + rd (r)}{NA}{NA}{NA}
+  \xopen{I}{imm8/16/32}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Decrements the stack pointer and stores the source operand on the
+stack.  The following extensions apply to these instructions in 64-bit
+mode:
+
+\begin{itemize}
+  \item Address size: The 0x07 prefix selects a capability-aware
+    address.
+
+  \item Operand size: The \insnnoref{CAP} prefix selects a capability
+    operand size.  When a capability operand size is used, immediate
+    operands are sign-extended to 64-bits and the result used as the
+    address of a null-derived capability.
+\end{itemize}
+
+In capability mode, the various sizes are:
+
+\begin{itemize}
+  \item Address size: The default addressing mode uses
+    capability-aware addressing.  64-bit addresses can be used by
+    specifying the 0x07 prefix.
+
+  \item Operand size: The default operand size is a capability.  If
+    the \insnnoref{CAP} prefix is specified, the operand size is
+    64-bits.  Immediate operands are sign-extended to 64-bits.  When a
+    capability operand size is used, sign-extended immediate operands
+    are used as the address of a null-derived capability.
+
+  \item Stack-address size: In capability mode the stack pointer is
+    always \CSP{}.
+\end{itemize}
+
+\subsubsection*{Flags Affected}
+
+None
