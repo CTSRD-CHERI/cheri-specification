@@ -1,0 +1,30 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CPYTYPE - Construct Sealing Capability}
+\insnxeslabel{cpytype}
+\subsection*{CPYTYPE - Construct Sealing Capability}
+
+\begin{x86opcodetable}
+  \xopcode{VEX.LZ.66.0F.W0 0E \emph{/r}}{CPYTYPE \emph{rca, r/mc, rcb}}
+  {RMV}{Valid}{Valid}
+  {Construct a sealing capability from \emph{r/mc} and \emph{rcb} and
+    store in \emph{rca}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RMV}{ModRM:reg (w)}{ModRM:r/m (r)}{VEX.vvvv (r)}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Constructs a new capability equal to the second operand with the
+\textbf{address} field set to the \textbf{otype} field of the third
+operand and stores the result in the first (destination) operand.
+If the third operand's \textbf{otype} field is reserved or if the
+second operand was sealed, the \textbf{tag} in the resulting
+capability is cleared.
+
+\subsubsection*{Flags Affected}
+
+ZF is set to the \textbf{tag} field of the resulting capability.  The
+CF, PF, AF, and OF flags are undefined.

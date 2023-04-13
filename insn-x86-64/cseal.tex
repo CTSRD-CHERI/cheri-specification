@@ -1,0 +1,28 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CSEAL - Conditional Capability Seal}
+\insnxeslabel{cseal}
+\subsection*{CSEAL - Conditional Capability Seal}
+
+\begin{x86opcodetable}
+  \xopcode{VEX.LZ.F2.0F.W0 0E \emph{/r}}{CSEAL \emph{rca, r/mc, rcb}}
+  {RMV}{Valid}{Valid}
+  {Conditionally seal \emph{r/mc} with type from address field of
+    \emph{rcb} and store in \emph{rca}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RMV}{ModRM:reg (w)}{ModRM:r/m (r)}{VEX.vvvv (r)}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Seals the second operand with the \textbf{otype} equal to the
+\textbf{address} field of the third operand and stores the result in
+the first (destination) operand.  If the sealing operation fails, the
+second operand is copied to the first operand.
+
+\subsubsection*{Flags Affected}
+
+The ZF flag is set to 1 if the sealing operation succeeds; otherwise
+0.  The CF, PF, AF, SF, and OF flags are undefined.
