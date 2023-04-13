@@ -216,3 +216,50 @@ available in capability mode.
   66 0F 7B \emph{/r} & \insnxesref{GCOFF} \emph{r64, r/mc}\\
   \hline
 \end{tabular}
+
+\clearpage
+\section{Instructions Deprecated in Capability Mode}
+
+The following instructions are valid in 64-bit mode but invalid in
+capability mode.  For conciseness, the placeholder \texttt{XX} in the
+table below indicates any valid size for the instruction (i.e. 8, 16, 32,
+or 64).
+
+\bigskip
+\noindent
+\begin{tabularx}{\textwidth}{| l | l | Z |} \hline
+  \textbf{Opcode} & \textbf{Instruction} &
+  \textbf{Description}\\
+  \hline
+  A0 & MOV AL,\emph{moffs8} & Move byte at (\emph{offset}) to AL.\\
+  \hline
+  A1 & MOV [ER]AX,\emph{moffsxx} & Move value at (\emph{offset}) to [ER]AX.\\
+  \hline
+  A2 & MOV \emph{moffs8},AL & Move AL to  (\emph{offset}).\\
+  \hline
+  A3 & MOV \emph{moffs8},[ER]AX & Move [ER]AX to  (\emph{offset}).\\
+  \hline
+  0F 02 \emph{/r} & LAR \emph{rxx,rxx/m16} &
+  Load access rights.\\
+  \hline
+  0F 03 \emph{/r} & LSL \emph{rxx,rxx/m16} &
+  Load segment limit.\\
+  \hline
+  0F A0 & PUSH FS & Push FS.\\
+  \hline
+  0F A1 & POP FS & Pop FS.\\
+  \hline
+  0F A8 & PUSH GS & Push GS.\\
+  \hline
+  0F A9 & POP GS & Pop GS.\\
+  \hline
+  0F B2 \emph{/r} & LSS \emph{rxx,m16:xx} &
+  Load SS:\emph{rxx} with far pointer.\\
+  \hline
+  0F B4 \emph{/r} & LFS \emph{rxx,m16:xx} &
+  Load FS:\emph{rxx} with far pointer.\\
+  \hline
+  0F B5 \emph{/r} & LGS \emph{rxx,m16:xx} &
+  Load GS:\emph{rxx} with far pointer.\\
+  \hline
+\end{tabularx}
