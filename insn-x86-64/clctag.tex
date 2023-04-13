@@ -1,0 +1,24 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CLCTAG - Clear Capability Tag}
+\insnxeslabel{clctag}
+\subsection*{CLCTAG - Clear Capability Tag}
+
+\begin{x86opcodetable}
+  \xopcode{0E /1}{CLCTAG \emph{r/mc}}
+  {M}{Valid}{Valid}
+  {Clear tag of \emph{r/mc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{M}{ModRM:r/m (r, w)}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Clears the \textbf{tag} field of the destination operand.  The
+destination operand can be a register or memory location.
+
+\subsubsection*{Flags Affected}
+
+None

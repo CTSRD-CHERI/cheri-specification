@@ -125,6 +125,8 @@ frequently-accessed code paths.
 
 \input{insn-x86-64/andcperm}
 \input{insn-x86-64/cinvoke}
+\input{insn-x86-64/clctag}
+\input{insn-x86-64/clctags}
 \input{insn-x86-64/cram}
 \input{insn-x86-64/crrl}
 \input{insn-x86-64/gcbase}
@@ -139,6 +141,7 @@ frequently-accessed code paths.
 \input{insn-x86-64/scbnde}
 \input{insn-x86-64/scoff}
 \input{insn-x86-64/seal}
+\input{insn-x86-64/sentry}
 \input{insn-x86-64/unseal}
 
 \clearpage
@@ -151,6 +154,12 @@ available in capability mode.
 \noindent
 \begin{tabular}{| l | l |} \hline
   \textbf{Opcode} & \textbf{Instruction}\\
+  \hline
+  0E /0 & \insnxesref{SENTRY} \emph{r/mc}\\
+  \hline
+  0E /1 & \insnxesref{CLCTAG} \emph{r/mc}\\
+  \hline
+  0E /2 & \insnxesref{CLCTAGS} \emph{m8}\\
   \hline
   16 \emph{/r} & \insnxesref{SCADDR} \emph{r/mc, r64}\\
   \hline

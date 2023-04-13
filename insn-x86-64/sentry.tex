@@ -1,0 +1,25 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{SENTRY - Seal Capability as a Sentry}
+\insnxeslabel{sentry}
+\subsection*{SENTRY - Seal Capability as a Sentry}
+
+\begin{x86opcodetable}
+  \xopcode{0E /0}{SENTRY \emph{r/mc}}
+  {M}{Valid}{Valid}
+  {Seal \emph{r/mc} as a sentry.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{M}{ModRM:r/m (r, w)}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Seals the destination operand as a sentry capability.  If the sealing
+operation fails, leave the destination operand unchanged.
+
+\subsubsection*{Flags Affected}
+
+The ZF flag is set to 1 if the sealing operation succeeds; otherwise
+0.  The CF, PF, AF, SF, and OF flags are undefined.
