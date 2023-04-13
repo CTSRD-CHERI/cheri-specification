@@ -1,0 +1,63 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{JMP - Jump}
+\insnxeslabel{jmp}
+\subsection*{JMP - Jump}
+
+\begin{x86opcodetable}
+  \xopcode{E9 \emph{cw}}{JMP \emph{rel16}}
+  {D}{Invalid}{N.S.}
+  {Jump near, relative displacement.}
+  \xopcode{E9 \emph{cd}}{JMP \emph{rel32}}
+  {D}{Valid}{Valid}
+  {Jump near, relative displacement, 32-bit displacement sign-extended
+    to 64-bits.}
+  \xopcode{FF /4}{JMP \emph{r/m16}}
+  {M}{N.E.}{N.S.}
+  {Jump near, absolute indirect, address given in \emph{r/m16}.}
+  \xopcode{FF /4}{JMP \emph{r/m32}}
+  {M}{N.E.}{N.S.}
+  {Jump near, absolute indirect, address given in \emph{r/m32}.}
+  \xopcode{FF /4}{JMP \emph{r/m64}}
+  {M}{Invalid}{Valid}
+  {Jump near, absolute indirect, address given in \emph{r/m64}.}
+  \xopcode{FF /4}{JMP \emph{r/mc}}
+  {M}{Valid}{Valid}
+  {Jump near, absolute indirect, address given in \emph{r/mc}.}
+  \xopcode{EA \emph{cd}}{JMP \emph{ptr16:16}}
+  {D}{N.E.}{Invalid}
+  {Jump far, absolute, address in operand.}
+  \xopcode{EA \emph{cp}}{JMP \emph{ptr16:32}}
+  {D}{N.E.}{Invalid}
+  {Jump far, absolute, address in operand.}
+  \xopcode{FF /5}{JMP \emph{m16:16}}
+  {M}{Valid}{Valid}
+  {Jump far, absolute indirect, address given in \emph{m16:16}.}
+  \xopcode{FF /5}{JMP \emph{m16:32}}
+  {M}{Valid}{Valid}
+  {Jump far, absolute indirect, address given in \emph{m16:32}.}
+  \xopcode{REX.W FF /5}{JMP \emph{m16:64}}
+  {M}{Valid}{Valid}
+  {Jump far, absolute indirect, address given in \emph{m16:64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{D}{Offset}{NA}{NA}{NA}
+  \xopen{M}{ModRM:r/m (r)}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Branches to the location specified by the first operand.  In 64-bit
+mode the \insnnoref{CAP} prefix can be used with opcode \texttt{FF /4}
+to select the capability operand size instead of 64-bit.  In
+capability mode, \texttt{FF /4} supports only the capability operand
+size.
+
+Relative jumps always apply the relative displacement to the address
+of the next instruction to compute a new value of the \textbf{address}
+field of \CIP{}.
+
+\subsubsection*{Flags Affected}
+
+None
