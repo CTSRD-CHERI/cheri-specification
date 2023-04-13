@@ -1,0 +1,41 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{RET - Return from Procedure}
+\insnxeslabel{ret}
+\subsection*{RET - Return from Procedure}
+
+\begin{x86opcodetable}
+  \xopcode{C3}{RET}
+  {ZO}{Valid}{Valid}
+  {Near return.}
+  \xopcode{CB}{RET}
+  {ZO}{Valid}{Valid}
+  {Far return.}
+  \xopcode{C2 \emph{iw}}{RET \emph{imm16}}
+  {I}{Valid}{Valid}
+  {Near return and pop \emph{imm16} bytes from stack.}
+  \xopcode{CA \emph{iw}}{RET \emph{imm16}}
+  {I}{Valid}{Valid}
+  {Far return and pop \emph{imm16} bytes from stack.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{ZO}{NA}{NA}{NA}{NA}
+  \xopen{I}{imm16}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Pops return address from the stack and transfers control to the popped
+address.  In 64-bit mode the \insnnoref{CAP} prefix can be used with
+near returns to select the capability operand size instead of 64-bit.
+In capability mode, near returns always use the capability operand
+size.
+
+Near returns which use a capability operand size always pop a
+capability off of the stack to load into \CIP{} rather than popping
+off the new value of \RIP{}.
+
+\subsubsection*{Flags Affected}
+
+None

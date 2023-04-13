@@ -1,0 +1,67 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CALL - Call Procedure}
+\insnxeslabel{call}
+\subsection*{CALL - Call Procedure}
+
+\begin{x86opcodetable}
+  \xopcode{E8 \emph{cw}}{CALL \emph{rel16}}
+  {D}{Invalid}{N.S.}
+  {Call near, relative displacement.}
+  \xopcode{E8 \emph{cd}}{CALL \emph{rel32}}
+  {D}{Valid}{Valid}
+  {Call near, relative displacement, 32-bit displacement sign-extended
+    to 64-bits.}
+  \xopcode{FF /2}{CALL \emph{r/m16}}
+  {M}{N.E.}{N.E.}
+  {Call near, absolute indirect, address given in \emph{r/m16}.}
+  \xopcode{FF /2}{CALL \emph{r/m32}}
+  {M}{N.E.}{N.E.}
+  {Call near, absolute indirect, address given in \emph{r/m32}.}
+  \xopcode{FF /2}{CALL \emph{r/m64}}
+  {M}{Invalid}{Valid}
+  {Call near, absolute indirect, address given in \emph{r/m64}.}
+  \xopcode{FF /2}{CALL \emph{r/mc}}
+  {M}{Valid}{Valid}
+  {Call near, absolute indirect, address given in \emph{r/mc}.}
+  \xopcode{9A \emph{cd}}{CALL \emph{ptr16:16}}
+  {D}{N.E.}{N.E.}
+  {Call far, absolute, address in operand.}
+  \xopcode{9A \emph{cp}}{CALL \emph{ptr16:32}}
+  {D}{N.E.}{N.E.}
+  {Call far, absolute, address in operand.}
+  \xopcode{FF /3}{CALL \emph{m16:16}}
+  {M}{Valid}{Valid}
+  {Call far, absolute indirect, address given in \emph{m16:16}.}
+  \xopcode{FF /3}{CALL \emph{m16:32}}
+  {M}{Valid}{Valid}
+  {Call far, absolute indirect, address given in \emph{m16:32}.}
+  \xopcode{REX.W FF /3}{CALL \emph{m16:64}}
+  {M}{Valid}{Valid}
+  {Call far, absolute indirect, address given in \emph{m16:64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{D}{Offset}{NA}{NA}{NA}
+  \xopen{M}{ModRM:r/m (r)}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Saves return address on the stack and branches to the location
+specified by the first operand.  In 64-bit mode the \insnnoref{CAP}
+prefix can be used with opcode \texttt{FF /2} to select the capability
+operand size instead of 64-bit.  In capability mode, near calls always
+use the capability operand size.
+
+Relative calls always apply the relative displacement to the address
+of the next instruction to compute a new value of the \textbf{address}
+field of \CIP{}.
+
+Near calls which use a capability operand size always push \CIP{} onto
+the current stack before executing the first instruction at the target
+rather than pushing the value of \RIP{}.
+
+\subsubsection*{Flags Affected}
+
+None

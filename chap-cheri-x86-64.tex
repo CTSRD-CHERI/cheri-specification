@@ -423,7 +423,7 @@ using capability-aware addressing.
 \subsubsection{Stack Address Size}
 
 Instructions that work with the stack such as \insnxesref{PUSH} or
-\insnnoref{CALL} use the stack pointer as an implicit operand.  In
+\insnxesref{CALL} use the stack pointer as an implicit operand.  In
 32-bit x86, the `B' flag of the stack segment selector determines if
 the 16-bit or 32-bit stack pointer register is used.  In 64-bit long
 mode, \RSP{} is always used as the stack pointer.  In capability mode,
@@ -433,7 +433,7 @@ Code which needs to use the alternate stack pointer
 interpretation would simulate these instructions using \insnxesref{MOV}
 instructions and adjusting the desired stack pointer using
 instructions such as \insnxesref{ADD} or \insnxesref{SUB}.  Emulation of
-\insnnoref{CALL} or \insnnoref{RET} would use \insnnoref{JMP} to
+\insnxesref{CALL} or \insnxesref{RET} would use \insnxesref{JMP} to
 adjust the instruction pointer.
 
 \subsection{Capability-Aware Instructions}
@@ -636,7 +636,7 @@ code segment.
 
 Note that attempting to push or pop a misaligned capability will raise
 an exception.  The stack pointer must be suitably aligned before the
-use of \insnnoref{CALLC}, \insnnoref{IRETC}, and \insnnoref{RETC}.
+use of \insnxesref[call]{CALLC}, \insnnoref{IRETC}, and \insnxesref[ret]{RETC}.
 
 \subsection{New CHERI Instructions}
 
