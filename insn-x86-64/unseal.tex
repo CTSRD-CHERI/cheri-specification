@@ -1,0 +1,28 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{UNSEAL - Unseal Capability}
+\insnxeslabel{unseal}
+\subsection*{UNSEAL - Unseal Capability}
+
+\begin{x86opcodetable}
+  \xopcode{F3 0F 0C \emph{/r}}{UNSEAL \emph{r/mc, rc}}
+  {MR}{Valid}{Valid}
+  {Unseal \emph{r/mc} using \emph{rc} as the authority}.
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (r, w)}{ModRM:reg (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Unseals the destination operand using the source operand as the
+unsealing authority and stores the result in the destination operand.
+If the unsealing operation fails, the destination operand is set to
+the original value of the destination operand with the \textbf{tag}
+field cleared.
+
+\subsubsection*{Flags Affected}
+
+The ZF flag is set to 1 if the unsealing operation succeeds; otherwise
+0.  The CF, PF, AF, SF, and OF flags are undefined.
