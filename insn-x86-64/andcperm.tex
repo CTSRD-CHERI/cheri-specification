@@ -1,0 +1,32 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{ANDCPERM - Mask Capability Permissions}
+\insnxeslabel{andcperm}
+\subsection*{ANDCPERM - Mask Capability Permissions}
+
+\begin{x86opcodetable}
+  \xopcode{NP 0F 0C \emph{/r}}{ANDCPERM \emph{r/mc, r64}}
+  {MR}{Valid}{Valid}
+  {Mask permissions of \emph{r/mc} by \emph{r64}.}
+  \xopcode{37 /2 \emph{id}}{ANDCPERM \emph{r/mc, imm32}}
+  {MI}{Valid}{Valid}
+  {Mask permissions of \emph{r/mc} by sign-extended \emph{imm32}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (r, w)}{ModRM:reg (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Derives a new capability from the destination operand with the
+\textbf{perms} and \textbf{uperms} field bitwise ANDed with the source
+operand and stores the result in the destination operand.  The
+destination operand can be a register or memory location; the source
+operand can be a register or immediate.  If the destination operand is
+sealed and tagged, set the destination operand to its original value
+with the \textbf{tag} field cleared.
+
+\subsubsection*{Flags Affected}
+
+None

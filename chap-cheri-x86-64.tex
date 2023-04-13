@@ -692,43 +692,12 @@ If these instructions fail, they should clear the tag in the resulting
 capability.
 
 \begin{itemize}
-  \item \insnref{CSeal} r/mc, rc
-
-    Seal \emph{r/mc} with \textbf{otype} equal to the \textbf{address}
-    field of \empty{rc}.  If the sealing operation fails, set
-    \emph{r/mc} to its original value with the \textbf{tag} field
-    cleared and clear \texttt{ZF}.  If the sealing operation succeeds,
-    set \texttt{ZF} to 1.  The value of other status flags
-    (\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and
-    \texttt{OF}) would be undefined.
-
-  \item \insnref{CUnSeal} r/mc, rc
-
-    Unseal \emph{r/mc} using \emph{rc} as the authority for the
-    unsealing operation.  If the unsealing operation fails, set
-    \emph{r/mc} to its original value with the \textbf{tag} field
-    cleared and clear \texttt{ZF}.  If the unsealing operation
-    succeeds, set \texttt{ZF} to 1.  The value of other status flags
-    (\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and
-    \texttt{OF}) would be undefined.
-
-  \item \insnref{CAndPerm} r/mc, r64
-
-    Set the \textbf{perms} and \textbf{uperms} fields of \emph{r/mc}
-    to the bitwise and of the existing field values and \emph{r64}.
-    If \emph{r/mc} is sealed and tagged, set \emph{r/mc} to its
-    original value with the \textbf{tag} field cleared.
-
-  \item \insnref{CSetOffset} r/mc, r64
-
-    Set the \textbf{offset} field of \emph{r/mc} to \emph{r64}.  If
-    \emph{r/mc} is sealed and tagged, set \emph{r/mc} to its original
-    value with the \textbf{tag} field cleared.
-
+  \item \insnxesref{SEAL} - Seal Capability
+  \item \insnxesref{UNSEAL} - Unseal Capability
+  \item \insnxesref{ANDCPERM} - Mask Capability Permissions
+  \item \insnxesref{SCOFF} - Set Capability Offset
   \item \insnxesref{SCADDR} - Set Capability Address
-
   \item \insnxesref{SCBND} - Set Capability Bounds
-
   \item \insnxesref{SCBNDE} - Set Exact Capability Bounds
 
   \item \insnref{CClearTag} r/mc

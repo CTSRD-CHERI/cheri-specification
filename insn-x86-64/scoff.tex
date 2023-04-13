@@ -1,0 +1,32 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{SCOFF - Set Capability Offset}
+\insnxeslabel{scoff}
+\subsection*{SCOFF - Set Capability Offset}
+
+\begin{x86opcodetable}
+  \xopcode{66 0F 0C \emph{/r}}{SCOFF \emph{r/mc, r64}}
+  {MR}{Valid}{Valid}
+  {Set offset of \emph{r/mc} to \emph{r64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (r, w)}{ModRM:reg (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Sets the \textbf{offset} field of the destination operand to the
+source operand and stores the result in the destination operand.  The
+destination operand can be a register or memory location; the source
+operand can be a register.  If the destination operand is sealed and
+tagged, the destination operand is set to its original value with the
+\textbf{tag} field cleared.
+
+If the new value of the \textbf{offset} field makes the resulting
+capability unrepresentable, the \textbf{tag} field in the resulting
+capability is cleared.
+
+\subsubsection*{Flags Affected}
+
+None

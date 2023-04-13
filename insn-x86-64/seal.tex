@@ -1,0 +1,28 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{SEAL - Seal Capability}
+\insnxeslabel{seal}
+\subsection*{SEAL - Seal Capability}
+
+\begin{x86opcodetable}
+  \xopcode{F2 0F 0C \emph{/r}}{SEAL \emph{r/mc, rc}}
+  {MR}{Valid}{Valid}
+  {Seal \emph{r/mc} with type from the address field of \emph{rc}}.
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (r, w)}{ModRM:reg (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Seals the destination operand with the \textbf{otype} equal to the
+\textbf{address} field of the source operand and stores the result in
+the destination operand.  If the sealing operation fails, the
+destination operand is set to the original value of the destination
+operand with the \textbf{tag} field cleared.
+
+\subsubsection*{Flags Affected}
+
+The ZF flag is set to 1 if the sealing operation succeeds; otherwise
+0.  The CF, PF, AF, SF, and OF flags are undefined.
