@@ -1,0 +1,32 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CMP - Compare Two Operands}
+\insnxeslabel{cmp}
+\subsection*{CMP - Compare Two Operands}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + 39 \emph{/r}}{CMP \emph{r/mc, rc}}
+  {MR}{Valid}{Valid}
+  {Compare \emph{rc} with \emph{r/mc}.}
+  \xopcode{CAP + 3B \emph{/r}}{CMP \emph{rc, r/mc}}
+  {RM}{Valid}{Valid}
+  {Compare \emph{r/mc} with \emph{rc}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:Reg (r)}{ModRM:r/m (r)}{NA}{NA}
+  \xopen{MR}{ModRM:r/m (r)}{ModRM:reg (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Compares the first source operand with the scond source operand and
+sets status flags in \RFLAGS{}.  Sets ZF to 1 if the two operands are
+equal and 0 otherwise.  Sets SF to 1 if the \textbf{tag} fields of the
+two operands are equal and the bounds and permissions of the second
+operand are a subset of the first operand.
+
+\subsubsection*{Flags Affected}
+
+The ZF and SF flags are set as described above.  The OF, SF, AF, CF,
+and PF flags are undefined.

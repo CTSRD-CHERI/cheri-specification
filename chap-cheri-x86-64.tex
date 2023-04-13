@@ -540,7 +540,7 @@ add %csp,$16
     with \insnxesref[add]{ADDC}, the second operand would always be an
     integer operand.
 
-  \item \insnnoref{CMPC} would permit comparison of capability values
+  \item \insnxesref[cmp]{CMPC} would permit comparison of capability values
     including the functionality of both \insnref{CSetEqualExact} (via
     \texttt{ZF}) and \insnref{CTestSubset} (via \texttt{SF}).  This is
     somewhat different than the existing variants of \insnnoref{CMP}
@@ -548,15 +548,8 @@ add %csp,$16
     discard the result as in this case the flags set would not be
     identical to the flags set as a result of \insnxesref[sub]{SUBC}.
 
-    The \insnnoref{CMP} opcodes \texttt{39} and \texttt{3B} would be
-    extended to support capability operands via the capability operand
-    prefix.
-
     We do not anticipate a need for a capability-sized variant of
     \insnnoref{TEST}.
-
-    \insnnoref{CMP} should default to integer operands in capability
-    mode.
 
   \item \insnnoref{CMPXCHGC} will be required to support atomic
     operations on capabilities.  (Note that \insnnoref{CMPXCHG16B}'s
