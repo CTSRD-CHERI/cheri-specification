@@ -699,10 +699,7 @@ capability.
   \item \insnxesref{SCADDR} - Set Capability Address
   \item \insnxesref{SCBND} - Set Capability Bounds
   \item \insnxesref{SCBNDE} - Set Exact Capability Bounds
-
-  \item \insnref{CClearTag} r/mc
-
-    Clear the \textbf{tag} field of \emph{r/mc}.
+  \item \insnxesref{CLCTAG} - Clear Capability Tag
 
   \item \insnref{CBuildCap} rca, r/mc, rcb
 
@@ -743,13 +740,7 @@ capability.
     \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF}) would be
     undefined.
 
-  \item \insnref{CSealEntry} r/mc
-
-    Seal \emph{r/mc} as a sentry.  On failure, leave \emph{r/mc}
-    unchanged.  Set \texttt{ZF} in \RFLAGS{} to 1 if \emph{r/mc} if
-    \emph{r/mc} is sealed as a sentry or 0 otherwise.  The value of
-    other status flags (\texttt{CF}, \texttt{PF}, \texttt{AF},
-    \texttt{SF}, and \texttt{OF}) would be undefined.
+  \item \insnxesref{SENTRY} - Seal Capability as a Sentry
 \end{itemize}
 
 \subsubsection{Control-Flow Instructions}
@@ -792,18 +783,7 @@ returned by an existing \insnnoref{CPUID} leaf.
     Fault (see Section~\ref{sec:x86:capability-fault}) or a Page
     Fault.
 
-  \item \insnref{CClearTags} m
-
-    Clear the memory tags for a stride of capabilities located in
-    memory at and above the memory addressed by \emph{m}.  The
-    authorizing capability for \emph{m} must include \cappermS{} and
-    authorize access to the entire stride of
-    capabilities.  The address of \emph{m} must also be aligned to a
-    stride of capabilities.
-
-    If this instruction fails, it raises either a Capability Violation
-    Fault (see Section~\ref{sec:x86:capability-fault}) or a Page
-    Fault.
+  \item \insnxesref{CLCTAGS} - Clear Capability Tags
 \end{itemize}
 
 \subsection{Interactions with Vector Extensions}

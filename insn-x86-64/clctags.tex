@@ -1,0 +1,30 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{CLCTAGS - Clear Capability Tags}
+\insnxeslabel{clctags}
+\subsection*{CLCTAGS - Clear Capability Tags}
+
+\begin{x86opcodetable}
+  \xopcode{0E /2}{CLCTAGS \emph{m8}}
+  {M}{Valid}{Valid}
+  {Clear capability tags of \emph{m8}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{M}{ModRM:r/m (w)}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Clears the capability tags for a stride of capabilities in memory
+starting at the destination operand.  The authorizing capability for
+the destination operand must include \cappermS{} and authorize access
+to the entire stride of capabilities.  The address of the destination
+operand must also be aligned to a stride of capabilities.
+
+If this instruction fails, it raises either a Capability Violation
+Fault (see Section~\ref{sec:x86:capability-fault}) or a Page Fault.
+
+\subsubsection*{Flags Affected}
+
+None
