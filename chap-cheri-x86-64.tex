@@ -700,46 +700,9 @@ capability.
   \item \insnxesref{SCBND} - Set Capability Bounds
   \item \insnxesref{SCBNDE} - Set Exact Capability Bounds
   \item \insnxesref{CLCTAG} - Clear Capability Tag
-
-  \item \insnref{CBuildCap} rca, r/mc, rcb
-
-    Set \emph{rca} equal to \emph{r/mc} with the \textbf{base},
-    \textbf{length}, \textbf{address}, \textbf{perms}, and
-    \textbf{uperms} fields replaced with the corresponding fields in
-    \emph{rcb}.  If \emph{rcb} is a sentry then \emph{rca} is also
-    sealed as a sentry.  If \emph{r/mc} does not authorize the
-    construction of the desired capability, set \emph{rca} equal to
-    \emph{rcb} with the \textbf{tag} field cleared.
-
-    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    of \emph{rca}.  The value of other status flags (\texttt{CF},
-    \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF}) would be
-    undefined.
-
-  \item \insnref{CCopyType} rca, r/mc, rcb
-
-    Set \emph{rca} to \emph{r/mc} with the \textbf{address} field set
-    to \emph{rcb}.\textbf{otype}.  On failure (including if the
-    \textbf{otype} field of \emph{rcb} is a reserved value), set
-    \emph{rca} to the \textbf{NULL} capability with the
-    \textbf{address} field set to \emph{rcb}.\textbf{otype}.
-
-    Set \texttt{ZF} in \RFLAGS{} to the value of \textbf{tag} field
-    of \emph{rca}.  The value of other status flags (\texttt{CF},
-    \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF}) would be
-    undefined.
-
-  \item \insnref{CCSeal} rca, r/mc, rcb
-
-    Set \emph{rca} to \emph{r/mc} conditionally sealed with
-    \textbf{otype} equal to the \textbf{address} field of \emph{rcb}.
-    If \emph{rca} is not sealed with \emph{rcb}.\textbf{otype}, it
-    will be set equal to \emph{r/mc}.  Set \texttt{ZF} in \RFLAGS{} to
-    1 if \emph{rca} is sealed with \emph{rcb}.\textbf{otype} or 0
-    otherwise.  The value of other status flags (\texttt{CF},
-    \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF}) would be
-    undefined.
-
+  \item \insnxesref{BUILDCAP} - Construct Capability
+  \item \insnxesref{CPYTYPE} - Construct Sealing Capability
+  \item \insnxesref{CSEAL} - Conditional Capability Seal
   \item \insnxesref{SENTRY} - Seal Capability as a Sentry
 \end{itemize}
 

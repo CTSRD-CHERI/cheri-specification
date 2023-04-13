@@ -124,11 +124,14 @@ instructions which we believe may either be used frequently or in
 frequently-accessed code paths.
 
 \input{insn-x86-64/andcperm}
+\input{insn-x86-64/buildcap}
 \input{insn-x86-64/cinvoke}
 \input{insn-x86-64/clctag}
 \input{insn-x86-64/clctags}
+\input{insn-x86-64/cpytype}
 \input{insn-x86-64/cram}
 \input{insn-x86-64/crrl}
+\input{insn-x86-64/cseal}
 \input{insn-x86-64/gcbase}
 \input{insn-x86-64/gclen}
 \input{insn-x86-64/gcoff}
@@ -186,6 +189,12 @@ available in capability mode.
   F2 0F 0C \emph{/r} & \insnxesref{SEAL} \emph{r/mc, rc}\\
   \hline
   F3 0F 0C \emph{/r} & \insnxesref{UNSEAL} \emph{r/mc, rc}\\
+  \hline
+  VEX.LZ.0F.W0 0E \emph{/r} & \insnxesref{BUILDCAP} \emph{rca, r/mc, rcb}\\
+  \hline
+  VEX.LZ.66.0F.W0 0E \emph{/r} & \insnxesref{CPYTYPE} \emph{rca, r/mc, rcb}\\
+  \hline
+  VEX.LZ.F2.0F.W0 0E \emph{/r} & \insnxesref{CSEAL} \emph{rca, r/mc, rcb}\\
   \hline
   0F 24 \emph{/r} & \insnxesref[movcap]{MOV} \emph{rc,} CFS/CGS/DDC\\
   \hline
