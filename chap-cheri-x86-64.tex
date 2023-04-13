@@ -611,6 +611,24 @@ add %csp,$16
     \insnnoref{AND}, \insnnoref{OR}, and \insnnoref{XOR} should
     default to integer operands in capability mode.
 
+  \item \insnnoref{CMPC} would permit comparison of capability values
+    including the functionality of both \insnref{CSetEqualExact} (via
+    \texttt{ZF}) and \insnref{CTestSubset} (via \texttt{SF}).  This is
+    somewhat different than the existing variants of \insnnoref{CMP}
+    which perform the equivalent \insnnoref{SUB} instruction and then
+    discard the result as in this case the flags set would not be
+    identical to the flags set as a result of \insnnoref{SUBC}.
+
+    The \insnnoref{CMP} opcodes \texttt{39} and \texttt{3B} would be
+    extended to support capability operands via the capability operand
+    prefix.
+
+    We do not anticipate a need for a capability-sized variant of
+    \insnnoref{TEST}.
+
+    \insnnoref{CMP} should default to integer operands in capability
+    mode.
+
   \item \insnnoref{CMPXCHGC} will be required to support atomic
     operations on capabilities.  (Note that \insnnoref{CMPXCHG16B}'s
     existing semantics are not suitable for capabilities as it divides
@@ -807,6 +825,11 @@ capability can be obtained via a 64-bit \insnnoref{MOV} instruction.
     Set \emph{r64} to the \textbf{offset} field of \emph{r/mc}.
 \end{itemize}
 
+Additionally, to support efficient tag checks without overwriting an
+integer register with the result as is done in \insnref{CGetTag}, a
+single operand \insnnoref{CTestTag} which copies the tag value to
+\texttt{ZF} may be desired.
+
 \subsubsection{Capability-Modification Instructions}
 
 If these instructions fail, they should clear the tag in the resulting
@@ -970,35 +993,6 @@ would be undefined.
     Otherwise, set \emph{rc} to \emph{r/mc} with its \textbf{offset}
     replaced by \emph{r64} and set \texttt{ZF} to 1.
 \end{itemize}
-
-\subsubsection{Pointer-Comparison Instructions}
-
-For these instructions, the result of the comparison should be written
-to the \texttt{ZF} field of \RFLAGS{} instead of to a destination
-register as is done in CHERI-RISC-V.  The value of other status flags
-(\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF})
-would be undefined.
-
-\begin{itemize}
-  \item \insnref{CSetEqualExact} r/mc, rc
-
-    If all of the fields in the in-memory representation of
-    \emph{r/mc} and \emph{rc} are identical including tags and any
-    reserved encoding bits, set \texttt{ZF} to 1; otherwise, set
-    \texttt{ZF} to 0.
-
-  \item \insnref{CTestSubset} r/mc, rc
-
-    If the \textbf{tag} fields of \emph{r/mc} and \emph{rc} are the
-    same and the bounds and permissions of \emph{rc} are a subset of
-    \emph{r/mc}, set \texttt{ZF} to 1; otherwise, set \texttt{ZF} to
-    0.
-\end{itemize}
-
-Additionally, to support efficient tag checks without overwriting an
-integer register with the result as is done in \insnref{CGetTag}, a
-single operand \insnnoref{CTestTag} which copies the tag value to
-\texttt{ZF} may be desired.
 
 \subsubsection{Control-Flow Instructions}
 
