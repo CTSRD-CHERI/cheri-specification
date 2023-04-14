@@ -1,0 +1,32 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{LCTAGS - Load Capability Tags}
+\insnxeslabel{lctags}
+\subsection*{LCTAGS - Load Capability Tags}
+
+\begin{x86opcodetable}
+  \xopcode{2F \emph{/r}}{LCTAGS \emph{r64, m8}}
+  {RM}{Valid}{Valid}
+  {Load bitmask of capability tags of \emph{m8} into \emph{r64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:Reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Loads a packed bitmask of capability tags for a stride of capabilities
+in memory starting at the source operand and stores the bitmask in the
+destination operand.  Bit 0 corresponds to tag for the capability at
+the address of the source operand.  The authorizing capability for the
+source operand must include \cappermL{} and \cappermLC{} and authorize
+access to the entire stride of capabilities.  The source operand
+address must also be aligned to a stride of capabilities.
+
+If this instruction fails, it raises either a Capability Violation
+Fault (see Section~\ref{sec:x86:capability-fault}) or a Page Fault.
+
+\subsubsection*{Flags Affected}
+
+None

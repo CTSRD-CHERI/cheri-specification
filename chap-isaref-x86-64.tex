@@ -138,6 +138,7 @@ frequently-accessed code paths.
 \input{insn-x86-64/gcperm}
 \input{insn-x86-64/gctag}
 \input{insn-x86-64/gctype}
+\input{insn-x86-64/lctags}
 \input{insn-x86-64/movcap}
 \input{insn-x86-64/scaddr}
 \input{insn-x86-64/scbnd}
@@ -173,6 +174,8 @@ available in capability mode.
   1F \emph{/r} & \insnxesref{CRAM} \emph{r64, r/m64}\\
   \hline
   27 \emph{/r} & \insnxesref{SCBNDE} \emph{r/mc, r64}\\
+  \hline
+  2F \emph{/r} & \insnxesref{LCTAGS} \emph{r64, m8}\\
   \hline
   37 /0 \emph{id} & \insnxesref{SCBND} \emph{r/mc, imm32}\\
   \hline
