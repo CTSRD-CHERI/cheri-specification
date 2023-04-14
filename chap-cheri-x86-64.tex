@@ -731,21 +731,7 @@ a new \insnnoref{CPUID} leaf or be defined as equal to the value
 returned by an existing \insnnoref{CPUID} leaf.
 
 \begin{itemize}
-  \item \insnref{CLoadTags} r64, m
-
-    Set \emph{r64} to a bitmask of tags for a stride of capabilities
-    located in memory at and above the memory addressed by \emph{m}.
-    Bit 0 corresponds to tag for the capability at the address
-    \emph{m}.  The authorizing capability for \emph{m} (either \DDC{}
-    or an explicit capability register as the base address register)
-    must include \cappermL{} and \cappermLC{} and authorize access to
-    the entire stride of capabilities.  The address of \emph{m} must
-    also be aligned to a stride of capabilities.
-
-    If this instruction fails, it raises either a Capability Violation
-    Fault (see Section~\ref{sec:x86:capability-fault}) or a Page
-    Fault.
-
+  \item \insnxesref{LCTAGS} - Load Capability Tags
   \item \insnxesref{CLCTAGS} - Clear Capability Tags
 \end{itemize}
 
