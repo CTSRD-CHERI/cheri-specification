@@ -11,7 +11,7 @@ env:
 
 jobs:
   build:
-    runs-on: [ubuntu-20.04]
+    runs-on: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v3
     - name: Basic checks
@@ -29,7 +29,7 @@ jobs:
   draft-release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
-    runs-on: [ubuntu-18.04]
+    runs-on: [ubuntu-latest]
     steps:
     - name: Download artifact
       uses: actions/download-artifact@master
