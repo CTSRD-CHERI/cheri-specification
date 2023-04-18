@@ -248,7 +248,7 @@ execution mode along with prefixes to toggle the individual addressing
 mode and operand size of individual instructions.  We define a new
 \textbf{capability mode}.  As with CHERI-RISC-V, this mode is enabled
 by setting the low bit of the \cflags{} field in \CIP{}.  This mode is
-only valid in 64-bit mode.  A far call or jump which uses a 32-bit
+valid only in 64-bit mode.  A far call or jump which uses a 32-bit
 code segment along with a target code capability with this flag set
 will raise a General Protection Fault with the error code set to the
 target segment selector.
@@ -502,8 +502,8 @@ capability operands:
 
     The existing \texttt{89} and \texttt{8B} opcodes would be extended
     to support capability operands via the capability operand prefix.
-    Note that these instructions would only permit a general-purpose
-    register as the source (\texttt{89}) or destination (\texttt{8B}).
+    Note that these instructions would  permit a general-purpose
+    register only as the source (\texttt{89}) or destination (\texttt{8B}).
 
     The \texttt{A1} and \texttt{A3} opcodes would not be extended to
     support capabilities.
@@ -513,7 +513,7 @@ capability operands:
     new opcodes (\texttt{0F 24} and \texttt{0F 25}) would be
     used.  These opcodes would permit access to \CFS{}, \CGS{}, and
     \DDC{} in all privilege levels.  Access to other additional
-    capability registers would only be permitted in privilege level 0.
+    capability registers would be permitted only in privilege level 0.
 
     To support efficiently storing NULL pointers to memory, the \texttt{C7 /0}
     opcode would be extended to support capability operands via
@@ -531,7 +531,7 @@ capability operands:
 
     The existing \texttt{0F C3} opcode would be extended to support
     capability operands via the capability operand prefix.  Note that
-    this would only support stores of general-purpose capability
+    this would support only stores of general-purpose capability
     registers.
 
     \insnnoref{MOVNTI} should default to integer operands in
@@ -556,7 +556,7 @@ capability operands:
   \item \insnnoref{CMOVC} would handle conditional loads and stores of
     capabilities.  Existing opcodes for \insnnoref{CMOV} would be
     extended to support capability operands via the capability operand
-    prefix.  Note that this would only support moves to and from
+    prefix.  Note that this would support only moves to and from
     general-purpose capability registers.
 
     \insnnoref{CMOV} should default to integer operands in
@@ -721,7 +721,7 @@ add %csp,$16
 Absolute near branches would be extended to support capability operands.
 In 64-bit long mode, a capability operand prefix would select a
 capability operand size.  In capability mode, absolute near branches would
-only support capability operands.
+support only capability operands.
 Absolute near branches which use an integer operand would set the offset of the
 \CIP{} capability while absolute near branches using a capability operand would
 load a new capability into \CIP{}.
@@ -1194,8 +1194,8 @@ information:
   offset adjustments from immediates or scaled indices.  If the result
   of offset adjustments made the capability unrepresentable, the
   faulting capability would have its tag cleared.
-\item Similar to the above, but ignore offset adjustments and only
-  provide the base capability value.
+\item Similar to the above, but ignore offset adjustments and provide
+  only the base capability value.
 \item Provide the virtual address from the faulting capability in
   \CRTWO{} similar to PF\#.  A debugger could examine the faulting
   instruction's operands to determine which capability triggered the fault.
@@ -1204,7 +1204,7 @@ information:
 \end{enumerate}
 
 Like Morello and CHERI-RISC-V, we recommend that CHERI-x86-64
-only raise capability violation faults when a invalid memory access is
+raise capability violation faults only when a invalid memory access is
 performed such as an out-of-bounds access or access via an untagged
 capability.  Specifically, we recommend that instructions which modify
 capabilities should not raise capability violation faults (for
@@ -1382,7 +1382,7 @@ fault error code such as \texttt{P}, \texttt{W/R}, \texttt{U/S}, and
 addition, the virtual address of the memory access should be provided
 in the \CRTWO{} register similar to other page-fault exceptions.
 
-Note that the \texttt{CR} and \texttt{CW} bits only fault if the
+Note that the \texttt{CR} and \texttt{CW} bits fault only if the
 capability being read or written is tagged.  Untagged capability
 values can be read from or written to memory regardless of the
 \texttt{CR} and \texttt{CW} permissions.  In addition, if the
@@ -1422,7 +1422,7 @@ would match traditional x86, it would not protect instruction decoding
 by sealing.  For example, a sentry capability could be used in either
 plain 64-bit mode or capability mode.  By storing the mode in
 capability metadata protected by sealing, sealed code capabilities can
-only be used in the intended mode.  Also, while it may be less
+be used only in the intended mode.  Also, while it may be less
 flexible to permit the stack alignment to be chosen orthogonally to the
 default instruction encoding mode, it does not seem useful in
 practice.  Instead, capability mode is designed as a single knob to
@@ -1432,7 +1432,7 @@ optimize pure capability code.
 
 We considered various options for using additional capability
 registers such as \CGS{} as explicit operands in instructions rather
-than as a separate bank of registers only accessed via
+than as a separate bank of registers accessed only via
 \insnnoref{MOV}.  All of these approaches add complexity to
 instruction decoding, but we do not anticipate frequent direct access
 to additional capability registers beyond the use of the existing
@@ -1474,7 +1474,7 @@ using an additional capability register.
 
 The \CFS{}, \CGS{}, and \DDC{} capability registers must be accessible
 in all privilege levels.  However, other additional capability
-registers such as \KGS{} are only suitable for privilege level 0.
+registers such as \KGS{} are suitable only for privilege level 0.
 Currently the \textbf{0F 24} and \textbf{0F 25} instructions permit
 access to a subset of registers in privilege levels other than 0.
 
@@ -1504,7 +1504,7 @@ A few other approaches are enumerated below:
 
 Supporting far branches with capability operands would add additional
 complexity.  For example, far branches need to ensure that code
-capability pointers which enable capability mode are only used with
+capability pointers which enable capability mode are used only with
 64-bit code segments.  In-memory far capability pointers would also
 have odd alignment requirements due to the 16-bit code selector being
 adjacent to an aligned capability.  Far branches are also little used
