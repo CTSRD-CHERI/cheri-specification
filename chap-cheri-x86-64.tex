@@ -956,39 +956,6 @@ capability.
     \texttt{SF}, and \texttt{OF}) would be undefined.
 \end{itemize}
 
-\subsubsection{Pointer-Arithmetic Instructions}
-
-These instructions should set \texttt{ZF} in \RFLAGS{} to indicate
-success (set) or failure (clear).  If one of these instructions fails, it
-should not raise an exception.  The value of other status flags
-(\texttt{CF}, \texttt{PF}, \texttt{AF}, \texttt{SF}, and \texttt{OF})
-would be undefined.
-
-\begin{itemize}
-  \item \insnref{CToPtr} r64, rc, r/mc
-
-    If the \textbf{tag} field of \emph{r/mc} is not set or \emph{rc}
-    is sealed and tagged, then set \emph{r64} to 0 and clear
-    \texttt{ZF} in \RFLAGS{}.
-
-    If the \textbf{tag} field of \emph{rc} is not set, then set
-    \emph{r64} to 0 and set \texttt{ZF} in \RFLAGS{} to 1; otherwise,
-    set \emph{r64} to \emph{rc}.\textbf{address} -
-    \emph{r/mc}.\textbf{base} and set \texttt{ZF} in \RFLAGS{} to 1.
-
-  \item \insnref{CFromPtr} rc, r/mc, r64
-
-    If \emph{r64} is 0, then set \emph{rc} to \textbf{NULL} and set
-    \texttt{ZF} to 1.
-
-    If \emph{r/mc} is untagged or sealed, then set \emph{rc} to the
-    \textbf{NULL} capability with the \textbf{address} field set to
-    \emph{r64} and set \texttt{ZF} to 0.
-
-    Otherwise, set \emph{rc} to \emph{r/mc} with its \textbf{offset}
-    replaced by \emph{r64} and set \texttt{ZF} to 1.
-\end{itemize}
-
 \subsubsection{Control-Flow Instructions}
 
 \begin{itemize}
