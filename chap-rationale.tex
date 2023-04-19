@@ -1,4 +1,4 @@
-\chapter{Detailed Design Rationale}
+vvggg\chapter{Detailed Design Rationale}
 \label{chap:rationale}
 
 During the design of CHERI that began in 2010, we considered many
@@ -184,7 +184,7 @@ any language for which a compiler has been written. In particular, it is a desig
 goal of CHERI that it be able to run legacy code written in C.
 
 Some earlier capability machines, such as the Burroughs B5000, made the compiler
-a privileged program. We have followed the approach taken in capability machines
+a privileged program. We have followed the altenative approach taken in capability machines
 such as CAP, in which the compiler was not privileged.
 
 \mrnote{We could expand on this, perhaps in the high-assurance section. We do depend
@@ -199,15 +199,15 @@ correct -- this depends on how we load code into a sandbox.}
 \section{Base and Length Versus Lower and Upper Bounds}
 
 The CHERI architecture permits two different interpretations of capabilities:
-as a virtual address paired with lower and upper bounds; and as a base,
+as a virtual address paired with lower and upper bounds, and as a base,
 length, and current offset.
 These different interpretations support differing C-language models for
 pointers.
-The former, in which pointer casts to integers return their virtual addresses,  is more compatible with current software, but risks leaking those virtual
+The former, in which pointer-casts to integers return their virtual addresses,  is more compatible with current software, but risks leaking those virtual
 addresses (or their implications) out of tagged values where they cannot be
 found for the purposes of pointer-transformation techniques such as copying
 garbage collection.
-The latter, in which pointer casts to integers return their offsets, is less
+The latter, in which pointer-casts to integers return their offsets, is less
 compatible (as comparisons between pointers into different buffers may give
 surprising equality results), but avoids leakage of virtual address out of
 tagged values, enabling techniques such as copying garbage collection.
@@ -221,8 +221,9 @@ systems code, cannot avoid this idiomatic use.
 For example, run-time linkers and memory allocators both naturally consider
 integer virtual addresses as part of their operation.
 More subtly, techniques such as ordering locks for objects based on object
-address, or sorting trees based on object address, makes copying garbage
+address, or sorting trees based on object address, make copying garbage
 collection a difficult prospect.
+\pgnnote{copying???}
 Compressed capabilities further complicate this story, as a precise lower
 bound may not be possible without padding; this is easy to arrange within
 memory allocators for new allocations, but when subsetting an existing
@@ -230,11 +231,13 @@ allocation (e.g., to describe the bounds of an array embedded within another
 structure), the 0 offset from the bottom of the embedded structure may not
 carry over to being a 0 offset relative to the base address of a capability.
 
-In recent versions of the CHERI C compiler, we have shifted to preferring a
-virtual-address interpretation of pointers in all cases except those where
-specific built-in functions are used to query the offset.
-We retain an optional compiler mode utilizing an offset interpretation, which
-will be suitable for future experimentation with copying garbage collection.
+In recent versions of the CHERI C compiler (with the CHERI-LLVM
+back-end), we have shifted to preferring a virtual-address
+interpretation of pointers in all cases except those where specific
+built-in functions are used to query the offset.  We retain an
+optional compiler mode utilizing an offset interpretation, which will
+be suitable for future experimentation with copying garbage
+collection.
 
 \section{Signed and Unsigned Offsets}
 
@@ -242,7 +245,7 @@ In the CHERI instructions that take both a register offset and an immediate
 offset, the register offset is treated as unsigned integer, whereas the
 immediate offset is treated as a signed integer.
 
-Register offsets are treated as unsigned so that given a capability to
+Register offsets are treated as unsigned, so that given a capability to
 the entire address space (except for the very last byte, as
 explained above), a register offset can be used to access any byte within it.
 Signed register offsets would have the disadvantage that negative offsets
