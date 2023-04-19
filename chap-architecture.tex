@@ -838,7 +838,7 @@ following:
   bounds, and other checks on instruction fetch.
 
 \item[Default Data Capability (\DDC{})] indirects legacy non-capability loads
-  and stores, controlling and relocating data accesses to memory.
+  and stores, controlling data accesses to memory.
 \end{description}
 
 Although these capability special registers may be viewed as extensions to
@@ -856,19 +856,11 @@ reasons of compatibility to modify the capability while retaining its tag
 and other metadata (such as bounds and permissions) without modification --
 subject to maintaining monotonicity.
 For example, when modifying \PC{}, it is desirable to leave other fields (such
-as bounds of \PCC{}) unmodified, and further to have integer accesses be
-performed on \coffset{} rather than on the capability virtual address, so that
+as bounds of \PCC{}) unmodified, so that
 capability-unaware code can jump within its code segment without experiencing
-a tag violation or being exposed to absolute virtual addresses.
+a tag violation.
 %%%% SUCH AS BOUNDS was ambiguous, in a sentence with TOO MANY COMMAS,
 %%%% and I may have miscorrected it.  PLEASE VET MY SECOND TRY.
-These design choices allow accesses to be relocated relative to each of
-these capabilities.\footnote{This is a design point on which we have had
-considerable discussion, and for which other approaches would also be
-reasonable.
-For example, a virtual-address interpretation of \PC{} would also be
-meaningful, but would place greater constraints on how capabilities were
-used to constrain access by unmodified software.}
 
 \subsection{Values Extended to Capabilities}
 
