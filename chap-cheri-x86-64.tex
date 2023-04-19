@@ -648,20 +648,6 @@ CHERI instructions, most instructions are defined with two operands
 rather than three.  New instructions which require three operands must
 be encoded using a \VEX{} prefix.
 
-Operands are described using the syntax from Volume 2 of Intel's
-Software Developer's Manual~\cite{intel-sdm-vol2} with the following
-extensions:
-
-\begin{itemize}
-  \item \textbf{rc} { }---{ } One of the general-purpose capability
-    registers: \CAX{}, \CBX{}, \CCX{}, \CDX{}, \CDI{}, \CSI{}, \CBP{},
-    \CSP{}, \creg{8}-\creg{15}.
-
-  \item \textbf{r/mc} { }---{ } A capability operand that is either
-    the contents of one of the capability registers for \textbf{rc} or
-    a capability in memory.
-\end{itemize}
-
 Note that all of these instructions would only be valid in 64-bit mode
 and capability mode.
 
