@@ -160,7 +160,102 @@ approaches:
 \end{itemize}
 
 However, a hash-based approach also has several appealing properties when
-compared to tags required (require for the compartmentalization model), which
+compared to tags:
+
+\begin{itemize}
+\item Cryptographic hashes do not require the implementation of tagged memory,
+  which could reduce memory-subsystem complexity and DRAM-traffic impact.
+
+\item Cryptographic hashes do not impose alignment requirements on
+  capabilities, which may improve compatibility.
+
+\item Cryptographically protected capabilities can be copied in memory,
+  swapped to disk, or migrated in virtual-machine images, without special
+  support for tags.
+
+  This could entirely avoid the need for special capability load and store
+  instructions, although retaining them might assist with microarchitectural
+  optimization of hash use.
+\end{itemize}
+
+If hashed-based protection were viewed as a stepping stone to a full CHERI
+implementation, substituting hashing for tags in an initial implementation,
+there are several steps that could be taken to reduce the further disruption
+associated with later tag adoption:
+
+\begin{itemize}
+\item Explicit capability load and store instructions would be maintained and
+  used in future capability-aware memory copying, etc.
+
+\item Capability load and store instructions would require strong alignment
+  for values that would later be used for load and store, even though this is
+  not required with hashing.
+
+\item Other non-tag-related capability properties, such as monotonicity, would
+  continue to be enforced via guarded manipulation.
+\end{itemize}
+
+However, substantially smaller benefit would arise prior to the introduction
+of tags: capabilities would be able to provide capability-like spatial memory
+protection, and probabilistic pointer integrity protection, but not the
+non-probabilistic protection or enforcement of provenance validity required
+for stronger policies such as preventing pointer reinjection, supporting
+temporal memory safety through deterministic pointer identification in memory,
+or enabling in-address-space compartmentalization that depends on those
+properties.
+
+\section{Capability Register File}
+
+The decision to separate the capability-register file from the general-purpose
+integer
+register file is somewhat arbitrary from a software-facing perspective: we
+envision capabilities gradually displacing general-purpose integer registers as
+pointers, but where management of the two register files will remain largely
+the same, with stack spilling behaving the same way, and so on, as is already
+the case for disjoint integer and floating-point register files.
+
+We initially selected the separate representation on CHERI-MIPS for a
+few pragmatic reasons:
+
+\begin{itemize}
+\item Coprocessor interfaces on MIPS assume additional
+  register files (a la floating-point registers).
+\item The initial 256-bit capability registers were quite large, and by giving the capability
+  coprocessor its own pipeline for manipulations, we could avoid enforcing a
+  256-bit-wide path through the main pipeline.
+\item It is more obvious, given a coprocessor-based interface, how to provide
+  compatibility support in which the capability coprocessor is ``disabled,''
+  the default configuration in order to support unmodified MIPS compilers and
+  operating systems.
+\end{itemize}
+
+\noindent
+However, a design in
+which (more similar to the manner in which the 32-bit x86 ISA was extended to
+support 64-bit registers) the two files are \textit{merged} and able to hold
+both general-purpose integer registers and capability registers is
+also possible.
+This became a more appealing choice in the presence of 128-bit compressed
+capabilities, as register size doubled rather than quadrupled.
+
+Early in our design cycle, capability registers were able to hold only true
+capabilities (i.e., with tags); later, we weakened this requirement by adding
+an explicit tag bit to each register, in order to improve support for
+capability-oblivious code such as memory-copy routines able to copy data
+structures consisting of both capabilities and ordinary data.
+This shifted our approach somewhat more towards a merged approach; our view
+is that efficiency of implementation and compatibility (rather than
+maintaining a negligible
+effect on the software model) would be the primary reasons to select one
+approach or another for a particular starting-point ISA.
+
+Another design variation might have specific capability registers
+more tightly coupled with general-purpose integer registers -- an approach we discussed
+extensively, especially when comparing with the bounds-checking literature,
+which has explored techniques based on {\em sidecar registers} or associative
+look-aside buffers.
+Many of these approaches did not adopt tags as a means of strong integrity
+protection (which we require for the compartmentalization model), which
 would make associative techniques less suitable.
 Further, we felt that the working-set properties of the two register files
 might be quite different; effectively pinning the two to one another would
