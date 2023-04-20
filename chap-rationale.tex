@@ -1,4 +1,4 @@
-vvggg\chapter{Detailed Design Rationale}
+\chapter{Detailed Design Rationale}
 \label{chap:rationale}
 
 During the design of CHERI that began in 2010, we considered many
@@ -12,7 +12,7 @@ choices.
 Our goals of providing fine-grained memory protection and compartmentalization
 led to an early design choice to allow capabilities to be used as C- and
 C++-language pointers.
-This rapidly led to vaarious conclusions:
+This rapidly led to various conclusions:
 
 \begin{itemize}
 \item Capabilities exist within virtual address spaces, imposing an ordering in
@@ -279,7 +279,7 @@ any language for which a compiler has been written. In particular, it is a desig
 goal of CHERI that it be able to run legacy code written in C.
 
 Some earlier capability machines, such as the Burroughs B5000, made the compiler
-a privileged program. We have followed the altenative approach taken in capability machines
+a privileged program. We have followed the alternative approach taken in capability machines
 such as CAP, in which the compiler was not privileged.
 
 \mrnote{We could expand on this, perhaps in the high-assurance section. We do depend
@@ -942,7 +942,7 @@ mutual distrust, \insnref{CInvoke} can be used to invoke
 a trusted supervisor responsible for mediating messages and
 requests between distrusting parties.  The supervisor would be
 responsible for clearing non-argument capability and general-purpose
-integer resgisters and performing any additional checks.
+integer registers and performing any additional checks.
 The \insnref{CInvoke} trusted
 routine can jump out of trusted code without
 any special handling in the ISA, as it will conform to monotonic
@@ -964,7 +964,7 @@ base, pointer, and bounds to reduce the in-memory footprint of fat pointers,
 reducing the precision of bounds -- with substantial space savings.
 We now specify only compressed capabilities, whether 64-bit capabilities for
 32-bit architectural addresses, or 128-bit capabilities for 64-bit
-achitectural addresses.
+architectural addresses.
 Prior versions of our compression approaches, the CHERI-128 candidates, are
 described in \cref{app:cheri-128}.
 
@@ -1460,7 +1460,7 @@ before forwarding the result.
 
 Early exceptions can still be achieved if desired for debugging by
 instrumenting potentially tag-clearing instructions with assertions about
-the tag, either manually or in a compiler santitization pass.
+the tag, either manually or in a compiler sanitization pass.
 The CHERI ISA instantiation can ensure these checks are cheap, for example by
 providing an instruction to throw an exception based on the tag.
 
