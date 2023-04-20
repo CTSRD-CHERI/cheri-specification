@@ -65,18 +65,26 @@ ${PREVEOUS}:
 .PHONY: diffdir
 diffdir:
 	@(test -d ${DIFFDIR} || mkdir ${DIFFDIR})
+	@(test -d ${DIFFDIR}/cheri_concentrate_listings || mkdir ${DIFFDIR}/cheri_concentrate_listings)
 	@(test -d ${DIFFDIR}/insn-riscv || mkdir ${DIFFDIR}/insn-riscv)
 	@(test -d ${DIFFDIR}/sail_latex_riscv || mkdir ${DIFFDIR}/sail_latex_riscv)
 
 ${DIFFDIR}/$(TARGET): $(DIFFTEX)
-	cp Makefile ${DIFFDIR}/
+	cp LICENSE* Makefile ${DIFFDIR}/
 	cp ${FIGSOURCES} ${DIFFDIR}/
 	cp sail_latex_riscv/*.sail ${DIFFDIR}/sail_latex_riscv
+	cp cheri_concentrate_listings/*.bsv ${DIFFDIR}/cheri_concentrate_listings
 	make -C ${DIFFDIR}
 	@(echo "diff of between "${PREVEOUS}" and this version is now in "${DIFFDIR}"/"${TARGET})
 
 ${DIFFDIR}/preamble.tex: preamble.tex
 	cp preamble.tex ${DIFFDIR}
+
+${DIFFDIR}/def-riscv-insns-macros.tex: def-riscv-insns-macros.tex
+	cp def-riscv-insns-macros.tex ${DIFFDIR}
+
+${DIFFDIR}/sail_latex_riscv/%.tex: sail_latex_riscv/%.tex
+	cp $< ${DIFFDIR}/sail_latex_riscv
 
 ${DIFFDIR}/%.tex: %.tex
 	@(echo '\DIFaddbegin' > ${DIFFDIR}/diffbegin)
