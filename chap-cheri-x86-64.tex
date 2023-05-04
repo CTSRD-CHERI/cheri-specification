@@ -535,6 +535,10 @@ add %csp,$16
     We do not anticipiate a need for capability-sized variants of
     \insnnoref{ADC} or \insnnoref{SBB}.
 
+  \item \insnxesref[inc]{INCC} and \insnxesref[dec]{DECC} would permit
+    simple increments and decrements of the \textbf{address} field of
+    capabilites.
+
   \item \insnxesref[and]{ANDC}, \insnxesref[or]{ORC}, and \insnxesref[xor]{XORC} would
     permit bit manipulation of the \textbf{address} field of a capability.  As
     with \insnxesref[add]{ADDC}, the second operand would always be an

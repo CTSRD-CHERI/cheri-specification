@@ -1,0 +1,30 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{DEC - Decrement by 1}
+\insnxeslabel{dec}
+\subsection*{DEC - Decrement by 1}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + FF /1}{DEC \emph{r/mc}}
+  {M}{Valid}{Valid}
+  {Decrement address field of \emph{r/mc} by 1.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{M}{ModRM:r/m (r,w)}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Subtracts 1 from the \textbf{address} field of the destination operand
+and then stores the result in the destination operand. The destination
+operand can be a register or a memory location.
+
+If the new value of the \textbf{address} field makes the resulting
+capability unrepresentable, the \textbf{tag} field in the resulting
+capability is cleared.
+
+\subsubsection*{Flags Affected}
+
+The CF flag is not affected.  The OF, SF, ZF, AF, and PF flags are set
+according to the value of the resulting \textbf{address} field.
