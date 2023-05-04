@@ -273,6 +273,7 @@ longer be valid:
   \item \insnnoref{LAR}
   \item \insnnoref{LSL}
   \item Direct memory-offset \insnnoref{MOV}
+  \item Far branches (\insnnoref{CALL}, \insnnoref{JMP}, and \insnnoref{RET})
 \end{itemize}
 
 \subsection{Using Capabilities with Memory Address Operands}
@@ -477,7 +478,7 @@ operand when executed in capability mode:
 \begin{itemize}
   \item Near branches.
 
-  \item Instructions other than far branches that implicitly reference
+  \item Instructions that implicitly reference
     the stack pointer (\CSP{}).
 \end{itemize}
 
@@ -621,11 +622,10 @@ Capability-sized branches would save and restore a full capability on
 the stack while integer-sized branches would save and restore an
 integer address.
 
-Far calls, jumps, and returns would not support capability operands.
+Far calls, jumps, and returns would not support capability operands
+and would be invalid in capability mode.
 Far branches would
-set the \textbf{address} field of \CIP{}.  An attempt to branch to a 32-bit code
-segment in capability mode should raise a General Protection fault
-with the error code set to the destination code segment.
+set the \textbf{address} field of \CIP{}.
 
 If the resulting value of \CIP{} after any branch
 is invalid, a capability violation fault would be raised on the branch
@@ -1172,10 +1172,7 @@ have odd alignment requirements due to the 16-bit code selector being
 adjacent to an aligned capability.  Far branches are also little used
 in existing 64-bit x86 programs.  Significantly, 64-bit x86 still
 defaults to 32-bit operands for far branches (unlike near branches
-which are commonly used and default to 64-bit operands).  It may make
-sense to remove far branches other than \insnnoref{IRET} completely
-in capability mode causing the instructions to raise an illegal
-instruction fault.
+which are commonly used and default to 64-bit operands).
 
 \subsection{Direct Memory-Offset MOVs}
 
