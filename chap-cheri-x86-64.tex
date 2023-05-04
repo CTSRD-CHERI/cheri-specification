@@ -518,10 +518,10 @@ capability operands:
     capabilities.
 
   \item \insnxesref[add]{ADDC} and \insnxesref[sub]{SUBC} would be used to adjust
-    the address of a capability similar to \insnriscvref{CIncOffset}.  Note
+    the \textbf{address} field of a capability similar to \insnriscvref{CIncOffset}.  Note
     that for these instructions, the source operand would either be a
     sign-extended immediate or a 64-bit integer register whose value
-    is either added to or subtracted from the address of the
+    is either added to or subtracted from the \textbf{address} field of the
     capability-sized destination operand.
 
     For example:
@@ -536,7 +536,7 @@ add %csp,$16
     \insnnoref{ADC} or \insnnoref{SBB}.
 
   \item \insnxesref[and]{ANDC}, \insnxesref[or]{ORC}, and \insnxesref[xor]{XORC} would
-    permit bit manipulation of the integer value of a capability.  As
+    permit bit manipulation of the \textbf{address} field of a capability.  As
     with \insnxesref[add]{ADDC}, the second operand would always be an
     integer operand.
 
@@ -604,10 +604,11 @@ Absolute near branches would be extended to support capability operands.
 In 64-bit long mode, a capability operand prefix would select a
 capability operand size.  In capability mode, absolute near branches would
 support only capability operands.
-Absolute near branches which use an integer operand would set the address of the
+Absolute near branches which use an integer operand would set the
+\textbf{address} field of the
 \CIP{} capability while absolute near branches using a capability operand would
 load a new capability into \CIP{}.
-Relative near branches would always modify the address of the \CIP{}
+Relative near branches would always modify the \textbf{address} field of the \CIP{}
 capability and would not support the capability operand prefix.
 
 The size of return addresses pushed to and popped from the
@@ -618,7 +619,7 @@ integer address.
 
 Far calls, jumps, and returns would not support capability operands.
 Far branches would
-set the address of \CIP{}.  An attempt to branch to a 32-bit code
+set the \textbf{address} field of \CIP{}.  An attempt to branch to a 32-bit code
 segment in capability mode should raise a General Protection fault
 with the error code set to the destination code segment.
 
@@ -989,13 +990,13 @@ aliases over time such as the \FSBASE{} and \GSBASE{} MSRs and
 \insnnoref{RDFSBASE} family of instructions.  These aliases should be
 implemented as the addresses of the appropriate capability register.
 Reads of the \FSBASE{}, \GSBASE{}, and \KGSBASE{} MSRs should return
-the address of the \CFS{}, \CGS{}, and \KGS{} capabilities,
-respectively.  Writes to these MSRs should set the address of the
+the \textbf{address} field of the \CFS{}, \CGS{}, and \KGS{} capabilities,
+respectively.  Writes to these MSRs should set the \textbf{address} field of the
 respective capability equivalent to \insnxesref{SCADDR}.  Similarly,
 the \insnnoref{RDFSBASE} and \insnnoref{RDGSBASE} instructions should
-return the address of the \CFS{} and \CGS{} capabilities,
+return the \textbf{address} field of the \CFS{} and \CGS{} capabilities,
 respectively.  The \insnnoref{WRFSBASE} and \insnnoref{WRGSBASE}
-instructions should set the address of the respective capability
+instructions should set the \textbf{address} field of the respective capability
 equivalent to \insnxesref{SCADDR}.  If a new address is set which makes
 the capability unrepresentable, the capability's tag should be
 cleared.
