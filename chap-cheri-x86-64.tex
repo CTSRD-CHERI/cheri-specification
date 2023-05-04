@@ -257,7 +257,7 @@ opcodes will also assume a capability sized operand in this mode.
 Finally, instructions which work with the stack would use \CSP{} as
 the implicit stack pointer.
 
-\subsubsection{Deprecated Instructions in Capability Mode}
+\subsubsection{Removed Instructions in Capability Mode}
 
 In capability mode, the following 64-bit mode instructions would no
 longer be valid:
@@ -380,8 +380,8 @@ Extending these instructions to support capability immediates would
 require padding nops to align the capability immediate as well as text
 relocations (even for position-dependent code).  However, we do not
 anticipate wide use of these instructions so instead choose to
-deprecate them in capability mode and restrict them to using integer
-operands and integer addressing.  Attempting to use these instructions
+remove them in capability mode and restrict them to using integer
+operands and integer addressing in 64-bit mode.  Attempting to use these instructions
 with capability-aware addressing would be reserved and raise a UD\#
 exception.
 
@@ -703,13 +703,16 @@ add %csp,$16
 
   \item \insnnoref{ENTER} and \insnnoref{LEAVE} could be extended to
     support implicit capability operands, or they could be deprecated
-    for capabilities and remain as integer-only instructions.
+    and remain as integer-only instructions.
 
     If these instructions were extended to support capability
     operands, the capability-sized versions would operate on \CSP{}
     and \CBP{} rather than \RSP{} and \RBP{}.  These instructions
     would also default to capability operands in capability mode
     if extended.
+
+    If these instructions were deprecated then they would would be
+    removed in capability mode.
 \end{itemize}
 
 \subsection{Control-Flow Instructions}
@@ -1473,7 +1476,7 @@ adjacent to an aligned capability.  Far branches are also little used
 in existing 64-bit x86 programs.  Significantly, 64-bit x86 still
 defaults to 32-bit operands for far branches (unlike near branches
 which are commonly used and default to 64-bit operands).  It may make
-sense to deprecate far branches other than \insnnoref{IRET} completely
+sense to remove far branches other than \insnnoref{IRET} completely
 in capability mode causing the instructions to raise an illegal
 instruction fault.
 
@@ -1481,13 +1484,13 @@ instruction fault.
 
 These four \insnnoref{MOV} instructions store the address of their
 memory operand inline as an immediate.  Currently, we propose
-deprecating these instructions in capability code and not extending
-them to support capability operands.  These instructions could instead
+removing these instructions in capability code and not extending
+them to support capability operands in 64-bit mode.  These instructions could instead
 be extended to support capabilities both as immediates for the memory
 offset and as operands.  In that case, the opcodes would be retained
-in capability mode rather than deprecated.
+in capability mode rather than removed.
 
 \subsection{XCHG [ER]AX Opcodes}
 
 If the \insnnoref{XCHG} instructions \texttt{91} - \texttt{97} are not
-commonly used, they could be deprecated in capability mode.
+commonly used, they could be removed in capability mode.
