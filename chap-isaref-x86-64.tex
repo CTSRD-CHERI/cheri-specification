@@ -241,6 +241,17 @@ or 64).
   \hline
   A3 & MOV \emph{moffs8},[ER]AX & Move [ER]AX to  (\emph{offset}).\\
   \hline
+  CA & RET \emph{imm16} &
+  Far return and pop \emph{imm16} bytes from stack.\\
+  \hline
+  CB & RET & Far return.\\
+  \hline
+  FF /3 & CALL \emph{m16:xx} &
+  Call far, absolute indirect, address given in \emph{m16:xx}.\\
+  \hline
+  FF /5 & JMP \emph{m16:xx} &
+  Jump far, absolute indirect, address given in \emph{m16:xx}.\\
+  \hline
   0F 02 \emph{/r} & LAR \emph{rxx,rxx/m16} &
   Load access rights.\\
   \hline
