@@ -1,0 +1,30 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{INC - Increment by 1}
+\insnxeslabel{inc}
+\subsection*{INC - Increment by 1}
+
+\begin{x86opcodetable}
+  \xopcode{CAP + FF /0}{INC \emph{r/mc}}
+  {M}{Valid}{Valid}
+  {Increment address field of \emph{r/mc} by 1.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{M}{ModRM:r/m (r,w)}{NA}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Adds 1 to the \textbf{address} field of the destination operand and
+then stores the result in the destination operand. The destination
+operand can be a register or a memory location.
+
+If the new value of the \textbf{address} field makes the resulting
+capability unrepresentable, the \textbf{tag} field in the resulting
+capability is cleared.
+
+\subsubsection*{Flags Affected}
+
+The CF flag is not affected.  The OF, SF, ZF, AF, and PF flags are set
+according to the value of the resulting \textbf{address} field.
