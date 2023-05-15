@@ -517,7 +517,7 @@ Since capabilities have precise bounds, sub-word atomics cannot be implemented
 using word-sized atomics. To avoid unnecessary complexity compared with a
 non-CHERI RISC-V implementation, we define only \texttt{LR.B}, \texttt{SC.B},
 \texttt{LR.H} and \texttt{SC.H}, without any of the corresponding AMOs. We also
-only require these to be present in capability mode, but implementations may
+require these to be present only in capability mode, but implementations may
 choose to always provide them for simplicity.
 
 		\begin{bytefield}{32}
