@@ -1162,6 +1162,59 @@ A few other approaches are enumerated below:
     and \textbf{0F 27} that were restricted to privilege level 0.
 \end{itemize}
 
+\subsection{Additional Capability Arithmetic Opcodes}
+
+Two operand arithmetic instructions such as \insnxesref{ADD} overwrite
+one of the source operands with the arithmetic result.  For operations
+which are commutative such as adding two integers, a compiler can
+choose which of the source operands to overwrite.  For example, if a
+series of instructions computes integer pointers to fields of an
+object by adding offsets to a base integer pointer, the compiler can
+use the register holding the offset as the destination operand of
+\insnxesref{ADD} to preserve the operand holding the base object
+integer pointer.  Capability arithmetic instructions such as
+\insnxesref[add]{ADDC} are not commutative since only one source
+operand holds a capability.
+
+To mitigate this, it may be desirable to add alternate opcodes for
+\insnxesref{ADD}, \insnxesref{SUB}, \insnxesref{AND}, \insnxesref{OR},
+and \insnxesref{XOR} which treat the destination operand as an integer
+input to the arithmetic operation applied to the second capability
+operand.  This could be implemented by extending a subset of the 8-bit
+opcodes of these instructions to perform a three operand operation
+when used with a capability operand prefix.  However, two of these
+operands would be encoded by a single ModRM field similar to the
+encoding of \insnxesref[xadd]{XADDC}.
+
+For example, the \texttt{00} opcode would be extended to support three
+operand \insnxesref[add]{ADDC} by adding a 64-bit offset read from
+ModRM:r/m to the \textbf{address} field of the capability read from
+ModRM:reg.  The result would then be stored to the capability
+identified by ModRM:r/m.
+
+The instruction
+
+\begin{verbatim}
+addc %cax, %cbx, %rax
+\end{verbatim}
+
+would add \RAX{} to the address field of \CBX{} and store the result
+in \CAX{}.  It would be encoded identically to the instruction
+
+\begin{verbatim}
+addc %cax, %rbx
+\end{verbatim}
+
+except for using the opcode \texttt{00} instead of \texttt{01}.
+
+Note that this approach would permit encoding variants of
+\insnxesref[and]{ANDC} and \insnxesref[sub]{SUBC} which preserve the
+base capability pointer input operand which is not possible in the
+existing ISA for integer pointers.
+
+Instructions which use an immediate source operand would not be
+extended in this manner.
+
 \subsection{Far Branches and Capabilities}
 
 Supporting far branches with capability operands would add additional
