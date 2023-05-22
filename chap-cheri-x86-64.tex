@@ -1218,6 +1218,27 @@ existing ISA for integer pointers.
 Instructions which use an immediate source operand would not be
 extended in this manner.
 
+\subsection{Vector Registers and Tags}
+
+It may be desirable to support loading and storing tags in vector
+registers.  In particular, if a tag preserving extension of
+\insnnoref{REP MOVSB} is not added, then loads and stores of multiple
+packed capabilities via new instructions may be desirable to support
+optimized implementations of \ccode{memcpy()}.  For example, new
+tag-preserving variants of \insnnoref{MOVDQA} and \insnnoref{MOVDQU}
+could be added via two new two-byte opcodes.
+
+This would require extending the vector registers to contain one or
+more tags (1 tag for XMM registers, 2 tags for YMM, 4 tags for ZMM).
+Instructions which modify vector registers should not permit
+non-monotonic operations on tagged capabilities embedded in vector
+registers.  The simplest approach would be to clear all tags for any
+instruction other than simple move operations.  However, it may be
+desirable to preserve tags for operations which are safe.  For
+example, tags belonging to capabilities in the unshuffled half of a
+YMM or ZMM register used with \insnnoref{VPSHUFHW} could be safely
+preserved.
+
 \subsection{Far Branches and Capabilities}
 
 Supporting far branches with capability operands would add additional
