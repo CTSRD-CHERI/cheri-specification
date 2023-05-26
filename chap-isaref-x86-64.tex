@@ -135,6 +135,7 @@ frequently-accessed code paths.
 \input{insn-x86-64/crrl}
 \input{insn-x86-64/cseal}
 \input{insn-x86-64/gcbase}
+\input{insn-x86-64/gchi}
 \input{insn-x86-64/gclen}
 \input{insn-x86-64/gcoff}
 \input{insn-x86-64/gcperm}
@@ -145,6 +146,7 @@ frequently-accessed code paths.
 \input{insn-x86-64/scaddr}
 \input{insn-x86-64/scbnd}
 \input{insn-x86-64/scbnde}
+\input{insn-x86-64/schi}
 \input{insn-x86-64/scoff}
 \input{insn-x86-64/seal}
 \input{insn-x86-64/sentry}
@@ -187,6 +189,8 @@ available in capability mode.
   \hline
   EA \emph{/r} & \insnxesref{CINVOKE} \emph{rc, r/mc}\\
   \hline
+  NP 0F 0A \emph{/r} & \insnxesref{SCHI} \emph{r/mc, r64}\\
+  \hline
   NP 0F 0C \emph{/r} & \insnxesref{ANDCPERM} \emph{r/mc, r64}\\
   \hline
   66 0F 0C \emph{/r} & \insnxesref{SCOFF} \emph{r/mc, r64}\\
@@ -216,6 +220,8 @@ available in capability mode.
   NP 0F 7B \emph{/r} & \insnxesref{GCTAG} \emph{r64, r/mc}\\
   \hline
   66 0F 7B \emph{/r} & \insnxesref{GCOFF} \emph{r64, r/mc}\\
+  \hline
+  F2 0F 7B \emph{/r} & \insnxesref{GCHI} \emph{r64, r/mc}\\
   \hline
 \end{tabular}
 
