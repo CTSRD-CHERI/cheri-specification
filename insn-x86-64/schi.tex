@@ -1,0 +1,27 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{SCHI - Set Capability High Half}
+\insnxeslabel{schi}
+\subsection*{SCHI - Set Capability High Half}
+
+\begin{x86opcodetable}
+  \xopcode{NP 0F 0A \emph{/r}}{SCHI \emph{r/mc, r64}}
+  {MR}{Valid}{Valid}
+  {Set high half of \emph{r/mc} to \emph{r64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (r, w)}{ModRM:reg (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Sets the \textbf{high half} of the destination operand to the source
+operand and stores the result in the destination operand.  The
+destination operand can be a register or memory location; the source
+operand can be a register.  The \textbf{tag} field in the destination
+operand is cleared.
+
+\subsubsection*{Flags Affected}
+
+None
