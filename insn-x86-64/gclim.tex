@@ -1,0 +1,27 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{GCLIM - Get Capability Limit}
+\insnxeslabel{gclim}
+\subsection*{GCLIM - Get Capability Limit}
+
+\begin{x86opcodetable}
+  \xopcode{F3 0F 7B \emph{/r}}{GCLIM \emph{r64, r/mc}}
+  {RM}{Valid}{Valid}
+  {Store the limit of \emph{r/mc} in \emph{r64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Sets the destination operand to the limit (i.e. one past the last
+addressable byte) of the source operand.  The source operand can be a
+register or memory location.  If the source operand permits accessing
+the last byte of the address space, the destination operand is set to
+the value $2^{64}-1$.
+
+\subsubsection*{Flags Affected}
+
+None
