@@ -291,12 +291,12 @@ On any jump, it is possible for a powerful \PCC{} to be predicted, introducing r
 The Morello implementation chooses to forward the bounds of \PCC{} rather than predict them, so the \PCC{} capability cannot be used in a data memory access unless it is legally sourced form another register in the pipeline.
 CHERI-MIPS, Piccolo, and Flute share this design choice, though they are of less note as their simple pipelines do not allow speculative read gadgets.
 
-\subsection{Bounding Execution to Forwarded \PCC{}}
-If \PCC{} must obey \emph{SCC} before proceeding to Execute, many classes of cross-domain transient execution attacks are made impossible.
-An efficient implementation may wait to execute instructions until the \PCC{} authorising their fetch is produced and forwarded in the pipeline.
-The pipeline may speculate that \PCC{} does not actually change such that instructions that lie within an already-calculated \PCC{} are allowed to progress to execution, but predicted instructions that lie outside of any SCC-legal \PCC{} would wait for forwarded bounds.
-This may allow some implementations to avoid storing the bounds of \PCC{} in many places in the pipeline.
-A branch of CHERI Toooba has an basic example implementation, \emph{SinglePCC}, which permits a single set of \PCC{} bounds to be in flight in the pipeline at any time, gaining efficiency and safety at the expense of performance when crossing code domains.
+%\subsection{Bounding Execution to Forwarded \PCC{}}
+%If \PCC{} must obey \emph{SCC} before proceeding to Execute, many classes of cross-domain transient execution attacks are made impossible.
+%An efficient implementation may wait to execute instructions until the \PCC{} authorising their fetch is produced and forwarded in the pipeline.
+%The pipeline may speculate that \PCC{} does not actually change such that instructions that lie within an already-calculated \PCC{} are allowed to progress to execution, but predicted instructions that lie outside of any SCC-legal \PCC{} would wait for forwarded bounds.
+%This may allow some implementations to avoid storing the bounds of \PCC{} in many places in the pipeline.
+%A branch of CHERI Toooba has an basic example implementation, \emph{SinglePCC}, which permits a single set of \PCC{} bounds to be in flight in the pipeline at any time, gaining efficiency and safety at the expense of performance when crossing code domains.
 
 \subsection{Speculative Forgery Prevention}
 \emph{SCC} may also be violated if capabilities can be forged in speculation.
