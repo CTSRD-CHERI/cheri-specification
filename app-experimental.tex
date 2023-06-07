@@ -1353,7 +1353,7 @@ instructions on call rather than the one \insnref{CJALR}:
 
 	\item two to move the stack pointer
 		(\insnref{CRepresentableAlignmentMask},
-		\insnref{CAndAddr}),
+		\insnnoref{CAndAddr}),
 
 	\item four to bound the stack pointer (\insnref{CGetOffset},
 		\insnref{CSetOffset} (to zero), \insnref{CSetBounds},
@@ -1376,7 +1376,7 @@ some plausible examples include:
   \clength$) of a capability to the cursor and left the base alone could
   replace the four instruction sequence bounding the stack pointer.
 %
-  \item \insnref{CRepresentableAlignmentMask} and \insnref{CAndAddr}
+  \item \insnref{CRepresentableAlignmentMask} and \insnnoref{CAndAddr}
   could be fused into a dedicated instruction for aligning the capability's
   offset appropriately.
 %
