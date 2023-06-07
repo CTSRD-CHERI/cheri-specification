@@ -1830,6 +1830,9 @@ Possible bounds on speculative execution grounded in CHERI features include:
 \item Limiting speculation across protection-domain boundary transitions.
 \end{itemize}
 
+\insnriscvlabel{cgetcid} % silence undefined hyperref warning until this instruction is defined.
+\insnriscvlabel{csetcid} % silence undefined hyperref warning until this instruction is defined.
+
 In addition, we have extended CHERI with new instructions to get and set a
 software-defined \textit{compartment ID} (CID).
 Unlike with conventional MMU-based virtual address spaces that have specific
