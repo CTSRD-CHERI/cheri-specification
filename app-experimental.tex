@@ -1924,7 +1924,7 @@ Because 64-bit capabilities operate only within a 4 GiB window of the
 address space, when fetching a 64-bit capability from memory, we fill in the
 implied upper 32 bits of the full 64-bit address from the \emph{cursor} of
 the \emph{capability authorizing the fetch}.  This straightforward operation
-is provided by the \insnref{CLShC} instruction.
+is provided by the \insnnoref{CLShC} instruction.
 
 When attempting to (encode and) store a capability to a short form in memory,
 the store will fail%
@@ -1945,7 +1945,7 @@ access beyond the limits of the 4-GiB-aligned region had been shed.  Because
 short capabilities are never used directly, there is some flexibility in
 enforcement here.}
 %
-All of this is provided by the \insnref{CSShC} instruction.
+All of this is provided by the \insnnoref{CSShC} instruction.
 
 A consequence of this design is that short capabilities (transitively
 reached through short capabilities) are always interpreted within the 4 GiB
