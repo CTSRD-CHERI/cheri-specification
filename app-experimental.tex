@@ -25,6 +25,7 @@ experimental feature.
 \section{Additional Architectural Assistance For Revocation} % <<<
 
 \subsection{CClearTags} % <<<
+\insnriscvlabel{ccleartags} % silence undefined hyperref warning until this instruction is defined.
 
 Typically, allocators allow for the return of ``uninitialized'' memory
 (e.g., \texttt{malloc} vs.\@ \texttt{calloc}).  In the context of temporal
@@ -61,6 +62,7 @@ cache already.}
 % >>>
 \subsection{Non-Temporal (Streaming) CLC} % <<<
 \label{app:exp:clcnt}
+\insnriscvlabel{clcnt} % silence undefined hyperref warning until this instruction is defined.
 
 During revocation, whenever a capability is identified via
 \insnref{CLoadTags}, it is fetched from memory for analysis.  A large
