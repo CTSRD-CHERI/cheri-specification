@@ -1,0 +1,31 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{SCFLAGS - Set Capability Flags}
+\insnxeslabel{scflags}
+\subsection*{SCFLAGS - Set Capability Flags}
+
+\begin{x86opcodetable}
+  \xopcode{66 0F 0A \emph{/r}}{SCFLAGS \emph{r/mc, r64}}
+  {MR}{Valid}{Valid}
+  {Set the flags field of \emph{r/mc} to \emph{r64}.}
+  \xopcode{37 /2 \emph{ib}}{SCFLAGS \emph{r/mc, imm8}}
+  {MI}{Valid}{Valid}
+  {Set the flags field of \emph{r/mc} to \emph{imm8}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{MR}{ModRM:r/m (r, w)}{ModRM:reg (r)}{NA}{NA}
+  \xopen{MI}{ModRM:r/m (r,w)}{imm8}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Sets the \textbf{flags} field of the destination operand to the
+source operand and stores the result in the destination operand.  The
+destination operand can be a register or memory location; the source
+operand can be a register.  If the destination operand is sealed and
+tagged, the \textbf{tag} field of the destination operand is cleared.
+
+\subsubsection*{Flags Affected}
+
+None
