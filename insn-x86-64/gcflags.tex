@@ -1,0 +1,24 @@
+\clearpage
+\phantomsection
+\addcontentsline{toc}{subsection}{GCFLAGS - Get Capability Flags}
+\insnxeslabel{gcflags}
+\subsection*{GCFLAGS - Get Capability Flags}
+
+\begin{x86opcodetable}
+  \xopcode{NP 0F 7B \emph{/r}}{GCFLAGS \emph{r64, r/mc}}
+  {RM}{Valid}{Valid}
+  {Store the flags field of \emph{r/mc} in \emph{r64}.}
+\end{x86opcodetable}
+
+\begin{x86opentable}
+  \xopen{RM}{ModRM:reg (w)}{ModRM:r/m (r)}{NA}{NA}
+\end{x86opentable}
+
+\subsubsection*{Description}
+
+Sets the destination operand to the \textbf{flags} field of the source
+operand.  The source operand can be a register or memory location.
+
+\subsubsection*{Flags Affected}
+
+None
