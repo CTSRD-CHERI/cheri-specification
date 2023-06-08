@@ -674,11 +674,6 @@ capability can be obtained via a 64-bit \insnnoref{MOV} instruction.
   \item \insnxesref{GCLIM} - Get Capability Limit
 \end{itemize}
 
-Additionally, to support efficient tag checks without overwriting an
-integer register with the result as is done in \insnxesref{GCTAG}, a
-single operand \insnnoref{TESTCTAG} which copies the tag value to
-\texttt{ZF} may be desired.
-
 \subsubsection{Capability-Modification Instructions}
 
 If these instructions fail, they should clear the tag in the resulting
