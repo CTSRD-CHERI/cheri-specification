@@ -67,6 +67,9 @@ Additional symbols are defined to represent operands in the
 
   \item \textbf{m2c} { }---{ } A pair of adjacent capabilities in
     memory.
+
+  \item \textbf{mcs} { }---{ } An aligned stride of capabilities in
+    memory.
 \end{itemize}
 
 In addition, all of these instructions are either invalid or not
@@ -168,7 +171,7 @@ available in capability mode.
   \hline
   0E /1 & \insnxesref{CLCTAG} \emph{r/mc}\\
   \hline
-  0E /2 & \insnxesref{CLCTAGS} \emph{m8}\\
+  0E /2 & \insnxesref{CLCTAGS} \emph{mcs}\\
   \hline
   16 \emph{/r} & \insnxesref{SCADDR} \emph{r/mc, r64}\\
   \hline
@@ -180,7 +183,7 @@ available in capability mode.
   \hline
   27 \emph{/r} & \insnxesref{SCBNDE} \emph{r/mc, r64}\\
   \hline
-  2F \emph{/r} & \insnxesref{LCTAGS} \emph{r64, m8}\\
+  2F \emph{/r} & \insnxesref{LCTAGS} \emph{r64, mcs}\\
   \hline
   37 /0 \emph{id} & \insnxesref{SCBND} \emph{r/mc, imm32}\\
   \hline
