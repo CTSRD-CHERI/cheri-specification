@@ -5,18 +5,18 @@
 \subsection*{GCTAG - Get Capability Tag}
 
 \begin{x86opcodetable}
-  \xopcode{NP 0F 7B \emph{/r}}{GCTAG \emph{r64, r/mc}}
-  {RM}{Valid}{Valid}
-  {Store the tag of \emph{r/mc} in \emph{r64}.}
+  \xopcode{0E /3}{GCTAG \emph{r/mc}}
+  {M}{Valid}{Valid}
+  {Store the tag of \emph{r/mc} in ZF.}
 \end{x86opcodetable}
 
 \begin{x86opentable}
-  \xopen{RM}{ModRM:reg (w)}{ModRM:r/m (r)}{NA}{NA}
+  \xopen{M}{ModRM:r/m (r)}{NA}{NA}{NA}
 \end{x86opentable}
 
 \subsubsection*{Description}
 
-Sets the destination operand to the \textbf{tag} field of the source
+Sets ZF in \RFLAGS{} to the \textbf{tag} field of the source
 operand.  The source operand can be a register or memory location.
 
 \subsubsection*{Flags Affected}
