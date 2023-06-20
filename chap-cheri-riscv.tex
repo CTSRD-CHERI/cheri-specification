@@ -171,9 +171,8 @@ CHERI-RISC-V shares the following features with other CHERI architectures:
 \begin{itemize}
 \item Tagged memory with capability-width tag granularity and alignment.
 \item Registers able to hold capabilities are tagged.
-\item \PCC{} transforms and controls program-counter-relative fetches.
-\item \DDC{} transforms and controls legacy RISC-V load-store instructions,
-  including relocating access addresses using the capability base and offset.
+\item \PCC{} controls program-counter-relative fetches.
+\item \DDC{} controls legacy RISC-V load-store instructions.
 \item Floating point is fully supported, including capability-relative
   floating-point load and store instructions.
 \item General-purpose registers are extended to hold capabilities.
@@ -588,7 +587,7 @@ being in a permitted mode).
 \textbf{Reset} indicates whether the register is initialised to the default
 root capability ($\infty$) or NULL capability ($\emptyset$) on reset.
 Some special capabilities registers are extensions of existing RISC-V
-registers, with the capability offset being equal to the original register.
+registers, with the capability address being equal to the original register.
 \note{We should describe this in more detail including behavior if they are
 sealed or become unrepresentable and what to do about PC alignment. Note this
 table shares quite a lot with \cref{subsection:riscv:exceptionhandling}}{rmn30}
@@ -597,25 +596,22 @@ table shares quite a lot with \cref{subsection:riscv:exceptionhandling}}{rmn30}
 \end{table}
 
 Where an SCR extends a RISC-V CSR, e.g.\ \MTCC{} extending \mtvec{},
-any read to the CSR shall return the offset of the corresponding SCR.
-Similarly, any write to the CSR shall set the offset of the SCR to the value
+any read to the CSR shall return the address of the corresponding SCR.
+Similarly, any write to the CSR shall set the address of the SCR to the value
 written.
-This shall be equivalent to a \insnriscvref{CSetOffset} instruction, but with
-any exception condition instead just clearing the tag of the SCR.
+This shall be equivalent to a \insnriscvref{CSetAddr} instruction.
 This allows sealed capabilities to be held in SCRs without allowing them to
-be modified in a tag-preserving way, while also preventing exceptions when
-installing trap vectors: something that can be problematic where the task
-is delegated to a higher privilege level.
+be modified in a tag-preserving way.
 Some RISC-V CSRs have write ignore bits, or otherwise implicitly modify
 the written value to restrict the CSR to legal values.
-These modifications must be applied to the SCR's new offset when writing a CSR
-extended by an SCR, or to the offset of the newly written capability when
+These modifications must be applied to the SCR's new address when writing a CSR
+extended by an SCR, or to the address of the newly written capability when
 using \insnriscvref{CSpecialRW}.
 \insnriscvref{CSpecialRW} of a sealed capability to an SCR which extends a CSR
 with any non-preserved bits clears the tag on the capability, even if the
-offset would not be changed.
+address would not be changed.
 As per the rest of the RISC-V specification, should the SCR become
-unrepresentable as a result of the offset being set, the resulting address is
+unrepresentable as a result of the address being set, the resulting address is
 preserved, and the rest of the capability is cleared to match the null
 capability.
 Note that this means a read of the CSR (where the SCR has restricted bounds)
@@ -632,7 +628,7 @@ is saved in the scratch register. We try to follow RISC-V design where possible.
 
 The RISC-V instructions that interpret arguments or results as addresses
 (e.g.\ loads, stores, jumps, \insnnoref{auipc}) can either act on integer pointers
-relative to \DDC{} or \PCC{}, or on explicit capabilities.
+or on explicit capabilities.
 For example, capability-relative load and store instructions accept (and expect) capability
 operands that relocate and constrain data accesses, performing tag, bounds,
 permission, and other checks as required.
@@ -695,10 +691,10 @@ opcode space, and be sufficient to allow initial compiler engineering to take
 place.
 
 \item Introduce an architectural ``encoding mode bit'' in which RISC-V
-instruction encodings used for integer-relative \DDC{}-constrained loads and
+instruction encodings used for integer-addressed \DDC{}-constrained loads and
 stores are instead used for CHERI-RISC-V capability-relative loads and stores.
 To continue to allow hybrid code when in capability mode, we would introduce a
-further simple set of \DDC{}-indirected integer-relative loads and stores with
+further simple set of \DDC{}-indirected integer-addressed loads and stores with
 no immediate, similar to the capability-relative set described above.
 
 \item Introduce a full set of capability-relative loads and stores
@@ -728,7 +724,6 @@ encoding-mode flag in the capability \cflags{} field of \PCC{}:
   \textit{integer addresses}.
   The upper \texttt{XLEN} bits and tag bit of
   the operand register will be ignored.
-  The dereference will implicitly occur relative to \DDC{}.
   The tag bit on \DDC{} must indicate that a valid capability is present, and
   all capability-related checks (such as bounds checks) must be performed in
   order for a successful load or store to take place.
@@ -897,7 +892,7 @@ mode:
 The vast majority of floating-point instructions are not impacted by the
 presence of CHERI-RISC-V.
 Existing RISC-V floating-point load and store instructions, in the
-integer encoding mode, are relocated and constrained by \DDC{}.
+integer encoding mode, are constrained by \DDC{}.
 In CHERI-RISC-V, we define a new set of simple capability-relative load and
 store instructions, as well as a more rich set via capability encoding mode.
 
@@ -1041,9 +1036,7 @@ Value & Description \\
 0x04 & Type Violation \\
 0x05-0x07 & \emph{reserved} \\
 0x08 & Software-defined Permission Violation \\
-0x09-0x0a & \emph{reserved} \\
-0x0b & Unaligned Base \\
-0x0c-0x0f & \emph{reserved} \\
+0x09-0x0f & \emph{reserved} \\
 0x10 & \cappermG Violation \\
 0x11 & \cappermX Violation \\
 0x12 & \cappermL Violation \\
@@ -1090,9 +1083,8 @@ Priority & Description \\
    & \cappermSC Violation \\
 9 & \cappermSLC Violation \\
 10 & \cappermG Violation \\
-11 & Unaligned Base \\
-12 & Length Violation \\
-13 & Software-defined Permission Violation \\
+11 & Length Violation \\
+12 & Software-defined Permission Violation \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1335,55 +1327,6 @@ Depending on the code linkage model, it might also be desirable to have a
 further version of the instruction, \insnnoref{AUICGP}, which returns
 a capability derived from a global capability table register.
 
-\subsection{\PCC{} alignment}
-\label{section:cheri-risc-v-pcc-align}
-
-Matching the RISC-V specification, we specify that installation of an
-insufficiently aligned \PC{} triggers exception at the jump rather than at
-the jump target.
-However, CHERI-RISC-V poses additional potential alignment issues.
-In particular, an unaligned base in \PCC{} would force either its address
-or its offset to be similarly unaligned.
-Since the architecturally visible \PC{} is the offset of \PCC{}, allowing
-this to be unaligned would break assumptions made by RISC-V software, while
-allowing the address to be unaligned may break assumptions made in
-RISC-V SoCs.
-We instead specify that the \PCC{} base must be 4-byte aligned when compressed
-instructions are disabled.
-This is enforced on the capability-based jump instruction, throwing an
-Unaligned Base exception.
-Whenever compressed instructions are enabled, the \PCC{} base may be aligned to
-only 2 bytes, however writes to the WARL field of \texttt{misa} to re-enable
-compressed instructions are ignored while the \PCC{} base is not 4-byte
-aligned, as is the case if the \PC{} would be unaligned.
-The following edge-case behaviors relating to CSRs/SCRs are also specified:
-\begin{itemize}
-\item \insnriscvref{CSpecialRW} instructions that attempt to write a capability
-      into \xTCC{} with a base that is not 4-byte aligned (regardless of whether
-      compressed instructions are enabled) shall leave \xTCC{} unmodified.
-      This simplifies the treatment of the lowest two bits of \xtvec{},
-      which are used in the RISC-V specification to determine the vectoring
-      mode of an exception.
-\item \xEPCC{} can be written with an arbitrarily aligned base.
-      Reads of \xEPCC{} (via \xRET{}, \insnriscvref{CSpecialRW}, or CSR read
-      from \xepc{}) implicitly mask the offset as per \xepc{} in the RISC-V
-      specification, triggering a Representability Violation if the resulting
-      capability is unrepresentable.
-      An \xRET{} to a capability with an insufficiently aligned base causes an
-      Unaligned Base exception on the following instruction fetch.
-\end{itemize}
-
-\pmnote{Perhaps add a sub-section on PCC alignment: The RISC-V
-  architecture has the property that with the RVC compressed
-  instruction-set extension, the processor cannot generate
-  fetch-misaligned faults.  However, if PCC is improperly set, then
-  CHERI-RISC-V could generate such faults.  Since compiler-generated
-  code would normally use aligned offsets, we could just ensure that
-  explicit assignments to PCC result in an aligned base.  One way to
-  ensure this would be to zero the lowest bits needed for alignment:
-  lowest bit for RVC, and lowest 2-bits for non-RVC systems.  It might
-  be simplest to always zero the lowest 2-bits, even for RVC.}
-
 % \subsection{Capability Encoding Mode}
 % \label{subsec-cap-mode}
 %
@@ -1531,7 +1474,7 @@ file).  This second approach mirrored the approach used on CHERI-MIPS.
 
 Most of the ISA is agnostic to this choice due to the principle of
 intentional-use such as the explicit use of capability-relative
-addresses versus integer pointers relative to \DDC{} or \PCC{}.
+addresses versus integer pointers constrained by \DDC{} or \PCC{}.
 However, the ``split'' register file approach did require a few
 additional changes:
 
@@ -1560,3 +1503,18 @@ additional changes:
 In practice, only variants of CHERI-RISC-V using a ``merged'' register
 file were implemented in emulators, soft cores, toolchains, and
 operating systems.
+
+\subsection{\DDC{} and \PCC{} Relocation}
+
+CHERI-RISC-V originally specified that legacy memory accesses using
+integer pointers were relocated by \DDC{} and \PCC{} in addition to
+being constrained.  In this model, integer pointers were treated as
+offsets relative to the base of \DDC{} and \PCC{} rather than
+addresses.
+
+The current version of CHERI-RISC-V does not relocate integer
+pointers.  However, it may be desirable to provide optional relocation
+in the future, in particular to permit compartmentalization of hybrid
+code in user mode.  Such compartments would run with \DDC{} and \PCC{}
+set to narrow bounds and integer pointers relocated to the base
+address of \DDC{}.
