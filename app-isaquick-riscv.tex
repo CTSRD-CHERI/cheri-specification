@@ -20,8 +20,6 @@
 		\mrnote{What is the RISC-V equivalent of CPtrCmp?}
 		\jwnote{Wouldn't the legacy comparisons do the trick? (described above)}
 
-		\mrnote{We need to add \insnriscvref{CGetAddr}}
-
 		\mrnote{Given that, unlike CHERI-MIPS, CHERI RISC-V does not yet
 		have a backwards-compatibility problem, we might take the opportunity
 		to rationalize the bit positions of permission bits.}
@@ -44,8 +42,6 @@
 		\rvcheriisaquick{CGetOffset}
 
 		\rvcheriisaquick{CGetFlags}
-
-		\rvcheriisaquick{CGetAddr}
 
 		\rvcheriisaquick{CGetHigh}
 
@@ -847,10 +843,12 @@ Pseudoinstruction	& Base Instruction(s)	& Meaning \\
 	\vspace{1em}
 
 	{\rvcherienctablefontsize
-	\def\rvcherireservedfootnotemark{$^\dagger$}
+	\def\rvcheriremovedfootnotemark{$^\dagger$}
+	\def\rvcherireservedfootnotemark{$^\ddagger$}
 	\rvcherienctablesrcdest\\\\
 	\footnotesize
-	$^\dagger$Reserved for future use.
+	$^\dagger$Previously used by a removed instruction.\\
+	$^\ddagger$Reserved for future use.
 	}
 
 	\vspace{1em}

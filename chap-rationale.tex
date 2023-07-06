@@ -1539,7 +1539,7 @@ caveats of this approach arose:
 CHERI no longer mandates \DDC{} and \PCC{} offsetting by default.
 CHERI architectures may provide it as an optional feature which can be
 enabled at runtime or may omit it entirely.  CHERI compilers always
-treat integer pointers as addresses using \insnref{CGetAddr} and
+treat integer pointers as addresses using
 \insnref{CSetAddr} to handle conversions between capabilities and
 integers.  The \insnref{CFromPtr} and \insnref{CToPtr} instructions
 may be provided on architectures supporting offsetting.
