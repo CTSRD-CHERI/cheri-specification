@@ -1622,14 +1622,6 @@ representability: \insnref{CAndPerm}, \insnref{CClearTag},
 \insnref{CSetFlags}, \insnref{CSetHigh}, and
 \insnref{CSetOffset}.
 
-\item[Derive integer pointers from capabilities, or capabilities from integer
-pointers]
-The \insnref{CToPtr} and \insnref{CFromPtr} instructions efficiently
-convert between integer pointers and capabilities, performing suitable bounds
-checks against contextual capabilities.
-These support efficient hybrid code, in which use of integer pointers and
-capabilities are intermixed.
-
 \item[Capability pointer comparison]
 These instructions provide pointer comparison:
 \insnref{CSetEqualExact} and
