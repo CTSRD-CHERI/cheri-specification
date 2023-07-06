@@ -608,13 +608,13 @@ The address, or \ccursor{}, of a capability is the sum of its
 \cbase{} and \coffset{} fields.
 The components of the virtual address may be accessed separately (e.g., via
 \insnref{CGetOffset}), or as a single combined entity (e.g., via
-\insnref{CGetAddr} and \insnref{CSetAddr}) depending on the software
+\insnref{CSetAddr}) depending on the software
 use case.
 For example, an integer cast of a C-language pointer might return either the
 offset or the virtual address, depending on the C-language interpretation
 being used.
 
-\note{As presently defined, CGetAddr and CGetOffset appear not to carry out
+\nwfnote{As presently defined, CGetOffset appears not to carry out
 bounds checks, which means that software really should get the length (and
 base) and do the math as well if the bound(s) matter(s).  Could there be
 utility to additional instructions for checked access when the intent is to
@@ -622,7 +622,7 @@ extract only in-bound offsets and addresses?  Or, to dodge the question
 about what such a checked accessor returns when the cursor is out of bounds,
 a CBTS/CBTU-like pair of tests for the cursor being in-bounds?  While a
 CIncOffset by zero would clear the tag of an out of bounds capability, this
-seems too fragile, too prone to optimization, to depend on from C.}{nwf}
+seems too fragile, too prone to optimization, to depend on from C.}
 
 \subsubsection{Length}
 
@@ -1604,7 +1604,6 @@ These instructions are described in detail in Chapter~\ref{chap:isaref-riscv}:
 \item[Retrieve capability fields]
 These instructions extract specific capability-register fields and move their
 values into general-purpose (integer) registers:
-\insnref{CGetAddr},
 \insnref{CGetBase}, \insnref{CGetFlags}, \insnref{CGetLen},
 \insnref{CGetOffset}, \insnref{CGetPerm}, \insnref{CGetSealed},
 \insnref{CGetTag}, and \insnref{CGetType}.
