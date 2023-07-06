@@ -1631,9 +1631,9 @@ checks against contextual capabilities.
 These support efficient hybrid code, in which use of integer pointers and
 capabilities are intermixed.
 
-\item[Capability pointer comparison and arithmetic]
-These instructions provide pointer comparison and
-subtraction behavior: \insnref{CSetEqualExact}, \insnref{CSub}, and
+\item[Capability pointer comparison]
+These instructions provide pointer comparison:
+\insnref{CSetEqualExact} and
 \insnref{CTestSubset}.
 
 \item[Load or store via a capability]
@@ -3044,7 +3044,7 @@ implementation in the CHERI architecture:
   they have $base=0$ and $length=2^{64}$ for the purposes of the
   instructions where this matters, namely \insnref{CGetBase},
   \insnref{CGetOffset}, \insnref{CIncOffset},
-  \insnref{CGetLen} and \insnref{CSub}.
+  and \insnref{CGetLen}.
   However, there is also a desire that \insnref{CSetOffset} should preserve
     the values of $T$ and $B$ for debugging purposes, where possible.
 

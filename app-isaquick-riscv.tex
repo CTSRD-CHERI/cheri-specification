@@ -114,13 +114,6 @@
 
 		\rvcheriisaquick{CFromPtr}
 
-		\jwnote{We do not need CSub, since a standard Sub will return the difference between two capabilities.}
-
-		\jrtcnote{We do need a separate CSub with a split register file though,
-		so we define one that should be used even with a merged register file.}
-
-		\rvcheriisaquick{CSub}
-
 		\rvcheriisaquick{CMove}
 
 		%\dcnote{We probably shouldn't have these, because RISC-V doesn't have equivalents for integer registers - or we should define these as working on all registers.}
@@ -760,10 +753,12 @@ Pseudoinstruction	& Base Instruction(s)	& Meaning \\
 	\vspace{1em}
 
 	{\rvcherienctablefontsize
-	\def\rvcherireservedfootnotemark{$^\dagger$}
+	\def\rvcheriremovedfootnotemark{$^\dagger$}
+	\def\rvcherireservedfootnotemark{$^\ddagger$}
 	\rvcherienctablesrcsrcdest\\\\
 	\footnotesize
-	$^\dagger$Reserved for future use.
+	$^\dagger$Previously used by a removed instruction.\\
+	$^\ddagger$Reserved for future use.
 	}
 
 	\subsection*{Stores encoding allocation  (rd field)}

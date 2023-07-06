@@ -1545,11 +1545,10 @@ additional changes:
   obtained by reading the aliased general-purpose integer register.
   Note that \insnref{CGetAddr} is currently still defined.
 
-\item A separate \insnref{CSub} instruction to compute the difference
+\item A separate \insnnoref{CSub} instruction to compute the difference
   between addresses in two capability registers.  In a ``merged''
   register file this can be computed via the existing \insnnoref{SUB}
-  instruction on the aliased general-purpose integer registers.  Note
-  that \insnref{CSub} is currently still defined.
+  instruction on the aliased general-purpose integer registers.
 
 \item Dirty bits were defined in a the per-mode CSR \xccsr{}. This bit
   was set anytime a general-purpose capability register was changed.
