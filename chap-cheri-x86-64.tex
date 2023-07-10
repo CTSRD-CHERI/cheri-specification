@@ -274,6 +274,7 @@ longer be valid:
   \item \insnnoref{LSL}
   \item Direct memory-offset \insnnoref{MOV}
   \item Far branches (\insnnoref{CALL}, \insnnoref{JMP}, and \insnnoref{RET})
+  \item Segment Prefixes for \CS{}, \DS{}, \ES{}, and \SSreg{}
 \end{itemize}
 
 \subsection{Using Capabilities with Memory Address Operands}
@@ -911,7 +912,7 @@ aligned.  The \RIP{} and \RSP{} fields in the exception frame would be
 replaced with the full \CIP{} and \CSP{} capabilities.  Other fields
 in this frame would be padded to 16 bytes.  To minimize padding, it
 may be desirable to pack multiple smaller registers into a single
-16-byte slot; for example, \SS{}, \CS{}, and \RFLAGS{} could be stored
+16-byte slot; for example, \SSreg{}, \CS{}, and \RFLAGS{} could be stored
 in a single slot.  However, this would result in a frame layout
 inconsistent with far calls.  \insnnoref{IRETC} would be used in
 interrupt service routines to unwind this frame.

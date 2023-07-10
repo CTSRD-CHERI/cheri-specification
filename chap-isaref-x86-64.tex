@@ -253,6 +253,14 @@ or 64).
   \textbf{Opcode} & \textbf{Instruction} &
   \textbf{Description}\\
   \hline
+  26 & SEG=ES & ES segment prefix.\\
+  \hline
+  2E & SEG=CS & CS segment prefix.\\
+  \hline
+  36 & SEG=SS & SS segment prefix.\\
+  \hline
+  3E & SEG=DS & DS segment prefix.\\
+  \hline
   A0 & MOV AL,\emph{moffs8} & Move byte at (\emph{offset}) to AL.\\
   \hline
   A1 & MOV [ER]AX,\emph{moffsxx} & Move value at (\emph{offset}) to [ER]AX.\\
