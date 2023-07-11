@@ -306,15 +306,6 @@ explicitly specify whether capability semantics are required for an input or
 output register, or that the current architectural mode unambiguously specify
 integer or capability operand interpretation.
 
-A further design choice relates to the specific subset of general-purpose
-integer registers that are extended to capability width, as it need not be the
-case that all are.
-In our baseline specification, we extend all registers, but allow software
-ABIs to limit specific numbered registers to only integer use.
-We hope to evaluate different points in this design space to determine whether
-performance tradeoffs favour a complete set of capability registers, or simply
-a partial set (which might reduce microarchitectural overhead).
-
 The bottom \texttt{XLEN} bits of the register will contain the integer
 interpretation (which, for a capability, will be its address\pdrnote{Does this also
 cover capabilities which authorise type space rather than address space?}), and the
