@@ -13,6 +13,18 @@ release of the Version 9 specification:
 \item CHERI-RISC-V reports capability exception details in \xtval{}
   rather than \xccsr{}.
 
+\item The RISC-V \insnnoref{JAL} and \insnnoref{JALR} instructions are
+  now mode-dependent meaning that they use capability register
+  operands in capability mode rather than always using integer
+  registers.  The capability mode version of these instructions are
+  named \insnref{CJAL} and \insnref{CJALR}.  The previous
+  \insnnoref{CJALR} instruction has been renamed to
+  \insnref{JALR.CAP}.  In addition, \insnref{JALR.PCC} has been added
+  to permit integer jump and links in capability mode.
+
+\item Opcode encodings have been reserved for CHERI-RISC-V memory
+  versioning instructions as well as \insnnoref{CRelocate}.
+
 \item CHERI-RISC-V always uses a merged register file and the
   architecture-neutral chapters now assume a merged register file on
   all CHERI architectures.  This included removing the dirty bit from
@@ -21,6 +33,12 @@ release of the Version 9 specification:
 
 \item CHERI-RISC-V clears tags rather than raising exceptions for
   non-monotonic modifications to capabilities.
+
+\item Added \insnref{CGetHigh} and \insnref{CSetHigh} to retrieve and
+  modify the upper half of a capability.
+
+\item Added \insnref{CGetTop} to retrieve the upper limit of a
+  capability.
 
 \item \DDC{} and \PCC{} no longer relocate legacy memory accesses.
   These registers still constrain legacy memory accesses.  This
