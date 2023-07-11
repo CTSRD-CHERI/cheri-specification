@@ -43,11 +43,6 @@ development (v1.10)~\cite{RISCV:Privileged:1.10}\footnote{As v1.11 of the
 privileged specification remains a work-in-progress, we define CHERI-RISC-V
 relative to v1.10.}. \mmnote{1.11 is ratified now, so we should rewrite this chapter with v1.11 changes.}
 
-%\textbf{XXXRW: It would be nice to propose an extension name; unfortunately,
-%the `C' extension is already used for compressed instructions.
-%`S' is taken for the supervisor extensions, and `P' for SIMD.
-%Perhaps we should be `W' for Weally Secure, Doc?}
-
 \section{CHERI-RISC-V Approach}
 
 Our application of CHERI to the RISC-V architecture is motivated by several
@@ -57,8 +52,6 @@ opportunities:
 \item To gain access to a maturing open-source ISA, hardware, and software
   ecosystem, for the purposes of a stronger experimental baseline and
   methodology (such as more mature core variants).
-  At the time of writing, the MIPS software ecosystem remains richer, but we
-  see a substantial community effort at filling gaps for RISC-V.
 
 \item To demonstrate the portability of the CHERI approach across multiple
   architectures, and in particular to illustrate how portable CHERI software
@@ -133,12 +126,6 @@ design space, in which several key design dimensions are parameterized:
 \begin{itemize}
 \item Both 32-bit and 64-bit RISC-V are extended, with 64-bit and 128-bit
   capabilities respectively.
-
-% XXXRW: We now think that we are not doing this in CHERI-RISC-V.
-%
-%\item Both exception-throwing and tag-clearing variants of monotonic
-%  capability manipulation instructions are supported.
-%  \arnote{I thought we had concluded that we should not be throwing exceptions unless absolutely required.}
 
 \item Optional instruction variations and an optional ``capability encoding
   mode'' that
@@ -251,16 +238,6 @@ The following changes are specific to CHERI-RISC-V:
   existing load, store, and jump opcodes to be interpreted as expecting
   capability rather than integer operands.
 
-% XXXRW: We are no longer doing this in CHERI-RISC-V:
-%
-%\item Instructions performing operations that would violate monotonicity or
-%  otherwise lead to an undereferenceable (e.g., unrepresentable) capability
-%  clear the tag when writing the register back, rather than immediately
-%  throwing an exception.
-%  Later attempts to dereference those capabilities will throw a tag
-%  violation exception.
-%  \jrtcnote{In CHERI-RISC-V is an ISA Design Space we say both
-%    exception-throwing and tag-clearing variants are supported}
 \end{itemize}
 
 \section{CHERI-RISC-V Specification}
@@ -619,10 +596,6 @@ may not be consistent with the preceding write, but this approach is
 consistent with the invalidating of other RISC-V capabilities, and allows a
 meaningful address to be reported should the SCR be dereferenced.
 
-\arnote{what about an unprivileged register for TLS?} \hmnote{Unlike ARM, RISC-V uses a general-purpose integer register \textit{tp}
-for TLS in user-level. In the kernel, the thread's kernel's context pointer
-is saved in the scratch register. We try to follow RISC-V design where possible.}
-
 \subsection{Efficiently Encoding Capability-Relative Operations}
 \label{subsec-encoding-cap-ops}
 
@@ -969,29 +942,6 @@ the SCR contains a capability that would not be a valid \PCC{} (untagged,
 sealed, not executable, or improperly aligned).
 In these cases, the value is still installed in \PCC{}, and a check on the next
 instruction fetch will trigger a further exception.
-
-% XXXRW: We are no longer doing this in CHERI-RISC-V:
-%
-%\subsection{Exceptions vs. Tag Clearing on Capability Manipulation Failure}
-%
-%In CHERI-MIPS, in keeping with the MIPS ISA design, many instructions are able
-%to throw exceptions -- not only the load/store/jump variants, but also
-%operations to manipulate capability fields.
-%In more complex microarchitectures, it may be desirable to limit the set of
-%instructions that can throw exceptions.
-%If that is desirable for CHERI-RISC-V, then this could be accomplished by
-%shifting manipulation instructions from throwing exceptions on non-permitted
-%access to clearing the tag bit in the target register.
-%This maintains the security invariant that monotonicity (and other aspects)
-%is enforced, but shifts the point of exception delivery from manipulation to
-%dereference.
-%
-%One risk in adopting this approach is that debugging non-derefenceable
-%pointers may become more difficult, due to greater asynchrony.
-%An additional architectural status bit that can be checked to detect loss of a
-%tag by an instruction would allow compiler-inserted instrumentation to check
-%for tag loss at suitable moments (e.g., after potentially tag-stripping
-%operations such as pointer manipulation).
 
 \subsection{Capability Exception Reporting}
 \label{subsection:riscv:cheri-exception-reporting}
