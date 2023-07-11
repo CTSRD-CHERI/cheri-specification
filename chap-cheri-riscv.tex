@@ -558,19 +558,19 @@ Might be worth further discussion to decide if we need/want them.}
 [1.5em]
 \textbf{4} & User trap code capability (\UTCC{})     & U, S, M & ASR & $\infty$    & \utvec{} \\
 \textbf{5} & User trap data capability (\UTDC{})     & U, S, M & ASR & $\emptyset$ & -        \\
-\textbf{6} & User scratch capability (\UScratchC{})  & U, S, M & ASR & $\emptyset$ & -        \\
+\textbf{6} & User scratch capability (\UScratchC{})  & U, S, M & ASR & $\emptyset$ & \uscratch{}  \\
 \textbf{7} & User exception PC capability (\UEPCC{}) & U, S, M & ASR & $\infty$    & \uepc{} \\
 [1.5em]
 
 \textbf{12} & Supervisor trap code capability (\STCC{})     & S, M & ASR & $\infty$    & \stvec{} \\
 \textbf{13} & Supervisor trap data capability (\STDC{})     & S, M & ASR & $\emptyset$ & -        \\
-\textbf{14} & Supervisor scratch capability (\SScratchC{})  & S, M & ASR & $\emptyset$ & -        \\
+\textbf{14} & Supervisor scratch capability (\SScratchC{})  & S, M & ASR & $\emptyset$ & \sscratch{} \\
 \textbf{15} & Supervisor exception PC capability (\SEPCC{}) & S, M & ASR & $\infty$    & \sepc{}  \\
 [1.5em]
 
 \textbf{28} & Machine trap code capability (\MTCC{})     & M & ASR & $\infty$    & \mtvec{} \\
 \textbf{29} & Machine trap data capability (\MTDC{})     & M & ASR & $\emptyset$ & -        \\
-\textbf{30} & Machine scratch capability (\MScratchC{})  & M & ASR & $\emptyset$ & -        \\
+\textbf{30} & Machine scratch capability (\MScratchC{})  & M & ASR & $\emptyset$ & \mscratch{} \\
 \textbf{31} & Machine exception PC capability (\MEPCC{}) & M & ASR & $\infty$    & \mepc{}  \\
 \bottomrule
 \end{tabular}
@@ -918,7 +918,8 @@ written only from machine mode:
   \mepc{})
 \item \MTDC{} - Machine Mode Data Capability
 \item \MTCC{} - Machine Mode Trap Code Capability (extends \mtvec{})
-\item \MScratchC{} - Machine Mode Scratch Capability
+\item \MScratchC{} - Machine Mode Scratch Capability (extends
+  \mscratch{})
 \end{itemize}
 
 \subsubsection{Exceptions to Supervisor Mode}
@@ -932,7 +933,8 @@ written only from supervisor mode and above:
 \item \STDC{} - Supervisor Mode Data Capability
 \item \STCC{} - Supervisor Mode Trap Code Capability (extends
   \stvec{})
-\item \SScratchC{} - Supervisor Mode Scratch Capability
+\item \SScratchC{} - Supervisor Mode Scratch Capability (extends
+  \sscratch{})
 \end{itemize}
 
 \subsubsection{Exceptions to User Mode}
@@ -946,7 +948,8 @@ new special capability registers that can be read and written from any mode:
   \uepc{})
 \item \UTDC{} - User Mode Data Capability
 \item \UTCC{} - User Mode Trap Code Capability (extends \utvec{})
-\item \UScratchC{} - User Mode Scratch Capability
+\item \UScratchC{} - User Mode Scratch Capability (extends
+  \uscratch{})
 \end{itemize}
 
 The extension could be leveraged for user-space-only implementations
@@ -956,12 +959,11 @@ device drivers.
 
 Explicit vector and data capabilities give each ring its
 own code and data capabilities to utilize during exception handling.
-We define ``scratch capabilities'' to allow the exception handler to stash a
+We extend the existing RISC-V \xscratch{} registers as capabilities
+to allow the exception handler to stash a
 capability register for the purposes of having a working register that
 corresponding data capabilities can be loaded to in order to begin a full
 context save.
-This is consistent with RISC-V's use of scratch registers in various modes to
-avoid committing general-purpose integer registers to exception handling.
 
 When exception behavior, e.g.\ a trapping instruction, \insnnoref{ecall},
 or \xRET{}, causes \PCC{} to take a value stored in an SCR, it is possible that
