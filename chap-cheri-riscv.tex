@@ -231,7 +231,7 @@ The following changes are specific to CHERI-RISC-V:
 \item The \cflags{} field contains a single bit indicating the ``capability
   encoding mode'' to use when the capability is installed as \PCC{}.
 \item In the non-compressed RISC-V encoding, the capability encoding mode
-  allows existing opcodes, e.g.\ for loads, stores, \insnnoref{auipc},
+  allows existing opcodes, e.g.\ for loads, stores, \insnnoref{AUIPC},
   to be interpreted as expecting capability rather than integer operands
   (reducing opcode footprint while maintaining intentionality).
 \item In the compressed RISC-V encoding, the capability encoding mode allows
@@ -591,7 +591,7 @@ meaningful address to be reported should the SCR be dereferenced.
 \label{subsec-encoding-cap-ops}
 
 The RISC-V instructions that interpret arguments or results as addresses
-(e.g.\ loads, stores, jumps, \insnnoref{auipc}) can either act on integer pointers
+(e.g.\ loads, stores, jumps, \insnnoref{AUIPC}) can either act on integer pointers
 or on explicit capabilities.
 For example, capability-relative load and store instructions accept (and expect) capability
 operands that relocate and constrain data accesses, performing tag, bounds,
@@ -668,14 +668,6 @@ the size of instructions, we should understand how much performance is being
 lost by reducing the flexibility of code generation.
 \end{enumerate}
 
-As register-relative jump instructions have relatively light opcode
-utilization, and because there are many easy-to-imagine uses for protecting
-control flow using capabilities even in hybrid code, we do not apply semantic
-changes to those baseline non-compressed RISC-V instructions when in
-capability encoding mode.
-The implications for compressed instructions are described in
-Section~\ref{subsection:compressed-instructions}.
-
 \subsubsection{Encoding Modes}
 \label{sec:cheri-riscv-encmodes}
 
@@ -684,17 +676,18 @@ encoding-mode flag in the capability \cflags{} field of \PCC{}:
 
 \begin{description}
 \item[Integer encoding mode (0)] Conventional RISC-V execution mode, in which
-  address operands to existing RISC-V load and store opcodes contain
+  address operands to existing RISC-V load, store, jump, and \insnnoref{AUIPC} opcodes contain
   \textit{integer addresses}.
   The upper \texttt{XLEN} bits and tag bit of
   the operand register will be ignored.
-  The tag bit on \DDC{} must indicate that a valid capability is present, and
+  For loads and stores, the
+  tag bit on \DDC{} must indicate that a valid capability is present, and
   all capability-related checks (such as bounds checks) must be performed in
   order for a successful load or store to take place.
 
 \item[Capability encoding mode (1)] CHERI capability encoding mode, in which address operands to
-  existing RISC-V load and store opcodes contain \textit{capabilities}.
-  The tag bit must indicate a valid capability is present, and all
+  existing RISC-V load, store, jump, and \insnref{AUIPCC} opcodes contain \textit{capabilities}.
+  For loads and stores, the tag bit must indicate a valid capability is present, and all
   capability-related checks (such as bounds checks) must be performed in order
   for a successful load or store to take place.
 \end{description}
@@ -726,6 +719,7 @@ further details on compressed instructions):
 \textit{Floating-point store} & FSW & FSD & FSQ & & \\
 \textit{Atomic} & LR & SC & AMOSWAP & AMOADD & AMOAND \\
 \textit{Atomic (cont)} & AMOOR & AMOXOR & AMOMAX & AMOMIN & \\
+\textit{Control flow} & JAL & JALR & & & \\
 \textit{Address calculation} & AUIPC\footnote{See Section~\ref{section:cheri-risc-v-auipc}.} & & & & \\
 \end{tabular}
 \end{savenotes}
@@ -787,16 +781,11 @@ replace floating-point double operations with capability operations:
 \texttt{C.FLDSP} with \texttt{C.LCSP} and \texttt{C.FSDSP} with
 \texttt{C.SCSP}.
 
-In the RISC-V I base instruction set (non-compressed instructions), we chose to make
-capability jump instructions available in both integer and capability encoding
-modes, as they use relatively little encoding space compared to the amount of
-free space available.
-In the RISC-V C extension (compressed instructions), the amount of free space is
-far smaller, leading us to select a different design choice: when in capability
+When in capability
 encoding mode, as with load-store instructions, we interpret existing compressed
 instructions \insnnoref{C.J}, \insnnoref{C.JAL}, \insnnoref{C.JR}, and
-\insnnoref{C.JALR} as the capability instructions \insnriscvref{CJAL},
-\insnriscvref{CJR}, and \insnriscvref{CJALR}, accepting capability rather than
+\insnnoref{C.JALR} as the capability instructions \insnriscvref{CJAL}
+and \insnriscvref{CJALR}, accepting capability rather than
 integer register operands for jump target registers and link registers.
 
 There is one large gap in the compressed instruction encoding at
@@ -844,7 +833,7 @@ mode:
 \medskip
 
 \begin{tabular}{llllll}
-\textit{Control flow} & C.JALR & C.JR & & \\
+\textit{Control flow} & C.JAL & C.JALR & C.JR & \\
 \textit{Compressed integer load} & C.LW & C.LD & C.LWSP & C.LDSP & \\
 \textit{Compressed integer store} & C.SW & C.SD & C.SWSP & C.SDSP & \\
 \textit{Compressed floating-point load} & C.FLW & C.FLD & C.FLWSP & C.FLDSP & \\
