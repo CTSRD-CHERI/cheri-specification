@@ -610,9 +610,6 @@ The components of the virtual address may be accessed separately (e.g., via
 \insnref{CGetOffset}), or as a single combined entity (e.g., via
 \insnref{CSetAddr}) depending on the software
 use case.
-For example, an integer cast of a C-language pointer might return either the
-offset or the virtual address, depending on the C-language interpretation
-being used.
 
 \nwfnote{As presently defined, CGetOffset appears not to carry out
 bounds checks, which means that software really should get the length (and
