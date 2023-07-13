@@ -1186,7 +1186,7 @@ It is a development from the CHERI-128 compression format described in \cref{app
 For a more detailed rational behind some of the encoding decisions see \cref{sec:rational:comressed}.
 
 \Cref{fig:cheric128} shows the capability format and decoding method for 128-bit CHERI concentrate.
-The format contains a 64-bit address, $a$, 16 permission bits (4 user defined and 12 hardware defined), an 18-bit object type and 27 bits that encode the bounds relative to the address.
+The format contains a 64-bit address, $a$, 16 permission bits (4 user defined and 12 hardware defined), a flag bit, an 18-bit object type and 27 bits that encode the bounds relative to the address.
 The following definitions are used in the description of the bounds encoding:\note{Would be useful if this list could be opposite \cref{fig:cheric128}}{rmn30}
 
 \begin{description}
@@ -1381,6 +1381,7 @@ in our register file.
 This fast representability check allows us to perform pointer arithmetic on compressed capabilities directly, avoiding decompressing capabilities in the register file that introduces both a dramatically enlarged register file and substantial load-to-use delay.
 
 \subsubsection{CHERI Concentrate 64-bit format for 32-bit address spaces}
+
 In this section, we describe how CHERI Concentrate compresses the bounds used
 in 64-bit capabilities with 32-bit architectural addresses.
 
@@ -1474,6 +1475,11 @@ true  & true  & $0$  &&true  & true  & $0$  \\
 \label{fig:cheric64}
 \vspace{-1.5em}
 \end{figure}
+
+\Cref{fig:cheric64} shows the capability format and decoding method
+for 64-bit CHERI concentrate.  The format contains a 32-bit address,
+$a$, 12 hardware defined permission bits, a flag bit, a 4-bit object
+type and 15 bits that encode the bounds relative to the address.
 
 \subsection{Capability Address and Length Rounding Instructions}
 \label{sec:capability-address-and-length-rounding}
