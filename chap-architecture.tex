@@ -1380,6 +1380,100 @@ in our register file.
 %demonstrated in Section~\ref{sec:eval:microarch}.
 This fast representability check allows us to perform pointer arithmetic on compressed capabilities directly, avoiding decompressing capabilities in the register file that introduces both a dramatically enlarged register file and substantial load-to-use delay.
 
+\subsubsection{CHERI Concentrate 64-bit format for 32-bit address spaces}
+In this section, we describe how CHERI Concentrate compresses the bounds used
+in 64-bit capabilities with 32-bit architectural addresses.
+
+\begin{figure}
+
+\begin{bytefield}[bitwidth=\linewidth/32]{32}
+\bitheader[endianness=big]{0,31} \\
+\bitbox{12}{$p$'12} & \bitbox{4}{otype'4}
+                    & \bitbox{2}{$I_E$} &
+                    \bitbox{3}{$T[5:3]$} & \bitbox{3}{$T_\text{E}$'3}
+                    \bitbox{5}{$B[7:3]$} & \bitbox{3}{$B_\text{E}$'3} \\
+\bitbox[lrb]{32}{$a$'32}
+\end{bytefield}
+
+\begin{minipage}{\linewidth}
+\begin{center}
+\begin{tabular}{ccc}
+\\
+$p$: permissions & otype: object type & $a$: pointer address\\
+\end{tabular}
+\end{center}
+\end{minipage}
+
+\vspace{1em}
+
+\begin{center}
+\begin{tabular}{r c l | r c l}
+If $I_E=0$: & & & If $I_E=1$: & & \\
+$E$      &=& $0$                                &      $E$ &=& $\{T_\text{E},B_\text{E}\}$ \\
+$T[2:0]$ &=& $T_\text{E}$                       & $T[2:0]$ &=& $0$ \\
+$B[2:0]$ &=& $B_\text{E}$                       & $B[2:0]$ &=& $0$ \\
+$L_\text{carry\_out}$ &=& $ \begin{cases}
+             1,& \text{if } T[5:0] < B[5:0] \\
+             0,& \text{otherwise}
+\end{cases} $ &
+
+$L_\text{carry\_out}$ &=& $ \begin{cases}
+             1,& \text{if } T[5:3] < B[5:3] \\
+             0,& \text{otherwise}
+           \end{cases} $ \\
+
+$L_\text{msb}$ &=& $0$                          & $L_\text{msb}$ &=& $1$ \\
+\end{tabular}
+\end{center}
+
+Reconstituting the top two bits of T:
+\begin{center}
+$T[7:6] $=$ B[7:6] + L_\text{carry\_out} + L_\text{msb}$
+\end{center}
+
+Decoding the bounds:
+\begin{center}
+% spread out the table a bit otherwise it is too tight for maths
+{
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{r|c|c|c|}
+\cline{2-4}
+address, $a =$ & $a_\text{top} = a[31:E+8]$ & $a_\text{mid} = a[E+7:E]$  & $a_\text{low} = a[E-1:0]$ \\ \cline{2-4}
+top, $t =$     & $a_\text{top}+c_\text{t}$   & $T[7:0]$                   & $0$'$E$ \\ \cline{2-4}
+base, $b =$    & $a_\text{top}+c_\text{b}$   & $B[7:0]$                   & $0$'$E$ \\ \cline{2-4}
+\end{tabular}
+}
+\end{center}
+
+To calculate corrections $c_\text{t}$ and $c_\text{b}$:
+
+\begin{center}
+\begin{tabular}{r c l}
+  $A_3$ &=& $a[E+7:E+5]$ \\
+  $B_3$ &=& $B[7:5]$     \\
+  $T_3$ &=& $T[7:5]$     \\
+  $R$   &=& $B_3 - 1$      \\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{@{}ccr@{}p{1em}@{}ccr@{}}
+\cmidrule[\heavyrulewidth]{1-3}\cmidrule[\heavyrulewidth]{5-7}
+$A_3<R$ & $T_3<R$ & $c_\text{t}$&&$A_3<R$ & $B_3<R$ & $c_\text{b}$\\
+\cmidrule{1-3}\cmidrule{5-7}
+false & false & $0$  &&false & false & $0$  \\
+false & true  & $+1$ &&false & true  & $+1$ \\
+true  & false & $-1$ &&true  & false & $-1$ \\
+true  & true  & $0$  &&true  & true  & $0$  \\
+\cmidrule[\heavyrulewidth]{1-3}\cmidrule[\heavyrulewidth]{5-7}
+\end{tabular}
+\end{center}
+%\end{minipage}
+\caption{CHERI Concentrate 64-bit capability format and decoding}
+\label{fig:cheric64}
+\vspace{-1.5em}
+\end{figure}
+
 \subsection{Capability Address and Length Rounding Instructions}
 \label{sec:capability-address-and-length-rounding}
 
