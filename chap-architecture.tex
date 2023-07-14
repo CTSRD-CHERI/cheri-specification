@@ -1094,7 +1094,7 @@ precision constants and a slightly different encoding format.}
 
 \begin{bytefield}[bitwidth=\linewidth/64]{64}
 \bitheader[endianness=big]{0,63} \\
-\bitbox{16}{$p$'16} & \bitbox{3}{\color{lightgray}\rule{\width}{\height}} & \bitbox{15}{otype'18}
+\bitbox{16}{$p$'16} & \bitbox{1}{$f$} & \bitbox{1}{\color{lightgray}\rule{\width}{\height}} & \bitbox{15}{otype'18}
                     & \bitbox{2}{$I_E$} &
                     \bitbox{9}{$T[11:3]$} & \bitbox{4}{$T_\text{E}$'3}
                     \bitbox{11}{$B[13:3]$} & \bitbox{4}{$B_\text{E}$'3} \\
@@ -1103,9 +1103,9 @@ precision constants and a slightly different encoding format.}
 
 \begin{minipage}{\linewidth}
 \begin{center}
-\begin{tabular}{ccc}
+\begin{tabular}{cccc}
 \\
-$p$: permissions & otype: object type & $a$: pointer address\\
+$f$: flag & $p$: permissions & otype: object type & $a$: pointer address\\
 \end{tabular}
 \end{center}
 \end{minipage}
@@ -1388,8 +1388,9 @@ in 64-bit capabilities with 32-bit architectural addresses.
 
 \begin{bytefield}[bitwidth=\linewidth/32]{32}
 \bitheader[endianness=big]{0,31} \\
-\bitbox{12}{$p$'12} & \bitbox{4}{otype'4}
-                    & \bitbox{2}{$I_E$} &
+\bitbox{12}{$p$'12} & \bitbox{1}{$f$}
+                    & \bitbox{4}{otype'4}
+                    & \bitbox{1}{$I_E$} &
                     \bitbox{3}{$T[5:3]$} & \bitbox{3}{$T_\text{E}$'3}
                     \bitbox{5}{$B[7:3]$} & \bitbox{3}{$B_\text{E}$'3} \\
 \bitbox[lrb]{32}{$a$'32}
@@ -1397,9 +1398,9 @@ in 64-bit capabilities with 32-bit architectural addresses.
 
 \begin{minipage}{\linewidth}
 \begin{center}
-\begin{tabular}{ccc}
+\begin{tabular}{cccc}
 \\
-$p$: permissions & otype: object type & $a$: pointer address\\
+$f$: flag & $p$: permissions & otype: object type & $a$: pointer address\\
 \end{tabular}
 \end{center}
 \end{minipage}
