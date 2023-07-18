@@ -126,12 +126,6 @@ design space, in which several key design dimensions are parameterized:
 \begin{itemize}
 \item Both 32-bit and 64-bit RISC-V are extended, with 64-bit and 128-bit
   capabilities respectively.
-
-\item Optional instruction variations and an optional ``capability encoding
-  mode'' that
-  invest opcode space differently to reduce instruction count for common
-  instruction sequences -- especially with respect to load/store instructions
-  that occupy substantial quantities of opcode space.
 \end{itemize}
 
 With respect to all of these design dimensions, we intend that specific
@@ -232,6 +226,7 @@ The following changes are specific to CHERI-RISC-V:
   encoding mode'' to use when the capability is installed as \PCC{}.
 \item In the non-compressed RISC-V encoding, the capability encoding mode
   allows existing opcodes, e.g.\ for loads, stores, \insnnoref{AUIPC},
+  and jumps
   to be interpreted as expecting capability rather than integer operands
   (reducing opcode footprint while maintaining intentionality).
 \item In the compressed RISC-V encoding, the capability encoding mode allows
@@ -587,10 +582,10 @@ may not be consistent with the preceding write, but this approach is
 consistent with the invalidating of other RISC-V capabilities, and allows a
 meaningful address to be reported should the SCR be dereferenced.
 
-\subsection{Efficiently Encoding Capability-Relative Operations}
-\label{subsec-encoding-cap-ops}
+\subsection{Capability Encoding Mode}
+\label{sec:cheri-riscv-capmode}
 
-The RISC-V instructions that interpret arguments or results as addresses
+RISC-V instructions that interpret arguments or results as addresses
 (e.g.\ loads, stores, jumps, \insnnoref{AUIPC}) can either act on integer pointers
 or on explicit capabilities.
 For example, capability-relative load and store instructions accept (and expect) capability
@@ -599,79 +594,14 @@ permission, and other checks as required.
 However, load and store instructions occupy large amounts of instruction
 encoding space due to having multiple register operands and large immediate
 values.
-One consideration in adding CHERI support to RISC-V is the degree to which we
-are willing to occupy large chunks of remaining encoding space by simply
+
+To avoid occupying large chunks of remaining encoding space by
 supplementing each address-manipulating instruction with a
-corresponding capability-relative version.
-Other options that conserve opcode space include utilizing a more limited set
-of addressing modes or using smaller immediate sizes for capability-relative
-instructions -- with a potentially significant negative impact on performance
-due to an increase in resulting code size.
-We therefore consider several points in this design space:
-
-\begin{itemize}
-\item Introduce a full set of new load and store instructions occupying
-  substantial opcode space, but providing more efficient capability-intensive
-  generated code.
-
-\item Introduce only a limited set of new load and store instructions,
-  reducing new opcode utilization, and supportingly less efficient
-  capability-intensive generated code.
-
-\item Introduce a new \textit{capability encoding mode} in which
-  existing RISC-V load-store opcode space is reused for capability-relative
-  accesses, allowing a rich set of load-store instructions without
-  substantially occupying available RISC-V opcode space.
-
-  In the conventional (legacy) \textit{integer encoding mode}, a small set of
-  capability-relative loads and stores are added, tuned to limit opcode
-  space utilization -- e.g., by having small or no immediates -- at the cost
-  of increased code footprint.
-
-  To maintain intentionality, this approach is never ambiguous in either mode
-  as to whether load and store opcodes are intended to access relative to
-  integer or capability operand: address operands are always integer relative
-  in integer encoding mode, and always capability relative in capability
-  encoding mode.
-
-  Pure-capability and hybrid code can be generated against either encoding,
-  but will be most efficient (in terms of instruction footprint) when
-  generated against the corresponding mode.
-  We have specified that the encoding mode will change as a result of jumping
-  to a \PCC{} with a different encoding-mode flag.
-  Section~\ref{section:capability-encoding-mode} considers other options for
-  encoding-mode switches.
-\end{itemize}
-
-\noindent
-In the interest of experimentation, we plan to pursue all three approaches
-in stages, considering tradeoffs around efficiency and instruction-set design
-across a range of workloads:
-
-\begin{enumerate}
-\item Begin by adding a conservative set of capability-relative load and store
-instructions without immediate offsets, which will consume a small amount of
-opcode space, and be sufficient to allow initial compiler engineering to take
-place.
-
-\item Introduce an architectural ``encoding mode bit'' in which RISC-V
-instruction encodings used for integer-addressed \DDC{}-constrained loads and
-stores are instead used for CHERI-RISC-V capability-relative loads and stores.
-To continue to allow hybrid code when in capability mode, we would introduce a
-further simple set of \DDC{}-indirected integer-addressed loads and stores with
-no immediate, similar to the capability-relative set described above.
-
-\item Introduce a full set of capability-relative loads and stores
-with immediate offsets to enable full flexibility without switching modes.
-While this may not be acceptable to the upstream community without increasing
-the size of instructions, we should understand how much performance is being
-lost by reducing the flexibility of code generation.
-\end{enumerate}
-
-\subsubsection{Encoding Modes}
-\label{sec:cheri-riscv-encmodes}
-
-We define two encoding modes, selected using the CHERI-RISC-V-specific
+corresponding capability-relative version,
+we introduce a new \textit{capability encoding mode} in which
+some existing RISC-V opcodes are reused for capability-relative
+accesses.
+The encoding mode is selected using the CHERI-RISC-V-specific
 encoding-mode flag in the capability \cflags{} field of \PCC{}:
 
 \begin{description}
@@ -692,6 +622,13 @@ encoding-mode flag in the capability \cflags{} field of \PCC{}:
   for a successful load or store to take place.
 \end{description}
 
+To maintain intentionality, this approach is never ambiguous in either mode
+as to whether memory accesses are relative to an
+integer or capability operand: address operands of existing RISC-V
+opcodes are always integer relative
+in integer encoding mode, and always capability relative in capability
+encoding mode.
+
 The operating system will automatically save and restore \PCC{} on context
 switches, preserving an execution context's encoding mode.
 It is essential that changes in encoding mode be properly observed when an
@@ -700,6 +637,16 @@ semantics or risk insecure behavior.
 When \xTCC{} is set by the operating system, it should contain an appropriate
 encoding-mode flag to ensure that exception handlers utilize the correct
 instruction encoding.
+
+In addition, a small set of both capability-relative and
+integer-relative loads, stores, and jumps are added, tuned to limit opcode
+space utilization -- e.g., by having small or no immediates -- at the cost
+of increased code footprint.  These instructions are available in both
+encoding modes to permit alternate memory accesses.
+
+Pure-capability and hybrid code can be generated against either encoding,
+but will be most efficient (in terms of instruction footprint) when
+generated against the corresponding mode.
 
 \subsubsection{Non-Compressed Instructions Affected by Capability Encoding
   Mode}
@@ -844,10 +791,9 @@ mode:
 
 The vast majority of floating-point instructions are not impacted by the
 presence of CHERI-RISC-V.
-Existing RISC-V floating-point load and store instructions, in the
-integer encoding mode, are constrained by \DDC{}.
-In CHERI-RISC-V, we define a new set of simple capability-relative load and
-store instructions, as well as a more rich set via capability encoding mode.
+Existing RISC-V floating-point load and store instructions use
+capability-relative addresses in capability encoding mode, and
+integer-relative addresses constrained by \DDC{} in integer encoding mode.
 
 The floating point control
 registers (FCSR, FRM, and FFlags) are whitelisted in Table \ref{tab:risc-v-access-system-registers-whitelist}
@@ -1258,113 +1204,6 @@ less efficient, instruction sequence must be used instead.
 Depending on the code linkage model, it might also be desirable to have a
 further version of the instruction, \insnnoref{AUICGP}, which returns
 a capability derived from a global capability table register.
-
-% \subsection{Capability Encoding Mode}
-% \label{subsec-cap-mode}
-%
-% \rwnote{This section not yet edited after planning session, relocation from
-%   the CHERI-RISC-V appendix.}
-
-% \newcommand{\capmode}{\textbf{capability encoding mode}}
-
-% Instructions that alter the control flow and cause memory accesses for
-% instruction fetches, such as branches and jumps, consider their target address
-% as an offset in \PCC{}.
-
-% In general, data memory accesses are checked against \DDC{} when not in
-% \capmode{}, and are checked against specific capability operands otherwise.
-% Instruction memory accesses are always checked against \PCC{}. On exception,
-% depending on the current privilege mode, the appropriate trap code capability
-% \UTCC{}, \STCC{} or \MTCC{} is loaded in \PCC{}, and \PCC{} is saved in the
-% appropriate \UEPCC{}, \SEPCC{} or \MEPCC{}. If the exception is a capability
-% exception, the appropriate RISC-V \ucause{}, \scause{} or \mcause{} is set to a
-% new ``capability exception'' cause, and \xtval{} is updated appropriately.
-
-% The following instruction produces a \PCC{}-derived capability when in
-% \capmode{}, and an offset into \PCC{} otherwise:
-% \asm{AUIPC}
-% This allows the expected behavior both for integer-pointer code operating
-% relative to \PCC{} or \DDC{}, and for capability-pointer code that expects to
-% dereference a capability with its own bounds.
-
-% When in \capmode{}, the following instructions (which perform ordered
-% comparisons) read their operands as capabilities and must order tagged
-% capabilities after \arnote{consider tagged capabilitie greater than?} untagged capabilities. These instructions are:
-% \asm{BGEU},
-% \asm{BGE},
-% \asm{BLTU},
-% \asm{BLT},
-% \asm{SLTIU},
-% \asm{SLTI},
-% \asm{SLTU},
-% \asm{SLT}.
-
-% When in \capmode{}, the following instructions (which perform unordered
-% comparisons) read their operands as capabilities and compare all of the bits in
-% the register. These instructions are:
-% \asm{BNE}
-% \asm{BEQ}
-
-% Shifts are not defined on capabilities because most shifts will quickly take an
-% address out of the representable range.
-
-% 64-bit instructions that are specifically designed to operate on only the low 32
-% bits, similarly, do not make sense when applied to capabilities.
-
-% With a merged register file, the following instructions will ignore the
-% capability bits on source operands and clear them on the destination register:
-% \asm{ADD},
-% \asm{ADDI},
-% \asm{ADDIW},
-% \asm{ADDW},
-% \asm{ANDI},
-% \asm{AND},
-% \asm{ORI},
-% \asm{OR},
-% \asm{SLLIW},
-% \asm{SLLI},
-% \asm{SLLI},
-% \asm{SLLW},
-% \asm{SLL},
-% \asm{SRAIW},
-% \asm{SRAI},
-% \asm{SRAI},
-% \asm{SRAW},
-% \asm{SRA},
-% \asm{SRLIW},
-% \asm{SRLI},
-% \asm{SRLI},
-% \asm{SRLW},
-% \asm{SRL},
-% \asm{SUB},
-% \asm{SUBW},
-% \asm{XORI},
-% \asm{XOR}.
-
-% With a merged register file, the \asm{LUI} instruction clears all of the
-% capablity bits in the destination register.
-
-% When in \capmode{}, \asm{JALR} and \asm{JAL} write the capability link register
-% with \PCC{} + 4. \asm{JALR} also uses a capability operand for the target of
-% the jump.
-% \dcnote{It would be nice if they could set a thing that's both a capability and a valid address, but that's possible only if we don't do PCC-offsetting.}
-%
-% When not in \capmode{}, all existing load and store instructions treat the
-% memory address as a \DDC{}-relative address. With a merged register file, when
-% not in \capmode{}, load instructions will zero all of the capability bits in
-% their target register. When in \capmode{}, the address operand is a capability
-% register.
-% \asm{LBU},
-% \asm{LB},
-% \asm{LD},
-% \asm{LHU},
-% \asm{LH},
-% \asm{LWU},
-% \asm{LW},
-% \asm{SB},
-% \asm{SD},
-% \asm{SH},
-% \asm{SW}.
 
 \pmnote{Need a section on capability state on reset.}
 
