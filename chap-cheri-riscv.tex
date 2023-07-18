@@ -472,8 +472,10 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
 \begin{figure}[!h]
 \begin{center}
 \begin{bytefield}[bitwidth=\textwidth/34]{32}
-  \bitheader[endianness=big]{0,1,2,31} \\
-  \bitbox{32}{\textbf{WIRI}}
+  \bitheader[endianness=big]{0,30,31} \\
+  \bitbox{1}{\texttt{tc}}
+  \bitbox{1}{\texttt{nr}}
+  \bitbox{30}{\textbf{WIRI}}
 \end{bytefield}
 \caption{\xccsr{} register format; WIRI bits are Write Ignore Read Ignore.}
 \label{fig-ccsr}
@@ -487,6 +489,17 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
   The RISC-V spec unsatisfyingly does not specify what happens if
   software doesn't preserve values for WPRI, but then this spec
   doesn't need to either.}
+
+\begin{description}
+\item [nr] The \texttt{nr} ``no relocation'' read-only bit indicates
+  if integer memory addresses are relocated by the base address of
+  \DDC{} and \PCC{}.  If this bit is 1, then integer addresses are not
+  relocated.
+\item [tc] The \texttt{tc} ``tag-clearing'' read-only bit indicates if
+  attempts to update a capability non-monotonically clear the
+  resulting capability's tag (1) rather than raising a
+  \riscvcheriexception{} exception (0).
+\end{description}
 
 \subsection{Special Capability Registers (SCRs)}
 \label{subsection:cheri-riscv-scrs}
