@@ -475,20 +475,12 @@ Figure~\ref{fig-ccsr} (shown for XLEN=32):
   \bitheader[endianness=big]{0,30,31} \\
   \bitbox{1}{\texttt{tc}}
   \bitbox{1}{\texttt{nr}}
-  \bitbox{30}{\textbf{WIRI}}
+  \bitbox{30}{\textbf{WPRI}}
 \end{bytefield}
-\caption{\xccsr{} register format; WIRI bits are Write Ignore Read Ignore.}
+\caption{\xccsr{} register format; WPRI bits are Write Preserve Read Ignore.}
 \label{fig-ccsr}
 \end{center}
 \end{figure}
-
-\pmnote{WIRI has been removed from the RISC-V specification.  The spec
-  now typically uses WPRI (Write-Preserve, Read-Ignore) for such
-  undefined bits (e.g. in \texttt{mstatus}).  Both WARL (Write-Any,
-  Read-Legal) and WLRL (Write-Legal, Read-Legal) seem unsuitable here.
-  The RISC-V spec unsatisfyingly does not specify what happens if
-  software doesn't preserve values for WPRI, but then this spec
-  doesn't need to either.}
 
 \begin{description}
 \item [nr] The \texttt{nr} ``no relocation'' read-only bit indicates
