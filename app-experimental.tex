@@ -2405,7 +2405,7 @@ as well as its internal operation, are left to future work.
 Compartment identification is essential. Code and data associated with a compartment must be somehow identified and validated when they are being accessed.
 The most natural way seems to be to give them identification numbers.
 This has traditionally been done in software, e.g., processes are assigned process IDs (PIDs) in operating systems. In some cases, a software ID can correspond to a hardware ID, e.g., PIDs can correspond to ASIDs.
-However, that is not necessarily the case. 
+However, that is not necessarily the case.
 In this proposal, we suggest an architectural ID for compartments.
 We call these numbers compartment IDs (CIDs). That means that one CID is mapped to one compartment at a time.
 An architecturally defined CID needs to be implemented by hardware.
@@ -2518,7 +2518,7 @@ However, sometimes this behaviour is desired by software. We have designed two m
 \item Explicit unsealing: This will explicitly unseal a capability and it can be shared either via the register file or via memory.
 Another compartment can pick up this capability and seal it again and use it.
 This does not protect against transitive capability leaks - an unsealed capability can be passed on to a third compartment and thus be leaked.
-\item CID spaces: CIDs can be separated into CID spaces (see Section CID Spaces).
+\item CID spaces: CIDs can be separated into CID spaces (see Section~\ref{subsec:cid_spaces}).
 One approach is to allow unsealing within a CID space.
 This allows all compartments in that space to use that capability, but no other compartment can unseal the capability.
 This protects from transitive capability leaks outside of the CID space.
@@ -2556,6 +2556,7 @@ An unsealed capability can be misused and the system can become victim to transi
 Having the zero CID represent an unsealed capability seems untuitive and allows code unaware of CID sealing to operate correct.
 
 \subsection{CID Spaces}
+\label{subsec:cid_spaces}
 
 We envision that CIDs can build subspaces in order to model relationships between compartments.
 One possibility is to put compartments with identical upper bits into the same group, e.g., CID\_Group = 0b10101010xx.
