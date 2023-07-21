@@ -12,10 +12,6 @@ elaborating CHERI capabilities within a specific architecture: 32-bit
 and 64-bit RISC-V.
 Wherever possible, CHERI-RISC-V implements the architecture-neutral concepts
 described in Chapter~\ref{chap:architecture}.
-We chose to design CHERI-RISC-V as a parameterizable instruction set that
-includes several key design points that allow us to evaluate both
-microarchitectural and architectural implications via side-by-side
-experiments.
 Detailed descriptions of specific capability-aware instructions can be found
 in Chapter~\ref{chap:isaref-riscv}.
 
@@ -104,32 +100,6 @@ encoding for 64-bit capabilities provides insufficient precision.
 Further research is needed to determine if an alternate encoding,
 perhaps using an alternate scheme for permissions, can provide better
 precision.
-
-\subsection{CHERI-RISC-V is an ISA Design Space}
-
-A key aim in CHERI-RISC-V is to allow experiments to be run comparing various
-CHERI-related parameters:  Are capabilities with respect to 32-bit or
-64-bit virtual addresses?  What are the impacts of various instruction-set
-variations or microarchitectural optimizations?  How does greater investment
-of opcode space affect performance -- and what techniques, such as instruction
-compression or different capability-aware modes, may impact this?  How can
-CHERI interact with other architectural specializations such as DMA and
-heterogenous compute?
-To answer these and other questions, we have designed CHERI-RISC-V as an ISA
-design space, in which several key design dimensions are parameterized:
-
-\begin{itemize}
-\item Both 32-bit and 64-bit RISC-V are extended, with 64-bit and 128-bit
-  capabilities respectively.
-\end{itemize}
-
-With respect to all of these design dimensions, we intend that specific
-instantiated microarchitectures, compiler targets, compiled operating systems,
-and compiled software stacks support only one point in the space.
-However, we hope that carefully parameterized hardware and software designs
-will be able to target more than one point to allow side-by-side comparison
-from the perspectives of hardware resource utilization, performance, security,
-and compatibility.
 
 \subsection{CHERI-RISC-V Strategy}
 
