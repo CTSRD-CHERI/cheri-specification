@@ -633,24 +633,27 @@ Integer Instruction		& Capability Instruction \\
 \toprule
 Integer Instruction		& Capability Instruction & ISA \\
 \midrule
+\texttt{c.addi16sp sp, offset} & \texttt{c.cincoffsetimm16csp csp, offset} & - \\
+\texttt{c.addi4spn rd, sp, offset} & \texttt{c.cincoffsetimm4cspn cd, csp, offset} & - \\
+\texttt{c.jal offset} & \texttt{c.cjal offset} & RV32 \\
 \texttt{c.jr rs1} & \texttt{c.cjr cs1} & - \\
 \texttt{c.jalr rs1} & \texttt{c.cjalr cs1} & - \\
 \texttt{c.l\{w|d\} rd, offset(rs1)} & \texttt{c.cl\{w|d\} rd, offset(cs1)} & - \\
-\texttt{c.l\{w|d\}sp rd, offset(sp)} & \texttt{c.cl\{w|d\}sp rd, offset(csp)} & - \\
+\texttt{c.l\{w|d\}sp rd, offset(sp)} & \texttt{c.cl\{w|d\}csp rd, offset(csp)} & - \\
 \texttt{c.s\{w|d\} rs2, offset(rs1)} & \texttt{c.cs\{w|d\} rs2, offset(cs1)} & - \\
-\texttt{c.s\{w|d\}sp rs2, offset(sp)} & \texttt{c.cs\{w|d\}sp rs2, offset(csp)} & - \\
+\texttt{c.s\{w|d\}sp rs2, offset(sp)} & \texttt{c.cs\{w|d\}csp rs2, offset(csp)} & - \\
 \texttt{c.flw fd, offset(rs1)} & \texttt{c.clc cd, offset(cs1)} & RV32 \\
-\texttt{c.flwsp fd, offset(sp)} & \texttt{c.clcsp cd, offset(csp)} & RV32 \\
+\texttt{c.flwsp fd, offset(sp)} & \texttt{c.clccsp cd, offset(csp)} & RV32 \\
 \texttt{c.fsw fs2, offset(rs1)} & \texttt{c.csc cs2, offset(cs1)} & RV32 \\
-\texttt{c.fswsp fs2, offset(sp)} & \texttt{c.cscsp cs2, offset(csp)} & RV32 \\
+\texttt{c.fswsp fs2, offset(sp)} & \texttt{c.csccsp cs2, offset(csp)} & RV32 \\
 \texttt{c.fld fd, offset(rs1)} & \texttt{c.cfld fd, offset(cs1)} & RV32 \\
-\texttt{c.fldsp fd, offset(sp)} & \texttt{c.cfldsp fd, offset(csp)} & RV32 \\
+\texttt{c.fldsp fd, offset(sp)} & \texttt{c.cfldcsp fd, offset(csp)} & RV32 \\
 \texttt{c.fsd fs2, offset(rs1)} & \texttt{c.cfsd fs, offset(cs1)} & RV32 \\
-\texttt{c.fsdsp fs2, offset(sp)} & \texttt{c.cfsdsp fs, offset(csp)} & RV32 \\
+\texttt{c.fsdsp fs2, offset(sp)} & \texttt{c.cfsdcsp fs, offset(csp)} & RV32 \\
 \texttt{c.fld fd, offset(rs1)} & \texttt{c.clc cd, offset(cs1)} & RV64 \\
-\texttt{c.fldsp fd, offset(sp)} & \texttt{c.clcsp cd, offset(csp)} & RV64 \\
+\texttt{c.fldsp fd, offset(sp)} & \texttt{c.clccsp cd, offset(csp)} & RV64 \\
 \texttt{c.fsd fs2, offset(rs1)} & \texttt{c.csc cs, offset(cs1)} & RV64 \\
-\texttt{c.fsdsp fs2, offset(sp)} & \texttt{c.cscsp cs, offset(csp)} & RV64 \\
+\texttt{c.fsdsp fs2, offset(sp)} & \texttt{c.csccsp cs, offset(csp)} & RV64 \\
 \bottomrule
 \end{tabular}
 \end{center}
