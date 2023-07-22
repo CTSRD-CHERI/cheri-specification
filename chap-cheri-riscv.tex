@@ -229,7 +229,7 @@ The following changes are specific to CHERI-RISC-V:
   to be interpreted as expecting capability rather than integer operands
   (reducing opcode footprint while maintaining intentionality).
 \item In the compressed RISC-V encoding, the capability encoding mode allows
-  existing load, store, and jump opcodes to be interpreted as expecting
+  existing load, store, jump, and stack addressing opcodes to be interpreted as expecting
   capability rather than integer operands.
 
 \end{itemize}
@@ -655,7 +655,7 @@ generated against the corresponding mode.
 \subsubsection{Non-Compressed Instructions Affected by Capability Encoding
   Mode}
 
-The following non-compressed RISC-V load and store instructions would be
+The following non-compressed RISC-V instructions would be
 affected by the capability encoding-mode bit (see the following section for
 further details on compressed instructions):
 
@@ -678,103 +678,55 @@ further details on compressed instructions):
 \subsection{Compressed Instructions}
 \label{subsection:compressed-instructions}
 
-\rwnote{Ensure that this text is up-to-date after our revisions to the
-  encoding-mode mechanism.}
+While the compressed instruction extension is not mandatory for RV32G
+and RV64G, it is widely used in existing RISC-V software to improve
+code density.
 
-The compressed instruction extension (extension \texttt{C}) is now
-routinely used by the RISC-V gcc compiler to improve code density.  It seems
-likely that the \texttt{C}ompressed extension will become mandatory for
-the \texttt{G}eneral configuration (which is currently
-\texttt{IMAFD}).
+Given the tight encoding space for compressed instructions, it is not
+practical to support both integer and capability variations of common
+instructions.  Instead, the encoding mode must be used to alter the
+interpretation of existing instructions to support optimal code
+density.
 Two problems arise in adding compressed instruction support for capabilities:
-the need for additional opcode space for load, store, and jump instructions;
+determining which existing instructions should use capability semantics
 and the need to add new instructions to load and store capabilities.
 
-Given the tight encoding space for compressed instructions, some
-registers (e.g.~the stack pointer - \texttt{sp}) are implicit for some
-instructions.  Since there appears to be no free encoding space to
-differentiate between a capability-\texttt{sp} and an
-integer-\texttt{sp}, one potential design choice is to use our capability
-encoding mode to also control the interpretation of compressed instructions.
-Similarly, for compressed loads and
-stores that can use only registers \texttt{x8}--\texttt{x15} as the
-base address, the encoding mode would allow us to reuse opcode space.
-As with the baseline compressed instruction set, this imposes ABI-related
-constraints on the architecture, and would require the compiler to conform to
-those constraints in order to accomplish the best code density.
+For some instructions, the choice to use capability semantics in
+capability encoding mode is straightforward.  Compressed loads and
+stores should use capability-relative addresses just as for
+non-compressed instructions.  Similarly, compressed jump instructions
+should use capability registers for jump target registers and link
+registers.  Finally, instructions which use the stack pointer as an
+implicit operand should use \CSP{} as the stack pointer.  This
+includes loads and stores as well as the stack addressing instructions
+\insnnoref{C.ADD16SP} and \insnnoref{C.ADDI4SPN}.
 
-In his thesis~\cite{WatermanThesis2016}, Waterman gives the following
-function prologue and epilogue examples to illustrate how compressed
-instructions improve code density:
+For other instructions, the decision is less clear.  Pure capability
+code will use both \insnnoref{MV} and \insnref{CMove} instructions as
+well as both \insnnoref{ADDI} and \insnref{CIncOffsetImm}.  Our current
+approach for these types of instructions has been to not alter their
+semantics in capability encoding mode until more research can be done
+to determine the most common semantics in pure capability code.
 
-\begin{small}
-\begin{verbatim}
-   prologue_legacy:       epilogue_legacy:
-     c.addi sp, -16         c.ldsp ra, 8(sp)
-     c.sdsp ra, 8(sp)       c.ldsp s0, 0(sp)
-     c.sdsp s0, 0(sp)       c.addi sp, 16
-     c.jr t0                c.jr ra
-\end{verbatim}
-\end{small}
+Adding compressed instructions to load and store capabilities requires
+repurposing some existing opcodes.  For this case we follow the
+pattern used by RV64C and RV128C of repurposing compressed floating
+point loads and stores to load and store capabilities.  Just as RV64C
+reuses the floating-point single-precision loads and stores
+(e.g. \insnnoref{C.FLW} and \insnnoref{C.FSW}) for 64-bit integer
+loads and stores (\insnnoref{C.LD} and \insnnoref{C.SD}), compressed
+CHERI-RV32 can reuse these opcodes in capability-encoding mode for
+capability loads and stores (\insnnoref{C.CLC} and \insnnoref{C.CSC}).
+Similarly, CHERI-RV64 can reuse the opcodes for floating-point double
+loads and stores (\insnnoref{C.FLD} and \insnnoref{C.FSD}) in
+capability-encoding mode for capability loads and stores.  The same
+rules would apply to stack-relative memory access instructions.
 
-For capability-aware code, saving and restoring the return address
-(\texttt{ra}) requires capability store and load instructions.
-Given the frequency of capability use for the pure-capability code targeted by
-our capability encoding mode (all pointer loads and stores), one option might
-be to relieve pressure on the compressed opcode space by removing the less
-frequently used floating-point double load and store instructions.
-For RV64, we could replace the compressed load floating-point double
-(\texttt{C.FLD}) with compressed load capability (\texttt{C.LC}) with
-the same encoding as compressed load quad (\texttt{C.LQ}) used in
-RV128.  Similarly, replace: \texttt{C.FSD} with \texttt{C.SC}
-(compressed store capability). For stack-relative memory access,
-replace floating-point double operations with capability operations:
-\texttt{C.FLDSP} with \texttt{C.LCSP} and \texttt{C.FSDSP} with
-\texttt{C.SCSP}.
-
-When in capability
-encoding mode, as with load-store instructions, we interpret existing compressed
-instructions \insnnoref{C.J}, \insnnoref{C.JAL}, \insnnoref{C.JR}, and
-\insnnoref{C.JALR} as the capability instructions \insnriscvref{CJAL}
-and \insnriscvref{CJALR}, accepting capability rather than
-integer register operands for jump target registers and link registers.
-
-There is one large gap in the compressed instruction encoding at
-\verb#100X_XXXX_XXXX_XX00# (where \verb#X#$=$ don't care) that could
-be used to support a \insnriscvref{CIncOffsetImm} (\texttt{c.cincoff})
-instruction to allow the stack pointer to be adjusted.
-
-This would result in capability-aware prologue and epilogues:
-
-\begin{small}
-\begin{verbatim}
-   prologue_cap_aware:    epilogue_cap_aware:
-     c.cincoff csp, -16     c.lcsp cra, 8(csp)
-     c.scsp cra, 8(csp)     c.lcsp s0, 0(csp)
-     c.scsp cs0, 0(csp)     c.cincoff csp, 16
-     c.cjr ct0              c.cjr cra
-\end{verbatim}
-\end{small}
-
-A further interaction relates to encoding-mode selection.
-If we pursue a design choice using the lowest bit of a target jump address to
-set the encoding used following a jump, then no additional opcode pressure is
-introduced.
-If we instead choose to use new instructions, such as to get or set the mode
-explicitly, then additional space might be required.
-The amount of space required would be modest, but this additional usage might
-be a further consideration in the encoding-mode management strategy.
-
-If the approach of using a mode bit for compressed instructions is
-adopted, then it follows that the uncompressed versions of the
-instructions should follow suit to preserve the design intent that
-all compressed instructions can be expanded out to uncompressed
-instructions by the processor's decoder, and that the assembler should
-be permitted to optimize uncompressed instructions into their
-compressed form where possible.
-\pdrnote{These last two paragraphs do seem a bit stale, and do we need to
-add a note about the prologue assuming it's been called in the correct
-mode? (or doing a check)}
+When a compressed instruction in capability encoding mode encodes a
+capability register operand using a 3-bit field rather than a 4-bit
+field, the selected capability register is one of
+\texttt{c8}--\texttt{c15} using the same mapping used for
+\texttt{x8}--\texttt{x15} in integer encoding mode.
 
 \subsubsection{Compressed Instructions Affected by Capability Encoding Mode}
 
@@ -784,6 +736,7 @@ mode:
 \medskip
 
 \begin{tabular}{llllll}
+\textit{Stack addressing} & C.ADDI4SPN & C.ADDI16SP & \\
 \textit{Control flow} & C.JAL & C.JALR & C.JR & \\
 \textit{Compressed integer load} & C.LW & C.LD & C.LWSP & C.LDSP & \\
 \textit{Compressed integer store} & C.SW & C.SD & C.SWSP & C.SDSP & \\
