@@ -31,10 +31,10 @@ Typically, allocators allow for the return of ``uninitialized'' memory
 (e.g., \texttt{malloc} vs.\@ \texttt{calloc}).  In the context of temporal
 safety, this proves to be problematic unless the allocator is type- and
 use-specicialized: data and pointers may unintentionally flow into the
-possession of the holder of a new allocation, violating both confidentality
+possession of the holder of a new allocation, violating both confidentiality
 and, in a non-architectural sense, provenance integrity.  Most treatments of
 security-conscious allocators therefore always zero memory.  CHERI can
-directly probe at the difference between confidentality of data and
+directly probe at the difference between confidentiality of data and
 provenance integrity of pointers.  Towards this end, we introduce a
 \insnref{CClearTags} instruction, which permits bulk zeroing of
 capabilities within a cacheline (i.e., at the same granularity as
