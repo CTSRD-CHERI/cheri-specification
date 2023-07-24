@@ -2467,6 +2467,12 @@ extract the CID of cs1 and store it in rd
 
 Preliminary encoding (31:0): 0x7f, 0x1, cs1, 0x0, rd, 0x5b (this is the same encoding as CGetType, which will be obsolete with this proposal)
 
+An alternative way of enabling sealing not just constrained by the PERMIT\_SET\_CID bit is to use non-memory capabilities.
+Comparable to the mechanism already present for otypes in the CHERI-RISC-V ISA, we envision a more fine-grained mechanism.
+We propose to create capabilities that authorise for another capability to be sealed with a CID being in a certain range of CIDs.
+This authorising capability has the same fields as a conventional CHERI memory capability, but uses its fields differently.
+The address field is used as the CID another capability is sealed with and the bounds allow for the range of CIDs this authorising capabilities allows.
+
 \subsection{Sealing}
 
 The current CID (the CID of the current compartment) is determined by the CID in the PCC, which is also a capability.
