@@ -2435,7 +2435,7 @@ This also includes CID sealed code capabilities.
 In the CHERI world up to now, sentries cannot be manipulated.
 
 An extension would be to add an additional bit indicating whether a capability is a sentry.
-This will make capabilites immutable even within a compartment.
+This will make capabilities immutable even within a compartment.
 The only way to unseal a sentry is to jump to it.
 
 At the moment, this CID sealing proposal is limited to the 128-bit capability format.
@@ -2537,8 +2537,8 @@ As an addition, we envision a bit that -- if set -- allows sharing within the CI
 Furthermore, we also envision the possibility of \textit{resealing} capabilities.
 A capability belonging to one compartment can be resealed to another compartment.
 This effectively means that code can seal one or more of its own capabilities for another compartment.
-The main advantages are that this avoids capabilities to be unsealed in the open as done with explicit unsealing as well as potential performance improvements avoiding the need to unseal and seal capabilites.
-However, resealing brings the disavantage for the receiving compartment of not knowing whether a capability was sealed by itself or another compartment.
+The main advantages are that this avoids capabilities to be unsealed in the open as done with explicit unsealing as well as potential performance improvements avoiding the need to unseal and seal capabilities.
+However, resealing brings the disadvantage for the receiving compartment of not knowing whether a capability was sealed by itself or another compartment.
 Therefore, we would expect the need for additional validation checks.
 
 \subsection{Explicit Unsealing}
