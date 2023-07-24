@@ -2419,7 +2419,7 @@ Second, one can import CIDs into the capability format, which is what we propose
 Having this solution leads to an atomic change of CID and code capability -- a property we envision to be useful for secure compartmentalisation.
 
 The CID will substitute the otype bits (18 bits) in the 128-bit capability format.
-The otype bits are currently not well-used. The otype field indicates whether a capability is sealed and if so which “type” it has.
+The otype bits are currently not well-used. The otype field indicates whether a capability is sealed and if so which ``type'' it has.
 There exists currently two fixed values that are used: one for unsealed capabilities and one for sealed entry (sentry) capabilities.
 There are 14 more reserved fixed values, which are not currently used. All other values are used as values for sealed capabilities.
 
@@ -2544,12 +2544,12 @@ This ACID is also known as the zero ACID. A capability with the zero ACID can be
 This introduces two new instructions (in comparison to the three-operand operations currently present in the CHERI-RISC-V, our proposed operations have two operands. The third implicit operand is PCC):
 
 \texttt{CCIDUnseal cd, cs1}\\
-If cs1.CID and PCC.CID match, then cs1 will be assigned to cd with cd.CID=0. Otherwise, throw an exception.
+If cs1.CID and PCC.CID match, then cs1 will be assigned to cd with cd.CID=0. Otherwise, clear the tag of cs1 and assign it to cd.
 
 Preliminary encoding(31:0): 0x7f, 0x1a, rs0, 0x0, cd, 0x5b (assign a random free funct5)
 
 \texttt{CCIDSeal cd, cs1}\\
-If cs1.CID==0, then cs1 will be assigned cd with cd.CID=PCC.CID. Otherwise, throw an exception.
+If cs1.CID==0, then cs1 will be assigned cd with cd.CID=PCC.CID. Otherwise, clear the tag of cs1 and assign it to cd.
 
 Preliminary encoding(31:0): 0x7f, 0x1b, rs0, 0x0, cd, 0x5b (assign a random free funct5)
 
@@ -2557,6 +2557,7 @@ A capability with CID==0 can be used by any compartment.
 An unsealed capability can be misused and the system can become victim to transitive capability leaks, e.g., by code that carelessly stores capabilities in shared memory.
 
 Having the zero CID represent an unsealed capability seems intuitive and allows code unaware of CID sealing to operate correctly.
+In contrast, with otypes, the unsealed capability is represented by $-1$, which expands to all 1s in the otype bits.
 
 \subsection{CID Spaces}
 \label{subsec:cid_spaces}
@@ -2603,13 +2604,14 @@ The OS saves all capabilities of the old compartment in its own space as they ar
 During this sweep, the OS will make all of these capabilities unusable, e.g., by marking it with an \textit{unusable} bit.
 If code tries to legitimately use this capability, the OS will need to jump in and assign a new ACID to this SCID and update all of its pointers to make it usable again.
 For example, a legitimate use case would be waking up the compartment after a longer phase of not invoking it.
-However, we expect there to be many causes for the need of revocation.
 
 \subsection{Performance Implications}
 
 Using CID sealing can lead to performance improvements.
 When changing compartments, the calling compartment no longer has to invalidate its own capabilities, but can rely on the sealing mechanism to prevent another compartment from using its capabilities.
 This saves the calling compartment from using multiple instructions to zero out the register file (with CHERI, a compartment can also use cclear instructions, which can zero out a quarter of the register file on CHERI-RISC-V).
+CID sealing does not help with confidentiality.
+Sealed capabilities are still readable and therefore can leak secrets, e.g., keys.
 
 One potential improvement is that short compartment calls with only a few instructions do not poison many registers.
 After returning from a short-instruction callee compartment, many registers will still hold the original value of the calling compartment.
