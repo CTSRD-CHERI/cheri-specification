@@ -2465,7 +2465,7 @@ Possible encoding (31:0): 0x7f, 0x19, rs0, 0x0, cd, 0x5b (assign a random free f
 \texttt{CGetCID rd, cs1}:\\
 extract the CID of cs1 and store it in rd
 
-Preliminary encoding (31:0): 0x7f, 0x1, cs1, 0x0, rd, 0x5b (this is the same encoding as CGetType, which will be obsolete with this proposal)
+Possible encoding (31:0): 0x7f, 0x1, cs1, 0x0, rd, 0x5b (this is the same encoding as CGetType, which will be obsolete with this proposal)
 
 An alternative way of enabling sealing not just constrained by the PERMIT\_SET\_CID bit is to use non-memory capabilities.
 Comparable to the mechanism already present for otypes in the CHERI-RISC-V ISA, we envision a more fine-grained mechanism.
@@ -2552,12 +2552,12 @@ This introduces two new instructions (in comparison to the three-operand operati
 \texttt{CCIDUnseal cd, cs1}\\
 If cs1.CID and PCC.CID match, then cs1 will be assigned to cd with cd.CID=0. Otherwise, clear the tag of cs1 and assign it to cd.
 
-Preliminary encoding(31:0): 0x7f, 0x1a, rs0, 0x0, cd, 0x5b (assign a random free funct5)
+Possible encoding(31:0): 0x7f, 0x1a, rs0, 0x0, cd, 0x5b (assign a random free funct5)
 
 \texttt{CCIDSeal cd, cs1}\\
 If cs1.CID==0, then cs1 will be assigned cd with cd.CID=PCC.CID. Otherwise, clear the tag of cs1 and assign it to cd.
 
-Preliminary encoding(31:0): 0x7f, 0x1b, rs0, 0x0, cd, 0x5b (assign a random free funct5)
+Possible encoding(31:0): 0x7f, 0x1b, rs0, 0x0, cd, 0x5b (assign a random free funct5)
 
 A capability with CID==0 can be used by any compartment.
 An unsealed capability can be misused and the system can become victim to transitive capability leaks, e.g., by code that carelessly stores capabilities in shared memory.
@@ -2579,6 +2579,10 @@ This would use another field of size log\_2(ACID\_LENGTH) in order to specify ho
 
 Another improvement might be to add a bit that determines whether a capability is allowed to be used within CID spaces.
 This would add fine-grained control over which capabilities can be shared within CID spaces and which are private to the owning compartment.
+
+Alternatively to capabilities being implicitly unsealed by the capability in the PCC register, we also envision a system with an implicit unseal register.
+On every capability access, this register is checked in parallel.
+The address and bounds information span a range of CIDs which the currently executing compartment can unseal.
 
 \subsection{Code and Data Compartments}
 
