@@ -242,28 +242,27 @@ the RISC-V instruction set.
 Instruction opcode encodings can be found in
 Appendix~\ref{app:isaquick-riscv}.
 
-\pmnote{Perhaps mention something like this:
-
 \subsection{CHERI as a non-standard RISC-V extension}
 
 CHERI is integrated into the RISC-V ISA as a non-standard extension
 named Xcheri, and follows the idioms for RISC-V extensions to the
 extent possible.  In the extension terminology of the RISC-V
-specification, CHERI is a \emph{greenfield} extension since it adds
-new instructions by populating a new instruction encoding space.  The
+specification, CHERI is mostly a \emph{greenfield} extension since it adds
+most new instructions by populating a new instruction encoding space.  The
 prefix used for the encoding is currently ``1011011'', placing it in
 the \emph{custom-2/rv128} opcode space that the specification allows
 for use for custom instruction set extensions on RV64; this makes it a
-standard-compatible global encoding. (See however the discussion in
-Section~\ref{section:cheri-risc-v-rv128-lq-sq}.)
+standard-compatible global encoding.  However, we also propose a few
+new instructions in existing encoding ranges.  The new instructions to
+load and store capabilities are \emph{brownfield} extensions to the
+LOAD and STORE opcodes in the base integer ISAs.  In addition, CHERI
+adds new atomic operation instructions which are \emph{brownfield}
+extensions to the AMO opcode.
 
 A CHERI-RISC-V processor has the X bit of the \texttt{misa} register
 hardwired to 1 on boot to indicate the presence of a non-standard
 extension.  Information tying this set X bit to the Xcheri extension
 would be communicated to system software in a platform-specific manner.
-}
-\pdrnote{Agreed: this would be great, although pedantically, our adding of
-load cap and store cap in non-extension space must make us brownfield?}
 
 \subsection{Tagged Capabilities and Memory}
 
