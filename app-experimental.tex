@@ -2619,9 +2619,9 @@ For example, a legitimate use case would be waking up the compartment after a lo
 
 Using CID sealing can lead to performance improvements.
 When changing compartments, the calling compartment no longer has to invalidate its own capabilities, but can rely on the sealing mechanism to prevent another compartment from using its capabilities.
-This saves the calling compartment from using multiple instructions to zero out the register file (with CHERI, a compartment can also use cclear instructions, which can zero out a quarter of the register file on CHERI-RISC-V).
-CID sealing does not help with confidentiality.
-Sealed capabilities are still readable and therefore can leak secrets, e.g., keys.
+This saves the calling compartment from using multiple instructions to zero out the register file provided it does not contain sensitive information (with CHERI, a compartment can also use cclear instructions, which can zero out a quarter of the register file on CHERI-RISC-V).
+CID sealing does help with confidentiality because another compartment cannot dereference the CID sealed capabilities left in the register file.
+However, CID sealed capabilities are still readable bit patterns and therefore can leak secrets in the integer portion, e.g., keys.
 
 One potential improvement is that short compartment calls with only a few instructions do not poison many registers.
 After returning from a short-instruction callee compartment, many registers will still hold the original value of the calling compartment.
