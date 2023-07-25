@@ -98,7 +98,8 @@ Our definition of CHERI-RISC-V should work with either 32-register or
 We specify CHERI as applied to RVG, which consists of the general-purpose
 elements of the RISC-V ISA: integer, multiplication and division,
 atomic, floating-point, and double floating-point instructions.
-We also describe extensions to RVS, the supervisor extension defined in the
+We also describe extensions to the supervisor-level and machine-level ISAs
+defined in the
 privileged portion of the ISA.
 
 We view 64-bit CHERI-RISC-V as a mature specification suitable as a
@@ -542,8 +543,8 @@ Might be worth further discussion to decide if we need/want them.}
 \bottomrule
 \end{tabular}
 \caption{Special Capability Registers (SCRs).
-SCRs 4-7 are available only with the N extension, and 12-15 only with the S
-extension.
+SCRs 4-7 are available only with the N extension, and 12-15 only with
+supervisor mode.
 \textbf{Modes} shows which RISC-V privilege modes are allowed to access the
 registers.
 \textbf{Access} indicates additional restrictions on accessing the registers:
