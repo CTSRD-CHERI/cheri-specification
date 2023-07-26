@@ -37,11 +37,6 @@ Various drafts and standardized extensions add other more contemporary
 features such as hypervisor support.  There is also ongoing work to define
 broader platform behaviors beyond the architecture, including platform
 self-description and peripheral-device enumeration.
-At the time of writing, the RISC-V userspace ISA has been standardized
-(v2.2)~\cite{RISCV:User:2.2}, but the privileged ISA remains under
-development (v1.10)~\cite{RISCV:Privileged:1.10}\footnote{As v1.11 of the
-privileged specification remains a work-in-progress, we define CHERI-RISC-V
-relative to v1.10.}. \mmnote{1.11 is ratified now, so we should rewrite this chapter with v1.11 changes.}
 
 \section{CHERI-RISC-V Approach}
 
@@ -263,6 +258,10 @@ A CHERI-RISC-V processor has the X bit of the \texttt{misa} register
 hardwired to 1 on boot to indicate the presence of a non-standard
 extension.  Information tying this set X bit to the Xcheri extension
 would be communicated to system software in a platform-specific manner.
+
+CHERI-RISC-V is currently defined as a non-standard extension to
+version 2.2 of the RISC-V userspace ISA~\cite{RISCV:User:2.2} and
+version 1.11 of the RISC-V privileged ISA~\cite{RISCV:Privileged:1.11}.
 
 \subsection{Tagged Capabilities and Memory}
 
