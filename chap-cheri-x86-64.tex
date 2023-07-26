@@ -1269,6 +1269,7 @@ Of the five major extensions listed here, two have been deprecated
 and are therefore unlikely to coexist with a potential CHERI-x86-64.
 
 \subsection{Intel CET}
+
 Intel's Control-flow Enforcement Technology (CET) first shipped in Tiger Lake
 and AMD's Zen3 CPUs, and support has so-far continued.
 CET introduces a new ENDBRANCH landing pad instruction (from the NOP space) to
@@ -1279,6 +1280,7 @@ CET also includes guarantees on speculative execution for CET-protected
 transitions.
 
 \subsubsection{CET Compatibility with CHERI-x86-64}
+
 CET and CHERI-x86-64 are compatible technologies.
 CET landing pads can naturally be asserted on indirect jumps to capabilities.
 The guarantees of sentries and of landing pads largely overlap, but the
@@ -1300,6 +1302,7 @@ save/restore may be sufficient to avoid a software intermediary
 for compartment switching in many cases.
 
 \subsubsection{CET and Transient Execution}
+
 The CET specification from Intel includes the following line:
 \begin{quote}
 Instructions at the target of a RET instruction will not execute,
@@ -1435,7 +1438,6 @@ object that will be shared in this space which is not
 as natural as CHERI which allows any local object
 to be passed as an argument to another compartment.
 
-
 \subsection{Intel MPX (deprecated)}
 
 Intel's Memory Protection Extension (MPX) was designed to accelerate
@@ -1519,6 +1521,7 @@ or branch prediction can easily push overheads over 20\% and
 greatly restrict adoption.
 
 \subsection{Intel SGX (deprecated)}
+
 Intel SGX is a very complex extension to enable a user-space
 application to trust the processor to provide enclave memory that is
 not readable or modifiable from the operating system or even
