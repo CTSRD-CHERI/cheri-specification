@@ -2395,3 +2395,244 @@ as well as its internal operation, are left to future work.
 % >>>
 
 % vim: foldmethod=marker:foldmarker=<<<,>>>
+
+% >>>
+% >>>
+\section{Compartment ID Sealing} % <<<
+
+\subsection{Motivation}
+
+Compartment identification is essential. Code and data associated with a compartment must be somehow identified and validated when they are being accessed.
+The most natural way seems to be to give them identification numbers.
+This has traditionally been done in software, e.g., processes are assigned process IDs (PIDs) in operating systems. In some cases, a software ID can correspond to a hardware ID, e.g., PIDs can correspond to address space identifiers (ASIDs).
+However, that is not necessarily the case.
+In this proposal, we suggest an architectural ID for compartments.
+We call these numbers compartment IDs (CIDs). That means that one CID is mapped to one compartment at a time.
+An architecturally defined CID needs to be implemented by hardware.
+
+\subsection{Storage}
+\label{app:exp:subsec:storage}
+
+The first question to tackle is where to store a CID.
+We envision multiple options for that.
+First, one can use a dedicated register for compartment identification as done by the Morello architecture.
+Second, one can import CIDs into the capability format, which is what we propose in this document.
+Having this solution leads to an atomic change of CID and code capability -- a property we envision to be useful for secure compartmentalisation.
+Future research has to show if one approach of storing CIDs is preferable over the other.
+
+The CID will substitute the otype bits (18 bits) in the 128-bit capability format.
+The otype bits are currently not well-used. The otype field indicates whether a capability is sealed and if so which ``type'' it has.
+There exists currently two fixed values that are used: one for unsealed capabilities and one for sealed entry (sentry) capabilities.
+There are 14 more reserved fixed values, which are not currently used. All other values are used as values for sealed capabilities.
+
+However, there is also the possibility to combine otypes and CIDs.
+One potential approach is to subdivide the 18 otype bits such that there is space for a few otypes and the remainder of the bits is dedicated to CIDs.
+This would allow sentries and CID sealing to be combined.
+
+In the following text, we propose to completely substitute otypes.
+All values but the zero CID (CID==0) are valid IDs.
+Furthermore, every CID sealed code capability already is a sealed entry capability.
+Please note that every capability within a compartment can be manipulated by the compartment itself.
+This also includes CID sealed code capabilities.
+In the CHERI world up to now, sentries cannot be manipulated.
+
+An extension would be to add an additional bit indicating whether a capability is a sentry.
+This will make capabilities immutable even within a compartment.
+The only way to unseal a sentry is to jump to it.
+
+At the moment, this CID sealing proposal is limited to the 128-bit capability format.
+However, the underlying mechanism to add CID bits to the meta information bits of the capability works for every format.
+These CIDs are referred to as the Architectural CIDs (ACIDs).
+In the 128-bit capability format, we propose to allocate 10 bits to the compartment ID, but we envision any number of bits fitting in the meta information bits to be a valid implementation of CID Sealing.
+This length is also known as the ACID\_LENGTH.
+In this proposal, we allow for 1024 CIDs to be encoded, and keep the remaining 8 bits reserved.
+Software may choose to virtualise these and can create Software CIDs (SCIDs), which are a concept similar to PIDs.
+A SCID may consist of the corresponding ACID added to other bits in order to create a virtual identifier or can be fully independent of the ACID it is mapped to.
+
+Compartment IDs come with two new instructions.
+One instruction for reading the CID into a general purpose register and one instruction for setting the CID of a capability.
+Like capabilities themselves, CIDs are not considered secret.
+Therefore, the CID reading instruction is not privileged, but the writing instruction is restricted by the PERMIT\_SET\_CID permission.
+The PERMIT\_SET\_CID bit is a hardware permission bit that, if set in a PCC, allows manipulating the ACID.
+Like all hardware permission bits in CHERI, PERMIT\_SET\_CID is constrained by monotonicity.
+One security policy is that a code capability with this bit set should only be available to supervisor code.
+We suggest encodings for the instructions in order to demonstrate the adaptability of CID to the currently existing CHERI-RISC-V ISA.
+
+\begin{itemize}
+\item \texttt{CSetCID cd, rs0}:\\
+set the CID in cd to the value in rs0.
+This instruction needs the PERMIT\_SET\_CID bit set, otherwise it throws an exception.
+This instruction uses the ACID\_LENGTH lower bits of rs0 and ignores the upper bits.
+
+Possible encoding (31:0): 0x7f, 0x19, rs0, 0x0, cd, 0x5b (assign a random free funct5)
+
+\item \texttt{CGetCID rd, cs1}:\\
+extract the CID of cs1 and store it in rd
+
+Possible encoding (31:0): 0x7f, 0x1, cs1, 0x0, rd, 0x5b (this is the same encoding as CGetType, which could be obsolete with this proposal)
+\end{itemize}
+
+An alternative way of enabling sealing not just constrained by the PERMIT\_SET\_CID bit is to use non-memory capabilities.
+Comparable to the mechanism already present for otypes in the CHERI-RISC-V ISA, we envision a more fine-grained mechanism.
+We propose to create capabilities that authorise for another capability to be sealed with a CID being in a certain range of CIDs.
+This authorising capability has the same fields as a conventional CHERI memory capability, but uses its fields differently.
+The address field is interpreted as the CID, and the bounds define a range of CIDs.
+This allows for code to be granted a range of CIDs it can use to seal other capabilities with.
+One possible extension to this is an instruction that retrieves the next CID from the authorising capability and atomically increments the CID field.
+
+
+\subsection{Sealing}
+
+The current CID (the CID of the current compartment) is determined by the CID in the PCC, which is also a capability.
+If the PCC changes and the new PCC has a different CID, this constitutes a compartment change (see Section~\ref{app:exp:subsec:comp_change}).
+
+With an ACID being in all capabilities, we can establish a concept referred to as CID Sealing.
+All capabilities are implicitly sealed by their CID.
+Capabilities are considered unsealed if and only if: their CID matches \texttt{PCC.CID} or their CID is 0. All other capabilities are implicitly sealed.
+An implicitly sealed capability can be inspected (its fields can be read), but it cannot be manipulated nor can it be used to reference memory.
+
+CID sealing allows a register file to hold capabilities from different compartments without allowing capability leaks.
+The currently executing compartment can only make use of its own capabilities or explicitly unsealed ones.
+
+In this proposal, CID sealing completely replaces the sealing mechanism currently present in CHERI.
+A CID sealed capability can only be manipulated by the compartment it is owned by.
+Therefore, it can be securely handed out to other compartments, e.g., as a code pointer back.
+
+However, CID sealing can also co-exist with current sealing mechanisms in place, e.g., sentries, as discussed in Section~\ref{app:exp:subsec:storage}.
+In comparison to conventional CHERI-RISC-V sealing, CID sealing cannot produce code pointers that are immutable within a compartment, but only across compartments.
+
+\subsection{Compartment Change}
+\label{app:exp:subsec:comp_change}
+
+A compartment change is done when the CID is changed.
+The CID can be changed by installing a code capability with a different CID into the PCC register.
+Installing a new PCC can be facilitated in many ways, e.g., by jumping to a capability using the CJALR instruction.
+We envision there to exist multiple ways of changing the PCC and the CID sealing mechanism is independent of the concrete way.
+Once the new PCC is installed, the new compartment needs to bootstrap.
+We envision two ways for that, which only differ in the way they retrieve their initial data capability.
+
+First, the new PCC can have further capabilities in its global space, which can be loaded into the register file.
+This can be facilitated by the AUIPCC instruction.
+The following instruction sequence loads a capability at an example fixed offset:
+
+\texttt{auipcc ct0, 2}\\
+\texttt{clc cs0, 0x100(ct0)}
+
+Second, a new data capability can be installed alongside the new PCC.
+This gives the compartment a capability ready to use in the register file.
+One option for this kind of compartment transition would be indirect sealed capability pairs (see Section~\ref{app:exp:indsentry}).
+The following code example shows the brevity of this approach.
+The instruction sequence was shrunk to just one instruction reading from the new data capability(ct6).
+
+\texttt{clc cs0, 0(ct6)}
+
+\subsection{Sharing}
+
+Sealing implicitly forbids sharing capabilities between compartments.
+However, sometimes this behaviour is desired by software. We have designed two mechanisms for sharing capabilities between compartments:
+
+\begin{itemize}
+\item Explicit unsealing: This will explicitly unseal a capability, and it can be shared either via the register file or via memory.
+Another compartment can pick up this capability and seal it again and use it.
+This does not protect against transitive capability leaks - an unsealed capability can be passed on to a third compartment and thus be leaked.
+\item CID spaces: CIDs can be separated into CID spaces (see Section~\ref{app:exp:subsec:cid_spaces}).
+One approach is to allow unsealing within a CID space.
+This allows all compartments in that space to use that capability, but no other compartment can unseal the capability.
+This protects from transitive capability leaks outside of the CID space.
+As an addition, we envision a bit that -- if set -- allows sharing within the CID space.
+\end{itemize}
+
+Furthermore, we also envision the possibility of \textit{resealing} capabilities.
+A capability belonging to one compartment can be resealed to another compartment.
+This effectively means that code can seal one or more of its own capabilities for another compartment.
+The main advantages are that this avoids capabilities to be unsealed in the open as done with explicit unsealing as well as potential performance improvements avoiding the need to unseal and seal capabilities.
+However, resealing brings the disadvantage for the receiving compartment of not knowing whether a capability was sealed by itself or another compartment.
+Therefore, we would expect the need for additional validation checks.
+
+\subsection{Explicit Unsealing}
+
+We need to reserve a CID value that represents an unsealed capability instead of a valid compartment ID.
+We can choose any value to represent an unsealed capability.
+In this proposal, a capability is unsealed if and only if  its ACID is set to 0.
+This ACID is also known as the zero ACID. A capability with the zero ACID can be CID sealed by any compartment.
+This introduces two new instructions (in comparison to the three-operand operations currently present in the CHERI-RISC-V, our proposed operations have two operands. The third implicit operand is PCC):
+
+\begin{itemize}
+\item \texttt{CCIDUnseal cd, cs1}\\
+If cs1.CID and PCC.CID match, then cs1 will be assigned to cd with cd.CID=0. Otherwise, clear the tag of cs1 and assign it to cd.
+
+Possible encoding(31:0): 0x7f, 0x1a, rs0, 0x0, cd, 0x5b (assign a random free funct5)
+
+\item \texttt{CCIDSeal cd, cs1}\\
+If cs1.CID==0, then cs1 will be assigned cd with cd.CID=PCC.CID. Otherwise, clear the tag of cs1 and assign it to cd.
+
+Possible encoding(31:0): 0x7f, 0x1b, rs0, 0x0, cd, 0x5b (assign a random free funct5)
+\end{itemize}
+
+A capability with CID==0 can be used by any compartment.
+An unsealed capability can be misused and the system can become victim to transitive capability leaks, e.g., by code that carelessly stores capabilities in shared memory.
+
+Having the zero CID represent an unsealed capability seems intuitive and allows code unaware of CID sealing to operate correctly.
+In contrast, with otypes, the unsealed capability is represented by $-1$, which expands to all 1s in the otype bits.
+
+\subsection{CID Spaces}
+\label{app:exp:subsec:cid_spaces}
+
+We envision that CIDs can build subspaces in order to model relationships between compartments.
+One possibility is to put compartments with identical upper bits into the same group, e.g., $CID-Space$ = 0b10101010xx.
+This would lead to a CID space of size 4.
+
+CID spaces can express trust relationships between compartments, e.g., capabilities within a CID space are implicitly unsealed in any compartment of that CID space.
+
+A further refinement to this is to make the mask configurable with which the CID spaces are defined.
+This would use another field of size log\_2(ACID\_LENGTH) in order to specify how many of the most significant ACID bits are the mask.
+
+Another improvement might be to add a bit that determines whether a capability is allowed to be used within CID spaces.
+This would add fine-grained control over which capabilities can be shared within CID spaces and which are private to the owning compartment.
+
+Alternatively to capabilities being implicitly unsealed by the capability in the PCC register, we also envision a system with an implicit unseal register.
+On every capability access, this register is checked in parallel.
+The address and bounds information span a range of CIDs which the currently executing compartment can unseal.
+
+\subsection{Code and Data Compartments}
+
+A common use case for compartments is to have one code base that operates on multiple data sets as found often in web browsers.
+We envision this to be modelled by CID sealing and present our preliminary model for code and data compartments in the following paragraph:
+
+The capabilities for different data sets are separated into compartments.
+There will be one code compartment for each data, but each code capability maps to the same code.
+This means that all code capabilities are identical in all fields, except for the CID field.
+Depending on whether the different compartments trust each other, the compartments can be placed into the same CID space.
+
+It is also possible to use conventional CHERI compartmentalisation where each data compartment has the same CID, but the data capabilities are non-overlapping sets between the compartments.
+In this case, the supervisor code needs to be careful that two data capabilities from different compartments are never accessible to one capability at the same time.
+
+\subsection{Revocation}
+
+When employing more compartments than storable in the ACID space, software will need to virtualise CIDs.
+This will lead to one or more ACIDs needing to be reused.
+In order to maintain safety and security, every capability from the old compartment needs to be made inaccessible.
+This prevents leaking capabilities from the old to the new compartment where both of them have the same ACID, but different SCIDs.
+
+We have come up with a preliminary revocation mechanism, which we will sketch in the following paragraphs.
+Please note that this mechanism likely incurs a substantial performance penalty.
+
+When the supervisor code, e.g., the operating system, has run out of available ACIDs, it needs to revoke a ACID currently in use.
+We currently propose to pick this ACID by random.
+However, one could imagine keeping information in the OS that would enable different strategies, e.g., implementing a least recently used (LRU) policy.
+The OS saves all capabilities of the old compartment in its own space as they are.
+During this sweep, the OS will make all of these capabilities unusable, e.g., by marking it with an \textit{unusable} bit.
+If code tries to legitimately use this capability, the OS will need to jump in and assign a new ACID to this SCID and update all of its pointers to make it usable again.
+For example, a legitimate use case would be waking up the compartment after a longer phase of not invoking it.
+
+\subsection{Performance Implications}
+
+Using CID sealing can lead to performance improvements.
+When changing compartments, the calling compartment no longer has to invalidate its own capabilities, but can rely on the sealing mechanism to prevent another compartment from using its capabilities.
+This saves the calling compartment from using multiple instructions to zero out the register file provided it does not contain sensitive information (with CHERI, a compartment can also use cclear instructions, which can zero out a quarter of the register file on CHERI-RISC-V).
+CID sealing does help with confidentiality because another compartment cannot dereference the CID sealed capabilities left in the register file.
+However, CID sealed capabilities are still readable bit patterns and therefore can leak secrets in the integer portion, e.g., keys.
+
+One potential improvement is that short compartment calls with only a few instructions do not poison many registers.
+After returning from a short-instruction callee compartment, many registers will still hold the original value of the calling compartment.
+This can potentially be used to enhance performance even more because the calling compartment does not have to completely re-instantiate its register state.
