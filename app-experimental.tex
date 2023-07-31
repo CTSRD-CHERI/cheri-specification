@@ -2411,12 +2411,14 @@ We call these numbers compartment IDs (CIDs). That means that one CID is mapped 
 An architecturally defined CID needs to be implemented by hardware.
 
 \subsection{Storage}
-\label{subsec:storage}
+\label{app:exp:subsec:storage}
 
-The first question to tackle is where to store a CID. We envision multiple options for that.
+The first question to tackle is where to store a CID.
+We envision multiple options for that.
 First, one can use a dedicated register for compartment identification as done by the Morello architecture.
 Second, one can import CIDs into the capability format, which is what we propose in this document.
 Having this solution leads to an atomic change of CID and code capability -- a property we envision to be useful for secure compartmentalisation.
+Future research has to show if one approach of storing CIDs is preferable over the other.
 
 The CID will substitute the otype bits (18 bits) in the 128-bit capability format.
 The otype bits are currently not well-used. The otype field indicates whether a capability is sealed and if so which ``type'' it has.
@@ -2440,9 +2442,10 @@ The only way to unseal a sentry is to jump to it.
 
 At the moment, this CID sealing proposal is limited to the 128-bit capability format.
 However, the underlying mechanism to add CID bits to the meta information bits of the capability works for every format.
-In the 128-bit capability format, we propose to allocate 10 bits to the compartment ID, but we envision any number of bits fitting in the meta information bits to be a valid implementation of CID Sealing.
-This length is also known as the ACID\_LENGTH, and keep the remaining 8 bits reserved, which allows for 1024 CIDs to be encoded.
 These CIDs are referred to as the Architectural CIDs (ACIDs).
+In the 128-bit capability format, we propose to allocate 10 bits to the compartment ID, but we envision any number of bits fitting in the meta information bits to be a valid implementation of CID Sealing.
+This length is also known as the ACID\_LENGTH.
+In this proposal, we allow for 1024 CIDs to be encoded, and keep the remaining 8 bits reserved.
 Software may choose to virtualise these and can create Software CIDs (SCIDs), which are a concept similar to PIDs.
 A SCID may consist of the corresponding ACID added to other bits in order to create a virtual identifier or can be fully independent of the ACID it is mapped to.
 
@@ -2452,31 +2455,36 @@ Like capabilities themselves, CIDs are not considered secret.
 Therefore, the CID reading instruction is not privileged, but the writing instruction is restricted by the PERMIT\_SET\_CID permission.
 The PERMIT\_SET\_CID bit is a hardware permission bit that, if set in a PCC, allows manipulating the ACID.
 Like all hardware permission bits in CHERI, PERMIT\_SET\_CID is constrained by monotonicity.
-A code capability with this bit set should only be available to supervisor code.
+One security policy is that a code capability with this bit set should only be available to supervisor code.
 We suggest encodings for the instructions in order to demonstrate the adaptability of CID to the currently existing CHERI-RISC-V ISA.
 
-\texttt{CSetCID cd, rs0}:\\
+\begin{itemize}
+\item \texttt{CSetCID cd, rs0}:\\
 set the CID in cd to the value in rs0.
 This instruction needs the PERMIT\_SET\_CID bit set, otherwise it throws an exception.
 This instruction uses the ACID\_LENGTH lower bits of rs0 and ignores the upper bits.
 
 Possible encoding (31:0): 0x7f, 0x19, rs0, 0x0, cd, 0x5b (assign a random free funct5)
 
-\texttt{CGetCID rd, cs1}:\\
+\item \texttt{CGetCID rd, cs1}:\\
 extract the CID of cs1 and store it in rd
 
-Possible encoding (31:0): 0x7f, 0x1, cs1, 0x0, rd, 0x5b (this is the same encoding as CGetType, which will be obsolete with this proposal)
+Possible encoding (31:0): 0x7f, 0x1, cs1, 0x0, rd, 0x5b (this is the same encoding as CGetType, which could be obsolete with this proposal)
+\end{itemize}
 
 An alternative way of enabling sealing not just constrained by the PERMIT\_SET\_CID bit is to use non-memory capabilities.
 Comparable to the mechanism already present for otypes in the CHERI-RISC-V ISA, we envision a more fine-grained mechanism.
 We propose to create capabilities that authorise for another capability to be sealed with a CID being in a certain range of CIDs.
 This authorising capability has the same fields as a conventional CHERI memory capability, but uses its fields differently.
-The address field is used as the CID another capability is sealed with and the bounds allow for the range of CIDs this authorising capabilities allows.
+The address field is interpreted as the CID, and the bounds define a range of CIDs.
+This allows for code to be granted a range of CIDs it can use to seal other capabilities with.
+One possible extension to this is an instruction that retrieves the next CID from the authorising capability and atomically increments the CID field.
+
 
 \subsection{Sealing}
 
 The current CID (the CID of the current compartment) is determined by the CID in the PCC, which is also a capability.
-If the PCC changes and the new PCC has a different CID, this constitutes a compartment change (see Section~\ref{subsec:comp_change}).
+If the PCC changes and the new PCC has a different CID, this constitutes a compartment change (see Section~\ref{app:exp:subsec:comp_change}).
 
 With an ACID being in all capabilities, we can establish a concept referred to as CID Sealing.
 All capabilities are implicitly sealed by their CID.
@@ -2490,11 +2498,11 @@ In this proposal, CID sealing completely replaces the sealing mechanism currentl
 A CID sealed capability can only be manipulated by the compartment it is owned by.
 Therefore, it can be securely handed out to other compartments, e.g., as a code pointer back.
 
-However, CID sealing can also co-exist with current sealing mechanisms in place, e.g., sentries, as discussed in Section~\ref{subsec:storage}.
+However, CID sealing can also co-exist with current sealing mechanisms in place, e.g., sentries, as discussed in Section~\ref{app:exp:subsec:storage}.
 In comparison to conventional CHERI-RISC-V sealing, CID sealing cannot produce code pointers that are immutable within a compartment, but only across compartments.
 
 \subsection{Compartment Change}
-\label{subsec:comp_change}
+\label{app:exp:subsec:comp_change}
 
 A compartment change is done when the CID is changed.
 The CID can be changed by installing a code capability with a different CID into the PCC register.
@@ -2512,7 +2520,7 @@ The following instruction sequence loads a capability at an example fixed offset
 
 Second, a new data capability can be installed alongside the new PCC.
 This gives the compartment a capability ready to use in the register file.
-One option for this kind of compartment transition would be indirect sealed capability pairs.
+One option for this kind of compartment transition would be indirect sealed capability pairs (see Section~\ref{app:exp:indsentry}).
 The following code example shows the brevity of this approach.
 The instruction sequence was shrunk to just one instruction reading from the new data capability(ct6).
 
@@ -2520,14 +2528,14 @@ The instruction sequence was shrunk to just one instruction reading from the new
 
 \subsection{Sharing}
 
-Sealing explicitly forbids sharing capabilities between compartments.
+Sealing implicitly forbids sharing capabilities between compartments.
 However, sometimes this behaviour is desired by software. We have designed two mechanisms for sharing capabilities between compartments:
 
 \begin{itemize}
-\item Explicit unsealing: This will explicitly unseal a capability and it can be shared either via the register file or via memory.
+\item Explicit unsealing: This will explicitly unseal a capability, and it can be shared either via the register file or via memory.
 Another compartment can pick up this capability and seal it again and use it.
 This does not protect against transitive capability leaks - an unsealed capability can be passed on to a third compartment and thus be leaked.
-\item CID spaces: CIDs can be separated into CID spaces (see Section~\ref{subsec:cid_spaces}).
+\item CID spaces: CIDs can be separated into CID spaces (see Section~\ref{app:exp:subsec:cid_spaces}).
 One approach is to allow unsealing within a CID space.
 This allows all compartments in that space to use that capability, but no other compartment can unseal the capability.
 This protects from transitive capability leaks outside of the CID space.
@@ -2549,15 +2557,17 @@ In this proposal, a capability is unsealed if and only if  its ACID is set to 0.
 This ACID is also known as the zero ACID. A capability with the zero ACID can be CID sealed by any compartment.
 This introduces two new instructions (in comparison to the three-operand operations currently present in the CHERI-RISC-V, our proposed operations have two operands. The third implicit operand is PCC):
 
-\texttt{CCIDUnseal cd, cs1}\\
+\begin{itemize}
+\item \texttt{CCIDUnseal cd, cs1}\\
 If cs1.CID and PCC.CID match, then cs1 will be assigned to cd with cd.CID=0. Otherwise, clear the tag of cs1 and assign it to cd.
 
 Possible encoding(31:0): 0x7f, 0x1a, rs0, 0x0, cd, 0x5b (assign a random free funct5)
 
-\texttt{CCIDSeal cd, cs1}\\
+\item \texttt{CCIDSeal cd, cs1}\\
 If cs1.CID==0, then cs1 will be assigned cd with cd.CID=PCC.CID. Otherwise, clear the tag of cs1 and assign it to cd.
 
 Possible encoding(31:0): 0x7f, 0x1b, rs0, 0x0, cd, 0x5b (assign a random free funct5)
+\end{itemize}
 
 A capability with CID==0 can be used by any compartment.
 An unsealed capability can be misused and the system can become victim to transitive capability leaks, e.g., by code that carelessly stores capabilities in shared memory.
@@ -2566,11 +2576,11 @@ Having the zero CID represent an unsealed capability seems intuitive and allows 
 In contrast, with otypes, the unsealed capability is represented by $-1$, which expands to all 1s in the otype bits.
 
 \subsection{CID Spaces}
-\label{subsec:cid_spaces}
+\label{app:exp:subsec:cid_spaces}
 
 We envision that CIDs can build subspaces in order to model relationships between compartments.
-One possibility is to put compartments with identical upper bits into the same group, e.g., CID\_Group = 0b10101010xx.
-This would lead to a CID group of size 4.
+One possibility is to put compartments with identical upper bits into the same group, e.g., $CID-Space$ = 0b10101010xx.
+This would lead to a CID space of size 4.
 
 CID spaces can express trust relationships between compartments, e.g., capabilities within a CID space are implicitly unsealed in any compartment of that CID space.
 
