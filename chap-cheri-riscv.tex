@@ -577,13 +577,8 @@ using \insnriscvref{CSpecialRW}.
 with any non-preserved bits clears the tag on the capability, even if the
 address would not be changed.
 As per the rest of the RISC-V specification, should the SCR become
-unrepresentable as a result of the address being set, the resulting address is
-preserved, and the rest of the capability is cleared to match the null
-capability.
-Note that this means a read of the CSR (where the SCR has restricted bounds)
-may not be consistent with the preceding write, but this approach is
-consistent with the invalidating of other RISC-V capabilities, and allows a
-meaningful address to be reported should the SCR be dereferenced.
+unrepresentable as a result of the address being set, the tag is cleared
+but the resulting address and the encoded capability metadata are preserved.
 
 \subsection{Capability Encoding Mode}
 \label{sec:cheri-riscv-capmode}
