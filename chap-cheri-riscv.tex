@@ -288,7 +288,7 @@ full
 capabilities, along with a tag.
 
 Extending general-purpose integer registers raises the
-question of whether and how non-capability-aware instructions should
+question of whether and how capability-unaware instructions should
 interact with capability values in registers -- a concern not dissimilar to
 the behavior of instructions on 64-bit architectures offering legacy 32-bit
 support.
@@ -440,7 +440,7 @@ corresponding privilege mode's CSRs. Debate still open over whether these are en
 A new bit in the \menvcfg{} and \senvcfg{} CSRs is used to enable
 CHERI for lower privilege levels.  When CHERI is disabled, attempting
 to execute CHERI-specific instructions will raise an illegal
-instruction fault including loads and stores which use a capability
+instruction fault, including loads and stores which use a capability
 register (excluding the implicit \DDC{} operand for legacy
 loads/stores) as the memory operand.
 
@@ -747,7 +747,7 @@ capability-relative addresses in capability encoding mode, and
 integer-relative addresses constrained by \DDC{} in integer encoding mode.
 
 The floating point control
-registers (FCSR, FRM, and FFlags) are whitelisted in Table \ref{tab:risc-v-access-system-registers-whitelist}
+registers (\texttt{fcsr}, \texttt{frm}, and \texttt{fflags}) are whitelisted in Table \ref{tab:risc-v-access-system-registers-whitelist}
 so they can be accessed without needing \cappermASR{}.
 
 \subsection{Exception Handling}
