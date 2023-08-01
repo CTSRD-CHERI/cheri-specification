@@ -336,8 +336,8 @@ Opcode space is reserved in the RISC-V ISA for 64-bit load and store
 instructions even when \texttt{XLEN} is 32, and we can reuse these opcode
 reservations and encodings to load 64-bit \texttt{CLEN} words as well as
 their tag bit.
-Similarly, when \texttt{XLEN} is 64, we can use 128-bit \texttt{CLEN} load
-and store opcodes.
+Similarly, when \texttt{XLEN} is 64, we can use the anticipated 128-bit
+\texttt{CLEN} load and store opcodes.
 
 We do not currently define support for 32-bit compatibility (with or without
 capability support) when operating in a 64-bit RISC-V processor, but
