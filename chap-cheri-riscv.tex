@@ -495,10 +495,10 @@ general-purpose registers, but have capability rather than integer types.
 SCRs are therefore accessed via new capability-aware instructions.
 
 The new \asm{CSpecialRW} instruction allows reading and writing special
-capability registers. When the destination register is 0, the instruction shall
+capability registers. When the destination is the zero register, the instruction shall
 not read the special capability register and shall not cause any of the
 side-effects that might occur on a special capability register read, similar to
-the standard \asm{csrrw} RISC-V instruction. When the source register is 0, the
+the standard \asm{csrrw} RISC-V instruction. When the source is the zero register, the
 instruction will not write to the special capability register at all, and so
 shall not cause any of the side effects that might otherwise occur on a special
 capability register write, similarly to the standard \asm{csrrs/c} RISC-V
