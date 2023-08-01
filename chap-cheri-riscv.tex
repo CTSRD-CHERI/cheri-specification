@@ -55,8 +55,8 @@ opportunities:
 
 \item To apply lessons learned from CHERI-MIPS in an entirely fresh
   application of the protection model to a new architecture.
-  Many of our MIPS design choices reflect pragmatic design choices made prior
-  to the development of full compiler and operating-system stacks, and are
+  Many of our MIPS design choices reflected pragmatic design choices made prior
+  to the development of full compiler and operating-system stacks, and were
   difficult to change within those stacks.
 
 \item To revisit and scientifically explore a design space around CHERI
@@ -329,8 +329,8 @@ $2\times$\texttt{XLEN}, which excludes the tag bit.
 Operations such as capability-width CSR access, capability load, and capability
 store will operate on \texttt{CLEN}$+1$ bits including the tag bit.
 
-Specifically, for 32-bit CHERI-RISC-V, \texttt{CLEN} will be 64 bits, and for
-64-bit CHERI-RISC-V, \texttt{CLEN} will be 128 bits, affecting a variety of
+Specifically, for 32-bit CHERI-RISC-V, \texttt{CLEN} is 64 bits, and for
+64-bit CHERI-RISC-V, \texttt{CLEN} is 128 bits, affecting a variety of
 functions including the stride of tag bits in physical memory.
 Opcode space is reserved in the RISC-V ISA for 64-bit load and store
 instructions even when \texttt{XLEN} is 32, and we can reuse these opcode
@@ -654,7 +654,7 @@ generated against the corresponding mode.
 \subsubsection{Non-Compressed Instructions Affected by Capability Encoding
   Mode}
 
-The following non-compressed RISC-V instructions would be
+The following non-compressed RISC-V instructions are
 affected by the capability encoding-mode bit (see the following section for
 further details on compressed instructions):
 
