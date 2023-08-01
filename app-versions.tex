@@ -176,6 +176,24 @@ A short summary of key ISA versions is presented here:
   We have added a chapter on practical CHERI microarchitecture.
   CHERI ISAv8 is synchronized with Arm Morello.
 
+\item[CHERI ISAv9 / UCAM-CL-TR-XXX - 9.0 - August 2023]
+  CHERI-RISC-V has replaced CHERI-MIPS as the primary reference
+  platform, and CHERI-MIPS has been removed from the specification.
+  CHERI architectures now always use merged register files where
+  existing general-purpose registers are extended to support
+  capabilities.
+  CHERI architectures have adopted two design decisions from Arm
+  Morello: 1) CHERI architectures now clear tags rather than raising
+  exceptions if an instruction attempts a non-monotonic modification
+  of a capability; and 2) \DDC{} and \PCC{} no longer relocate legacy
+  memory accesses by default.
+  CHERI-RISC-V has received numerous updates to serve as a better
+  baseline for an upstream standard propsal including a more mature
+  definition of compressed instructions in capability mode.
+  CHERI-x86-64 now includes details of extensions to existing x86
+  instructions and proposed new instructions in a separate ISA
+  reference chapter along with various other updates.
+
 \end{description}
 
 \section{Detailed CHERI ISA Version Change History}
