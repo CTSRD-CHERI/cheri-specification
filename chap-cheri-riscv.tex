@@ -144,17 +144,17 @@ The following changes are specific to CHERI-RISC-V:
 \begin{itemize}
 \item RISC-V exception handling -- including register banking, scratch
   registers, and cause mechanism -- is used.
-\item A new exception code, \riscvloadcappagefault{}, will be
+\item A new exception code, \riscvloadcappagefault{}, is
   reported in the RISC-V \xcause{} CSRs when a load attempts to fetch a
   capability through a valid page table entry granting read permission but
   forbidding loads of capabilities.  This fault otherwise behaves like a RISC-V
   load page fault.
-\item A new exception code, \riscvstorecappagefault{}, will be
+\item A new exception code, \riscvstorecappagefault{}, is
   reported in the RISC-V \xcause{} CSRs when a store attempts to write a
   capability through a valid page table entry granting write permission but
   forbidding stores of capabilities.  This fault otherwise behaves like a
   RISC-V store/AMO page fault.
-\item A new exception code, \riscvcheriexception{}, will be
+\item A new exception code, \riscvcheriexception{}, is
   reported in the RISC-V \xcause{} CSRs when other
   capability-related exceptions (such as tag violations) occur.
   %
@@ -269,17 +269,17 @@ explicitly specify whether capability semantics are required for an input or
 output register, or that the current architectural mode unambiguously specify
 integer or capability operand interpretation.
 
-The bottom \texttt{XLEN} bits of the register will contain the integer
+The bottom \texttt{XLEN} bits of the register contain the integer
 interpretation (which, for a capability, will be its address\pdrnote{Does this also
 cover capabilities which authorise type space rather than address space?}), and the
-top \texttt{XLEN} bits (plus additional tag bit) will contain any capability
+top \texttt{XLEN} bits (plus additional tag bit) contain any capability
 metadata.
 When a register is read as an integer (i.e., using an opcode that dictates an
 integer interpretation),
 the register's bottom \texttt{XLEN} bits will be utilized, and any other bits ignored.
-When a register is written as an integer, its bottom \texttt{XLEN} bits will
-hold the new
-integer value, and the top \texttt{XLEN} bits and tag bit will be cleared to match
+When a register is written as an integer, the new integer value is
+stored in its bottom \texttt{XLEN} bits,
+and the top \texttt{XLEN} bits and tag bit are cleared to match
 those of the NULL capability. This both prevents in-register corruption of tagged
 capabilities by implicitly clearing the tag, and also provides reasonable semantics
 for integer access to capability values.
@@ -303,10 +303,10 @@ Specifically, for 32-bit CHERI-RISC-V, \texttt{CLEN} is 64 bits, and for
 64-bit CHERI-RISC-V, \texttt{CLEN} is 128 bits, affecting a variety of
 functions including the stride of tag bits in physical memory.
 Opcode space is reserved in the RISC-V ISA for 64-bit load and store
-instructions even when \texttt{XLEN} is 32, and we can reuse these opcode
+instructions even when \texttt{XLEN} is 32, and we reuse these opcode
 reservations and encodings to load 64-bit \texttt{CLEN} words as well as
 their tag bit.
-Similarly, when \texttt{XLEN} is 64, we can use the anticipated 128-bit
+Similarly, when \texttt{XLEN} is 64, we use the anticipated 128-bit
 \texttt{CLEN} load and store opcodes.
 
 We do not currently define support for 32-bit compatibility (with or without
@@ -407,9 +407,9 @@ corresponding privilege mode's CSRs. Debate still open over whether these are en
 
 \subsubsection{CHERI Extension Control}
 
-A new bit in the \menvcfg{} and \senvcfg{} CSRs is used to enable
+A new bit in the \menvcfg{} and \senvcfg{} CSRs enables
 CHERI for lower privilege levels.  When CHERI is disabled, attempting
-to execute CHERI-specific instructions will raise an illegal
+to execute CHERI-specific instructions raises an illegal
 instruction fault, including loads and stores which use a capability
 register (excluding the implicit \DDC{} operand for legacy
 loads/stores) as the memory operand.
@@ -479,7 +479,7 @@ available via that instruction, as well as their values at CPU reset, which
 will be set in a manner consistent with the description in
 Section~\ref{sec:capability-state-on-cpu-reset}.
 Whether a register is initialized to NULL or the omnipotent capability, its
-flags field will be initialized to zero (specifying integer encoding mode).
+flags field is initialized to zero (specifying integer encoding mode).
 
 \pdrnote{I have added MTDC, UTDC, STDC to match exception handling section.
 Might be worth further discussion to decide if we need/want them.}
@@ -577,7 +577,7 @@ encoding-mode flag in the capability \cflags{} field of \PCC{}:
   address operands to existing RISC-V load, store, jump, and \insnnoref{AUIPC} opcodes contain
   \textit{integer addresses}.
   The upper \texttt{XLEN} bits and tag bit of
-  the operand register will be ignored.
+  the operand register are ignored.
   For loads and stores, the
   tag bit on \DDC{} must indicate that a valid capability is present, and
   all capability-related checks (such as bounds checks) must be performed in
@@ -679,12 +679,12 @@ point loads and stores to load and store capabilities.  Just as RV64C
 reuses the floating-point single-precision loads and stores
 (e.g. \insnnoref{C.FLW} and \insnnoref{C.FSW}) for 64-bit integer
 loads and stores (\insnnoref{C.LD} and \insnnoref{C.SD}), compressed
-CHERI-RV32 can reuse these opcodes in capability-encoding mode for
+CHERI-RV32 reuses these opcodes in capability-encoding mode for
 capability loads and stores (\insnnoref{C.CLC} and \insnnoref{C.CSC}).
-Similarly, CHERI-RV64 can reuse the opcodes for floating-point double
+Similarly, CHERI-RV64 reuses the opcodes for floating-point double
 loads and stores (\insnnoref{C.FLD} and \insnnoref{C.FSD}) in
 capability-encoding mode for capability loads and stores.  The same
-rules would apply to stack-relative memory access instructions.
+rules apply to stack-relative memory access instructions.
 
 When a compressed instruction in capability encoding mode encodes a
 capability register operand using a 3-bit field rather than a 4-bit
@@ -722,14 +722,16 @@ so they can be accessed without needing \cappermASR{}.
 
 \subsection{Exception Handling}
 \label{subsection:riscv:exceptionhandling}
+
 RISC-V defines several privilege modes, including machine mode, user mode, and
 supervisor mode, with exceptions allowing controlled transition between those modes.
 CHERI-RISC-V introduces several new exception-related Special Capability Registers
 to supplement existing RISC-V exception CSRs with new capability-related functionality.
-In addition, when a capability exception is raised, \xtval{} will provide
+In addition, when a capability exception is raised, \xtval{} provides
 details about the exception as described in Section~\ref{subsection:riscv:cheri-exception-reporting}.
 
 \subsubsection{Exceptions to Machine Mode}
+
 We define the following new special capability registers that can be read and
 written only from machine mode:
 
@@ -759,8 +761,8 @@ written only from supervisor mode and above:
 
 \subsubsection{Exceptions to User Mode}
 
-We employ the ``N'' extension (for ``User-Level Interrupts'') being developed in
-the newer versions of the RISC-V specifications, and extend it with the following
+When present, we extend the ``N'' extension (for ``User-Level Interrupts'')
+with the following
 new special capability registers that can be read and written from any mode:
 
 \begin{itemize}
@@ -772,7 +774,7 @@ new special capability registers that can be read and written from any mode:
   \uscratch{})
 \end{itemize}
 
-The extension could be leveraged for user-space-only implementations
+This extension could be leveraged for user-space-only implementations
 of \insnriscvref{CInvoke}, as well as routing specific interrupts from
 suitable devices to user-level compartments for handling by sandboxed
 device drivers.
@@ -790,7 +792,7 @@ or \xRET{}, causes \PCC{} to take a value stored in an SCR, it is possible that
 the SCR contains a capability that would not be a valid \PCC{} (untagged,
 sealed, not executable, or improperly aligned).
 In these cases, the value is still installed in \PCC{}, and a check on the next
-instruction fetch will trigger a further exception.
+instruction fetch triggers a further exception.
 
 \subsection{Capability Exception Reporting}
 \label{subsection:riscv:cheri-exception-reporting}
@@ -957,7 +959,7 @@ specification to all instructions which \emph{could} store an asserted
 capability tag, removing the dependence on the tag bit. Instructions which are
 able to move only data (and so necessarily clear tags) will not interact with
 these PTE flags. CHERI-aware Sv32 implementations, lacking room in their PTEs,
-will act as though CW and CD are \emph{set}.
+act as though CW and CD are \emph{set}.
 
 As with the existing D bit, there are two permitted approaches for hardware to
 take in response to an attempted store with an asserted CHERI tag and through a
@@ -1023,7 +1025,7 @@ capability flow as follows:
 disposition when a PTE is configured to fault on a capability load, raising
 faults only when the resulting tag is set.  Future versions of this
 specification may, similarly, relax this to any instruction which \emph{could}
-load a capability with a set tag. CHERI-aware Sv32 implementations will act as
+load a capability with a set tag. CHERI-aware Sv32 implementations act as
 though CR is \emph{set} and both CRM and CRG are clear.
 
 \nwfnote{Asking as an almost entirely software person... might it be
@@ -1184,7 +1186,7 @@ additional changes:
   register file this can be computed via the existing \insnnoref{SUB}
   instruction on the aliased general-purpose integer registers.
 
-\item Dirty bits were defined in a the per-mode CSR \xccsr{}. This bit
+\item Dirty bits were defined in the per-mode CSR \xccsr{}. This bit
   was set anytime a general-purpose capability register was changed.
   It was intended to be used similar to \texttt{FS} and \texttt{XS}
   fields in \texttt{mstatus} to optimize context switching.
