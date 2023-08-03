@@ -3,13 +3,13 @@
 This technical report describes CHERI ISAv9, the ninth version of the
 CHERI architecture
 being developed by SRI International and the University of Cambridge.
-This design captures ten years of research, development, experimentation,
+This design captures thirteen years of research, development, experimentation,
 refinement, formal analysis, and validation through hardware and software
 implementation.
 
 CHERI introduces an architecture-neutral capability-based protection
 model, which has been instantiated in various commodity base architectures
-to give CHERI-MIPS,
+to give
 CHERI-RISC-V, Arm's prototype Morello architecture, and (sketched)
 CHERI-x86-64.
 It enables software
@@ -53,11 +53,19 @@ processing (which are concentrations of both complex and historically
 vulnerability-prone code exposed to untrustworthy data sources).
 
 CHERI ISAv9 is a substantial enhancement to prior ISA versions.
-%Capability compression is now part of the abstract model.
-%Both 32-bit and 64-bit architectural address sizes are supported.
-%Various previously experimental features, such as sentry capabilities and
-%CHERI-RISC-V, are now considered mature.
-%We have defined a number of new temporal memory-safety acceleration features
-%including MMU assistance for a load-side-barrier revocation model.
-%We have added a chapter on practical CHERI microarchitecture.
-%CHERI ISAv8 is synchronized with Arm Morello.
+CHERI-RISC-V has replaced CHERI-MIPS as the primary reference
+platform, and CHERI-MIPS has been removed from the specification.
+CHERI architectures now always use merged register files where
+existing general-purpose registers are extended to support
+capabilities.
+CHERI architectures have adopted two design decisions from Arm
+Morello: 1) CHERI architectures now clear tags rather than raising
+exceptions if an instruction attempts a non-monotonic modification
+of a capability; and 2) \DDC{} and \PCC{} no longer relocate legacy
+memory accesses by default.
+CHERI-RISC-V has received numerous updates to serve as a better
+baseline for an upstream standard propsal including a more mature
+definition of compressed instructions in capability mode.
+CHERI-x86-64 now includes details of extensions to existing x86
+instructions and proposed new instructions in a separate ISA
+reference chapter along with various other updates.
