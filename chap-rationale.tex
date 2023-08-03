@@ -712,8 +712,9 @@ both, and take the entry address of an object's methods as a convenient
 unique identifier for the type itself.
 
 The architecture we have chosen is conceptually simpler and easier to
-explain. It has the disadvantage that the type field is only 24 bits,
-as there is insufficient space inside the capability for more.
+explain. It has the disadvantage that the type field is constrained to
+a limited number of bits, as there is insufficient space inside the
+capability for more.
 
 The alternative of treating the set of object type identifiers as being the
 same as the set of memory addresses enables the saving of some bits within
