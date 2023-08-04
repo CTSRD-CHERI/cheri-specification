@@ -46,7 +46,7 @@ function #\hyperref[sailRISCVzinitzysys]{init\_sys}#() -> unit = {
   mcounteren->#\hyperref[sailRISCVzbits]{bits}#() = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
 
   minstret           = #\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b0);
-  minstret_written   = false;
+  minstret_increment = true;
 
   #\hyperref[sailRISCVzinitzypmp]{init\_pmp}#();
 

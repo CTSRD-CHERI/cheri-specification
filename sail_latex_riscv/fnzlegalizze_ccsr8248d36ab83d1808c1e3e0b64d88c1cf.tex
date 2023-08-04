@@ -3,8 +3,10 @@ function #\hyperref[sailRISCVzlegalizzezyccsr]{legalize\_ccsr}#(c : ccsr, v : xl
   // Technically, WPRI does not need a legalizer, since software is
   // assumed to legalize; so we could remove this function.
   let v = #\hyperref[sailRISCVzMkzyccsr]{Mk\_ccsr}#(v);
-  /* For now these bits are not really supported so hardwired to true */
-  let c = #\hyperref[sailRISCVzupdatezyd]{update\_d}#(c, 0b1);
+  /* For now the e bit is not really supported so hardwired to true */
   let c = #\hyperref[sailRISCVzupdatezye]{update\_e}#(c, 0b1);
+  /* Read-only feature bits to allow for software to detect CHERI semantics. */
+  let c = #\hyperref[sailRISCVzupdatezynr]{update\_nr}#(c, #\hyperref[sailRISCVzboolzytozybits]{bool\_to\_bits}#(#\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzhavezycherizyrelocation]{have\_cheri\_relocation}#())));
+  let c = #\hyperref[sailRISCVzupdatezytc]{update\_tc}#(c, 0b1);
   c
 }

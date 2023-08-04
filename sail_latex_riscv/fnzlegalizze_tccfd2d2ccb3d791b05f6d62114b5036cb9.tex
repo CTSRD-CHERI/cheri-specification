@@ -1,12 +1,12 @@
 function #\hyperref[sailRISCVzlegalizzezytcc]{legalize\_tcc}#(o : Capability, v : Capability) -> Capability = {
-  new_base = #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(v);
+  let new_base = #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(v);
   /* Ignore writes that attempt to set unaligned TCC base */
-  if new_base[0] != bitzero | new_base[1] != bitzero then
+  if #\hyperref[sailRISCVzhavezypcczyrelocation]{have\_pcc\_relocation}#() & (new_base[0] != bitzero | new_base[1] != bitzero) then
     o /* keep original TCC value */
   else {
-    /* legalize new TCC #\hyperref[sailRISCVzoffset]{offset}# (RISC-V tvec) */
-    new_tvec = v.address - new_base;
-    legalized_tvec = #\hyperref[sailRISCVzlegalizzezytvec]{legalize\_tvec}#(#\hyperref[sailRISCVzMkzyMtvec]{Mk\_Mtvec}#(#\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(o)), new_tvec);
-    #\hyperref[sailRISCVzsetCapOffsetChecked]{setCapOffsetChecked}#(v, legalized_tvec.#\hyperref[sailRISCVzbits]{bits}#())
+    /* legalize new #\hyperref[sailRISCVzTCC]{TCC}# (RISC-V tvec) */
+    let new_tvec = #\hyperref[sailRISCVzcapzytozyintegerzypc]{cap\_to\_integer\_pc}#(v);
+    let legalized_tvec = #\hyperref[sailRISCVzlegalizzezytvec]{legalize\_tvec}#(#\hyperref[sailRISCVzMkzyMtvec]{Mk\_Mtvec}#(#\hyperref[sailRISCVzcapzytozyintegerzypc]{cap\_to\_integer\_pc}#(o)), new_tvec);
+    #\hyperref[sailRISCVzupdatezycapzywithzyintegerzypc]{update\_cap\_with\_integer\_pc}#(v, legalized_tvec.#\hyperref[sailRISCVzbits]{bits}#())
   }
 }

@@ -1,6 +1,7 @@
 function #\hyperref[sailRISCVzhandlezycherizycapzyexception]{handle\_cheri\_cap\_exception}#(capEx, regnum) =
   {
-    #\hyperref[sailRISCVzprint]{print}#("CHERI " ^ #\hyperref[sailRISCVzstringzyofzycapex]{string\_of\_capex}#(capEx) ^ " Reg=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(regnum));
+    if #\hyperref[sailRISCVzgetzyconfigzyprintzyplatform]{get\_config\_print\_platform}#()
+    then #\hyperref[sailRISCVzprintzyplatform]{print\_platform}#("CHERI " ^ #\hyperref[sailRISCVzstringzyofzycapex]{string\_of\_capex}#(capEx) ^ " Reg=" ^ #\hyperref[sailRISCVzBitStr]{BitStr}#(regnum));
     let t : sync_exception = struct {
       trap    = #\hyperref[sailRISCVzEzyExtension]{E\_Extension}#(EXC_CHERI),
       excinfo = #\hyperref[sailRISCVzSome]{Some}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(regnum @ #\hyperref[sailRISCVzCapExCode]{CapExCode}#(capEx)) : xlenbits),

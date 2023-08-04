@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzupdatezycapzywithzyintegerzypc]{update\_cap\_with\_integer\_pc}# (cap: Capability, pc: xlenbits) -> Capability = {
+  if (#\hyperref[sailRISCVzhavezypcczyrelocation]{have\_pcc\_relocation}#()) then #\hyperref[sailRISCVzsetCapOffsetChecked]{setCapOffsetChecked}#(cap, pc) else #\hyperref[sailRISCVzsetCapAddrChecked]{setCapAddrChecked}#(cap, pc)
+}

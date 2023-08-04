@@ -1,0 +1,4 @@
+function #\hyperref[sailRISCVzddczyandzyresultingzyaddr]{ddc\_and\_resulting\_addr}# (addr) = {
+  let ddc_val = DDC in
+  (ddc_val, if (#\hyperref[sailRISCVzhavezyddczyrelocation]{have\_ddc\_relocation}#()) then ddc_val.address + addr else addr)
+}

@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzcapzytozyintegerzypc]{cap\_to\_integer\_pc}# (cap: Capability) -> xlenbits = {
+  if (#\hyperref[sailRISCVzhavezypcczyrelocation]{have\_pcc\_relocation}#()) then #\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(cap) else cap.address
+}

@@ -1,1 +1,5 @@
-function #\hyperref[sailRISCVzextzyvetozydisablezyC]{ext\_veto\_disable\_C}# () = #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(PCC)[1] == bitone
+function #\hyperref[sailRISCVzextzyvetozydisablezyC]{ext\_veto\_disable\_C}# () = {
+  if #\hyperref[sailRISCVzhavezypcczyrelocation]{have\_pcc\_relocation}#()
+  then #\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(PCC)[1] == bitone
+  else false
+}

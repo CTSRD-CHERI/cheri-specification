@@ -62,7 +62,9 @@ if (#\hyperref[sailRISCVznot]{not}#(specialExists) |
       30 => MScratchC = cs1_val,
       31 => MEPCC = cs1_val,
       _  => assert(false, "unreachable")
-    }
+    };
+    if #\hyperref[sailRISCVzgetzyconfigzyprintzyreg]{get\_config\_print\_reg}#() then
+      #\hyperref[sailRISCVzprintzyreg]{print\_reg}#(#\hyperref[sailRISCVzscrzynamezymap]{scr\_name\_map}#(scr) ^ " <- " ^ #\hyperref[sailRISCVzRegStr]{RegStr}#(cs1_val));
   };
   RETIRE_SUCCESS
 }

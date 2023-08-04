@@ -1,7 +1,7 @@
 function #\hyperref[sailRISCVzpmpMatchAddr]{pmpMatchAddr}#(addr: xlenbits, width: xlenbits, rng: pmp_addr_range) -> pmpAddrMatch = {
   match rng {
     #\hyperref[sailRISCVzNone]{None}#()         => PMP_NoMatch,
-    #\hyperref[sailRISCVzSome]{Some}#((lo, hi)) => if   hi <_u lo   /* to handle mis-configuration */
+    #\hyperref[sailRISCVzSome]{Some}#((lo, hi)) => if   hi <=_u lo   /* to handle mis-configuration */
                       then PMP_NoMatch
                       else {
                         if      (addr + width <=_u lo) | (hi <=_u addr)

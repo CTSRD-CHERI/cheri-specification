@@ -1,0 +1,3 @@
+function #\hyperref[sailRISCVzsetCapAddrChecked]{setCapAddrChecked}#(c, addr) : (Capability, CapAddrBits) -> Capability =
+    let (representable, newCap) = #\hyperref[sailRISCVzsetCapAddr]{setCapAddr}#(c, addr) in
+    #\hyperref[sailRISCVzclearTagIf]{clearTagIf}#(newCap, #\hyperref[sailRISCVznot]{not}#(representable) | #\hyperref[sailRISCVzisCapSealed]{isCapSealed}#(c))
