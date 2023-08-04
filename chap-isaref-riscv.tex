@@ -61,7 +61,11 @@ can be found in the CHERI-RISC-V Sail model~\cite{sail-cheri-riscv}.
 \sailRISCVtypecapOtypeWidth{}
 
 \phantomsection\label{sailRISCVzcapzymaxzyotype}
+\sailRISCVletreservedOtypes{}
 \sailRISCVletcapMaxOtype{}
+
+\phantomsection\label{sailRISCVzcapszyperzycachezyline}
+\sailRISCVtypecapsPerCacheLine{}
 
 \section{Function Definitions}
 
@@ -80,6 +84,7 @@ The following functions convert between bit vectors and integers and manipulate 
 \sailRISCVval{bool\_to\_bits}
 \sailRISCVval{truncate}
 \sailRISCVval{pow2}
+\sailRISCVval{MAX}
 
 % The following are overloads so we can't easily use the generated latex
 % Hacky hspace to get rid of unwanted hangindent
@@ -117,32 +122,37 @@ representation and the raw capability bits:
 \sailRISCVval{capBitsToCapability}
 \sailRISCVval{capToBits}
 
-\subsection*{Functions for reading and writing register and memory}
+\subsection*{Functions for reading and writing registers and memory}
 
-\arnote{TODO: document X() and C()}
 %\label{sailRISCVzC}
 \begin{lstlisting}[language=sail,label=sailRISCVzC]
 C(n) : regno -> Capability
 C(n) : (regno, Capability) -> unit
 \end{lstlisting}
+\hspace{\parindent}
 The overloaded function \isail{C(n)} is used to read or write capability register \isail{n}.
 
+\medskip
 \begin{lstlisting}[language=sail,label=sailRISCVzX]
 X(n) : regno -> xlenbits
 X(n) : (regno, xlenbits) -> unit
 \end{lstlisting}
+\hspace{\parindent}
 The overloaded function \isail{X(n)} is used to read or write integer register \isail{n}.
 
+\medskip
 \begin{lstlisting}[language=sail,label=sailRISCVzF]
 F(n) : regno -> xlenbits
 F(n) : (regno, xlenbits) -> unit
 \end{lstlisting}
+\hspace{\parindent}
 The overloaded function \isail{F(n)} is used to read or write floating-point register \isail{n}.
 
 \medskip
 \sailRISCVval{memBitsToCapability}
 \sailRISCVval{capToMemBits}
 \sailRISCVval{int\_to\_cap}
+\sailRISCVval{mem\_read\_cap}
 
 \medskip
 \sailRISCVval{get\_cheri\_mode\_cap\_addr}
