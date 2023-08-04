@@ -1199,8 +1199,12 @@ operating systems.
 CHERI-RISC-V originally specified that legacy memory accesses using
 integer pointers were relocated by \DDC{} and \PCC{} in addition to
 being constrained.  In this model, integer pointers were treated as
-offsets relative to the base of \DDC{} and \PCC{} rather than
-addresses.
+offsets relative to the address of \DDC{} or base of \PCC{}\footnote{%
+While offsetting with respect to \DDC{}'s address avoids unnecessary
+alignment requirements, the base of \PCC{} must be used since its
+address must change as the program runs, so cannot be used for
+offsetting.}
+rather than addresses.
 
 The current version of CHERI-RISC-V does not relocate integer
 pointers.  However, it may be desirable to provide optional relocation
