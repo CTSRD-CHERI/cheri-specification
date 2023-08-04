@@ -3174,12 +3174,6 @@ implementation in the CHERI architecture:
   passing the sealed capability to another subsystem.
 
 \item
-  Provide a variant of \insnref{CSetBounds} that sets imprecise bounds
-  suitable for sealing with \insnref{CSeal}. In the 128-bit
-  representation, the bounds of sealed capabilities have stronger alignment
-  requirements than for unsealed capabilities.
-
-\item
   Add instructions for copying non-capability data from a capability register
   into a general-purpose integer register. A use case is when a function is called
   with a parameter whose type is the union of a pointer and a non-pointer type,
