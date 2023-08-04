@@ -1470,7 +1470,9 @@ providing an instruction to throw an exception based on the tag.
 Originally, CHERI always treated integer pointers used for legacy
 memory accesses as offsets.  For example, loads and stores using an
 integer pointer treated integer address as an offset relative to the
-base of \DDC{}.  Similarly, branch instructions which targeted an
+base of \DDC{}\footnote{Some CHERI instantiations performed offsetting
+with respect to the address of DDC, rather than the base.}.
+Similarly, branch instructions which targeted an
 absolute integer pointer set the offset of \PCC{} to the value of the
 integer pointer.
 
