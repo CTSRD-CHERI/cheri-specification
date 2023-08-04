@@ -261,6 +261,18 @@ Further, we felt that the working-set properties of the two register files
 might be quite different; effectively pinning the two to one another would
 reduce the efficiency of both.
 
+With a split register file, it may be useful for the architecture to add
+instructions for copying non-capability data from a capability register
+into a general-purpose integer register. A use case is when a function is called
+with a parameter whose type is the union of a pointer and a non-pointer type,
+such as an int. This parameter must be passed in a capability register, because
+the tag needs to be preserved when it holds a capability. If the body of
+the function accesses the non-capability branch of the union, it needs to
+get the non-capability bits out of the capability register and into a general
+purpose register. This can be done by spilling the capability register to the
+stack and then reading it back into a general-purpose integer register, but a register
+to register copy would be faster.
+
 CHERI-RISC-V (Chapter~\ref{chap:cheri-riscv}),
 Morello, and CHERI-x86-64 (Chapter~\ref{chap:cheri-x86-64}) use merged register files.
 

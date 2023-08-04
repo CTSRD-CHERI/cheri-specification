@@ -3174,22 +3174,6 @@ implementation in the CHERI architecture:
   passing the sealed capability to another subsystem.
 
 \item
-  Add instructions for copying non-capability data from a capability register
-  into a general-purpose integer register. A use case is when a function is called
-  with a parameter whose type is the union of a pointer and a non-pointer type,
-  such as an int. This parameter must be passed in a capability register, because
-  the tag needs to be preserved when it holds a capability. If the body of
-  the function accesses the non-capability branch of the union, it needs to
-  get the non-capability bits out of the capability register and into a general
-  purpose register. This can be done by spilling the capability register to the
-  stack and then reading it back into a general-purpose integer register, but a register
-  to register copy would be faster. (We need to investigate whether this happens
-  often enough for the optimization to be worthwhile).
-
-  With compressed 128-bit capabilities, two instructions are needed (to get
-  the upper and lower 64 bits of the capability register).
-
-\item
   Add an instruction that is like \insnref{CSetBounds} except that it
   sets \cbase{} to the current \cbase{} $+$ \coffset{} and the new length
   is the old \clength{} $-$ \coffset{} (i.e., the upper bound is unchanged).
