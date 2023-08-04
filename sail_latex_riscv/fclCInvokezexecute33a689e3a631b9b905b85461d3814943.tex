@@ -29,14 +29,14 @@ if #\hyperref[sailRISCVznot]{not}#(cs1_val.tag) then {
 } else if cs2_val.permit_execute then {
   #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_PermitExecuteViolation, cs2);
   RETIRE_FAIL
-} else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(cs1_val, newPC, #\hyperref[sailRISCVzminzyinstructionzybytes]{min\_instruction\_bytes}#())) then {
-  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs1);
-  RETIRE_FAIL
-} else if newPCCBase[0] == bitone | (newPCCBase[1] == bitone & ~(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#())) then {
+} else if #\hyperref[sailRISCVzhavezypcczyrelocation]{have\_pcc\_relocation}#() & (newPCCBase[0] == bitone | (newPCCBase[1] == bitone & ~(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()))) then {
   #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_UnalignedBase, cs1);
   RETIRE_FAIL
 } else if newPC[1] == bitone & ~(#\hyperref[sailRISCVzhaveRVC]{haveRVC}#()) then {
   #\hyperref[sailRISCVzhandlezymemzyexception]{handle\_mem\_exception}#(newPC,  #\hyperref[sailRISCVzEzyFetchzyAddrzyAlign]{E\_Fetch\_Addr\_Align}#());
+  RETIRE_FAIL
+} else if #\hyperref[sailRISCVznot]{not}#(#\hyperref[sailRISCVzinCapBounds]{inCapBounds}#(cs1_val, newPC, #\hyperref[sailRISCVzminzyinstructionzybytes]{min\_instruction\_bytes}#())) then {
+  #\hyperref[sailRISCVzhandlezycherizyregzyexception]{handle\_cheri\_reg\_exception}#(CapEx_LengthViolation, cs1);
   RETIRE_FAIL
 } else {
   #\hyperref[sailRISCVzC]{C}#(31) = #\hyperref[sailRISCVzunsealCap]{unsealCap}#(cs2_val);

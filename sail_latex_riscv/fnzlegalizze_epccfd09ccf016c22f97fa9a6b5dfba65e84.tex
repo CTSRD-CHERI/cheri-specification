@@ -1,8 +1,8 @@
 function #\hyperref[sailRISCVzlegalizzezyepcc]{legalize\_epcc}# (v : Capability) -> Capability = {
-  let voffset = #\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(v);
-  let legalized = #\hyperref[sailRISCVzlegalizzezyxepc]{legalize\_xepc}#(voffset);
+  let int_val = #\hyperref[sailRISCVzcapzytozyintegerzypc]{cap\_to\_integer\_pc}#(v);
+  let legalized = #\hyperref[sailRISCVzlegalizzezyxepc]{legalize\_xepc}#(int_val);
 
-  if   legalized == voffset
+  if   legalized == int_val
   then v /* avoid possibly attempting to set the offset of a sentry */
-  else #\hyperref[sailRISCVzsetCapOffsetChecked]{setCapOffsetChecked}#(v, legalized)
+  else #\hyperref[sailRISCVzupdatezycapzywithzyintegerzypc]{update\_cap\_with\_integer\_pc}#(v, legalized)
 }

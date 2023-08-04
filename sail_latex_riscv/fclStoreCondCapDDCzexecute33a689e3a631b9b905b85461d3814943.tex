@@ -5,8 +5,7 @@ if #\hyperref[sailRISCVzspeculatezyconditional]{speculate\_conditional}# () == f
   #\hyperref[sailRISCVzC]{C}#(cs2) = #\hyperref[sailRISCVzintzytozycap]{int\_to\_cap}#(#\hyperref[sailRISCVzEXTZ]{EXTZ}#(0b1));
   RETIRE_SUCCESS
 } else if #\hyperref[sailRISCVzhaveAtomics]{haveAtomics}#() then {
-  let ddc_val = DDC;
-  let vaddr = ddc_val.address + #\hyperref[sailRISCVzX]{X}#(rs1);
+  let (ddc_val, vaddr) = #\hyperref[sailRISCVzddczyandzyresultingzyaddr]{ddc\_and\_resulting\_addr}#(#\hyperref[sailRISCVzX]{X}#(rs1));
   #\hyperref[sailRISCVzhandlezystorezycondzycapzyviazycap]{handle\_store\_cond\_cap\_via\_cap}#(cs2, cs2, DDC_IDX, ddc_val, vaddr, false, false, true)
 } else {
   #\hyperref[sailRISCVzhandlezyillegal]{handle\_illegal}#();

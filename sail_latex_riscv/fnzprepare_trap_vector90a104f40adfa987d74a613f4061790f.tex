@@ -6,9 +6,9 @@ function #\hyperref[sailRISCVzpreparezytrapzyvector]{prepare\_trap\_vector}#(p :
                          };
 
   /* NB we use address, not offset here because even though tvec is the offset
-     we want the absolute address to insert in PC. The bottom two #\hyperref[sailRISCVzbits]{bits}# (mode) should 
+     we want the absolute address to insert in PC. The bottom two #\hyperref[sailRISCVzbits]{bits}# (mode) should
      be the same because we enforce aligned tcc base. */
-  match #\hyperref[sailRISCVztveczyaddr]{tvec\_addr}#(#\hyperref[sailRISCVzMkzyMtvec]{Mk\_Mtvec}#(tcc.address), c) { 
+  match #\hyperref[sailRISCVztveczyaddr]{tvec\_addr}#(#\hyperref[sailRISCVzMkzyMtvec]{Mk\_Mtvec}#(tcc.address), c) {
     #\hyperref[sailRISCVzSome]{Some}#(addr) => { nextPCC = tcc; addr },
     #\hyperref[sailRISCVzNone]{None}#()     => #\hyperref[sailRISCVzinternalzyerror]{internal\_error}#(__FILE__, __LINE__, "Invalid tvec mode")
   }

@@ -1,4 +1,6 @@
 bitfield ccsr : xlenbits = {
-  d       :  1,      /* dirty  */
+  /* Bits allocated from 31 downwards are used for feature flags. */
+  tc      :  31,     /* tag-clearing error semantics */
+  nr      :  30,     /* no DDC/PCC relocation */
   e       :  0       /* enable */
 }

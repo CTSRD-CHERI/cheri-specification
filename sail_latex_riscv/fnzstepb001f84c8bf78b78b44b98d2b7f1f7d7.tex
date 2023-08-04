@@ -2,7 +2,16 @@ function #\hyperref[sailRISCVzstep]{step}#(step_no : int) -> bool = {
   /* for step extensions */
   #\hyperref[sailRISCVzextzyprezystepzyhook]{ext\_pre\_step\_hook}#();
 
-  minstret_written = false;     /* see note for minstret */
+  /*
+   * This records whether or not minstret should be incremented when
+   * the instruction is retired. Since retirement occurs before CSR
+   * writes we initialise it based on mcountinhibit here, before it is
+   * potentially changed. This is also set to false if minstret is
+   * written.  See the note near the minstret declaration for more
+   * information.
+   */
+  minstret_increment = mcountinhibit.#\hyperref[sailRISCVzIR]{IR}#() == 0b0;
+
   let (retired, stepped) : (Retired, bool) =
     match #\hyperref[sailRISCVzdispatchInterrupt]{dispatchInterrupt}#(cur_privilege) {
       #\hyperref[sailRISCVzSome]{Some}#(intr, priv) => {

@@ -11,8 +11,8 @@ function #\hyperref[sailRISCVzcapToString]{capToString}# (cap) = {
   #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(#\hyperref[sailRISCVzBitStr]{BitStr}#(0b0 @ #\hyperref[sailRISCVzgetCapPerms]{getCapPerms}#(cap)),
   #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" type:",
   #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(#\hyperref[sailRISCVzBitStr]{BitStr}#(otype64),
-  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" offset:",
-  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(#\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVzgetCapOffsetBits]{getCapOffsetBits}#(cap)),
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" address:",
+  #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(#\hyperref[sailRISCVzBitStr]{BitStr}#(cap.address),
   #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" base:",
   #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(#\hyperref[sailRISCVzBitStr]{BitStr}#(#\hyperref[sailRISCVzgetCapBaseBits]{getCapBaseBits}#(cap)),
   #\hyperref[sailRISCVzconcatzystr]{concat\_str}#(" length:", len_str)))))))))))))

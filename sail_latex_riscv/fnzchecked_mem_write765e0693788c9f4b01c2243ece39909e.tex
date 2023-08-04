@@ -5,5 +5,5 @@ function checked_mem_write forall 'n, 0 < 'n <= max_mem_access . (wk : write_kin
   then match #\hyperref[sailRISCVzextzycheckzyphyszymemzywrite]{ext\_check\_phys\_mem\_write}# (wk, paddr, width, data, meta) {
     #\hyperref[sailRISCVzExtzyPhysAddrzyOK]{Ext\_PhysAddr\_OK}#() => #\hyperref[sailRISCVzphyszymemzywrite]{phys\_mem\_write}#(wk, paddr, width, data, meta),
     #\hyperref[sailRISCVzExtzyPhysAddrzyError]{Ext\_PhysAddr\_Error}#(e)  => #\hyperref[sailRISCVzMemException]{MemException}#(e)
-  }  
+  }
   else #\hyperref[sailRISCVzMemException]{MemException}#(#\hyperref[sailRISCVzEzySAMOzyAccesszyFault]{E\_SAMO\_Access\_Fault}#())

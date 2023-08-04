@@ -51,10 +51,7 @@ function #\hyperref[sailRISCVzextzyinitzyregs]{ext\_init\_regs}# () = {
   x31 = null_cap;
 
   misa->#\hyperref[sailRISCVzX]{X}#() = 0b1;
-  mccsr->#\hyperref[sailRISCVzd]{d}#() = 0b1;
-  mccsr->#\hyperref[sailRISCVze]{e}#() = 0b1;
-  sccsr->#\hyperref[sailRISCVzd]{d}#() = 0b1;
-  sccsr->#\hyperref[sailRISCVze]{e}#() = 0b1;
-  uccsr->#\hyperref[sailRISCVzd]{d}#() = 0b1;
-  uccsr->#\hyperref[sailRISCVze]{e}#() = 0b1;
+  mccsr = #\hyperref[sailRISCVzlegalizzezyccsr]{legalize\_ccsr}#(mccsr, #\hyperref[sailRISCVzzzeros]{zeros}#());
+  sccsr = #\hyperref[sailRISCVzlegalizzezyccsr]{legalize\_ccsr}#(sccsr, #\hyperref[sailRISCVzzzeros]{zeros}#());
+  uccsr = #\hyperref[sailRISCVzlegalizzezyccsr]{legalize\_ccsr}#(uccsr, #\hyperref[sailRISCVzzzeros]{zeros}#());
 }

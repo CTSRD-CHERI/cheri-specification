@@ -1,8 +1,8 @@
 function #\hyperref[sailRISCVzsetzyxretzytarget]{set\_xret\_target}#(p, value) = {
   match p {
-    Machine    => MEPCC = #\hyperref[sailRISCVzsetCapOffsetChecked]{setCapOffsetChecked}#(MEPCC, value),
-    Supervisor => SEPCC = #\hyperref[sailRISCVzsetCapOffsetChecked]{setCapOffsetChecked}#(SEPCC, value),
-    User       => UEPCC = #\hyperref[sailRISCVzsetCapOffsetChecked]{setCapOffsetChecked}#(UEPCC, value)
+    Machine    => MEPCC = #\hyperref[sailRISCVzupdatezycapzywithzyintegerzypc]{update\_cap\_with\_integer\_pc}#(MEPCC, value),
+    Supervisor => SEPCC = #\hyperref[sailRISCVzupdatezycapzywithzyintegerzypc]{update\_cap\_with\_integer\_pc}#(SEPCC, value),
+    User       => UEPCC = #\hyperref[sailRISCVzupdatezycapzywithzyintegerzypc]{update\_cap\_with\_integer\_pc}#(UEPCC, value)
   };
   value
 }

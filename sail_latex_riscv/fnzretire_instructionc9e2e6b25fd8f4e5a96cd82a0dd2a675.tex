@@ -1,6 +1,3 @@
 function #\hyperref[sailRISCVzretirezyinstruction]{retire\_instruction}#() -> unit = {
-  if   minstret_written == true
-  then minstret_written = false
-  else if mcountinhibit.#\hyperref[sailRISCVzIR]{IR}#() == 0b0
-       then minstret = minstret + 1
+  if minstret_increment then minstret = minstret + 1;
 }

@@ -3,6 +3,6 @@ function #\hyperref[sailRISCVzgetzycherizymodezycapzyaddr]{get\_cheri\_mode\_cap
     let base_cap = #\hyperref[sailRISCVzC]{C}#(base_reg) in
     (base_cap, base_cap.address + offset, 0b0 @ base_reg)
   else
-    let ddc = DDC in
-    (ddc, ddc.address + #\hyperref[sailRISCVzX]{X}#(base_reg) + offset, DDC_IDX);
+    let (ddc_val, addr) = #\hyperref[sailRISCVzddczyandzyresultingzyaddr]{ddc\_and\_resulting\_addr}#(#\hyperref[sailRISCVzX]{X}#(base_reg) + offset) in
+    (ddc_val, addr, DDC_IDX);
 }

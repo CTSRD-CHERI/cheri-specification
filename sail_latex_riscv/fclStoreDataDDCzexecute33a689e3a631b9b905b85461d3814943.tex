@@ -1,3 +1,2 @@
-let ddc_val = DDC;
-let vaddr = ddc_val.address + #\hyperref[sailRISCVzX]{X}#(rs1);
+let (ddc_val, vaddr) = #\hyperref[sailRISCVzddczyandzyresultingzyaddr]{ddc\_and\_resulting\_addr}#(#\hyperref[sailRISCVzX]{X}#(rs1));
 #\hyperref[sailRISCVzhandlezystorezydatazyviazycap]{handle\_store\_data\_via\_cap}#(rs2, DDC_IDX, ddc_val, vaddr, width)
