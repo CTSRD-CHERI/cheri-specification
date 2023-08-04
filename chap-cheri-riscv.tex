@@ -117,8 +117,8 @@ CHERI-RISC-V shares the following features with other CHERI architectures:
 \begin{itemize}
 \item Tagged memory with capability-width tag granularity and alignment.
 \item Registers able to hold capabilities are tagged.
-\item \PCC{} controls program-counter-relative fetches.
-\item \DDC{} controls legacy RISC-V load-store instructions.
+\item \PCC{} constrains program-counter-relative fetches.
+\item \DDC{} constrains legacy RISC-V load-store instructions.
 \item Floating point is fully supported, including capability-relative
   floating-point load and store instructions.
 \item General-purpose registers are extended to hold capabilities.
@@ -557,7 +557,7 @@ RISC-V instructions that interpret arguments or results as addresses
 (e.g.\ loads, stores, jumps, \insnnoref{AUIPC}) can either act on integer pointers
 or on explicit capabilities.
 For example, capability-relative load and store instructions accept (and expect) capability
-operands that relocate and constrain data accesses, performing tag, bounds,
+operands that constrain data accesses, performing tag, bounds,
 permission, and other checks as required.
 However, load and store instructions occupy large amounts of instruction
 encoding space due to having multiple register operands and large immediate

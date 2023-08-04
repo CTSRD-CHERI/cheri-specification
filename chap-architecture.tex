@@ -769,7 +769,7 @@ If a capability dereference is expected, an exception must be thrown if the
 input register does not contain a valid tag.
 If an integer dereference is to be performed, only the integer portion of the
 capability register will be used (per above, the virtual address of the
-capability), and it will be indirected through an appropriate implied
+capability), and it will be checked using an appropriate implied
 capability such as the Program-Counter Capability (\PCC{}) or Default Data
 Capability (\DDC{}).
 
@@ -834,7 +834,7 @@ following:
   Counter (\PC{}) to be a full capability, imposing validity, permission,
   bounds, and other checks on instruction fetch.
 
-\item[Default Data Capability (\DDC{})] indirects legacy non-capability loads
+\item[Default Data Capability (\DDC{})] constrains legacy non-capability loads
   and stores, controlling data accesses to memory.
 \end{description}
 
@@ -1726,7 +1726,7 @@ These instructions provide pointer comparison:
 \insnref{CTestSubset}.
 
 \item[Load or store via a capability]
-These instructions access memory indirected via an explicitly named capability
+These instructions access memory via an explicitly named capability
 register, and will ideally correspond to a full range of contemporary
 indexing modes present in the baseline ISA -- for example, allowing aligned or
 unaligned access to zero-extended and sign-extended integers of varying
