@@ -1122,7 +1122,7 @@ CHERI-MIPS duplicated the full load-store encoding
 space to provide capability-relative variations on load and store
 instructions.
 This approach ensures intentionality: the architecture is always able to
-perform a \DDC{}-relative access with legacy integer-relative load and store
+perform a \DDC{}-constrained access with legacy integer-relative load and store
 instructions, and is always able to assert that the tag bit is set for
 capability-relative load and store instructions.
 However, this makes heavy use of remaining unused opcode space in many
@@ -1135,7 +1135,7 @@ have their current interpretations, and a small selection of
 capability-relative loads and stores are added.
 To get access to the full range of load and store variations, the encoding
 mode can be switched to one in which existing load and store opcodes are
-instead interpreted as requiring capability operands, and \DDC{}-relative
+instead interpreted as requiring capability operands, and \DDC{}-constrained
 integer-based access is disabled.
 
 There are a variety of mechanisms that could be used to switch between

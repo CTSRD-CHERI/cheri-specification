@@ -832,18 +832,14 @@ operations that conform to \gls{capability
   description={An integer \gls{address} translated by the Memory Management
     Unit (MMU) into a \gls{physical address} for the purposes of load, store,
     and instruction fetch.
-    \Glspl{capability} embed an address, represented in the instruction
-    set as the sum of the \gls{capability base} and \gls{capability offset},
-    as well as \gls{capability bounds} relative to the address.
+    \Glspl{capability} embed an address, as well as \gls{capability bounds}
+    relative to the address.
     The integer addresses passed to \glslink{legacy instructions}{legacy load
-    and store instructions} that would previously have been interpreted as
-    virtual addresses are, with CHERI, transformed (and checked) using the
-    \gls{default data capability}.
+    and store instructions} are checked with CHERI using the
+    \gls{default data capability}. The interpretation -- physical or virtual
+    addresses -- is not changed by CHERI.
     Similarly, the integer addresses passed to legacy branch and jump
-    instructions are transformed (and checked) using the \gls{program-counter
-    capability}.
-    This in effect introduces a further relocation of legacy addresses prior
-    to virtual address translation}
+    instructions are checked using the \gls{program-counter capability}}
 }
 
 \newglossaryentry{vulnerability mitigation}

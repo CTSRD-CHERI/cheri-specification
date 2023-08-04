@@ -260,7 +260,7 @@ For example, although tagged capabilities are used instead of unadorned
 integers in the instruction-level descriptions of loads and stores, once
 checks are performed capabilities are largely reduced to integer addresses
 for processing by the MMU and memory subsystem.
-Compilers must use capability-relative loads and stores for capability-aware
+Compilers must use capability-constrained loads and stores for capability-aware
 code, but the structure (and often format) of those instructions remain the
 same, and although code is generated to use capabilities rather than integers
 for pointers, the vast majority of source code remains the same.
@@ -377,7 +377,7 @@ All other capabilities will be derived from these initial valid capabilities
 through valid capability transformations.
 
 In order to continue to support non-CHERI-aware code, dereference of integer
-virtual addresses via legacy instruction is transparently indirected via a
+virtual addresses via legacy instruction is transparently checked via a
 \textit{default data capability} (\DDC{}) for loads and stores, or a
 \textit{program-counter capability} (\PCC{}) for instruction fetch.
 

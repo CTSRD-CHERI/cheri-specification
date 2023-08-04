@@ -935,19 +935,17 @@ compiled to use conventional integer pointers, rather than capability
 pointers, using two special capability registers:
 
 \begin{description}
-\item[Default Data Capability (DDC)] DDC indirects and controls legacy
-  instructions that load and store relative to integer addresses rather than
-  capabilities.
+\item[Default Data Capability (DDC)] DDC constrains legacy instructions that
+  load and store relative to integer addresses rather than capabilities.
 
 \item[Program Counter Capability (PCC)] PCC extends the conventional program
-  counter with capability metadata, indirecting and controlling instruction
-  fetches.
+  counter with capability metadata, constraining instruction fetches.
 \end{description}
 
 Programs compiled to use capabilities to represent pointers (whether
 implicitly or via explicit program annotations) will not use the default data
 capability, instead employing capability registers and capability-based
-instructions for pointer operations and indirection.
+instructions for pointer operations.
 The program-counter capability will be used regardless of the code model
 employed, although capability-aware code generation will employ constrained
 program-counter bounds and permissions to implement control-flow robustness
