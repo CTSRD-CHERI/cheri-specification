@@ -3138,13 +3138,6 @@ implementation in the CHERI architecture:
     the values of $T$ and $B$ for debugging purposes, where possible.
 
 \item
-  Consider re-writing pseudocode in terms of absolute addresses rather
-  than offsets, without changing the semantics. This would eliminate
-  repeated use of \cbase{} $+$ \coffset{} to mean the address field of the
-  capability; it would also potentially reduce ambiguity such as where
-  \cbase{} is not well defined due to $\cexponent{} > 43$ as above.
-
-\item
   Provide a separate instruction for clearing the \emph{global} bit on a
   capability.  \cappermG is currently treated as a permission, but it is
   really an information flow label rather than a permission. We may want to
