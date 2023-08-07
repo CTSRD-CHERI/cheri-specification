@@ -962,6 +962,23 @@ micro-architectural impact, software performance, compatibility, and security:
   published \citetitleit{cornucopia}~\cite{cornucopia}.
   This paper describes a full hardware-software implementation of temporal
   memory safety for CHERI, including architectural accelerations.
+
+\item In the proceedings of Hardware and Architectural Support for Security
+  and Privacy (HASP 2020), we published \citetitleit{DBLP:conf/micro/MarkettosBBNMW20}~\cite{DBLP:conf/micro/MarkettosBBNMW20}.
+  This paper proposes new solutions that can efficiently address the problem
+  of malicious memory access from pluggable computer peripherals and
+  microcontrollers embedded within a system-on-chip.
+
+\item In Workshop on Computer Architecture Research with RISC-V (CARRV 2021),
+  we published \citetitleit{fuchs2021framework}~\cite{fuchs2021framework}.
+  This paper presents a flexible and extensible bare-metal test suite containing replications of all major transient-execution attacks in RISC-V.
+
+\item In the proceedings of the 31st European Symposium on Programming
+  (ESOP 2022) we published \citetitleit{DBLP:conf/esop/BauereissCSAESB22}~\cite{DBLP:conf/esop/BauereissCSAESB22}.
+  In this paper we define the fundamental security property that Morello aims
+  to provide: reachable capability monotonicity, and prove that the
+  architecture definition satisfies it.  We also published an extended
+  version as a technical report~\cite{UCAM-CL-TR-959}.
 \end{itemize}
 
 We have additionally released several technical reports, including this
@@ -1020,6 +1037,10 @@ Each has had multiple versions reflecting evolution of our approach:
   introduction to pure-capability C/C++, variants of the C and C++ programming
   languages targeting implementation of all pointers using CHERI architectural
   capabilities.
+
+\item The \citetitleit{UCAM-CL-TR-982}~\cite{UCAM-CL-TR-982} lays out the
+  specific architectural security objectives of the Arm Morello prototype,
+  as well as areas that fell out of scope for the project.
 \end{itemize}
 
 The following technical reports are PhD dissertations that describe both CHERI
@@ -1051,6 +1072,34 @@ and our path to our current design:
   describes the implementation
   of C/C++ compilation and linkage using CHERI capabilities for spatial memory
   safety~\cite{UCAM-CL-TR-949}.
+
+\item Hongyan Xia's PhD dissertation, \citetitleit{UCAM-CL-TR-955},
+  describes 64-bit CHERI capabilities along with a real-time OS to evaluate
+  their effectiveness\cite{UCAM-CL-TR-955}.
+
+\item Lawrence Esswood's PhD dissertation, \citetitleit{UCAM-CL-TR-961},
+  describes CheriOS, a clean-slate CHERI-specific
+  operating system and hypervisor~\cite{UCAM-CL-TR-961}.
+
+\item Michael Dodson's PhD dissertation, \citetitleit{UCAM-CL-TR-963},
+  demostrates the composition of hardware-enforced architectural capabilities
+  and cryptographic network tokens to implement object capabilities in a
+  distributed cyber physical system~\cite{UCAM-CL-TR-963}.
+
+\item Brett Gutstein's PhD dissertation, \citetitleit{UCAM-CL-TR-975},
+  describes a memory-operations framework for reasoning about memory-safety
+  mitigations, presents a CHERI-aware implemention of Apple’s JavaScriptCore,
+  and describes the Cornucopia temporal memory safety implementation~\cite{UCAM-CL-TR-975}.
+
+\item Hesham Almatary's PhD dissertation, \citetitleit{UCAM-CL-TR-976},
+  describes CompartOS, a new lightweight hardware-software compartmentalisation
+  model building on CHERI to secure mainstream and complex embedded software
+  systems~\cite{UCAM-CL-TR-976}.
+
+\item Peter Rugg's PhD dissertation, \citetitleit{UCAM-CL-TR-984},
+  describes the implementation of CHERI on three RISC-V microarchitectures
+  as well as the refinement of support for temporal memory
+  safety~\cite{UCAM-CL-TR-984}.
 \end{itemize}
 
 As our research proceeded, and prior to our conference and journal articles,
