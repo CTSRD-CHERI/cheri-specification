@@ -219,7 +219,7 @@ As with other CHERI architectures, CHERI-x86-64 should support running existing
 x86-64 code, capability-aware code, and hybrid code.  This
 requires the architecture to support an additional addressing mode
 using capabilities as well as a new operand size for instructions
-which use capabilities as operands.
+that use capabilities as operands.
 The x86 architecture has supported similar extensions in the past when it was
 extended to support 32-bit operation.
 
@@ -246,7 +246,7 @@ execution mode along with prefixes to toggle the individual addressing
 mode and operand size of individual instructions.  We define a new
 \textbf{capability mode}.  As with CHERI-RISC-V, this mode is enabled
 by setting the low bit of the \cflags{} field in \CIP{}.  This mode is
-valid only in 64-bit mode.  A far call or jump which uses a 32-bit
+valid only in 64-bit mode.  A far call or jump that uses a 32-bit
 code segment along with a target code capability with this flag set
 will raise a General Protection Fault with the error code set to the
 target segment selector.
@@ -431,7 +431,7 @@ the 16-bit or 32-bit stack pointer register is used.  In 64-bit long
 mode, \RSP{} is always used as the stack pointer.  In capability mode,
 \CSP{} would always be used as the stack pointer.
 
-Code which needs to use the alternate stack pointer
+Code that needs to use the alternate stack pointer
 interpretation would simulate these instructions using \insnxesref{MOV}
 instructions and adjusting the desired stack pointer using
 instructions such as \insnxesref{ADD} or \insnxesref{SUB}.  Emulation of
@@ -442,7 +442,7 @@ adjust the instruction pointer.
 
 CHERI-x86-64 will require new instructions to examine and modify
 capabilities.  Many of these new instructions can be implemented as
-new variants of existing instructions that use an opcode which
+new variants of existing instructions that use an opcode that
 specifies a capability operation rather than an integer operation.
 Existing x86 toolchains already use instruction suffixes such as
 \texttt{b}, \texttt{w}, \texttt{l}, and \texttt{q} to explicitly state
@@ -470,7 +470,7 @@ instruction supports capability-sized operands, the capability operand
 prefix can be used to use a capability-sized operand instead.  This
 prefix would have higher precedence than \texttt{REX.W}.
 
-In capability mode, most instructions which can operate on either
+In capability mode, most instructions that can operate on either
 integer or capability-sized values would follow the same logic in the
 previous paragraph to determine the operand size.  However, two groups
 of existing instructions would default to using a capability-sized
@@ -549,8 +549,8 @@ add %csp,$16
   \item \insnxesref[cmp]{CMPC} would permit comparison of capability values
     including the functionality of both \insnref{CSetEqualExact} (via
     \texttt{ZF}) and \insnref{CTestSubset} (via \texttt{SF}).  This is
-    somewhat different than the existing variants of \insnnoref{CMP}
-    which perform the equivalent \insnnoref{SUB} instruction and then
+    somewhat different from the existing variants of \insnnoref{CMP}
+    that perform the equivalent \insnnoref{SUB} instruction and then
     discard the result as in this case the flags set would not be
     identical to the flags set as a result of \insnxesref[sub]{SUBC}.
 
@@ -610,7 +610,7 @@ Absolute near branches would be extended to support capability operands.
 In 64-bit long mode, a capability operand prefix would select a
 capability operand size.  In capability mode, absolute near branches would
 support only capability operands.
-Absolute near branches which use an integer operand would set the
+Absolute near branches that use an integer operand would set the
 \textbf{address} field of the
 \CIP{} capability while absolute near branches using a capability operand would
 load a new capability into \CIP{}.
@@ -636,7 +636,7 @@ instruction (see Section~\ref{sec:x86:capability-fault}).
 Section~\ref{sec:x86:interrupt-exception}) from the stack loading
 capabilities into \CIP{} and \CSP{}.  This instruction would require
 the capability operand prefix.  An attempt to restore a 32-bit code
-segment paired with a \CIP{} which uses capability mode should raise a
+segment paired with a \CIP{} that uses capability mode should raise a
 General Protection fault with the error code set to the destination
 code segment.
 
@@ -651,7 +651,7 @@ propose adding new CHERI-specific instructions.
 Existing general-purpose x86 instructions support two operands rather
 than three operands.  To avoid requiring a \VEX{} prefix for all new
 CHERI instructions, most instructions are defined with two operands
-rather than three.  New instructions which require three operands must
+rather than three.  New instructions thatrequire three operands must
 be encoded using a \VEX{} prefix.
 
 Note that all of these instructions would only be valid in 64-bit mode
@@ -734,17 +734,17 @@ x86 architecture including MMX, SSE, AVX, and AVX-512.
 We propose that vector registers should not contain tags.  Loads of
 vector registers should ignore tags in memory, and stores of vector
 registers to memory should always clear tags.  Existing vector
-instructions which manipulate vector register contents do not make
+instructions that manipulate vector register contents do not make
 sense for tagged capability values.  However, vector extensions are
-also used to perform certain classes of memory loads and stores which
+also used to perform certain classes of memory loads and stores, which
 may require additional care.
 
 \subsubsection{Memory Copies}
 
 Vector loads and stores are often used to implement \ccode{memcpy()}.
 In CHERI C, \ccode{memcpy()} must preserve tags.  A \ccode{memcpy()}
-implementation which uses \insnxesref[mov]{MOVC} will operate at the same
-width as existing memory copies implemented using SSE which may
+implementation that uses \insnxesref[mov]{MOVC} will operate at the same
+width as existing memory copies implemented using SSE, which may
 mitigate some of the cost.  Another option may be to support an
 optimized \insnxesref[movs]{REP MOVSC} similar to the existing optimization
 for \insnnoref{REP MOVSB} where the former instruction would preserve
@@ -837,7 +837,7 @@ Priority & Description \\
 \label{table:x86:exception-priority}
 \end{table}
 
-CHERI-RISC-V includes the name of the register which
+CHERI-RISC-V includes the name of the register, which
 triggers a capability violation.  It is not feasible to provide a
 direct analog of this on x86.  Indirect jumps and calls may raise an
 exception while loading a capability from memory that is not present
@@ -881,9 +881,9 @@ following changes:
 
 \begin{itemize}
   \item Extending the global and local descriptor table format to
-    support a new capability call gate which stored a full capability
+    support a new capability call gate that stores a full capability
     rather than a 64-bit address.  This will be more invasive than the
-    64-bit call gate which depends on the ability to force a number
+    64-bit call gate that depends on the ability to force a number
     of reserved bits in the fourth double word to zero as a sentinel
     type for the second half of a 64-bit call gate.
 
@@ -999,7 +999,7 @@ the \insnnoref{RDFSBASE} and \insnnoref{RDGSBASE} instructions should
 return the \textbf{address} field of the \CFS{} and \CGS{} capabilities,
 respectively.  The \insnnoref{WRFSBASE} and \insnnoref{WRGSBASE}
 instructions should set the \textbf{address} field of the respective capability
-equivalent to \insnxesref{SCADDR}.  If a new address is set which makes
+equivalent to \insnxesref{SCADDR}.  If a new address is set that makes
 the capability unrepresentable, the capability's tag should be
 cleared.
 
@@ -1031,7 +1031,7 @@ Bit & Name & Description \\
 \label{table:x86:pte}
 \end{table}
 
-If an instruction performs a memory access which violates a CHERI page
+If an instruction performs a memory access that violates a CHERI page
 permission (such as a store of a tagged capability to a page where the
 \texttt{CW} bit is clear), a page-fault (PF\#) exception should be
 raised.  Bit 8 (currently reserved) should be set in the page-fault
@@ -1164,7 +1164,7 @@ A few other approaches are enumerated below:
 
 Two operand arithmetic instructions such as \insnxesref{ADD} overwrite
 one of the source operands with the arithmetic result.  For operations
-which are commutative such as adding two integers, a compiler can
+that are commutative (such as adding two integers), a compiler can
 choose which of the source operands to overwrite.  For example, if a
 series of instructions computes integer pointers to fields of an
 object by adding offsets to a base integer pointer, the compiler can
@@ -1176,7 +1176,7 @@ operand holds a capability.
 
 To mitigate this, it may be desirable to add alternate opcodes for
 \insnxesref{ADD}, \insnxesref{SUB}, \insnxesref{AND}, \insnxesref{OR},
-and \insnxesref{XOR} which treat the destination operand as an integer
+and \insnxesref{XOR}, which treat the destination operand as an integer
 input to the arithmetic operation applied to the second capability
 operand.  This could be implemented by extending a subset of the 8-bit
 opcodes of these instructions to perform a three operand operation
@@ -1206,11 +1206,11 @@ addc %cax, %rbx
 except for using the opcode \texttt{00} instead of \texttt{01}.
 
 Note that this approach would permit encoding variants of
-\insnxesref[and]{ANDC} and \insnxesref[sub]{SUBC} which preserve the
-base capability pointer input operand which is not possible in the
+\insnxesref[and]{ANDC} and \insnxesref[sub]{SUBC} that preserve the
+base capability pointer input operand -- which is not possible in the
 existing ISA for integer pointers.
 
-Instructions which use an immediate source operand would not be
+Instructions that use an immediate source operand would not be
 extended in this manner.
 
 \subsection{Vector Registers and Tags}
@@ -1225,11 +1225,11 @@ could be added via two new two-byte opcodes.
 
 This would require extending the vector registers to contain one or
 more tags (1 tag for XMM registers, 2 tags for YMM, 4 tags for ZMM).
-Instructions which modify vector registers should not permit
+Instructions that modify vector registers should not permit
 non-monotonic operations on tagged capabilities embedded in vector
 registers.  The simplest approach would be to clear all tags for any
 instruction other than simple move operations.  However, it may be
-desirable to preserve tags for operations which are safe.  For
+desirable to preserve tags for operations that are safe.  For
 example, tags belonging to capabilities in the unshuffled half of a
 YMM or ZMM register used with \insnnoref{VPSHUFHW} could be safely
 preserved.
@@ -1238,13 +1238,13 @@ preserved.
 
 Supporting far branches with capability operands would add additional
 complexity.  For example, far branches need to ensure that code
-capability pointers which enable capability mode are used only with
+capability pointers that enable capability mode are used only with
 64-bit code segments.  In-memory far capability pointers would also
 have odd alignment requirements due to the 16-bit code selector being
 adjacent to an aligned capability.  Far branches are also little used
 in existing 64-bit x86 programs.  Significantly, 64-bit x86 still
 defaults to 32-bit operands for far branches (unlike near branches
-which are commonly used and default to 64-bit operands).
+that are commonly used and default to 64-bit operands).
 
 \subsection{Direct Memory-Offset MOVs}
 
