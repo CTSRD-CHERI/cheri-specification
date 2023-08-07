@@ -206,15 +206,12 @@ properties.
 
 \section{Capability Register File}
 
-The decision to separate the capability-register file from the general-purpose
-integer
-register file is somewhat arbitrary from a software-facing perspective: we
-envision capabilities gradually displacing general-purpose integer registers as
-pointers, but where management of the two register files will remain largely
-the same, with stack spilling behaving the same way, and so on, as is already
-the case for disjoint integer and floating-point register files.
+CHERI extends existing general-purpose integer registers to hold
+capabilities.  This design is similar to the manner in which the
+32-bit x86 ISA was extended to support 64-bit registers.  However,
+this is not the only way to add CHERI capability registers to an architecture.
 
-We initially selected the separate representation on CHERI-MIPS for a
+We initially used a separate register file for capability registers on CHERI-MIPS for a
 few pragmatic reasons:
 
 \begin{itemize}
@@ -229,25 +226,23 @@ few pragmatic reasons:
   operating systems.
 \end{itemize}
 
-\noindent
-However, a design in
-which (more similar to the manner in which the 32-bit x86 ISA was extended to
-support 64-bit registers) the two files are \textit{merged} and able to hold
-both general-purpose integer registers and capability registers is
-also possible.
-This became a more appealing choice in the presence of 128-bit compressed
-capabilities, as register size doubled rather than quadrupled.
-
 Early in our design cycle, capability registers were able to hold only true
 capabilities (i.e., with tags); later, we weakened this requirement by adding
 an explicit tag bit to each register, in order to improve support for
 capability-oblivious code such as memory-copy routines able to copy data
 structures consisting of both capabilities and ordinary data.
-This shifted our approach somewhat more towards a merged approach; our view
-is that efficiency of implementation and compatibility (rather than
-maintaining a negligible
-effect on the software model) would be the primary reasons to select one
-approach or another for a particular starting-point ISA.
+
+With the separate register file on CHERI-MIPS, we also added
+instructions for copying non-capability data from a capability register
+into a general-purpose integer register. A use case for this was when a function was called
+with a parameter whose type is the union of a pointer and a non-pointer type,
+such as an int. This parameter had to be passed in a capability register, because
+the tag needed to be preserved when it held a capability. If the body of
+the function accessed the non-capability branch of the union, it needed to
+get the non-capability bits out of the capability register and into a general
+purpose register. This was originally done by spilling the capability register to the
+stack and then reading it back into a general-purpose integer register, but the register
+to register copy of \insnnoref{CGetAddr} proved faster.
 
 Another design variation might have specific capability registers
 more tightly coupled with general-purpose integer registers -- an approach we discussed
@@ -261,20 +256,16 @@ Further, we felt that the working-set properties of the two register files
 might be quite different; effectively pinning the two to one another would
 reduce the efficiency of both.
 
-With a split register file, it may be useful for the architecture to add
-instructions for copying non-capability data from a capability register
-into a general-purpose integer register. A use case is when a function is called
-with a parameter whose type is the union of a pointer and a non-pointer type,
-such as an int. This parameter must be passed in a capability register, because
-the tag needs to be preserved when it holds a capability. If the body of
-the function accesses the non-capability branch of the union, it needs to
-get the non-capability bits out of the capability register and into a general
-purpose register. This can be done by spilling the capability register to the
-stack and then reading it back into a general-purpose integer register, but a register
-to register copy would be faster.
-
-CHERI-RISC-V (Chapter~\ref{chap:cheri-riscv}),
-Morello, and CHERI-x86-64 (Chapter~\ref{chap:cheri-x86-64}) use merged register files.
+With register tags and 128-bit compressed capabilities, extending
+existing general-purpose registers to support capabilities became a
+feasible approach, as register size doubled rather than quadrupled.
+This approach resulted in improved efficiency in implementations as
+well as greater software compatibility.  For example, in the case
+described above for a function parameter with a union, the integer
+branch of the union can be accessed by using the integer portion of
+the relevant general-purpose register without requiring a separate
+instruction.  As a result, all of the current CHERI architectures
+extend existing general-purpose registers to hold capabilities.
 
 \section{The Compiler is Not Part of the TCB for Isolated Code}
 
