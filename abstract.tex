@@ -14,7 +14,7 @@ CHERI-RISC-V, Arm's prototype Morello architecture, and (sketched)
 CHERI-x86-64.
 It enables software
 to efficiently implement fine-grained memory protection and scalable software
-compartmentalization, by providing strong, non-probabilistic, efficient
+compartmentalization, by providing strong, deterministic, efficient
 mechanisms to support the principles of least privilege and intentional use
 in the execution of software at multiple levels of abstraction, preventing and
 mitigating vulnerabilities.
@@ -26,10 +26,9 @@ and programmer-friendly underpinnings.
 CHERI blends traditional paged virtual memory with an
 in-address-space capability model that includes capability values in registers,
 capability instructions, and tagged memory to enforce capability integrity.
-This hybrid approach, inspired by the Capsicum security model, addresses the performance and robustness issues that arise
-when trying to express more secure programming models, minimising
-privilege, above conventional architectures that provide only
-MMU-based protection.
+This hybrid approach addresses the performance and robustness issues that arise
+when trying to express more secure, privilege minimising programming models,
+above conventional architectures that provide only MMU-based protection.
 CHERI builds on the C-language fat-pointer literature: its capabilities can
 describe fine-grained regions of memory, and can be substituted for data or
 code pointers in generated code, protecting data and improving
@@ -46,7 +45,7 @@ providing fine-grain memory protection, or be largely unmodified but encapsulate
 only controlled interaction.
 Potential early deployment scenarios include low-level software Trusted Computing
 Bases (TCBs) such as separation kernels, hypervisors, and operating-system
-kernels,  userspace TCBs such as language runtimes and web browsers,
+kernels, userspace TCBs such as language runtimes and web browsers,
 and particularly high-risk
 software libraries such as data compression, protocol parsing, and image
 processing (which are concentrations of both complex and historically
