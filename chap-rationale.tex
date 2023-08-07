@@ -910,7 +910,7 @@ Earlier versions of the CHERI-MIPS ISA included an exception-based
 mechanism for domain transition via a pair of \insnnoref{CCall}
 and \insnnoref{CReturn} instructions.  The use of exceptions
 introduced both runtime overhead and implementation complexity in the
-kernel.  We replaced this mechanism with \insnref{CInvoke}
+kernel.  We replaced this mechanism with \insnref{CInvoke},
 which provides jump-like semantics.
 Non-monotonicity is accomplished by virtue of unsealing the sealed
 operand capabilities to \insnref{CInvoke}.
@@ -1107,7 +1107,7 @@ tradeoffs in the precision of compressed capabilities.
 With no constraints on implementations, this may lead to unnecessary work
 when performing operations like loading programs into memory.
 For example, if linkers allow the generation of static binary load addresses
-which are insufficiently aligned to be representable, then program loaders
+that are insufficiently aligned to be representable, then program loaders
 must potentially pad the beginning of the mapped region, and enter a loop
 that adjusts the base and length of the region until they match.
 This could be avoided if an architectural minimum precision as specified so
@@ -1437,7 +1437,7 @@ would otherwise violate monotonicity.
 The early exception approach offers slightly improved debuggability
 by exposing the error earlier.
 Clearing the capability tag may make debugging more expensive (if additional checks are
-introduced) or more tricky (if loss of the tag is only discovered substantially later).
+introduced) or more tricky (if loss of the tag is discovered only substantially later).
 
 However, early exceptions limit compiler optimization as instructions that may
 throw exceptions are restricted in how they can safely be reordered.
@@ -1475,7 +1475,7 @@ memory accesses as offsets.  For example, loads and stores using an
 integer pointer treated integer address as an offset relative to the
 base of \DDC{}\footnote{Some CHERI instantiations performed offsetting
 with respect to the address of DDC, rather than the base.}.
-Similarly, branch instructions which targeted an
+Similarly, branch instructions that targeted an
 absolute integer pointer set the offset of \PCC{} to the value of the
 integer pointer.
 
@@ -1483,9 +1483,9 @@ Offsetting also impacted CHERI C in multiple ways.
 Casts of a capability to an integer value returned the offset of the
 capability rather than its address.  Similarly, casts between
 capability pointers and integer pointers used special instructions
-(\insnnoref{CFromPtr} and \insnnoref{CToPtr}) which took the offset of
+(\insnnoref{CFromPtr} and \insnnoref{CToPtr}), which took the offset of
 \DDC{} into account.  Specifically, the compiler would use
-\insnnoref{CFromPtr} to generate integer pointers which were not an
+\insnnoref{CFromPtr} to generate integer pointers that were not an
 absolute virtual address of an object, but the offset of an object's
 address relative to the base of \DDC{}.  Similarly, capability
 pointers created via casts were derived from \DDC{} assuming that the
@@ -1530,7 +1530,7 @@ caveats of this approach arose:
   support of legacy 64-bit processes for which \DDC{} and \PCC{}
   bounds covered the entire user portion of the address space with a
   base address of 0 this did not matter.  However, this was a hurdle
-  for hybrid operating system kernels which tended to run in a higher
+  for hybrid operating system kernels, which tended to run in a higher
   range of virtual addresses and were not always relocatable.  In
   practice hybrid kernels ran with \DDC{} and \PCC{} whose bounds
   spanned the entire address space.
@@ -1543,7 +1543,7 @@ caveats of this approach arose:
 \end{itemize}
 
 CHERI no longer mandates \DDC{} and \PCC{} offsetting by default.
-CHERI architectures may provide it as an optional feature which can be
+CHERI architectures may provide it as an optional feature, which can be
 enabled at runtime or may omit it entirely.  CHERI compilers always
 treat integer pointers as addresses using
 \insnref{CSetAddr} to handle conversions between capabilities and
