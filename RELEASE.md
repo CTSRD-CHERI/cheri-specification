@@ -40,7 +40,14 @@ Steps to Finalize New Release
 - Update version number and set explicit \date{} in
   cheri-architecture.tex
 
-- Tag the release as 'vX.Y'.
+- Create and push a releng/X.Y branch
+
+- Create (or download from CI) a PDF for review and tag the corresponding
+  version with prerelease-X.Y-submitted
+
+- Make any updates required by review to main and cherry-pick to releng/X.Y
+
+- Tag the release as 'vX.Y'
 
 Steps to Begin Next Version
 ===========================
