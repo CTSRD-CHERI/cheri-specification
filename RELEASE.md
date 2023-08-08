@@ -12,7 +12,8 @@ Steps to Finalize New Release
 - Review changes since the previous version to ensure the list
   of authors is up to date in cheri-architecture.tex
 
-- Review funding acks in cheri-architecture.tex
+- Review funding acks in cheri-architecture.tex, adjusting vspace as
+  required to keep the title on page 1
 
 - Review acknowledgements.tex to add new projects, DARPA PMs and
   SETAs, contractors, and students
