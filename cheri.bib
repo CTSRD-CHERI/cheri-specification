@@ -1681,6 +1681,7 @@ New York}, year=1989 }
   date = {1985-12-26},
   note = {\url{https://csrc.nist.gov/CSRC/media/Publications/white-paper/1985/12/26/dod-rainbow-series/final/documents/std001.txt} or \url{https://csrc.nist.gov/csrc/media/publications/conference-paper/1998/10/08/proceedings-of-the-21st-nissc-1998/documents/early-cs-papers/dod85.pdf}},
   number = {DoD 5200.28-STD, Orange Book},
+  label = {DoD}
 }
 
 @Manual{TCSEC-Glossary,
@@ -15486,7 +15487,8 @@ Principles of Programming Languages},
         ORGANIZATION = "Bluespec,~Inc.",
         ADDRESS = {Waltham,~MA},
         MONTH = nov,
-        YEAR = {2004}
+        YEAR = {2004},
+        LABEL = "BSV"
 }
 
 @article{watson13,
@@ -16193,14 +16195,14 @@ In this paper we explore the possible source-language semantics for memory objec
 
 @software{sail-cheri-mips,
   title = {{{CTSRD-CHERI/sail-cheri-mips: CHERI-MIPS model written in Sail}}},
-  author = {{Capability Hardware Enhanced RISC Instructions}},
+  label = {{CHERI}},
   shorttitle = {{{sail-cheri-riscv}}},
   url = {https://github.com/CTSRD-CHERI/sail-cheri-mips},
 }
 
 @software{sail-cheri-riscv,
   title = {{{CTSRD-CHERI/sail-cheri-riscv: CHERI-RISC-V model written in Sail}}},
-  author = {{Capability Hardware Enhanced RISC Instructions}},
+  label = {{CHERI}},
   shorttitle = {{{sail-cheri-riscv}}},
   url = {https://github.com/CTSRD-CHERI/sail-cheri-riscv},
 }
@@ -16210,6 +16212,7 @@ In this paper we explore the possible source-language semantics for memory objec
 	organization={Arm Limited},
 	howpublished={\url{https://static.docs.arm.com/ddi0596/a/DDI_0596_ARM_a64_instruction_set_architecture.pdf}},
 	year = 2020,
+	label = {Arm}
 }
 
 @manual{intel-sdm-vol2,
@@ -16220,12 +16223,14 @@ In this paper we explore the possible source-language semantics for memory objec
 	number=325383,
 	version={070US},
 	month=may,
-	year=2019
+	year=2019,
+	label={Intel}
 }
 
 @misc{sparc-m7-adi,
 	title={{Introduction to SPARC M7 and Application Data Integrity (ADI)}},
-	howpublished={\url{https://swisdev.oracle.com/_files/What-Is-ADI.html}}
+	howpublished={\url{https://swisdev.oracle.com/_files/What-Is-ADI.html}},
+	label={Oracle}
 }
 
 @inproceedings{mazzinghi:pointer-provenance,
@@ -16481,36 +16486,42 @@ Cornucopia is a lightweight capability revocation system for CHERI that implemen
 
 @online{CHERI-cheri-cpu,
     title = {{CTSRD-CHERI/cheri-cpu: CHERI-MIPS implementation in a 6-stage pipeline with associative caches and multi-core support}},
+    label = {{CHERI}},
     url = {https://github.com/CTSRD-CHERI/cheri-cpu},
     urldate = {2020-09-16}
 }
 
 @online{CHERI-Piccolo,
     title = {{CTSRD-CHERI/Piccolo: RISC-V CPU, simple 3-stage pipeline, for low-end applications (e.g., embedded, IoT)}},
+    label = {{CHERI}},
     url = {https://github.com/CTSRD-CHERI/Piccolo},
     urldate = {2020-09-16}
 }
 
 @online{CHERI-Flute,
     title = {{CTSRD-CHERI/Flute: RISC-V CPU, simple 5-stage in-order pipeline, for low-end applications needing MMUs and some performance}},
+    label = {{CHERI}},
     url = {https://github.com/CTSRD-CHERI/Flute},
     urldate = {2020-09-16}
 }
 
 @online{CHERI-Toooba,
     title = {{CTSRD-CHERI/Toooba: RISC-V Core; superscalar, out-of-order, multi-core capable; based on RISCY-OOO from MIT}},
+    label = {{CHERI}},
     url = {https://github.com/CTSRD-CHERI/Toooba},
     urldate = {2020-09-16}
 }
 
 @online{CHERI-TagController,
     title = {{CTSRD-CHERI/TagController: Multi-level tag controller for emulating a tagged memory using an in-memory table}},
+    label = {{CHERI}},
     url = {https://github.com/CTSRD-CHERI/TagController},
     urldate = {2020-09-16}
 }
 
 @online{CHERI-cheri-cap-lib,
     title = {{CTSRD-CHERI/cheri-cap-lib: A library of specific implementations of cheri and providing an abstract interface to those implementations}},
+    label = {{CHERI}},
     url = {https://github.com/CTSRD-CHERI/cheri-cap-lib},
     urldate = {2020-09-16}
 }
@@ -16522,7 +16533,8 @@ Cornucopia is a lightweight capability revocation system for CHERI that implemen
   organization = {Arm Limited},
   year = 2020,
   month = 10,
-  day = 22
+  day = 22,
+  label = {Arm}
 }
 
 @inproceedings{margaritov2019prefetched,
