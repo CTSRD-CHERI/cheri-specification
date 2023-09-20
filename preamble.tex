@@ -94,7 +94,12 @@
 % point to the title page.
 %   PS HACK
 %\usepackage[hidelinks]{hyperref}
+\ifdefined\trformat
+% page labels end up off-by-2 in the tech-report so disable them
+\usepackage[colorlinks,pdfpagelabels=false]{hyperref}
+\else
 \usepackage[colorlinks]{hyperref}
+\fi
 % Glossaries must be included after hyperref.
 \usepackage[toc,nonumberlist]{glossaries}
 \usepackage[nottoc]{tocbibind}
