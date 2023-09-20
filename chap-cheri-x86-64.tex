@@ -662,15 +662,15 @@ and capability mode.
 These instructions fetch a single field from a capability.
 
 \begin{itemize}
-  \item \insnxesref{GCPERM} - Get Capability Permissions
-  \item \insnxesref{GCTYPE} - Get Capability Object Type
-  \item \insnxesref{GCBASE} - Get Capability Base
-  \item \insnxesref{GCLEN} - Get Capability Length
-  \item \insnxesref{GCTAG} - Get Capability Tag
-  \item \insnxesref{GCOFF} - Get Capability Offset
-  \item \insnxesref{GCHI} - Get Capability High Half
-  \item \insnxesref{GCLIM} - Get Capability Limit
-  \item \insnxesref{GCFLAGS} - Get Capability Flags
+  \item \insnxesref{GCPERM} -- Get Capability Permissions
+  \item \insnxesref{GCTYPE} -- Get Capability Object Type
+  \item \insnxesref{GCBASE} -- Get Capability Base
+  \item \insnxesref{GCLEN} -- Get Capability Length
+  \item \insnxesref{GCTAG} -- Get Capability Tag
+  \item \insnxesref{GCOFF} -- Get Capability Offset
+  \item \insnxesref{GCHI} -- Get Capability High Half
+  \item \insnxesref{GCLIM} -- Get Capability Limit
+  \item \insnxesref{GCFLAGS} -- Get Capability Flags
 \end{itemize}
 
 \subsubsection{Capability-Modification Instructions}
@@ -679,34 +679,34 @@ If these instructions fail, they should clear the tag in the resulting
 capability.
 
 \begin{itemize}
-  \item \insnxesref{SEAL} - Seal Capability
-  \item \insnxesref{UNSEAL} - Unseal Capability
-  \item \insnxesref{ANDCPERM} - Mask Capability Permissions
-  \item \insnxesref{SCOFF} - Set Capability Offset
-  \item \insnxesref{SCADDR} - Set Capability Address
-  \item \insnxesref{SCBND} - Set Capability Bounds
-  \item \insnxesref{SCBNDE} - Set Exact Capability Bounds
-  \item \insnxesref{SCHI} - Set Capability High Half
-  \item \insnxesref{SCFLAGS} - Set Capability Flags
-  \item \insnxesref{CLCTAG} - Clear Capability Tag
-  \item \insnxesref{BUILDCAP} - Construct Capability
-  \item \insnxesref{CPYTYPE} - Construct Sealing Capability
-  \item \insnxesref{CSEAL} - Conditional Capability Seal
-  \item \insnxesref{SENTRY} - Seal Capability as a Sentry
+  \item \insnxesref{SEAL} -- Seal Capability
+  \item \insnxesref{UNSEAL} -- Unseal Capability
+  \item \insnxesref{ANDCPERM} -- Mask Capability Permissions
+  \item \insnxesref{SCOFF} -- Set Capability Offset
+  \item \insnxesref{SCADDR} -- Set Capability Address
+  \item \insnxesref{SCBND} -- Set Capability Bounds
+  \item \insnxesref{SCBNDE} -- Set Exact Capability Bounds
+  \item \insnxesref{SCHI} -- Set Capability High Half
+  \item \insnxesref{SCFLAGS} -- Set Capability Flags
+  \item \insnxesref{CLCTAG} -- Clear Capability Tag
+  \item \insnxesref{BUILDCAP} -- Construct Capability
+  \item \insnxesref{CPYTYPE} -- Construct Sealing Capability
+  \item \insnxesref{CSEAL} -- Conditional Capability Seal
+  \item \insnxesref{SENTRY} -- Seal Capability as a Sentry
 \end{itemize}
 
 \subsubsection{Control-Flow Instructions}
 
 \begin{itemize}
-  \item \insnxesref{CINVOKE} - Invoke sealed capability pair
+  \item \insnxesref{CINVOKE} -- Invoke sealed capability pair
 \end{itemize}
 
 \subsubsection{Adjusting to Compressed Capability Precision
   Instructions}
 
 \begin{itemize}
-  \item \insnxesref{CRRL} - Round Representable Length
-  \item \insnxesref{CRAM} - Representable Alignment Mask
+  \item \insnxesref{CRRL} -- Round Representable Length
+  \item \insnxesref{CRAM} -- Representable Alignment Mask
 \end{itemize}
 
 \subsubsection{Tag-Memory Access Instructions}
@@ -720,8 +720,8 @@ a new \insnnoref{CPUID} leaf or be defined as equal to the value
 returned by an existing \insnnoref{CPUID} leaf.
 
 \begin{itemize}
-  \item \insnxesref{LCTAGS} - Load Capability Tags
-  \item \insnxesref{CLCTAGS} - Clear Capability Tags
+  \item \insnxesref{LCTAGS} -- Load Capability Tags
+  \item \insnxesref{CLCTAGS} -- Clear Capability Tags
 \end{itemize}
 
 \subsection{Interactions with Vector Extensions}
@@ -1258,5 +1258,5 @@ in capability mode rather than removed.
 
 \subsection{XCHG [ER]AX Opcodes}
 
-If the \insnxesref{XCHG} instructions \texttt{91} - \texttt{97} are not
+If the \insnxesref{XCHG} instructions \texttt{91} -- \texttt{97} are not
 commonly used, they could be removed in capability mode.
