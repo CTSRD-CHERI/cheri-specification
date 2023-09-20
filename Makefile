@@ -142,6 +142,7 @@ update-concentrate-defs:
 .PHONY: clean update-sail-defs sail-cheri-riscv-latex update-sail-defs-riscv update-concentrate-defs
 clean:
 	latexmk -C $(LATEXMK_COMMON_FLAGS) cheri-architecture.tex
+	latexmk -C $(LATEXMK_COMMON_FLAGS) cheri-architecture-tr.tex
 	latexmk -C $(LATEXMK_COMMON_FLAGS) fig-*.tex
 	rm -f $(TARGET) $(TIKZFIGURES)
 	rm -rf $(DIFFDIR)
