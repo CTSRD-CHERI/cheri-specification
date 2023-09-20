@@ -30,8 +30,9 @@ endif
 LATEXMK_COMMON_FLAGS=-bibtex -pdf
 PDFLATEX_FLAGS=-file-line-error -halt-on-error -interaction=$(INTERACTION)
 
-.PHONY: all
+.PHONY: all tr
 all: ${TARGET}
+tr: ${TARGET_TR}
 
 # The texloganalyser tool can be used to find all warning messages in the latex
 # logfile which is useful when using interaction=batchmode. There is also
