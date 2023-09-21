@@ -1260,3 +1260,300 @@ in capability mode rather than removed.
 
 If the \insnxesref{XCHG} instructions \texttt{91} -- \texttt{97} are not
 commonly used, they could be removed in capability mode.
+
+\section{Relationship to x86 Security Extensions}
+
+The x86 architecture has seen several security-focused extensions introduced
+in the recent past by Intel and also AMD.
+Of the five major extensions listed here, two have been deprecated
+and are therefore unlikely to coexist with a potential CHERI-x86-64.
+
+\subsection{Intel CET}
+
+Intel's Control-flow Enforcement Technology (CET) first shipped in Tiger Lake
+and AMD's Zen3 CPUs, and support has so-far continued.
+CET introduces a new ENDBRANCH landing pad instruction (from the NOP space) to
+assert that indirect branches arrive at an expected destination.
+In addition, CET introduces a somewhat complex shadow stack specification.
+While not a headline feature,
+CET also includes guarantees on speculative execution for CET-protected
+transitions.
+
+\subsubsection{CET Compatibility with CHERI-x86-64}
+
+CET and CHERI-x86-64 are compatible technologies.
+CET landing pads can naturally be asserted on indirect jumps to capabilities.
+The guarantees of sentries and of landing pads largely overlap, but the
+mechanisms are different enough that paranoid applications can find comfort
+in using both.
+
+The shadow stack should be useable with CHERI-x86-64 executables;
+return addresses pushed to the stack should be widened to capabilities,
+though even without extension, it would be useful to assert that the return
+virtual address matches the virtual address of the return capability.
+
+\subsubsection{CET Synergy with CHERI-x86-64}
+
+The CET shadow stack can increase the guarantees of CHERI-x86-64,
+ensuring that an untrusted compartment returns to the expected
+caller without more costly manual bookkeeping.
+A combination of shadow stack return tracking and hardware context
+save/restore may be sufficient to avoid a software intermediary
+for compartment switching in many cases.
+
+\subsubsection{CET and Transient Execution}
+
+The CET specification from Intel includes the following line:
+\begin{quote}
+Instructions at the target of a RET instruction will not execute,
+even speculatively, if the RET addresses (either from normal stack
+or shadow stack) are speculative-only or do not match, unless the
+target of the RET is also predicted (e.g., by a Return Stack Buffer
+prediction), when CET shadow stack is enabled.
+\end{quote}
+
+CET thus provides a handle on limiting transient execution
+between protection domains, which could be very useful
+for compartmentalized CHERI programs.
+
+Furthermore this clause serves as precedent for specifying
+limits of transient execution for all implementations of an architecture
+which should be considered for the CHERI specification more generally.
+
+\subsection{Memory Encryption: AMD SME and SEV; Intel TME and TME-MK}
+
+AMD has introduced two levels of memory encryption (ME) extension,
+and Intel has specified two similar extensions that have not yet shipped.
+
+SME, introduced by AMD in 2017, can encrypt all memory with 128-bit
+AES using ephemeral keys produced by the processor.
+SEV is an extension that allows using distinct keys for different
+domains such that physical memory would be obscured
+if it were mistakenly mapped into a foreign domain.
+
+Intel introduced TME in 2019, which is quite similar to SME.  TME-MK,
+introduced in 2021, is an extension of TME that allows a table of
+Multiple Keys (MK) that are selected using upper bits of the physical
+address, allowing a number of protection models using page-granularity
+encryption keys.
+
+\subsubsection{Memory Encryption Compatibility with CHERI-x86-64}
+
+The various ME technologies are completely compatible
+with CHERI.
+CHERI prevents unauthorised access to virtual addresses, and ME
+encrypts data in physical memory without preventing access.
+Therefore all ME technologies, even TME-MK, fit neatly below CHERI enforcement
+between page translation and physical memory.
+
+\subsubsection{Memory Encryption Synergy with CHERI-x86-64}
+
+CHERI could strengthen ME by controlling key access, and
+ME could enable user-space CHERI enclaves.
+
+CHERI capabilities could carry an encryption key selector (à la
+Intel TME) where the creation of the key is managed by hardware
+and the distribution of the selector is guarded by capabilities.
+This could bypass the operating system for key management, allowing
+meaningful key management and distribution with virtual addresses
+directly from user space.
+
+This could also enable a light-weight CHERI enclave mechanism where
+the operating system would not have the ability to read the unencrypted
+contents of enclave memory despite managing the physical pages.
+In order to prevent keyed capabilities leaking to the OS, such a
+system would likely require storing keyed capabilities within the
+encrypted memory itself, and delegating register save and restore
+to trusted CPU state machines.
+
+Moving key management from physical pages to virtual addresses also
+allows ME to select keys on allocation granularity rather than on
+page granularity.
+When combined with capabilities, this could allow guarantees about
+memory sharing even where capability bounds overlap (by relying on
+encryption) and where keys are
+reused (by relying on capabilities).
+Allowing parts of a cache line to be encrypted with different keys
+could cause problems if we want to decrypt into the L1 cache, so the
+key selector would likely need to be treated like an extension of
+the physical address from the cache-tag perspective, with a distinct
+copy of the cache line held for each key.
+
+ME could also enable light-weight temporal safety for CHERI, where
+the encryption key for new allocations is cycled while leaving the
+memory unchanged.
+
+\subsection{Intel MPK}
+
+Intel's Memory Protection Keys (MPK) enables userspace filtering
+of read/write permissions of 15 sets of pages.
+The page table leaf entries themselves have a new 4-bit field to
+identify a page set (or key), with the value 0 wired to unfiltered.
+MPK was introduced with Skylake in 2015, and only appears to have
+been enabled for Xeon processors.
+AMD's Zen3 processors also appear to have MPK support since 2020,
+presumably enabled for both consumer and professional variants.
+
+In userspace, a thread may write its PKRU register, which maps
+16 pairs of read/write permissions coorosponding to the 16 possible
+keys.
+By writing this register, a thread may quickly remove access to subsets
+of pages.
+Current implementations appear to flush the back end of the pipeline,
+incuring a cycle penalty of roughly 20 cycles.
+This filtering is naturally per-thread, unlike the page table iteself
+which is per-process, so it can be used for fine-grained thread-local
+access for a few sensitive structures.
+For example, secret keys might be stored in a region of memory that
+is only briefly made accessible when necessary.
+
+MPK has 3 major disadvantages compared to CHERI capabilities:
+scaling, PKRU protection, and buffer sharing.
+
+While MPK appears to be extremely unscalable on the surface, work
+has been done to virtualise the page sets with an API similar to
+memprotect so that sets of pages can have their access permissions
+modified arbitrarily.
+This can actually be implemented in the backend with mprotect
+(with process-global semantics), or can be implemented with MPK
+for sets whose permissions are changed frequently.
+Nevertheless, there are likely to be serious scaling problems
+if the abstraction library needs to resort to system calls that
+traverse page tables to adjust permissions or mask ids.
+
+PKRU register is freely writable in user-mode.
+An obvious use of MPK would be compartmentalisation, where
+sets of pages in the address space can be enabled fairly efficiently.
+As the instruction that writes PKRU is unprivileged, any
+user code can change the set of page permissions.
+Publications suggest using complex binary analysis to ensure
+that WRPKRU cannot be executed by a compartment.
+
+Finally, it us awkward to pass memory buffers between
+compartments in MPK.
+The most natural solution would be to use a new key
+for memory that is shared between compartments, but
+a compartment would need to explicitly allocate any
+object that will be shared in this space which is not
+as natural as CHERI which allows any local object
+to be passed as an argument to another compartment.
+
+\subsection{Intel MPX (deprecated)}
+
+Intel's Memory Protection Extension (MPX) was designed to accelerate
+bounds checking with various usage models.
+MPX shipped commercially in 2015 with Skylake, the only high-end
+processor that has supported the extension.
+MPX is a complex extension
+with new instructions, new special-purpose registers, new tables,
+as well as new configuration and status registers.
+
+MPX introduced four new 128-bit BND registers to hold both an
+upper and a lower bound for a range, along with instructions
+to move bounds between registers and memory.
+MPX also introduced instructions to create bounds and compare integer
+values to the bounds;
+upper and lower bounds are compared with separate
+instructions.
+
+MPX further introduces two table access instructions
+for loading and storing bounds for any pointer in memory
+from a table.
+Each leaf entry in the table is 32-bytes, including 8 bytes for each
+of the bounds and 8-bytes to hold a copy of the expected pointer value.
+Using these instructions, a program can be compiled to stash
+bounds for each pointer in memory in a shadow space, loading
+and storing bounds whenever pointers themselves are loaded and stored.
+
+\subsubsection{MPX Shortcomings}
+
+MPX had critical shortcomings from two directions: security and
+performance.
+
+MPX was designed to maximise compatibility.
+As a result, MPX "failed open" in many cases where unexpected
+cases arose.
+If the pointer from the bounds table did not match the pointer
+from memory, bounds were left in state that would not fault.
+If the system did not have memory for the bounds table (which
+was up to four times the size of program memory), the system
+could disable bounds checking for this process such that all
+bounds-check operations become NOPs.
+Thus MPX was not usable for security from a determined attacker,
+but only to accelerate
+identification of memory safety vulnerabilities in a friendly
+environment.
+
+Secondly, MPX performance overhead was high;
+over 50\% on SPEC using the Intel compiler.
+Code bloat was considerable, with new instructions
+for loading and storing bounds alongside pointers,
+and separate instructions for checking the lower
+and upper bounds.
+The table access mode could quintuple the memory footprint
+of a program, though SPEC averaged 100\% memory overhead
+due to the sparse table structure.
+Furthermore, limitations on execution units that could
+execute bounds checks meant that instructions-per-cycle
+was usually lower for a MPX program than for a standard
+program despite the instruction bloat.
+
+With no hard security guarantees and performance competitive
+With similar software schemes, MPX adoption
+was abysmal and was deprecated after one generation of
+hardware.
+
+\subsubsection{MPX Lessons for CHERI-x86-64}
+
+CHERI sacrifices ABI compatibility for firm security guarantees
+and performance.
+While the x86 community has placed great emphasis on backward
+compatibility, CHERI-x86-64 must resist the pressure
+to cleverly enable compatibility in any way that compromises
+security.
+
+In addition, CHERI-x86-64 implementors should resist the pressure
+to leave CHERI de-optimised under the assumption that security
+is a niche application.
+CHERI is designed for overheads within 5\% of unprotected
+performance in most cases, but a few corner cases in forwarding
+or branch prediction can easily push overheads over 20\% and
+greatly restrict adoption.
+
+\subsection{Intel SGX (deprecated)}
+
+Intel SGX is a very complex extension to enable a user-space
+application to trust the processor to provide enclave memory that is
+not readable or modifiable from the operating system or even
+outside the CPU package.
+Some instructions required for this extension are in the style
+of function calls.
+The ECREATE instruction takes a pointer to a struct as an argument,
+which requests a contiguous range of virtual address space.
+This causes the hardware to allocate a number of structures in a
+reserved region of DRAM to track memory for the enclave before
+executing the next instruction.
+The EADD instruction copies a page of common memory into a
+newly-allocated enclave page, keeping a running hash of its contents.
+
+CHERI relies on simple invariants that can be enforced within
+single-cycle instructions.
+Intel SGX instead trusts the correctness and atomicity of
+hyper-visor-like subroutine calls due to their being
+provided by processor firmware.
+
+On one hand, the SGX precedent suggests that trusted hyper-visor-like
+subroutines can be implemented in the CPU.
+On the other hand, Intel SGX was only implemented in a single Intel
+microarchitecture (Skylake) and its derivatives, with the last derivative
+launching in 2019.
+This could indicate that this style of instruction is undesirable from
+an implementation perspective, or, more likely, that this style of pulling
+management subroutines into hardware greatly increases the hardware attack
+surface, increasing the maintenance burden by requiring frequent firmware
+updates to work around security issues.
+
+While trusted low-level subroutines may be desirable to maintain
+advanced CHERI invariants such as temporal safety or enclave memory, we might
+seek an architecture that allows these to run in a verifiable firmware that
+is managed by trusted software but is verifiable by all users.
