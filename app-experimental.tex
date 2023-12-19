@@ -2636,3 +2636,57 @@ However, CID sealed capabilities are still readable bit patterns and therefore c
 One potential improvement is that short compartment calls with only a few instructions do not poison many registers.
 After returning from a short-instruction callee compartment, many registers will still hold the original value of the calling compartment.
 This can potentially be used to enhance performance even more because the calling compartment does not have to completely re-instantiate its register state.
+
+
+% >>>
+\section{Label capabilities marking regions of memory}
+
+Capability metadata could be used to identify a capability-sized space
+in memory as special purpose by labeling it as such.  A \textit{label
+  capability} could be identified by the capability metadata via some
+mechanism including a specific bit or use some encoding space that is
+available like the unused exponent encodings from the compressed
+base/bounds format.  The meaning of the label might be specified in
+the metadata or use the address field that is otherwise unused.  A
+label capability is not dereferencable and is distinct from a sealed
+capability though the sealed encoding format might be reused and it
+might be convenient to think of it as sealed since it is not
+dereferencable though it cannot be unsealed.
+
+\subsection{Examples of use}
+
+\begin{description}
+  \item[Empty] --- This capability is an empty region of memory. This
+    could be used to do thread synchronisation in a data-flow manner
+    similar to the Monsoon fine-graind data-flow
+    machine~\cite{Monsoon1990} or later data-drive machines including
+    Anaconda~\cite{UCAM-CL-TR-358} or the Cray MTA architecture
+    (previously Tera)~\cite{Tera1998}. This would require some
+    mechanism to allow a receiving thread to load and block until the
+    memory is no longer empty either using a dedicated instruction or
+    a capability base address that is labeled with this new
+    functionality.
+  \item[Revoked] --- This could be used to paint memory as being
+    revoked.  Loads and stores to this memory using regular
+    capabilities or legacy code should result in an exception. Higher
+    privileged code or a capability with specific privilege could be
+    used to zero the memory before reallocation.  We hypothesis that
+    this would make concurrent revocation more efficient.
+\end{description}
+
+\subsection{Microarchitectural optimisations}
+
+Microarchitecturally, any level of the cache hierarchy could identify
+label capabilities and fabricate a specific tag allowing rapid test
+during memory access to see what operation should be performed (e.g.,
+block on loading an Empty or raise an exception when loading from a
+Revoked region).  Unlike CHERIoT that uses explicit revocation tags, no
+additional tags would be required in DRAM to label Revoked regions,
+nor would caches be required to fabricate such tags unless it is
+useful to optimise microarchitecture.
+
+A new mechanism could be created to allow the label capabilities to be
+efficiently painted across regions of memory similar to current
+optimisation allowing blocks of memory to be zeroed on Arm v8 and
+other commercial cores.
+
