@@ -1355,7 +1355,8 @@ Isentries are not designed for secrecy about where a compartment wants to jump, 
 Similar methods, e.g., cinvoke gives out sealed code and data capabilities, which are then invoked as a pair.
 The code capability itself is not secret.
 
-It is important to note that the linked pair of a \insnnoref{CLIL} and \insnnoref{CJAURL} instruction does not give any guarantees about memory consistency. Memory consistency is not an issue tackled by CHERI, but needs to be addressed by other architectural mechanisms, e.g. atomic memory operations.
+It is important to note that in the current state of this proposal the linked pair of a \insnnoref{CLIL} and \insnnoref{CJAURL} instruction does not give any guarantees about memory consistency.
+Further work could determine how the reservation interacts with the memory model.
 
 \subsubsection{Allowing more instructions in between \insnnoref{CLIL} and \insnnoref{CJAURL}}
 
