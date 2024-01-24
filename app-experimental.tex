@@ -1376,7 +1376,9 @@ A \insnnoref{CLIL} instruction is a write to the ct6 register and thus invalidat
 A read of any register does not invalidate the reservation.
 None of the information is secret and the reservation will still point to a correct copy of the isentry as well as the code capability.
 
-In this proposal there is no maximum number of instructions between the \insnnoref{CLIL} and \insnnoref{CJAURL} instruction.
+This proposal needs a number of instructions that gives a forward progress guarantee.
+One way is to only give a guarantee if a \insnnoref{CLIL} instruction is directly followed by a \insnnoref{CJAURL} instruction.
+However, this could wrong incentivise microarchitects to optimise for that which would harm the case of pushing the \insnnoref{CLIL} before doing work and thus attempting to mitigate a potential load to use penalty.
 
 
 %
