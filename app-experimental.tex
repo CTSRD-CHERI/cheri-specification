@@ -1329,21 +1329,21 @@ being written with valid capabilities or none of them being written.
 
 \subsubsection{Definition of linked pair of instructions}
 
-In this extension, we propose to split the cisentryj (CHERI indirect sealed entry jump) instruction into two sub instructions: Lil (load isentry linked) and cjaurl (CHERI jump and unseal into register linked).
+In this extension, we propose to split the \insnnoref{CISentryJ }(CHERI indirect sealed entry jump) instruction into two sub instructions: \insnnoref{CLIL} (CHERI load isentry linked) and \insnnoref{CJAURL} (CHERI jump and unseal into register linked).
 In the following paragraphs, we will explain what these instructions do and how they enforce the security model we are designing.
 
-The lil instruction loads a capability through an isentry capability and clears its tag.
-In the subsequent instruction this capability can be picked up by a cjaurl, which then jumps to this code capability and unseals the isentry into ct6.
+The \insnnoref{CLIL} instruction loads a capability through an isentry capability and clears its tag.
+In the subsequent instruction this capability can be picked up by a \insnnoref{CJAURL}, which then jumps to this code capability and unseals the isentry into ct6.
 The two instructions are linked and all security properties are held as explained in the following paragraphs.
 
-If attackers executed only the lil instruction, this will leave them with an untagged code capability.
+If attackers executed only the \insnnoref{CLIL} instruction, this will leave them with an untagged code capability.
 This code capability cannot be used in regular jumps because it is untagged.
-The only way it can be used for a jump is in a subsequent cjaurl instruction.
+The only way it can be used for a jump is in a subsequent \insnnoref{CJAURL} instruction.
 
 An attacker can only jump to a code capability with the isentry it came from.
-This can be divided into two cases: If the instruction following the lil is a cjaurl, this will jump to the code pointed to by the code capability and unseal the isentry.
-The register holding the isentry is stored in the reservation information of the lil instruction.
-In the second case, if the instruction following the lil is not a cjaurl, the reservation will have become invalid.
+This can be divided into two cases: If the instruction following the \insnnoref{CLIL} is a \insnnoref{CJAURL}, this will jump to the code pointed to by the code capability and unseal the isentry.
+The register holding the isentry is stored in the reservation information of the \insnnoref{CLIL} instruction.
+In the second case, if the instruction following the \insnnoref{CLIL} is not a \insnnoref{CJAURL}, the reservation will have become invalid.
 Thus the attacker cannot jump to the code capability.
 Equally, the isentry has never been unsealed and thus cannot be used by the attacker.
 
@@ -1355,27 +1355,27 @@ Isentries are not designed for secrecy about where a compartment wants to jump, 
 Similar methods, e.g., cinvoke gives out sealed code and data capabilities, which are then invoked as a pair.
 The code capability itself is not secret.
 
-It is important to note that the linked pair of a lil and cjaurl instruction does not give any guarantees about memory consistency. Memory consistency is not an issue tackled by CHERI, but needs to be addressed by other architectural mechanisms, e.g. atomic memory operations.
+It is important to note that the linked pair of a \insnnoref{CLIL} and \insnnoref{CJAURL} instruction does not give any guarantees about memory consistency. Memory consistency is not an issue tackled by CHERI, but needs to be addressed by other architectural mechanisms, e.g. atomic memory operations.
 
-\subsubsection{Allowing more instructions in between lil and cjaurl}
+\subsubsection{Allowing more instructions in between \insnnoref{CLIL} and \insnnoref{CJAURL}}
 
-In order to enhance performance, we want to allow for ordinary instructions to appear between a lil and cjaurl instruction.
+In order to enhance performance, we want to allow for ordinary instructions to appear between a \insnnoref{CLIL} and \insnnoref{CJAURL} instruction.
 This could allow for the load-to-use penalty to be reduced.
 
-The invariants laid out above still need to hold: One must only jump to a linked code capability with a cjaurl instruction.
+The invariants laid out above still need to hold: One must only jump to a linked code capability with a \insnnoref{CJAURL} instruction.
 The linked code capability can only be used with the isentry it came from and the other way around.
 
 We envision the following way of implementing it.
-The lil instruction makes a reservation, which stores the following information: a one bit tag whether the reservation is valid, a five bit index to indicate the register of the isentry.
+The \insnnoref{CLIL} instruction makes a reservation, which stores the following information: a one bit tag whether the reservation is valid, a five bit index to indicate the register of the isentry.
 A write to the register of the isentry linked will clear the valid bit of the reservation.
 A write to ct6 -- where the code capability is stored -- will equally lead to the reservation being invalidated.
 
 There always is only ever one reservation.
-A lil instruction is a write to the ct6 register and thus invalidates the reservation.
+A \insnnoref{CLIL} instruction is a write to the ct6 register and thus invalidates the reservation.
 A read of any register does not invalidate the reservation.
 None of the information is secret and the reservation will still point to a correct copy of the isentry as well as the code capability.
 
-In this proposal there is no maximum number of instructions between the lil and cjaurl instruction.
+In this proposal there is no maximum number of instructions between the \insnnoref{CLIL} and \insnnoref{CJAURL} instruction.
 
 
 %
