@@ -1332,12 +1332,13 @@ being written with valid capabilities or none of them being written.
 In this extension, we propose to split the \insnnoref{CISentryJ }(CHERI indirect sealed entry jump) instruction into two sub instructions: \insnnoref{CLIL} (CHERI load isentry linked) and \insnnoref{CJAURL} (CHERI jump and unseal into register linked).
 In the following paragraphs, we will explain what these instructions do and how they enforce the security model we are designing.
 
-The \insnnoref{CLIL} instruction loads a capability through an isentry capability and clears its tag.
-In the subsequent instruction this capability can be picked up by a \insnnoref{CJAURL}, which then jumps to this code capability and unseals the isentry into ct6.
+The \insnnoref{CLIL} instruction loads a capability through an isentry capability and seals it.
+For this, we use the \cotype{} $2^{64} - 5$, which is reserved.
+In the subsequent instruction this capability can be picked up by a \insnnoref{CJAURL}, which then jumps to this code capability and unseals it as well as unsealing the isentry into ct6.
 The two instructions are linked and all security properties are held as explained in the following paragraphs.
 
-If attackers executed only the \insnnoref{CLIL} instruction, this will leave them with an untagged code capability.
-This code capability cannot be used in regular jumps because it is untagged.
+If attackers executed only the \insnnoref{CLIL} instruction, this will leave them with a sealed code capability.
+This code capability cannot be used in regular jumps because it is seald with the \cotype{} $2^{64} - 5$.
 The only way it can be used for a jump is in a subsequent \insnnoref{CJAURL} instruction.
 
 An attacker can only jump to a code capability with the isentry it came from.
