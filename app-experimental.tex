@@ -1279,12 +1279,16 @@ instruction pointer.  The trampolines must, as well, be \emph{per-context}
 (e.g., library instance), which necessitates duplication of the trampoline code
 sequence for each context.
 
-\subsection{Points-to-PCC} % <<<
-
 Herein, we propose yet another architecturally-understood form of sealed
 capability, the \emph{indirect} sentry capability, which is a curious
 hybrid of a sentry capability (of \cref{sec:arch-sentry}) and a special
 case of an indirect capability (recall \cref{section:indirect-capabilities}).
+In this document, we refer to them indirect sentry capabilties as \emph{isentry}
+capabilities or simply \emph{isentries}. We currently envision two versions of
+isentries: Points-to-PCC and Points-to-Pair.%
+
+\subsection{Points-to-PCC} % <<<
+
 Where sentry capabilities point directly at the code to be run (and
 expose the entire region bounded by PCC to the callee), these indirect
 capabilities point at a capability to be installed into PCC (which, in turn,
@@ -1311,6 +1315,73 @@ calls and returns with \insnnoref{CInvokeInd}.
 
 Any capability authorizing capability load may be made into a sealed indirect
 entry capability, for which we propose reserving the \cotype{} $2^{64} - 4$.%
+A new, two-operand instruction is required for sealing an isentry, which we call
+\insnnoref{CSealIndEntry}. This instruction is comparable in its behavior to the
+\insnref{CSealEntry}.
+
+However, we do realize that \insnnoref{CInvokeInd} is complex instruction and it imposes to have
+micro-operations in microarchitectures. Thus we propose to have the two operations
+of the complex \insnnoref{CInvokeInd} to be split into a linked pair of instructions:
+an instruction for load of the code capability and an instruction for jumping to the
+code capability and unsealing the data capability.
+This property of having linked will retain the atomicity of the both IDC and PCC
+being written with valid capabilities or none of them being written.
+
+\subsubsection{Definition of linked pair of instructions}
+
+In this extension, we propose to split the \insnnoref{CISentryJ }(CHERI indirect sealed entry jump) instruction into two sub instructions: \insnnoref{CLIL} (CHERI load isentry linked) and \insnnoref{CJAURL} (CHERI jump and unseal into register linked).
+In the following paragraphs, we will explain what these instructions do and how they enforce the security model we are designing.
+
+The \insnnoref{CLIL} instruction loads a capability through an isentry capability and seals it.
+For this, we use the \cotype{} $2^{64} - 5$, which is reserved.
+In the subsequent instruction this capability can be picked up by a \insnnoref{CJAURL}, which then jumps to this code capability and unseals it as well as unsealing the isentry into ct6.
+The two instructions are linked and all security properties are held as explained in the following paragraphs.
+
+If attackers executed only the \insnnoref{CLIL} instruction, this will leave them with a sealed code capability.
+This code capability cannot be used in regular jumps because it is seald with the \cotype{} $2^{64} - 5$.
+The only way it can be used for a jump is in a subsequent \insnnoref{CJAURL} instruction.
+
+An attacker can only jump to a code capability with the isentry it came from.
+This can be divided into two cases: If the instruction following the \insnnoref{CLIL} is a \insnnoref{CJAURL}, this will jump to the code pointed to by the code capability and unseal the isentry.
+The register holding the isentry is stored in the reservation information of the \insnnoref{CLIL} instruction.
+In the second case, if the instruction following the \insnnoref{CLIL} is not a \insnnoref{CJAURL}, the reservation will have become invalid.
+Thus the attacker cannot jump to the code capability.
+Equally, the isentry has never been unsealed and thus cannot be used by the attacker.
+
+Because of this linkage, the attacker can never use a code capability and a data capability together, which have not been intended to work together.
+Thus the linking keeps the atomicity of the instruction.
+
+Loading the code capability does not break CHERI confidentiality.
+Isentries are not designed for secrecy about where a compartment wants to jump, but to implement jumping to a sealed pair of capabilities.
+Similar methods, e.g., cinvoke gives out sealed code and data capabilities, which are then invoked as a pair.
+The code capability itself is not secret.
+
+It is important to note that in the current state of this proposal the linked pair of a \insnnoref{CLIL} and \insnnoref{CJAURL} instruction does not give any guarantees about memory consistency.
+Further work could determine how the reservation interacts with the memory model.
+
+\subsubsection{Allowing more instructions in between \insnnoref{CLIL} and \insnnoref{CJAURL}}
+
+In order to enhance performance, we want to allow for ordinary instructions to appear between a \insnnoref{CLIL} and \insnnoref{CJAURL} instruction.
+This could allow for the load-to-use penalty to be reduced.
+
+The invariants laid out above still need to hold: One must only jump to a linked code capability with a \insnnoref{CJAURL} instruction.
+The linked code capability can only be used with the isentry it came from and the other way around.
+
+We envision the following way of implementing it.
+The \insnnoref{CLIL} instruction makes a reservation, which stores the following information: a one bit tag whether the reservation is valid, a five bit index to indicate the register of the isentry.
+A write to the register of the isentry linked will clear the valid bit of the reservation.
+A write to ct6 -- where the code capability is stored -- will equally lead to the reservation being invalidated.
+
+There always is only ever one reservation.
+A \insnnoref{CLIL} instruction is a write to the ct6 register and thus invalidates the reservation.
+A read of any register does not invalidate the reservation.
+None of the information is secret and the reservation will still point to a correct copy of the isentry as well as the code capability.
+
+This proposal needs a number of instructions that gives a forward progress guarantee.
+One way is to only give a guarantee if a \insnnoref{CLIL} instruction is directly followed by a \insnnoref{CJAURL} instruction.
+However, this could wrong incentivise microarchitects to optimise for that which would harm the case of pushing the \insnnoref{CLIL} before doing work and thus attempting to mitigate a potential load to use penalty.
+
+
 %
 \footnote{While we do not anticipate comingling code and data within the
 authorized region, we do not see much benefit in enforcing a lack of
@@ -1325,6 +1396,8 @@ to distinguish between sentry and indirect sentry capabilities both with
 %
 A new, two-operand instruction is required for this action, which we call
 \insnnoref{CSealIndEntry}.
+
+\subsubsection{Software considerations}
 
 It is straightforward to adapt the designs of \cref{sec:arch-sentry} to this
 instruction so that, for example, the PLT stub \emph{code} can be relocated to
@@ -1387,13 +1460,96 @@ some plausible examples include:
 
 Another option, for architectures open to multi-word transactions in their
 memory subsystems, is an indirect sentry capability which points to the pair of
-PCC and IDC.  Invocation of such a sentry performs two capability loads through
+PCC and IDC.  Invocation of such an isentry performs two capability loads through
 an ephemeral (architecturally invisible), unsealed copy of the given sentry and
 then, with both capabilities in hand, installs both into the register file
 atomically.  There is no requirement that the two capabilities pointed at be
 sealed.  Because these capabilities reside in memory, the instruction
 constructing these ``points to pair'' indirect sentries likely cannot perform
 any validation on their contents.
+
+We allocate the following \cotype{} $2^{64} - 6$ from the reserved otype space for ``points to pair'' isentries.
+%Furthermore, we allocate the \cotype{} $2^{64} - 7$ for capabilities that have been loaded through ``points to pair'' linked isentry loads.
+
+As described in the previous section about ``points to PCC'' isentries, an
+instruction facilitating all operations is complex and imposes the need for
+micro-operations. Thus, we also propose to split the ``points to pair'' isentry
+instruction into multiple linked instructions.
+There are four operations included in jumping to a ``points to pair'' isentry: loading the data capability, loading the code capability, jumping to the code capability, and installing the data capability in the IDC register.
+All these operations include capability checks.
+We propose the following three instructions for the four operations above:
+
+\begin{enumerate}
+  \item \insnnoref{CLILC}: CHERI load isentry linked code: this instruction has two operands. The register index of the ``points to pair'' isentry and a destination register index.
+  The instruction loads the capability at the address the isentry is pointing and stores it in the destination register.
+  The loaded capability is sealed with the \cotype{} $2^{64} - 7$.
+  Furthermore it creates a reservation about the linked load or it manipulates an already existing reservation.
+  The instruction does the following capability checks:
+  \begin{itemize}
+    \item Check whether the isentry is tagged.
+    \item Check whether the isentry is sealed with the ``points to pair'' isentry otype.
+    \item Check whether the isentry can load a CAP-WIDTH wide word.
+  \end{itemize}
+  \item \insnnoref{CLILD}: CHERI load isentry linked code; this instruction has one operand, which is the register of the ``points to pair'' isentry.
+  The implicit destination register is IDC.
+  The instruction loads the capability at the address of (isentry + CAP WIDTH) and stores it in the implicit destination register.
+  The loaded capability is sealed with the \cotype{} $2^{64} - 7$.
+  Furthermore it creates a reservation about the linked load or it manipulates an already existing reservation.
+  The instruction does the following capability checks:
+  \begin{itemize}
+    \item Check whether the isentry is tagged.
+    \item Check whether the isentry is sealed with the ``points to pair'' isentry otype.
+    \item Check whether the isentry can load a CAP-WIDTH wide word.
+  \end{itemize}
+  \item \insnnoref{CJAURLP}: CHERI jump and unseal into register linked pair; this instruction has three operands of which one is explicit and the other two are implicit.
+  The explicit source register is the register index to the linked code capability.
+  The implicit source register is IDC holding the linked data capability.
+  IDC is also the implicit destination register.
+  This instruction unseals the data capability and stores it into IDC as well as unsealing the code capability and installing it into the PCC register.
+  The instruction does the following capability checks:
+  \begin{itemize}
+    \item Check whether the code capability is tagged.
+    \item Check whether the code capability is sealed with the \cotype{} $2^{64} - 7$.
+    \item Check whether the cursor of the code capability has at least two bytes in bounds.
+    \item Check whether the data capability is tagged.
+    \item Check whether the data capability is sealed with the \cotype{} $2^{64} - 7$.
+    \item Check whether the reservation is valid.
+  \end{itemize}
+\end{enumerate}
+
+``Points to pair'' isentries need a separate instruction to seal the capability.
+This instruction will use the \cotype{} $2^{64} - 6$.
+
+\subsubsection{Security model}
+
+The three linked instructions described above require careful state storing in the reservation in order to not break the underlying security model of CHERI.
+The code capability is sealed with the \cotype{} $2^{64} - 7$.
+Thus the capability contents can be read, but the capability cannot be dereferenced.
+The only way of dereferencing the code capability is via a \insnnoref{CJAURLP} instruction.
+A similar argument holds for the data capability.
+It cannot be derefenced other than through a \insnnoref{CJAURLP} instruction.
+Through the reservation, the code and data capability are linked and thus only the two capabilities from the same isentry can be invoked.
+
+A write to the destination register of the code capability or to IDC will invalidate the reservation.
+However, all reads are allowed.
+A second \insnnoref{CLILC} or \insnnoref{CLILD} is a write and thus will invalidate the reservation.
+Equally, if one of two -- either \insnnoref{CLILC} or \insnnoref{CLILD} -- reads from a different ``points to pair'' isentry, this will invalidate the reservation as well.
+
+%\subsubsection{Order of instructions}
+%
+%This section describes one way of implementing the three instructions and its implications.
+
+\subsection{Encoding of isentry instructions}
+
+We specified multiple instructions in this Chapter.
+Some of them exhibit similar functionality.
+Therefore, we propose to encode the following instructions in the same encoding space and use ``mode'' bits to distinguish between the respective behaviour.
+
+\begin{itemize}
+  \item \insnref{CSealEntry}, \insnnoref{CISealPCC}, and \insnnoref{CISealPair}
+  \item \insnnoref{CLIL}, \insnnoref{CLILC}, and \insnnoref{CLILD}
+  \item \insnnoref{CJAURL} and \insnnoref{CJAURLP}
+\end{itemize}
 
 % >>>
 % >>>
