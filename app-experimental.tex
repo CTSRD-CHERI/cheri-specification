@@ -1468,12 +1468,42 @@ sealed.  Because these capabilities reside in memory, the instruction
 constructing these ``points to pair'' indirect sentries likely cannot perform
 any validation on their contents.
 
+We allocate the following \cotype{} $2^{64} - 6$ from the reserved otype space for ``points to pair'' isentries.
+%Furthermore, we allocate the \cotype{} $2^{64} - 7$ for capabilities that have been loaded through ``points to pair'' linked isentry loads.
+
 As described in the previous section about ``points to PCC'' isentries, an
 instruction facilitating all operations is complex and imposes the need for
 micro-operations. Thus, we also propose to split the ``points to pair'' isentry
-instruction into a pair of linked instructions.
+instruction into multiple linked instructions.
+There are four operations included in jumping to a ``points to pair'' isentry: loading the data capability, loading the code capability, jumping to the code capability, and installing the data capability in the IDC register.
+All these operations include capability checks.
+We propose the following three instructions for the four operations above:
+
+\begin{enumerate}
+  \item CLILC: CHERI load isentry linked code: this instruction has two operands. The register index of the ``points to pair'' isentry and a destination register index.
+  The instruction loads the capability at the address the isentry is pointing and stores it in the destination register.
+  The loaded capability is sealed with the 
+  Furthermore it creates a reservation about the linked load or it manipulates an already existing reservation.
+  The instruction does the following capability checks:
+  \begin{itemize}
+    \item Check whether the isentry is tagged.
+    \item Check whether the isentry is sealed with the ``points to pair'' isentry otype.
+    \item Check whether the isentry can load a CAP-WIDTH wide word.
+  \end{itemize}
+  \item CLILD: CHERI load isentry linked code; this instruction has one operand, which is the register of the ``points to pair'' isentry.
+  The implicit destination register is IDC.
+  The instruction loads the capability at the address of (isentry + CAP WIDTH) and stores it in the implicit destination register.
+  Furthermore it creates a reservation about the linked load or it manipulates an already existing reservation.
+  The instruction does the following capability checks:
+  \begin{itemize}
+    \item Check whether the isentry is tagged.
+    \item Check whether the isentry is sealed with the ``points to pair'' isentry otype.
+    \item Check whether the isentry can load a CAP-WIDTH wide word.
+  \end{itemize}
+\end{enumerate}
 
 ``Points to pair'' isentries need a separate instruction to seal the capability.
+This instruction will use the \cotype{} $2^{64} - 6$.
 
 % >>>
 % >>>
