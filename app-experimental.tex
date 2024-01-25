@@ -1534,9 +1534,21 @@ However, all reads are allowed.
 A second \insnnoref{CLILC} or \insnnoref{CLILD} is a write and thus will invalidate the reservation.
 Equally, if one of two -- either \insnnoref{CLILC} or \insnnoref{CLILD} -- reads from a different ``points to pair'' isentry, this will invalidate the reservation as well.
 
-\subsubsection{Order of instructions}
+%\subsubsection{Order of instructions}
+%
+%This section describes one way of implementing the three instructions and its implications.
 
-This section describes one way of implementing the three instructions and its implications.
+\subsection{Encoding of isentry instructions}
+
+We specified multiple instructions in this Chapter.
+Some of them exhibit similar functionality.
+Therefore, we propose to encode the following instructions in the same encoding space and use ``mode'' bits to distinguish between the respective behaviour.
+
+\begin{itemize}
+  \item \insnref{CSealEntry}, \insnnoref{CISealPCC}, and \insnnoref{CISealPair}
+  \item \insnnoref{CLIL}, \insnnoref{CLILC}, and \insnnoref{CLILD}
+  \item \insnnoref{CJAURL} and \insnnoref{CJAURLP}
+\end{itemize}
 
 % >>>
 % >>>
