@@ -1500,10 +1500,28 @@ We propose the following three instructions for the four operations above:
     \item Check whether the isentry is sealed with the ``points to pair'' isentry otype.
     \item Check whether the isentry can load a CAP-WIDTH wide word.
   \end{itemize}
+  \item CJAURLP: CHERI jump and unseal into register linked pair; this instruction has one three operands of which one is explicit and the other two are implicit.
+  The explicit source register is the register index to the linked code capability.
+  The implicit source register is IDC holding the linked data capability.
+  IDC is also the implicit destination register.
+  This instruction unseals the data capability and stores it into IDC as well as unsealing the code capability and installing it into the PCC register.
+  The instruction does the following capability checks:
+  \begin{itemize}
+    \item Check whether the code capability is tagged.
+    \item Check whether the code capability is sealed with the \cotype{} $2^{64} - 7$.
+    \item Check whether the cursor of the code capability has at least two bytes in bounds.
+    \item Check whether the data capability is tagged.
+    \item Check whether the data capability is sealed with the \cotype{} $2^{64} - 7$.
+    \item Check whether the reservation is valid.
+  \end{itemize}
 \end{enumerate}
 
 ``Points to pair'' isentries need a separate instruction to seal the capability.
 This instruction will use the \cotype{} $2^{64} - 6$.
+
+\subsubsection{Order of instructions}
+
+\subsubsection{Security model}
 
 % >>>
 % >>>
