@@ -1480,7 +1480,7 @@ All these operations include capability checks.
 We propose the following three instructions for the four operations above:
 
 \begin{enumerate}
-  \item CLILC: CHERI load isentry linked code: this instruction has two operands. The register index of the ``points to pair'' isentry and a destination register index.
+  \item \insnnoref{CLILC}: CHERI load isentry linked code: this instruction has two operands. The register index of the ``points to pair'' isentry and a destination register index.
   The instruction loads the capability at the address the isentry is pointing and stores it in the destination register.
   The loaded capability is sealed with the 
   Furthermore it creates a reservation about the linked load or it manipulates an already existing reservation.
@@ -1490,7 +1490,7 @@ We propose the following three instructions for the four operations above:
     \item Check whether the isentry is sealed with the ``points to pair'' isentry otype.
     \item Check whether the isentry can load a CAP-WIDTH wide word.
   \end{itemize}
-  \item CLILD: CHERI load isentry linked code; this instruction has one operand, which is the register of the ``points to pair'' isentry.
+  \item \insnnoref{CLILD}: CHERI load isentry linked code; this instruction has one operand, which is the register of the ``points to pair'' isentry.
   The implicit destination register is IDC.
   The instruction loads the capability at the address of (isentry + CAP WIDTH) and stores it in the implicit destination register.
   Furthermore it creates a reservation about the linked load or it manipulates an already existing reservation.
@@ -1500,7 +1500,7 @@ We propose the following three instructions for the four operations above:
     \item Check whether the isentry is sealed with the ``points to pair'' isentry otype.
     \item Check whether the isentry can load a CAP-WIDTH wide word.
   \end{itemize}
-  \item CJAURLP: CHERI jump and unseal into register linked pair; this instruction has one three operands of which one is explicit and the other two are implicit.
+  \item \insnnoref{CJAURLP}: CHERI jump and unseal into register linked pair; this instruction has one three operands of which one is explicit and the other two are implicit.
   The explicit source register is the register index to the linked code capability.
   The implicit source register is IDC holding the linked data capability.
   IDC is also the implicit destination register.
@@ -1519,9 +1519,24 @@ We propose the following three instructions for the four operations above:
 ``Points to pair'' isentries need a separate instruction to seal the capability.
 This instruction will use the \cotype{} $2^{64} - 6$.
 
+\subsubsection{Security model}
+
+The three linked instructions described above require careful state storing in the reservation in order to not break the underlying security model of CHERI.
+The code capability is sealed with the \cotype{} $2^{64} - 7$.
+Thus the capability contents can be read, but the capability can be derefenced.
+The only way of dereferencing the code capability is via a \insnnoref{CJAURLP} instruction.
+A similar argument holds for the data capability.
+It cannot be derefenced other than through a \insnnoref{CJAURLP} instruction.
+Through the reservation, the code and data capability are linked and thus only the two capabilities from the same isentry can be invoked.
+
+A write to the destination register of the code capability or to IDC will invalidate the reservation.
+However, all reads are allowed.
+A second \insnnoref{CLILC} or \insnnoref{CLILD} is a write and thus will invalidate the reservation.
+Equally, if one of two -- either \insnnoref{CLILC} or \insnnoref{CLILD} -- reads from a different ``points to pair'' isentry, this will invalidate the reservation as well.
+
 \subsubsection{Order of instructions}
 
-\subsubsection{Security model}
+This section describes one way of implementing the three instructions and its implications.
 
 % >>>
 % >>>
