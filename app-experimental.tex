@@ -1551,6 +1551,107 @@ Therefore, we propose to encode the following instructions in the same encoding 
   \item \insnnoref{CJAURL} and \insnnoref{CJAURLP}
 \end{itemize}
 
+We propose the following encodings as laid out below:
+
+%TODO: incorporate into the framework of this repo
+
+\subsubsection{CLIL}
+
+\subsubsection*{Format}
+
+CLIL cs1
+
+\begin{center}
+\begin{bytefield}{32}
+    \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+    
+    \bitbox{7}{0x7e}
+    \bitbox{5}{0x1}
+    \bitbox{5}{cs1}
+    \bitbox{3}{0x0}
+    \bitbox{5}{0x1f}
+    \bitbox{7}{0x5b}
+\end{bytefield}%
+\end{center}
+
+
+\subsubsection{CJAURL}
+
+\subsubsection*{Format}
+
+CJAURL cs1
+
+\begin{center}
+\begin{bytefield}{32}
+    \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+    
+    \bitbox{7}{0x7e}
+    \bitbox{5}{0x2}
+    \bitbox{5}{cs1}
+    \bitbox{3}{0x0}
+    \bitbox{5}{0x1f}
+    \bitbox{7}{0x5b}
+\end{bytefield}%
+\end{center}
+
+
+\subsubsection{CLILC}
+
+\subsubsection*{Format}
+
+CLILC cs1, cs2
+
+\begin{center}
+\begin{bytefield}{32}
+    \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+    
+    \bitbox{7}{0x7f}
+    \bitbox{5}{cs2}
+    \bitbox{5}{cs1}
+    \bitbox{3}{0x0}
+    \bitbox{5}{0x3}
+    \bitbox{7}{0x5b}
+\end{bytefield}%
+\end{center}
+
+\subsubsection{CLILD}
+
+\subsubsection*{Format}
+
+CLILD cs1
+
+\begin{center}
+\begin{bytefield}{32}
+    \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+    
+    \bitbox{7}{0x7f}
+    \bitbox{5}{0x3}
+    \bitbox{5}{cs1}
+    \bitbox{3}{0x0}
+    \bitbox{5}{0x1f}
+    \bitbox{7}{0x5b}
+\end{bytefield}%
+\end{center}
+
+\subsubsection{CJAURLP}
+
+\subsubsection*{Format}
+
+CJAURLP cs1
+
+\begin{center}
+\begin{bytefield}{32}
+    \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+    
+    \bitbox{7}{0x7f}
+    \bitbox{5}{0x4}
+    \bitbox{5}{cs1}
+    \bitbox{3}{0x0}
+    \bitbox{5}{0x1f}
+    \bitbox{7}{0x5b}
+\end{bytefield}%
+\end{center}
+
 % >>>
 % >>>
 \section{Anti-tamper Seals}
