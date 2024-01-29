@@ -1555,6 +1555,25 @@ We propose the following encodings as laid out below:
 
 %TODO: incorporate into the framework of this repo
 
+\subsubsection{CPTPCCSeal}
+
+\subsubsection*{Format}
+
+CPTPCCSeal cs1
+
+\begin{center}
+\begin{bytefield}{32}
+    \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+    
+    \bitbox{7}{0x7f}
+    \bitbox{5}{0x19}
+    \bitbox{5}{cs1}
+    \bitbox{3}{0x0}
+    \bitbox{5}{cd}
+    \bitbox{7}{0x5b}
+\end{bytefield}%
+\end{center}
+
 \subsubsection{CLIL}
 
 \subsubsection*{Format}
@@ -1592,6 +1611,25 @@ CJAURL cs1
 \end{bytefield}%
 \end{center}
 
+
+\subsubsection{CPTPairSeal}
+
+\subsubsection*{Format}
+
+CPTPairSeal cs1
+
+\begin{center}
+\begin{bytefield}{32}
+    \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+    
+    \bitbox{7}{0x7f}
+    \bitbox{5}{0x1a}
+    \bitbox{5}{cs1}
+    \bitbox{3}{0x0}
+    \bitbox{5}{cd}
+    \bitbox{7}{0x5b}
+\end{bytefield}%
+\end{center}
 
 \subsubsection{CLILC}
 
