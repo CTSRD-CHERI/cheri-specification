@@ -1329,7 +1329,10 @@ being written with valid capabilities or none of them being written.
 
 \subsubsection{Definition of linked pair of instructions}
 
-In this extension, we propose to split the \insnnoref{CISentryJ }(CHERI indirect sealed entry jump) instruction into two sub instructions: \insnnoref{CLIL} (CHERI load isentry linked) and \insnnoref{CJAURL} (CHERI jump and unseal into register linked).
+In this extension, we propose to split the functionality needed for a jump to a ``points to PCC'' isentry into two sub instructions: \insnnoref{CLIL} (CHERI load isentry linked) and \insnnoref{CJAURL} (CHERI jump and unseal into register linked).
+A different approach would be to manage the entire functionality in one instructions, which could be called \insnnoref{CIPTCCJ} (CHERI Isentry Points to PCC Jump).
+However, one big instruction would be against the RISC approach and we currently do not see a feasible path to implementation and less sophisticated microarchitectures.
+Therefore, we decided to define a pair of linked instructions.
 In the following paragraphs, we will explain what these instructions do and how they enforce the security model we are designing.
 
 The \insnnoref{CLIL} instruction loads a capability through an isentry capability and seals it.
@@ -1338,7 +1341,7 @@ In the subsequent instruction this capability can be picked up by a \insnnoref{C
 The two instructions are linked and all security properties are held as explained in the following paragraphs.
 
 If attackers executed only the \insnnoref{CLIL} instruction, this will leave them with a sealed code capability.
-This code capability cannot be used in regular jumps because it is seald with the \cotype{} $2^{64} - 5$.
+This code capability cannot be used in regular jumps because it is sealed with the \cotype{} $2^{64} - 5$.
 The only way it can be used for a jump is in a subsequent \insnnoref{CJAURL} instruction.
 
 An attacker can only jump to a code capability with the isentry it came from.
@@ -1353,7 +1356,7 @@ Thus the linking keeps the atomicity of the instruction.
 
 Loading the code capability does not break CHERI confidentiality.
 Isentries are not designed for secrecy about where a compartment wants to jump, but to implement jumping to a sealed pair of capabilities.
-Similar methods, e.g., cinvoke gives out sealed code and data capabilities, which are then invoked as a pair.
+Similar methods, e.g., \insnref{CInvoke} gives out sealed code and data capabilities, which are then invoked as a pair.
 The code capability itself is not secret.
 
 It is important to note that in the current state of this proposal the linked pair of a \insnnoref{CLIL} and \insnnoref{CJAURL} instruction does not give any guarantees about memory consistency.
@@ -1469,7 +1472,7 @@ constructing these ``points to pair'' indirect sentries likely cannot perform
 any validation on their contents.
 
 We allocate the following \cotype{} $2^{64} - 6$ from the reserved otype space for ``points to pair'' isentries.
-%Furthermore, we allocate the \cotype{} $2^{64} - 7$ for capabilities that have been loaded through ``points to pair'' linked isentry loads.
+Furthermore, we allocate the \cotype{} $2^{64} - 7$ for capabilities that have been loaded through ``points to pair'' linked isentry loads.
 
 As described in the previous section about ``points to PCC'' isentries, an
 instruction facilitating all operations is complex and imposes the need for
@@ -1540,16 +1543,6 @@ Equally, if one of two -- either \insnnoref{CLILC} or \insnnoref{CLILD} -- reads
 %This section describes one way of implementing the three instructions and its implications.
 
 \subsection{Encoding of isentry instructions}
-
-We specified multiple instructions in this Chapter.
-Some of them exhibit similar functionality.
-Therefore, we propose to encode the following instructions in the same encoding space and use ``mode'' bits to distinguish between the respective behaviour.
-
-\begin{itemize}
-  \item \insnref{CSealEntry}, \insnnoref{CISealPCC}, and \insnnoref{CISealPair}
-  \item \insnnoref{CLIL}, \insnnoref{CLILC}, and \insnnoref{CLILD}
-  \item \insnnoref{CJAURL} and \insnnoref{CJAURLP}
-\end{itemize}
 
 We propose the following encodings as laid out below:
 
@@ -1682,6 +1675,20 @@ CJAURLP cs1
     \bitbox{7}{0x5b}
 \end{bytefield}%
 \end{center}
+
+\subsubsection{Different encoding possibilities}
+
+We specified multiple instructions in this Chapter.
+Some of them exhibit similar functionality.
+Therefore, we envision to encode the following instructions in the same encoding space and use ``mode'' bits to distinguish between the respective behaviour.
+
+\begin{itemize}
+  \item \insnref{CSealEntry}, \insnnoref{CISealPCC}, and \insnnoref{CISealPair}
+  \item \insnnoref{CLIL}, \insnnoref{CLILC}, and \insnnoref{CLILD}
+  \item \insnnoref{CJAURL} and \insnnoref{CJAURLP}
+\end{itemize}
+
+However, we have not yet laid out the encoding of these instructions.
 
 % >>>
 % >>>
