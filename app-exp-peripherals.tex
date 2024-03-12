@@ -15,8 +15,8 @@ To achieve these goals, we propose several architectural features.
 This feature assumes that peripherals are capability-aware, in that they are able to load, store and manipulate capabilities and their tags.  A number of scenarios with trustworthy hardware and software, untrustworthy software on trustworthy hardware, or untrustworthy hardware and software may be envisaged.  Hardware that is not capability-aware and uses integers as pointers is out of scope for this extension, although it may be constrained or otherwise capability-wrapped by some other structure.
 
 \subsection{Address-space coloring}
-
-We deconstruct systems into regions of address-space colors (ASCs).  A region with a common color has addresses with a single unambiguous meaning.  Generalizing, a color could apply to an application's virtual address space, the system's hardware physical address space, the guest physical address space of a virtual machine, or a piece of memory on a peripheral.
+\label{app:exp:coloring}
+We may deconstruct systems into regions of address-space colors (ASCs).  A region with a common color has addresses with a single unambiguous meaning.  Generalizing, a color could apply to an application's virtual address space, the system's hardware physical address space, the guest physical address space of a virtual machine, or a piece of memory on a peripheral.
 A Processing Element (PE -- processor, DMA engine or other core) is assigned a color based on its physical location in the system topography.
 
 Colors also represent single regions of authority.  Within a colored region, it is assumed that every device that can synthesize a capability has rights to do so.  If a device is untrustworthy, it should be segmented into a different colored region.
@@ -47,7 +47,7 @@ To avoid reducing the bits for the \cotype{}, we propose a variable-length tag. 
 \end{verbatim}
 
 
-\subsection{Operations on colored capabilities}
+\subsubsection{Operations on colored capabilities}
 Colors are used to enforce policy by processing elements and ATPUs.  A processing element has, in its hardware, an awareness of the color of its local address space.
 
 In this area exist a number of possibilities, subject to further research.
@@ -71,7 +71,7 @@ Other approaches are possible.  For instance, colored capabilities could be trea
 %\item[Change color on capability.] A local capability may be converted to a capability of a different color by passing it %through ATPU(s), which return the appropriate non-local capability.  The rights on the returned capability may be reduced %compared to the input.
 %\end{description}
 
-\subsection{Enforcement}
+\subsubsection{Enforcement}
 Both PEs and system bridges are tasked with enforcing the capability model:
 
 \paragraph{Bridges} enforce operations on colored capabilities.  For example, a bridge may disallow capabilities of other colors to pass through it.  Bridges are viewed as more trustworthy than devices they connect, although a hierarchy exists -- bridges closer to DRAM are able to disallow capabilities that are accepted by bridges further away.  Bridges have an awareness of whether hardware might be untrustworthy (for instance, plugged in to a motherboard slot or external port) and apply external enforcement of properties where the hardware might be untrustworthy.
@@ -82,7 +82,7 @@ ATPUs could also transform capabilities that pass through them according to thei
 %\tmnote{What happens when malicious PE hardware violates the sealing of a non-local cap?  Can the bridge efficiently enforce that?}
 \paragraph{PEs} are tasked with enforcing the capability model within their local software.  Bridges enforce colors, but PEs enforce the remainder of the capability model (monotonicity, tagging, etc).  An untrustworthy PE may corrupt its own capabilities, but since the coloring is enforced by the bridge it will only have detrimental effects on its own software.
 
-\subsection{Implementation outline}
+\subsubsection{Implementation outline}
 For a minimalist implementation, the following might be done:
 
 \begin{enumerate}
@@ -108,3 +108,81 @@ possessing a suitable authorization capability, and thus making an API call to
 another PE or ATPU.  ATPUs may implement such translation in hardware to
 make it efficient.
 \end{enumerate}
+
+
+\subsection{Shared Host and Peripheral Virtual Address Spaces} % <<<
+An alternative to tagging capabilities with an address space color would be
+to arrange for all capabilities to represent the same address space, preventing
+ambiguity.
+
+Unlike in section \ref{app:exp:physcap}, when an IOMMU is present capabilities
+may hold virtual addresses.  The question is how should I/O virtual address
+spaces and capabilities interact.
+
+Parallels can be drawn to with the implementation of
+capabilities in Unix processes.  There, capabilities are used for fine-grained
+protection while the MMU may be used for address translation.
+In the I/O space, we can similarly use capabilities for fine-grained
+protection of memory objects while using an IOMMU to acheive address
+translation between the address spaces of different initiators.  Relegating the
+IOMMU to a secondary role gives the opportunity to
+simplify its hardware, potentially allowing fewer levels of page translation
+or even a non-paged IOMMU.
+
+As with virtually addressed capabilities in operating systems, there comes
+the challenge that capabilities without an address-space color (as sketched in
+section \ref{app:exp:coloring}) must be distinguished as to which
+address space they relate to.  In software the OS is in charge of process
+switching, maintains an awareness of the current address space, and prevents
+capabilities from leaking between address spaces.  In I/O this is not true:
+devices are making transactions independently and without coordination,
+hence transactions in different address spaces can and do occur
+concurrently.  Unlike traditional IOMMU usage, we are concerned not
+just with the address on the memory interconnect (where we can tell the address
+space based on the transaction's origin in the system topology) but also
+with addresses in memory (which have no clear provenance).
+
+An alternative approach is to use a simplified IOMMU to retain
+topological address provenance, but establish a \emph{shared I/O virtual
+address space}.
+In this way all devices share the same address mappings, but
+capabilities are used to restrict those accesses (either by device hardware
+being trustworthy and playing by the rules, or externally checking the outputs
+of untrusted hardware).
+
+One way to implement this is to ringfence a single range of virtual address
+space
+in the OS that is set up so that both OS and all peripherals' virtual address
+spaces align -- i.e.  an address in this region refers to the same piece of
+memory whether it comes from any software on the host or peripheral device.
+An analogy may be drawn with operating systems' \emph{direct mapped region},
+a chunk of virtual address space where physical memory is mapped contiguously
+-- this mapping exists in every process and is never switched out.
+
+This means that any capability that refers to this address space is
+unambiguous to what it refers.  Hence there is never a disambiguation
+problem and hence no need to color the capabilities.  The downside is that
+we cannot use such capabilities with physical addresses (unless the CPU lets
+software use physical addresses, which may be true on a microcontroller but
+less in an application-class system) and hence translation is required.
+Such translation could be relatively lightweight however -- eg simply
+adding a fixed offset to a physical address to turn it into a virtual
+address in this region.
+
+In this scenario access would require a capability to access a certain range of
+shared I/O virtual address space, and a way to securely revoke capabilities
+from devices once they were no longer required.  The IOMMU would be limited to
+ensuring that devices could not access memory outside the shared address space.
+
+A simplified IOMMU would map this region to physical address space.
+Alternatively a more complex page-based IOMMU could instead
+dynamically provision this space with physical pages to allow sparse mappings
+and contiguous blocks in fragmented physical memory -- but it could do so at a
+larger granularity than that of software objects (eg megabyte-sized pages
+rather than 4~KiB).  Such design choices would depend on the kinds of accesses
+expected by the system designer, but some tradeoffs could be made at runtime --
+for example, a traditional paged IOMMU could be populated with 'huge' pages
+(saving translation costs) since it is no longer needed to use
+the IOMMU for protection of individual objects.  Additionally, by handling
+revocation via capabilities rather than in the IOMMU, it reduces IOTLB churn
+and invalidation delays.
