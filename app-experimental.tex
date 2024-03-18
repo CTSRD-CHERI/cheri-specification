@@ -2693,6 +2693,114 @@ as well as its internal operation, are left to future work.
 
 % >>>
 % >>>
+\section{Thread Identification} % <<<
+
+\subsection{Motivation}
+
+Compartmentalisation models often rely on trusted code performing the switch from one compartment to another.
+This trusted code needs a mechanism to retrieve a data capability, e.g., for a stack.
+When using sentries (sealed entry capabilities) to call into trusted code, the same piece of trusted code can be called from multiple threads and each thread must have a distinct trusted data capability.
+Thus, we have the need for reliable thread identification.
+This can be solved by calling into the entity that provides threading support.
+In the conventional case, this would mean a call to kernel space at every time trusted code is entered.
+Thus, we need to have a way of both fast and reliably determining the current thread ID (TID).
+
+The TID is not the same as Thread-Local Storage (TLS).
+When jumping from one compartment to another, the TLS should change per compartment, but the TID should remain the same over all calls.
+The commonly used RISC-V calling convention defines \texttt{x4} as the thread pointer register.
+We cannot use \texttt{x4} as the TID register because it is not a reliable source.
+Any compartment can manipulate it.
+
+\subsection{Design}
+
+We currently envision multiple layers to this design.
+
+\begin{enumerate}
+\item The most simple design is to have one thread in the system called the Supervisor Thread ID (STID).
+      The register is a CSR that is only writable from S mode or more privileged modes if the ASR permission bit is set.
+      It is exposed as a read-only register to U mode, which is called User Thread ID (UTID).
+      We propose the following allocation in the CSR space: STID: \texttt{0x541} (RW), UTID: \texttt{0xC30} (RO)
+\item The design above can be extended by tagging the integer state in the TID register.
+      This will allow to virtualise the thread ID and thus multiple parties can write to the register and avoid being confused over the current content of the register.
+\item The UTID can also be instantiated as a read-write register.
+      This allows to have different thread ID values at the same time in S and U mode.
+      Writing to the UTID needs to be privileged by the ASR bit.
+      We propose the following allocation of UTID: \texttt{0x020} (RW)
+\item All proposals above can be extended by a register holding the current trusted data capability (TDC).
+      The trusted data capability can be retrieved via a call to more privileged code or indexed with the help of the thread ID.
+      Having a dedicated TDC register could allow for performance improvements.
+      The TDC register is likely to be allocated in the SCR space.
+\end{enumerate}
+
+\subsubsection{Access Control}
+
+The TDC register must not be manipulated by compartments because that would allow for the trusted code to use an unreliable data capability.
+Using ASR (Access System Registers) does not seem appropriate because it would not be nestable.
+One cannot gain a higher privilege than ASR. We propose to constrain access to the TDC register via otypes.
+The TDC register is sealed and it can only be written with an authorising capability.
+In order to facilitate that we add an additional \texttt{funct3} value for CSR instructions:
+
+\begin{center}
+  \begin{bytefield}{32}
+      \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,31}\\
+      \bitbox{12}{csr}
+      \bitbox{5}{rs1}
+      \bitbox{3}{CSRAW}
+      \bitbox{5}{Auth Cap}
+      \bitbox{7}{SYSTEM}
+  \end{bytefield}%
+\end{center}
+
+This instruction checks whether the value currently in the CSR is sealed with a subset of what the authorising capability grants.
+Otherwise, the instruction raises an exception.
+
+At boot, the TDC register is set to the almighty capability, tag set, and sealed with OTYPE\_MAX.
+The most privileged code in the system setting up compartmentalisation is expected to have an almighty authorising capability.
+Every layer performing sub-compartmentalisation will have a subset of the initial authorising capability.
+Thus more privileged compartmentalisation layers can always manipulate the capability in the TDC register, which has been set by a less privileged layer.
+
+It is not enough to only rely on the value of the otype that the TDC register is sealed with.
+For example, in the library compartmentalisation case, some malicious compartment could stash the current capability of TDC in some memory. Later, the malicious compartment could overwrite TDC with stale value and thus confuse trusted code.
+
+\subsubsection{Nestability of TDC}
+
+In the normal case, the type of the value in TDC is the one expected by the current level of compartmentalisation.
+However, when trusted code encounters a data capability that is not of its own type, it must have been installed because a nested compartmentalisation mechanism uses a subtype.
+The trampoline can use its thread ID to access the correct TDC.
+It could also call more privileged code, but that would result in great performance penalty.
+Once the trampoline is ready to return, it will need to re-instantiate the trusted data capability it has swapped out when being entered.
+
+\subsubsection{Usage of TID register}
+
+In the code below, we present how we expect the TID to be used in a system in order to load a trusted data capability.
+The respective TID register is used to index into a table of trusted stacks.
+In order to ensure correctness, the current data capability needs to be updated in a part of memory that is accessible by all trusted code.
+This approach does not require the sentry to have the write permission set.
+The following code sequence is needed to load the TDC:
+
+\begin{lstlisting}[label=tid_load_tdc]
+auipcc ct0, const_0
+CIncOffsetImm ct0, ct0, const_1
+clc ct0, 0(ct0) // load cap to sealed trusted caps
+csrr ct1, tid
+CIncOffset ct0, ct0, t1
+clc ct0, 0(ct0) // use tid as offset
+\end{lstlisting}
+
+\subsubsection{Usage of TDC register}
+
+With the TDC implemented, one only needs to load the authorising capability relative to the PCC.
+While everyone can read the TDC register, its content can only be unsealed with a suitable authorising capability.
+The code below shows how a trampoline can retrieve its trusted data capability:
+
+\begin{lstlisting}[label=tdc_load_tdc]
+auipcc ct0, const_0
+CIncOffsetImm ct0, ct0, const_1
+clc ct0, 0(ct0) // load auth cap
+csrr ct1, tdc // everyone can read TDC
+CUnseal ct0, ct0, ct1 // unseal TID  
+\end{lstlisting}
+
 \section{Compartment ID Sealing} % <<<
 
 \subsection{Motivation}
