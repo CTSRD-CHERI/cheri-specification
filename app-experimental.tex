@@ -2801,6 +2801,17 @@ csrr ct1, tdc // everyone can read TDC
 CUnseal ct0, ct0, ct1 // unseal TID
 \end{lstlisting}
 
+\subsection{Implementation Notes}
+
+Access to CSR registers is usually slow in microarchitectures because many CSRs take effect on the system and thus need to stall the pipeline or even need to redirect.
+The TID and TDC registers are different because they are pure-data registers and no value stored in it has any effect on other architectural state.
+Thus, we propose to treat these registers differently.
+
+We note that the TID register is written when every there is a thread switch, but not otherwise.
+However, the TID register is read on every trampoline entry.
+Thus, we conclude that the reading speed of the TID register matters for overall performance whereas the writing speed does not.
+We envision that this strategy might be useful to other pure-data CSRs.
+
 \section{Compartment ID Sealing} % <<<
 
 \subsection{Motivation}
