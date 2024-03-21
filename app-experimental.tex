@@ -2699,7 +2699,8 @@ as well as its internal operation, are left to future work.
 
 Compartmentalisation models often rely on trusted code performing the switch from one compartment to another.
 This trusted code needs a mechanism to retrieve a data capability, e.g., for a stack.
-When using sentries (sealed entry capabilities) to call into trusted code, the same piece of trusted code can be called from multiple threads and each thread must have a distinct trusted data capability.
+When using sentries (sealed entry capabilities) to call into trusted code, the same piece of trusted code can be called from multiple threads and each thread must be able to access its trusted data.
+The pre-thread root capability for trusted data is defined to be the trusted data capability of this thread.
 Thus, we have the need for reliable thread identification.
 This can be solved by calling into the entity that provides threading support.
 In the conventional case, this would mean a call to kernel space at every time trusted code is entered.
@@ -2716,8 +2717,9 @@ Any compartment can manipulate it.
 We currently envision multiple layers to this design.
 
 \begin{enumerate}
-\item The most simple design is to have one thread in the system called the Supervisor Thread ID (STID).
-      The register is a CSR that is only writable from S mode or more privileged modes if the ASR permission bit is set.
+\item The most simple design is to have one register per hardware thread holding the software thread id.
+      We refer to this reaister as the Supervisor Thread ID (STID).
+      This register is a CSR that is only writable from S mode or more privileged modes if the ASR permission bit is set.
       It is exposed as a read-only register to U mode, which is called User Thread ID (UTID).
       We propose the following allocation in the CSR space: STID: \texttt{0x541} (RW), UTID: \texttt{0xC30} (RO)
 \item The design above can be extended by tagging the integer state in the TID register.
@@ -2810,8 +2812,9 @@ Thus, we propose to treat these registers differently.
 
 We note that the TID register is written when every there is a thread switch, but not otherwise.
 However, the TID register is read on every trampoline entry.
-Thus, we conclude that the reading speed of the TID register matters for overall performance whereas the writing speed does not.
-We envision that this strategy might be useful to other pure-data CSRs.
+Thus, we conclude that the reading speed of the TID register matters for overall performance of compartmentalisation.
+The speed of writing the TID still has performance implications because the speed of thread switching code remains important to overall system performance.
+
 
 \section{Compartment ID Sealing} % <<<
 
