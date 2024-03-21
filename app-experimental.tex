@@ -2718,7 +2718,7 @@ We currently envision multiple layers to this design.
 
 \begin{enumerate}
 \item The most simple design is to have one register per hardware thread holding the software thread id.
-      We refer to this reaister as the Supervisor Thread ID (STID).
+      We refer to this register as the Supervisor Thread ID (STID).
       This register is a CSR that is only writable from S mode or more privileged modes if the ASR permission bit is set.
       It is exposed as a read-only register to U mode, which is called User Thread ID (UTID).
       We propose the following allocation in the CSR space: STID: \texttt{0x541} (RW), UTID: \texttt{0xC30} (RO)
