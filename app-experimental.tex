@@ -2782,7 +2782,8 @@ The following code sequence is needed to load the TDC:
 auipcc ct0, const_0
 CIncOffsetImm ct0, ct0, const_1
 clc ct0, 0(ct0) // load cap to sealed trusted caps
-csrr ct1, tid
+csrr t1, tid
+slli t1, t1, LOG2(BYTE_SIZE_CAP)
 CIncOffset ct0, ct0, t1
 clc ct0, 0(ct0) // use tid as offset
 \end{lstlisting}
