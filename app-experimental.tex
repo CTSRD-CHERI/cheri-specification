@@ -2984,3 +2984,29 @@ A new mechanism could be created to allow the label capabilities to be
 efficiently painted across regions of memory similar to current
 optimisation allowing blocks of memory to be zeroed on Arm v8 and
 other commercial cores.
+
+% >>>
+\section{Tagged Physical Memory Attribute}
+
+A CHERI system might statically preserve tags for all memory that could hold capabilities.
+However, if software were able to dynamically enable tag tracking for memory that is expected to hold tags, it might be possible to construct a system on chip that intermingles CHERI, tag-aware masters, and tag-oblivious masters such that tag-oblivious masters need not encounter any tag operations on their path to memory.
+
+To enable such a system, the tag controller, which emulates a tagged (e.g. 129-bit) memory, is placed at the mouth of our tagged interconnect such that any masters that can set tags reach DRAM through the tag controller.
+In addition, we introduce a \emph{Tag Filter} near the DRAM controller that manages a new Physical Memory Attributes (PMA) for each \emph{block} of physical memory (possibly on the order of a root-level tag table cache line, or about a super-page).
+We may call this new attribute PMAT (Physical Memory Attribute - Tagged), which indicates if this block can preserve tags in DRAM.
+The PMAT for any block is set only through notification of the tag controller, which keeps it's own copy and notifies the Tag Filter to set PMAT for this block, after which the Tag Controller begins tracking tags for that block.
+
+Every access to DRAM over the bus indicates whether the access expects to reach tagged memory. 
+This is always false for non-CHERI masters, and the tag controller, which serves all CHERI-aware masters, reflects the PMAT state it expects in each request.
+If the Tag Filter observes a match, it does nothing.
+If the Tag Filter sees an untagged write to tagged memory (PMAT=1), it clears PMAT.
+If the Tag Filter sees a tagged read from non-tagged memory (PMAT=0), it returns a bus error.
+
+This allows memory allocated to the tagged subsystem (on super-page granularity) to safely move between tagged and untagged over time without any data buffering required in the Tag Filter, which gates the whole memory controller.
+As the Tag Filter cannot set any tags, it cannot prevent data writes from tagless masters from overwriting tagged blocks, but it can record that a block has been sullied by a write from a non-tagged master, and can prevent any further tagged reads.
+The bus error could theoretically allow CheriBSD to move blocks from tagged to untagged (for example, to share with a DMA device) while changing the PMA only lazily after DMA has sullied the block.
+
+Super-page block granularity (rather than page) should allow the PMA to be stored in SRAM (1 KiB would hold PMAs for 1GiB of DRAM, for example), ensuring that lookup on the DRAM path is entirely deterministic.
+The bus error is only on reads, and can be attached to a read response, and so should allow implementation with no additional latency on the main data path.
+
+As a note, these PMAT bits are logically a software-controlled third layer of tag compression table, however, because these are software-controlled such that tag storage is enabled explicitly for each super-page block, they should be treated primarily as dynamic PMA bits.
