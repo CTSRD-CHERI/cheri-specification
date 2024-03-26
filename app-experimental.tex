@@ -2993,8 +2993,8 @@ However, if software were able to dynamically enable tag tracking for memory tha
 
 To enable such a system, the tag controller, which emulates a tagged (e.g. 129-bit) memory, is placed at the mouth of our tagged interconnect such that any masters that can set tags reach DRAM through the tag controller.
 In addition, we introduce a \emph{Tag Filter} near the DRAM controller that manages a new Physical Memory Attributes (PMA) for each \emph{block} of physical memory (possibly on the order of a root-level tag table cache line, or about a super-page).
-We may call this new attribute PMAT (Physical Memory Attribute - Tagged), which indicates if this block can preserve tags in DRAM.
-The PMAT for any block is set only through notification of the tag controller, which keeps it's own copy and notifies the Tag Filter to set PMAT for this block, after which the Tag Controller begins tracking tags for that block.
+We may call this new attribute PMAT (Physical Memory Attribute - Tagged), which indicates if this data block has associated capability tags.
+The PMAT for any block is set only through notification of the tag controller, which keeps it's own copy and notifies the Tag Filter to set PMAT for this block, after which the Tag Controller clears all tags for the new block, and henceforth begins tracking tags for that block.
 
 Every access to DRAM over the bus indicates whether the access expects to reach tagged memory. 
 This is always false for non-CHERI masters, and the tag controller, which serves all CHERI-aware masters, reflects the PMAT state it expects in each request.
