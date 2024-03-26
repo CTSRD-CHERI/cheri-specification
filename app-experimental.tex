@@ -2996,7 +2996,7 @@ In addition, we introduce a \emph{Tag Filter} near the DRAM controller that mana
 We may call this new attribute PMAT (Physical Memory Attribute - Tagged), which indicates if this data block has associated capability tags.
 The PMAT for any block is set only through notification of the tag controller, which keeps it's own copy and notifies the Tag Filter to set PMAT for this block, after which the Tag Controller clears all tags for the new block, and henceforth begins tracking tags for that block.
 
-Every access to DRAM over the bus indicates whether the access expects to reach tagged memory. 
+Every access to DRAM over the bus indicates whether the access expects to reach tagged memory.
 This is always false for non-CHERI masters, and the tag controller, which serves all CHERI-aware masters, reflects the PMAT state it expects in each request.
 If the Tag Filter observes a match, it does nothing.
 If the Tag Filter sees an untagged write to tagged memory (PMAT=1), it clears PMAT.
