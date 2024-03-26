@@ -1677,10 +1677,11 @@ CJAURLP cs1
 \end{center}
 
 \subsubsection{Different encoding possibilities}
+\label{sec:seal-type-consolidated}
 
-We specified multiple instructions in this Chapter.
+We specified multiple instructions in this chapter.
 Some of them exhibit similar functionality.
-Therefore, we envision to encode the following instructions in the same encoding space and use ``mode'' bits to distinguish between the respective behaviour.
+Therefore, we envision to encode the following instructions in the same encoding space and use ``mode'' bits to distinguish between the respective behavior.
 
 \begin{itemize}
   \item \insnref{CSealEntry}, \insnnoref{CISealPCC}, and \insnnoref{CISealPair}
@@ -1728,6 +1729,70 @@ of a capability before restoring its address using some seperate state
 (e.g. buffer length) and freeing it.
 It's unclear how common such code is, but intuitively such patterns
 will be difficult to detect statically.
+
+% >>>
+\section{Sealed Keys to Accelerate Typeless Data Sealing}
+
+Without otypes, it is still possible to ``unseal'' sealed capabilities if you posses a superset capability by rederiving from the superset capability, which can be accelerated with BuildCap.
+That is, if you have an unsealed capability to a region of memory, you can seal subsets of that region using the CSealEntry instruction and hand them out to untrusted parties.
+If these are returned to you, you can assert that the tag is set, and then clear the sealed bit (which will clear the tag), and then BuildCap with the superset capability to set the tag again.
+This sequence asserts that the original capability belonged to the expected set of addresses.
+This set of addresses can now be used as a kind of type, and the superset capability as a key for this type.
+
+This mechanism might be used directly if all objects that will be sealed can be allocated in the same ``heap'', or might be used with indirection to allow sealing any capability with that type.
+In this case, the sealing domain would allocate a table with space for one capability for each instance it intends to seal.
+Every time it wants to seal a capability with that type, it would store it in the table, and seal a capability pointing to that entry, and hand it to untrusted domains.
+To unseal, it would CBuildCap to assert that it belongs to the expected type, and then load the original reference from the table.
+
+This general strategy benefits from heap temporal safety.
+Type spaces that are allocated in heap memory are thus guaranteed to be fresh and free from confusion with past and future sealed types.
+
+\subsection{Shortcomings of Typeless Subset Sealing}
+
+Delegation of unsealing: The above typeless sealing is lacking some flexibility versus the full otype system in CHERIv9.
+One shortcoming is that you can no longer separate the ability to unseal from the ability to seal.
+With otypes, a compartment can possess the ability to unseal capabilities of a type without having access to all capabilities of that type.
+That is, it only gains access to capabilities of that type as they are passed to that compartment.
+
+There are other shortcomings that are not yet enumerated here, e.g. delegation of sealing without granting access to all current instances of that type.
+
+\subsection{Sealed Keys}
+
+A potential solution is to add a new hardware-defined Sealed type (in addition to SealedEntry and Unsealed) called \emph{SealedKey}.
+This type would not authorize access to the memory directly, but would authorize unsealing a sealed capability with BuildCap or a new, similar instruction.
+This would enable delegating the ability to unseal a type to a compartment without giving access to all instances of that type; only the instances of that type that are later given to it can be unsealed and used.
+
+In order to produce a SealedKey capability, we might potentially require a new instruction analogous to CSealEntry.
+Section~\ref{sec:seal-type-consolidated} proposes to encode all sealing instructions (Sentries, Keys, Indirect Sentries, etc...) as one instruction with the hardware sealing type specified in an immediate.
+
+\subsection{Instruction sequence for CBuildCap unsealing}
+
+As defined at the moment, the RISC-V CHERI proposal’s CBuildCap instruction restores the sealed bit from the bag of bits given to it.
+Therefore, rather than ``CGetTag; bnez fail; CBuildCap'' to unseal, the instruction sequence is much longer.
+To unseal the capability in ca0 with the authority in ca1, clobbering t0 and t1, the sequence is:
+
+\begin{lstlisting}[language=llvm]
+  CGetTag t0, ca0
+  bnez t0, fail
+  CGetHi t0, ca0
+  // optionally: check sealed bit, if unsealing an unsealed cap should fail
+  li t1, ~SEALED_BIT
+  and t0, t0, t1
+  CSetHi ca0, t0
+  CBuildCap ca0, ca1, ca0
+  ...
+fail:
+\end{lstlisting}
+
+With SealedKeys, the sequence would be:
+
+\begin{lstlisting}[language=llvm]
+  CSealKey ca1, ca1 // Create a SealedKey version of the authority capability
+  CBuildCap ca0, ca1, ca0 // CBuildCap semantics would expect a sealed, tagged
+                          // source when the authority is a SealedKey capability.
+                          // Optionally, we could have a new variant of CbuildCap;
+                          // likely just CUnseal for a system without otypes.
+\end{lstlisting}
 
 % >>>
 \section{Compact Capability Coloring} % <<<
@@ -2769,11 +2834,11 @@ Possible encoding (31:0): 0x7f, 0x1, cs1, 0x0, rd, 0x5b (this is the same encodi
 
 An alternative way of enabling sealing not just constrained by the PERMIT\_SET\_CID bit is to use non-memory capabilities.
 Comparable to the mechanism already present for otypes in the CHERI-RISC-V ISA, we envision a more fine-grained mechanism.
-We propose to create capabilities that authorise for another capability to be sealed with a CID being in a certain range of CIDs.
-This authorising capability has the same fields as a conventional CHERI memory capability, but uses its fields differently.
+We propose to create capabilities that authorize for another capability to be sealed with a CID being in a certain range of CIDs.
+This authorizing capability has the same fields as a conventional CHERI memory capability, but uses its fields differently.
 The address field is interpreted as the CID, and the bounds define a range of CIDs.
 This allows for code to be granted a range of CIDs it can use to seal other capabilities with.
-One possible extension to this is an instruction that retrieves the next CID from the authorising capability and atomically increments the CID field.
+One possible extension to this is an instruction that retrieves the next CID from the authorizing capability and atomically increments the CID field.
 
 
 \subsection{Sealing}
@@ -2824,7 +2889,7 @@ The instruction sequence was shrunk to just one instruction reading from the new
 \subsection{Sharing}
 
 Sealing implicitly forbids sharing capabilities between compartments.
-However, sometimes this behaviour is desired by software. We have designed two mechanisms for sharing capabilities between compartments:
+However, sometimes this behavior is desired by software. We have designed two mechanisms for sharing capabilities between compartments:
 
 \begin{itemize}
 \item Explicit unsealing: This will explicitly unseal a capability, and it can be shared either via the register file or via memory.
