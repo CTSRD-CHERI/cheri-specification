@@ -496,18 +496,21 @@ Might be worth further discussion to decide if we need/want them.}
 \textbf{0} & Program counter capability (\PCC{})     & U, S, M & RO & $\infty$ & \PC{} \\
 \textbf{1} & Default data capability (\DDC{})        & U, S, M & -  & $\infty$ & -     \\
 [1.5em]
+\textbf{3} & User thread id capability (\UTIDC{})     & U, S, M & ASR* & $\emptyset$ & -        \\
 \textbf{4} & User trap code capability (\UTCC{})     & U, S, M & ASR & $\infty$    & \utvec{} \\
 \textbf{5} & User trap data capability (\UTDC{})     & U, S, M & ASR & $\emptyset$ & -        \\
 \textbf{6} & User scratch capability (\UScratchC{})  & U, S, M & ASR & $\emptyset$ & \uscratch{}  \\
 \textbf{7} & User exception PC capability (\UEPCC{}) & U, S, M & ASR & $\infty$    & \uepc{} \\
 [1.5em]
 
+\textbf{11} & Supervisor thread id capability (\STIDC{})     & S, M & ASR* & $\emptyset$ & -        \\
 \textbf{12} & Supervisor trap code capability (\STCC{})     & S, M & ASR & $\infty$    & \stvec{} \\
 \textbf{13} & Supervisor trap data capability (\STDC{})     & S, M & ASR & $\emptyset$ & -        \\
 \textbf{14} & Supervisor scratch capability (\SScratchC{})  & S, M & ASR & $\emptyset$ & \sscratch{} \\
 \textbf{15} & Supervisor exception PC capability (\SEPCC{}) & S, M & ASR & $\infty$    & \sepc{}  \\
 [1.5em]
 
+\textbf{27} & Machine thread id capability (\MTIDC{})     & M & ASR* & $\emptyset$ & -        \\
 \textbf{28} & Machine trap code capability (\MTCC{})     & M & ASR & $\infty$    & \mtvec{} \\
 \textbf{29} & Machine trap data capability (\MTDC{})     & M & ASR & $\emptyset$ & -        \\
 \textbf{30} & Machine scratch capability (\MScratchC{})  & M & ASR & $\emptyset$ & \mscratch{} \\
@@ -523,7 +526,8 @@ registers.
 \PCC{} is read-only via \insnriscvref{CSpecialRW}, but is set by
 \insnriscvref{CJALR} and during exceptions; \textit{ASR} indicates
 \PCC{}.\cperms{} must grant \cappermASR{} to permit access (in addition to
-being in a permitted mode).
+being in a permitted mode; \textit{ASR*} indicates that \cappermASR{} is
+only needed for writing operations).
 \textbf{Reset} indicates whether the register is initialised to the default
 root capability ($\infty$) or NULL capability ($\emptyset$) on reset.
 Some special capabilities registers are extensions of existing RISC-V
@@ -896,6 +900,14 @@ Priority & Description \\
 \caption{CHERI-RISC-V Capability Exception Priority}
 \label{table:risc-v-exception-priority}
 \end{table}
+
+\subsection{Thread ID Capabilities}
+
+In CHERI-RISC-V, compartmentalisation switching code needs to identify the current thread it is running on.
+For this purpose, the \xTIDC{} registers are provided.
+They can written only if \PCC{}.\cperms{} must grant \cappermASR{}.
+Reading of the \xTIDC{} registers is not dependent on \cappermASR{}, but only on the mode.
+In order to protect other code running on the current mechanism from reading out and using the capability stored in \xTIDC{}, it might be necessary to seal the content of this register.
 
 \subsection{Virtual Memory and Page Tables}
 \label{subsection:riscv:pagetables}
