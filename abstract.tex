@@ -1,6 +1,6 @@
 \section*{Abstract}
 
-This technical report describes CHERI ISAv9, the ninth version of the
+This technical report describes CHERI ISAv10, the tenth version of the
 CHERI architecture
 being developed by SRI International and the University of Cambridge.
 This design captures thirteen years of research, development, experimentation,
@@ -51,20 +51,20 @@ software libraries such as data compression, protocol parsing, and image
 processing (which are concentrations of both complex and historically
 vulnerability-prone code exposed to untrustworthy data sources).
 
-CHERI ISAv9 is a substantial enhancement to prior ISA versions.
-CHERI-RISC-V has replaced CHERI-MIPS as the primary reference
-platform, and CHERI-MIPS has been removed from the specification.
-CHERI architectures now always use merged register files where
-existing general-purpose registers are extended to support
-capabilities.
-CHERI architectures have adopted two design decisions from Arm
-Morello: 1) CHERI architectures now clear tags rather than raising
-exceptions if an instruction attempts a non-monotonic modification
-of a capability; and 2) \DDC{} and \PCC{} no longer relocate legacy
-memory accesses by default.
-CHERI-RISC-V has received numerous updates to serve as a better
-baseline for an upstream standard proposal including a more mature
-definition of compressed instructions in capability mode.
-CHERI-x86-64 now includes details of extensions to existing x86
-instructions and proposed new instructions in a separate ISA
-reference chapter along with various other updates.
+CHERI ISAv10 is a substantial enhancement to prior ISA versions.
+% CHERI-RISC-V has replaced CHERI-MIPS as the primary reference
+% platform, and CHERI-MIPS has been removed from the specification.
+% CHERI architectures now always use merged register files where
+% existing general-purpose registers are extended to support
+% capabilities.
+% CHERI architectures have adopted two design decisions from Arm
+% Morello: 1) CHERI architectures now clear tags rather than raising
+% exceptions if an instruction attempts a non-monotonic modification
+% of a capability; and 2) \DDC{} and \PCC{} no longer relocate legacy
+% memory accesses by default.
+% CHERI-RISC-V has received numerous updates to serve as a better
+% baseline for an upstream standard proposal including a more mature
+% definition of compressed instructions in capability mode.
+% CHERI-x86-64 now includes details of extensions to existing x86
+% instructions and proposed new instructions in a separate ISA
+% reference chapter along with various other updates.
