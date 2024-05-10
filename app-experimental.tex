@@ -1765,9 +1765,9 @@ This would enable delegating the ability to unseal a type to a compartment witho
 In order to produce a SealedKey capability, we might potentially require a new instruction analogous to CSealEntry.
 Section~\ref{sec:seal-type-consolidated} proposes to encode all sealing instructions (Sentries, Keys, Indirect Sentries, etc...) as one instruction with the hardware sealing type specified in an immediate.
 
-\subsection{Instruction sequence for CBuildCap unsealing}
+\subsubsection{Instruction sequence for CBuildCap unsealing}
 
-As defined at the moment, the RISC-V CHERI proposal’s CBuildCap instruction restores the sealed bit from the bag of bits given to it.
+As defined at the moment, the RISC-V CHERI proposal's CBuildCap instruction restores the sealed bit from the bag of bits given to it.
 Therefore, rather than ``CGetTag; bnez fail; CBuildCap'' to unseal, the instruction sequence is much longer.
 To unseal the capability in ca0 with the authority in ca1, clobbering t0 and t1, the sequence is:
 
@@ -1793,6 +1793,60 @@ With SealedKeys, the sequence would be:
                           // Optionally, we could have a new variant of CbuildCap;
                           // likely just CUnseal for a system without otypes.
 \end{lstlisting}
+
+
+\subsubsection{Format}
+
+Sealed keys can be represented in multiple ways in the capability format.
+Some of the choices have an impact on other properties. (see Section~\ref{subsubsec:sealedkey_subtyping}).
+As a first option, the sealed key can be an extension to the current seal bit, bringing it to 2 bits in total.
+This would lead the sealed key itself being sealed and thus it cannot be manipulated.
+
+Second, the permissions can be extended by one bit for sealed keys.
+This would allow for manipulations, but also it would be monotonic.
+A memory region authorized by a capability cannot be used a sealed after the the permissions bit has been stripped.
+
+Third, the format can include a mode bit, which tells whether this is a sealed key capability.
+This allows for manipulations on the capability.
+The sealed key bit can never be cleared, but every non-sealed-key capability can become a sealed key.
+This gives code the power to create their own unsealers with needing to have given an unsealer before.
+
+\subsubsection{Subtyping}
+\label{subsubsec:sealedkey_subtyping}
+
+Software needs to option to pass a subset of its unsealing capabilities to other software.
+Therefore, sealed keys need to be manipulated.
+A sealed key must never be converted back to a ``conventional capability''.
+This would allow access to capabilities without ever having received the actual sealed capability.
+When creating a sealed key, the capability cannot be sealed.
+Otherwise, one could create a sealed key for a sealed capability.
+
+We allow the following manipulations on sealed keys:
+
+\begin{itemize}
+\item Set address
+\item Set bounds
+\item Set offset
+\item And permissions
+\end{itemize}
+
+\subsubsection{Unsealing semantics}
+
+We envision multiple ways of unsealing semantics.
+One is laid out above with using a sealed key through an invocation of \texttt{cbuildcap}.
+This would enforce the sealed key to be a superset of the capability to be unsealed.
+
+However, we also envision that it might be useful to software to have a sealed key capability that successfully unseals if the ``sealed key bit'' is set and the bounds of the sealed key span at least the capability to be unsealed.
+
+\subsubsection{Comparison with otypes}
+
+The sealed key approach conflates the object type space and the address space into one space.
+In the otype space, two capabilities can be sealed by the same otype.
+Furthermore, these capabilities are not bound to point to contiguous addresses.
+With sealed keys, the address of the capability becomes its ``type'' and thus two capabilities can never have the same ``type''.
+Otherwise, one of the two capabilities would be a subset of the other capability.
+
+% conflated space
 
 % >>>
 \section{Compact Capability Coloring} % <<<
