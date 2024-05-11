@@ -1400,6 +1400,36 @@ to distinguish between sentry and indirect sentry capabilities both with
 A new, two-operand instruction is required for this action, which we call
 \insnnoref{CSealIndEntry}.
 
+\subsubsection{Creating return isentries}
+
+When using isentries to jump from one compartment to another compartment, there needs to be a way to create return isentries.
+Creating a return isentry needs to perform the following actions:
+%\begin{itemize}
+%\item Sealing a capability to be an isentry
+%\item Writing 
+%\end{itemize}
+%We suggest two instructions to faciliate creating return isentries: \insnnoref{Ccreaterisentry} and \insnnoref{Cjali}.
+We suggest the \insnnoref{Cjali} instruction, which has the following semantics:
+\texttt{Cjali cd, cs1, cs2}: The instruction jumps to the sentry stored in \texttt{cs1}.
+The capability in \texttt{cs2} is sealed as an isentry and written to \texttt{cd}.
+The PCC pointing to the next instruction is written to the memory pointed to by the capability in \texttt{cs2}.
+The instruction fails if one the following conditions is met:
+\begin{itemize}
+\item The capability in \texttt{cs1} is not tagged.
+\item The capability in \texttt{cs1} is not a sentry.
+\item The curser of the capability in \texttt{cs1} is out-of-bounds.
+\item The permissions of the capability in \texttt{cs1} do not grant the execute permissions.
+\item The capability in \texttt{cs2} is not tagged.
+\item The capability in \texttt{cs2} is sealed.
+\item The capability in \texttt{cs2} has no capability write permissions.
+\item The capability in \texttt{cs2} has not authorize a write of CAP\_SIZE
+\end{itemize}
+
+This instruction is tailored to support the collaboration of code using sentries and isentries.
+If the jump to is going to an isentry, we envision a version of \insnnoref{Cjali} to be linked with an instruction loading the isentry being jumped to.
+
+\insnnoref{Ccreaterisentry} creates a return isentry and 
+
 \subsubsection{Software considerations}
 
 It is straightforward to adapt the designs of \cref{sec:arch-sentry} to this
@@ -1672,6 +1702,24 @@ CJAURLP cs1
     \bitbox{5}{cs1}
     \bitbox{3}{0x0}
     \bitbox{5}{0x1f}
+    \bitbox{7}{0x5b}
+\end{bytefield}%
+\end{center}
+
+\subsubsection{CJALI}
+
+\subsubsection*{Format}
+
+CJALI cd, cs1, cs2
+
+\begin{center}
+\begin{bytefield}{32}
+    \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+    \bitbox{7}{0x22}
+    \bitbox{5}{cs2}
+    \bitbox{5}{cs1}
+    \bitbox{3}{0x0}
+    \bitbox{5}{cd}
     \bitbox{7}{0x5b}
 \end{bytefield}%
 \end{center}
