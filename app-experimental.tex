@@ -1731,9 +1731,9 @@ It's unclear how common such code is, but intuitively such patterns
 will be difficult to detect statically.
 
 % >>>
-\section{Sealed Keys to Accelerate Typeless Data Sealing}
+\section{Typeless Data Sealing}
 
-Without otypes, it is still possible to ``unseal'' sealed capabilities if you posses a superset capability by rederiving from the superset capability, which can be accelerated with BuildCap.
+Without otypes, it is still possible to ``unseal'' sealed capabilities if you posses a superset capability by rederiving from the superset capability, which can be accelerated with \insnref{CBuildCap}.
 That is, if you have an unsealed capability to a region of memory, you can seal subsets of that region using the CSealEntry instruction and hand them out to untrusted parties.
 If these are returned to you, you can assert that the tag is set, and then clear the sealed bit (which will clear the tag), and then BuildCap with the superset capability to set the tag again.
 This sequence asserts that the original capability belonged to the expected set of addresses.
@@ -1742,32 +1742,38 @@ This set of addresses can now be used as a kind of type, and the superset capabi
 This mechanism might be used directly if all objects that will be sealed can be allocated in the same ``heap'', or might be used with indirection to allow sealing any capability with that type.
 In this case, the sealing domain would allocate a table with space for one capability for each instance it intends to seal.
 Every time it wants to seal a capability with that type, it would store it in the table, and seal a capability pointing to that entry, and hand it to untrusted domains.
-To unseal, it would CBuildCap to assert that it belongs to the expected type, and then load the original reference from the table.
+To unseal, it would use \insnref{CBuildCap} to assert that it belongs to the expected type, and then load the original reference from the table.
 
 This general strategy benefits from heap temporal safety.
 Type spaces that are allocated in heap memory are thus guaranteed to be fresh and free from confusion with past and future sealed types.
 
-\subsection{Shortcomings of Typeless Subset Sealing}
+\subsection{Shortcomings of Typeless Superset Unsealing}
 
-Delegation of unsealing: The above typeless sealing is lacking some flexibility versus the full otype system in CHERIv9.
+The above typeless sealing is lacking some flexibility versus the full otype system in CHERI v9.
 One shortcoming is that you can no longer separate the ability to unseal from the ability to seal.
+Two compartments having the same powerful capability can both seal and unseal capabilities.
+
+Furthermore, superset unsealing puts an upper limit of how many different capabilities can be unsealed with one key determined by the size of the memory space authorised by that key.
+In the otype world, a suitable authorising capability allows to unseal as many capabilities as there can concurrently exist in the system.
+
 With otypes, a compartment can possess the ability to unseal capabilities of a type without having access to all capabilities of that type.
 That is, it only gains access to capabilities of that type as they are passed to that compartment.
 
-There are other shortcomings that are not yet enumerated here, e.g. delegation of sealing without granting access to all current instances of that type.
+There are other shortcomings that are not yet enumerated here, e.g. the right to seal.
 
-\subsection{Sealed Keys}
+\subsection{Sealing Keys}
 
-A potential solution is to add a new hardware-defined Sealed type (in addition to SealedEntry and Unsealed) called \emph{SealedKey}.
-This type would not authorize access to the memory directly, but would authorize unsealing a sealed capability with BuildCap or a new, similar instruction.
+A potential solution is to add a new architecture-defined type called \emph{unsealing key}.
+This type would not authorize access to the memory directly, but would authorize unsealing a sealed capability with \insnref{CBuildCap} or a new, similar instruction.
 This would enable delegating the ability to unseal a type to a compartment without giving access to all instances of that type; only the instances of that type that are later given to it can be unsealed and used.
 
-In order to produce a SealedKey capability, we might potentially require a new instruction analogous to CSealEntry.
+In order to produce a sealing key capability, we might potentially require a new instruction analogous to \insnref{CSealEntry}.
 Section~\ref{sec:seal-type-consolidated} proposes to encode all sealing instructions (Sentries, Keys, Indirect Sentries, etc...) as one instruction with the hardware sealing type specified in an immediate.
 
-\subsubsection{Instruction sequence for CBuildCap unsealing}
+\subsubsection{Unsealing Instruction Sequences}
+\label{subsubsec:unsealing-sequence}
 
-As defined at the moment, the RISC-V CHERI proposal's CBuildCap instruction restores the sealed bit from the bag of bits given to it.
+As defined at the moment, the RISC-V CHERI proposal's \insnnoref{CBLD} instruction restores the sealed bit from the bag of bits given to it.
 Therefore, rather than ``CGetTag; bnez fail; CBuildCap'' to unseal, the instruction sequence is much longer.
 To unseal the capability in ca0 with the authority in ca1, clobbering t0 and t1, the sequence is:
 
@@ -1784,44 +1790,47 @@ To unseal the capability in ca0 with the authority in ca1, clobbering t0 and t1,
 fail:
 \end{lstlisting}
 
-With SealedKeys, the sequence would be:
+With sealing keys, the sequence would be:
 
 \begin{lstlisting}[language=llvm]
-  CSealKey ca1, ca1 // Create a SealedKey version of the authority capability
-  CBuildCap ca0, ca1, ca0 // CBuildCap semantics would expect a sealed, tagged
-                          // source when the authority is a SealedKey capability.
-                          // Optionally, we could have a new variant of CbuildCap;
+  CBuildCap ca0, ca1, ca0 // CBuildCap semantics would expect a sealed, tagged source
+                          // when the authority (ca1) is an unsealing key capability.
+                          // Optionally, we could have a new variant of CBuildCap;
                           // likely just CUnseal for a system without otypes.
 \end{lstlisting}
 
 
 \subsubsection{Format}
 
-Sealed keys can be represented in multiple ways in the capability format.
-Some of the choices have an impact on other properties. (see Section~\ref{subsubsec:sealedkey_subtyping}).
-As a first option, the sealed key can be an extension to the current seal bit, bringing it to 2 bits in total.
-This would lead the sealed key itself being sealed and thus it cannot be manipulated.
+Sealing keys can be represented in multiple ways in the capability format.
+Some of the choices have an impact on other properties. (see Section~\ref{subsubsec:sealingkey_subtyping}).
+As a first option, the sealing key can be an extension to the current seal bit, bringing it to 2 bits in total.
+This would lead the sealing key itself being sealed and thus it cannot be manipulated.
 
-Second, the permissions can be extended by one bit for sealed keys.
+Second, the permissions can be extended by one bit for sealing keys.
 This would allow for manipulations, but also it would be monotonic.
 A memory region authorized by a capability cannot be used a sealed after the the permissions bit has been stripped.
 
-Third, the format can include a mode bit, which tells whether this is a sealed key capability.
+Third, the format can include a mode bit, which tells whether this is a sealing key capability.
 This allows for manipulations on the capability.
-The sealed key bit can never be cleared, but every non-sealed-key capability can become a sealed key.
+The sealing key bit can never be cleared, but every non-sealed-key capability can become a sealing key.
 This gives code the power to create their own unsealers with needing to have given an unsealer before.
 
+\subsection{Extension to Sealing Keys}
+
+We envision the sealing key idea to be extended in multiple ways in order to fulfill several software use cases.
+
 \subsubsection{Subtyping}
-\label{subsubsec:sealedkey_subtyping}
+\label{subsubsec:sealingkey_subtyping}
 
 Software needs to option to pass a subset of its unsealing capabilities to other software.
-Therefore, sealed keys need to be manipulated.
-A sealed key must never be converted back to a ``conventional capability''.
+Therefore, sealing keys need to be manipulated.
+A sealing key must never be converted back to a ``conventional capability''.
 This would allow access to capabilities without ever having received the actual sealed capability.
-When creating a sealed key, the capability cannot be sealed.
-Otherwise, one could create a sealed key for a sealed capability.
+When creating a sealing key, the capability cannot be sealed.
+Otherwise, one could create a sealing key for a sealed capability.
 
-We allow the following manipulations on sealed keys:
+We allow the following manipulations on sealing keys:
 
 \begin{itemize}
 \item Set address
@@ -1830,21 +1839,31 @@ We allow the following manipulations on sealed keys:
 \item And permissions
 \end{itemize}
 
-\subsubsection{Unsealing semantics}
+\subsubsection{Unsealing Semantics}
 
 We envision multiple ways of unsealing semantics.
-One is laid out above with using a sealed key through an invocation of \texttt{cbuildcap}.
-This would enforce the sealed key to be a superset of the capability to be unsealed.
+One is laid out above in Section~\ref{subsubsec:unsealing-sequence} with using a sealing key through an invocation of \insnref{CBuildCap}.
+This would enforce the sealing key to be a superset of the capability to be unsealed.
 
-However, we also envision that it might be useful to software to have a sealed key capability that successfully unseals if the ``sealed key bit'' is set and the bounds of the sealed key span at least the capability to be unsealed.
+However, we also envision that it might be useful to software to have a sealing key capability that successfully unseals if the ``sealing key bit'' is set and the bounds of the sealing key span at least the capability to be unsealed.
+Thus, the later approach would ignore the permissions bits.
 
-\subsubsection{Comparison with otypes}
+\subsubsection{Right to Create Sealing Keys}
 
-The sealed key approach conflates the object type space and the address space into one space.
-In the otype space, two capabilities can be sealed by the same otype.
-Furthermore, these capabilities are not bound to point to contiguous addresses.
-With sealed keys, the address of the capability becomes its ``type'' and thus two capabilities can never have the same ``type''.
-Otherwise, one of the two capabilities would be a subset of the other capability.
+The right to create a sealing key does not need to be connected to only having an unsealed capability.
+One example would that multiple compartments have a capability authorising access to the same memory, but only one compartment can create sealing keys, which allow unsealing.
+We envision a permission bit for the right to create capabilities.
+Once stripped, the permission bit can never be recovered due to monotonicity.
+
+\subsubsection{Right to Seal Capabilities}
+
+In the current draft of the RISC-V CHERI specification, code that has an unsealed capability can seal it.
+Thus some code can unseal a capability, change its content and then reseal it.
+This way, other code can be tricked into believing that this capability is the original sealed capability.
+For some code, this form of assurance might be necessary.
+We envision to add an additional bit that determines the right to seal a capability.
+
+
 
 % conflated space
 
