@@ -109,6 +109,285 @@ on the LL/SC link flag.  In some toy examples, this seems to make full SMR
 hazards unnecessary.  Unclear that it is worth pursuing.}
 
 % >>>
+\section{Reduced PTE Usage of Architectural Revocation} % <<<
+\label{app:exp:dirtycrg}
+
+\subsection{Motivation} % <<<
+The load-barrier revocation model in the style of Cornucopia Reloaded
+\cite{cornucopia-reloaded} has been demonstrated with the CHERI PTE extensions
+described in \cref{subsection:riscv:pagetables}, as well as with the Morello
+PTE extensions \cite{arm-morello}.
+These solutions are considered superset implementations, where the bits
+allocated in the PTE tables allow a rich set of behaviours for experimentation.
+This comes at the cost of additional consumption of PTE bits, which are scarce.
+
+As part of the CHERI RISC-V standardisation effort, it becomes necessary to
+implement hardware to efficiently support a Cornucopia Reloaded-style revoker,
+while minimising the PTE bit usage. To this end, the CHERI RISC-V standard draft
+0.9.3 \cite{riscv-cheri-draft-0-9-3} (henceforth referred to as Zcheri)
+introduces a 2-bit PTE extension that is meant to enable Cornucopia Reloaded
+revocation.
+This is a significant saving with respect to both the 5 bits extension introduced by
+\cref{subsection:riscv:pagetables} and the 4 bits extension in Morello,
+which focus on enabling experimentation.
+\amnote{Since presumably the details of previous sections may change, should I
+  refer here to a specific CHERI ISA version? E.g. v9?}
+
+\subsubsection{RISC-V Zcheri 0.9.3 PTE Extensions}
+The 2-bit PTE extension as specified in the CHERI RISC-V standard draft 0.9.3
+defines the CW and CRG bits. The CW bit is defined to control both capability
+load and store. The CRG bit has a similar behavior to the CHERI ISAv9 CRG bit;
+however, when the CW bit is clear, the CRG bit is overloaded to encode the
+capability-dirty tracking state as follows:
+
+\begin{center}
+  %
+  \begin{tabular}{ccl}
+    \textbf{CW} & \textbf{CRG} & \textbf{Load Behavior} \\
+    0 & 0 & Capability loads strip tags on loaded result \\
+    0 & 1 & Capability loads strip tags on loaded result \\
+    1 & X & Generational load barrier, trap on load if Sstatus.UCRG $\neq$ CRG \\
+  \end{tabular}
+  %
+  \begin{tabular}{ccl}
+    \textbf{CW} & \textbf{CRG} & \textbf{Store Behavior} \\
+    0 & 0 & Trap on capability stores \\
+    0 & 1 & Track capability dirty, CW is set, CRG is set to Sstatus.UCRG \\
+    1 & X & Capability stores are unaltered \\
+  \end{tabular}
+  %
+\end{center}
+
+For this discussion, we associate names to each combination of the \{CW, CRG\}
+bits, according to the semantic of the Cornucopia Reloaded model.
+A PTE entry is in the \textit{Dirty} state when CW=1, in the
+\textit{Dirtiable} state when CW=0 CRG=1 and in the \textit{Clean} state when
+both CW=0 and CRG=0.
+
+\subsubsection{Limitations of the Zcheri 0.9.3 PTE Extensions}
+The 2-bit PTE extension as specified in the CHERI RISC-V standard draft 0.9.3
+has some limitations that do not allow the Cornucopia Reloaded revoker model
+to be implemented. This is both a consequence of how the Reloaded revoker is
+tuned to reduce TLB shootdowns, as well as fundamental design choices of the
+Zcheri PTE bits extension.
+
+The Zcheri PTE extension has two fundamental limitations:
+\begin{itemize}
+\item The CRG bit is overloaded to encode both the load-side generation and the
+  capability-dirty tracking PTE state (also referred as Dirtiable
+  state). This makes it impossible to retain the load-side generation
+  information when a PTE entry is in the Dirtiable state.
+\item The Dirtiable PTE state interacts poorly with the CW bit
+  semantic when dealing with aliasing pages. In particular, it is impossible
+  to use the capability-dirty tracking state for aliasing pages that may
+  contain capabilities.
+\end{itemize}
+
+In particular, the Dirtiable state is problematic because the
+Reloaded revoker relies on two important properties:
+\begin{enumerate}
+  \item The PTE can be configured to have load-side barrier semantic while in
+    the Dirtiable state.
+  \item The PTE transitions from Dirtiable to Dirty as a
+    result of a capability store leave the CRG bit is unchanged. This
+    encodes the generation for the entry, depending on whether the
+    revoker scan has reached it or not.
+\end{enumerate}
+
+The Reloaded revoker uses the Dirtiable state as an intermediate state
+while transitioning a (presumed) capability-clean page from
+\textit{occupied}\footnote{A page is occupied if it holds or may recently have
+held capabilities.} to \textit{idle}\footnote{A page is idle if it does not
+contain any capabilities, idle pages can be skipped by the revoker when scanning
+memory and play an important part in reducing the number of pages scanned.}.
+Because of the limitations outlined above, the revoker has to accept some
+trade-offs to use the Zcheri 0.9.3 PTE extension.
+
+\begin{itemize}
+  \item The Dirtiable state can not be used for aliasing pages.
+    This is both because of the tag clearing semantic on loads and the
+    CRG update rule.
+  \item Transitions from Dirty to Dirtiable break the
+    ability of the revoker to leave the TLB slightly cap-dirtier than
+    the PTE entries. This means that additional TLB invalidations are needed.
+\end{itemize}
+
+These trade-offs stem from an analysis of possible races between the program
+and the revoker, which result in violations of the Cornucopia Reloaded
+invariants.
+
+\subsection{Two-phase CRG Model}
+The Two-phase CRG model is a derivation of the Zcheri 0.9.3 2-bit PTE extension
+with changes to the Dirtiable state semantic and the addition of an
+extra bit in the Sstatus register.
+The additional bit in Sstatus is significantly less impactful than introducing
+a new PTE bit and, in general, it can be placed in another CSR if Sstatus
+register bits become scarce.
+
+The bit UDCRG (User Dirty CRG) is added to the Sstatus register and is intended
+to complement the existing UCRG (User CRG) bit.
+The UDCRG bit represents the epoch number that the revoker is currently closing,
+as opposed to the UCRG bit, which represents the epoch that is currently open.
+This fundamentally enables the revoker to communicate to the hardware that
+a revocation sweep is in progress. As an aside, it is fairly easy to model
+this in a slightly different way, using a ``Revocation In Progress''
+bit instead.
+
+The \{UDCRG, UCRG\} bit pair have the following architectural meaning:
+\begin{center}
+  %
+  \begin{tabular}{ccl}
+    \textbf{UDCRG} & \textbf{UCRG} & \textbf{Behavior} \\
+    0 & 0 & Epoch $E_0$ steady state \\
+    0 & 1 & Revocation in progress for the epoch transition $E_0 \rightarrow E_1$ \\
+    1 & 0 & Revocation in progress for the epoch transition $E_1 \rightarrow E_0$ \\
+    1 & 1 & Epoch $E_1$ steady state \\
+  \end{tabular}
+\end{center}
+
+The UDCRG bit modifies the PTE CRG update rule when transitining from the
+Dirtiable (CW=0 CRG=1) state to the Dirty state.
+The behavior of the CW and CRG bits is modified as follows
+\begin{center}
+  %
+  \begin{tabular}{ccl}
+    \textbf{CW} & \textbf{CRG} & \textbf{Load Behavior} \\
+    0 & 0 & Capability loads strip tags on loaded result \\
+    0 & 1 & Load fault when Sstatus.UCRG $\neq$ Sstatus.UDCRG \\
+    1 & X & Generational load barrier, trap on load if Sstatus.UCRG $\neq$ CRG \\
+  \end{tabular}
+  %
+  \begin{tabular}{ccl}
+    \textbf{CW} & \textbf{CRG} & \textbf{Store Behavior} \\
+    0 & 0 & Trap on capability stores \\
+    0 & 1 & Track capability dirty, CW is set, CRG is set to Sstatus.UDCRG \\
+    1 & X & Capability stores are unaltered \\
+  \end{tabular}
+  %
+\end{center}
+
+\subsubsection{Rationale and Software Operation}
+The revoker is responsible for correctly switching the Sstatus.{UDCRG, UCRG}
+bits, in accordance with the revocation state machine.
+When moving from epoch $E_0$ to epoch $E_1$, the revoker toggles the
+Sstatus.UCRG bit and begins the background scan. This is unchanged from the
+Reloaded model; however, the UDCRG bit remains set to the previous epoch.
+When the revoker completes the background scan, the UDCRG is set to UCRG;
+in other words, UDCRG ``catches up'' to the current epoch.
+
+This effectively splits up the epoch into two phases. The \textit{revocation%
+  phase} spans the period of time between the beginning of the epoch and the
+end of the background scan. The \textit{steady-state phase}, which starts when
+the background scan completes and lasts until the beginning of the next epoch.
+
+The revocation hardware assistance mechanism outlined above is designed to
+mitigate the loss of CRG information in the Dirtiable PTE state.
+It is important to consider the Zcheri Dirtiable state behavior during both
+the steady-state and revocation phases.
+
+In the steady-state phase, the Zcheri Dirtiable PTE behavior is never
+problematic because there is no ambiguity towards the load-side generation epoch
+associated to a PTE that becomes dirty: if a capability is written via a
+dirtiable mapping, the PTE entry should be considered Dirty at the current epoch.
+
+The Zcheri Dirtiable state is problematic during the revocation phase.
+In particular, when a capability is written via a Dirtiable PTE, the new value
+of the CRG bit is undecidable without additional information.
+Consider the following two cases:
+\begin{enumerate}
+\item The background scan has not visited the page: the CRG bit should be set
+  to the previous epoch CRG, so that the background scan will correctly detect
+  that the PTE has not been visited yet.
+\item The background scan has visited the page: in this case the background scan
+  has left the PTE in the Dirtiable state, so a subsequent write should upgrade
+  the PTE to Dirty in the current epoch.
+\end{enumerate}
+It is now clear that the problem arises from the fact that the CRG update
+behavior is dependent on whether the revoker has visited the page or not,
+which can not be determined by observing a Dirtiable PTE entry alone.
+
+The 2-phase CRG model attempts to recover this information without introducing
+additional PTE state. This comes at the cost of some changes to the Reloaded
+revoker.
+This introduces an hypothesis that these changes are less costly and invasive
+than other options, such as using a 3-bit PTE solution or implementing a
+revoker that does not rely on the Dirtiable state in this way.
+
+The two-phase CRG model has some known limitations that require changes to the
+existing revoker implementations.
+
+\begin{enumerate}
+\item A capability write via a Dirtiable PTE that has already been observed by
+  the background scan breaks the load-side invariant in the next epoch.
+\item The transition of a page to Idle may require a TLB invalidation because
+  there may be Dirtiable TLB entries.
+\end{enumerate}
+
+\subsubsection{Dirtiable Transition Delay}
+The first two-phase CRG model limitation introduced above can be addressed
+by batching Dirty to Dirtiable transitions at the end of the revocation pass,
+without additional synchronisation requirements.
+
+First, consider that the first limitation arises when the program writes a
+capability through a Dirtiable PTE entry after the revoker has visitied the PTE,
+but before the revocation pass is finished.
+This may occur as a result of two conditions:
+\begin{enumerate}
+\item The revoker observed a Dirtiable PTE entry from the previous pass and
+  left it in the Dirtiable state for the current epoch.
+\item The revoker has downgraded a Dirty PTE to Dirtiable as part of the visit.
+\end{enumerate}
+
+When the program writes a capability through the Dirtiable PTE before the end of
+the revocation pass, the Sstatus.UDCRG is still set to the previous epoch
+(e.g. UDCRG=0, UCRG=1) and the CRG bit will be set to the previous epoch
+as a result.
+
+This is a problem, because it is possible that the page is left untouched through
+the steady-state phase up to the next epoch. As the next epoch begins, we will
+flip UCRG again, so that UCRG for epochs $E_0$ and $E_2$ are the same.
+Under these conditions, the offending PTE entry will not be scanned for
+revocation and unrevoked capabilities from $E_1$ may leak to $E_2$.
+
+The proposed solution derives from the observation that the invalid CRG update
+can only occur in the window of time between the revoker visit of the PTE and
+the end of the revocation pass, when the revoker leaves the PTE in the
+Dirtiable state.
+If we delay PTE transitions from Dirty to Dirtiable until the end of the
+revocation pass, after UDCRG catches up to UCRG, any write to the Dirtiable PTE
+will correctly promote it to Dirty in the correct epoch.
+
+There are two important assumptions that must be noted here.
+\begin{enumerate}
+\item Delaying a Dirty to Dirtiable PTE transition is safe because the Dirtiable
+  state is used to encode that the page \textit{may} be cap-clean. This means
+  that the page will still be scanned during the next revocation pass and the
+  revoker naturally tolerates racing capability writes between the page visit
+  and the PTE update.
+\item The PTE update to Dirtiable does not require any synchronisation. In
+  particular, it does not depend on the number of aliasing mappings nor it
+  requires a TLB invalidation. This stems from the fact that the revoker already
+  tolerates TLB cap-dirtiness drift to a degree.
+\end{enumerate}
+
+Therefore, the cost of this solution should only be caused by the need to record
+the PTE entries that need to be moved to the Dirtiable state.
+A possible implementation could use a fixed-size array to track these PTE entries,
+so that memory allocation during the revocation pass is avoided.
+
+Finally, although this is an implementation detail, when the Cornucopia Reloaded
+revoker encounters a Dirtiable PTE entry from a previous epoch, it never leaves
+it as Dirtiable. In particular, it is either moved to the Dirty state if a
+capability is found in the page, or to the Clean state if no
+capabilities are found.
+This makes this delay technique less problematic, because we can not allow
+Dirtiable PTE entries to exist between the time of visit and the end of the
+revocation pass.
+If the revoker leaves existing Dirtiable PTE entries as Dirtiable, we
+would need to temporarily promote them to Dirty and demote them again
+to Dirtiable as part of the batch operation at the end of the scan.
+
+% >>>
 \section{Recursive Mutable Load Permission} % <<<
 \label{app:exp:recmutload}
 
