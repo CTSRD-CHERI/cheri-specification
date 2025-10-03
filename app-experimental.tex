@@ -3260,7 +3260,15 @@ In particular, we are interested in a mechanism that allows the following:
 \item The default value for the infinite capability is all “1”s for all fields, but the F field, which holds a “0”.
 \item The default value for the NULL capability is all “0s” for all fields.
 \item Overview: the number of bits needed for this approach is 2*X + 3.
-\item TODO
+\begin{center}
+  \begin{bytefield}{32}
+      \bitbox{4}{FA}
+      \bitbox{4}{F}
+      \bitbox{10}{CL}
+      \bitbox{10}{SL}
+      \bitbox{4}{EL}
+  \end{bytefield}%
+\end{center}
 \end{itemize}
 \item Instructions:
 \begin{itemize}
@@ -3319,7 +3327,15 @@ In an abstract model, consider a system with N protection levels and X bits of C
 \end{enumerate}
 We can model this scenario with an N * X vector that describes the capability level CL within each protection level, as follows:
 
-TODO
+\begin{center}
+  \begin{bytefield}{40}
+      \bitbox{8}{$CL(P_{0})$}
+      \bitbox{8}{$CL(P_{1})$}
+      \bitbox{8}{$CL(P_{2})$}
+      \bitbox{8}{...}
+      \bitbox{8}{$CL(P_{N-1})$}
+  \end{bytefield}%
+\end{center}
 
 Similarly, an N * X vector represents the global SL state.
 
@@ -3330,7 +3346,12 @@ An implementation for an orthogonal level model does not scale well.
 If we introduce the assumption that this global view of CL is not orthogonal but has a total order, it is possible to arbitrarily allocate chunks of the CL-space to different protection levels.
 This is slightly more efficient and would consume log2(N) * X bits for each of the CL and SL vectors as follows:
 
-TODO
+\begin{center}
+  \begin{bytefield}{40}
+      \bitbox{24}{Protection level: $log_{2}(N)$ bits}
+      \bitbox{16}{CL: X bits}
+  \end{bytefield}%
+\end{center}
 
 As previously noted, we make the assumption that capabilities in Protection Level Pi are always more sensitive than capabilities in $P_{i+1}$.
 This seems to be a sensible assumption if we associate architectural privilege levels (rings) to the protection level.
