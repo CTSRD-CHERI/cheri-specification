@@ -3198,3 +3198,195 @@ Super-page block granularity (rather than page) should allow the PMA to be store
 The bus error is only on reads, and can be attached to a read response, and so should allow implementation with no additional latency on the main data path.
 
 As a note, these PMAT bits are logically a software-controlled third layer of tag compression table, however, because these are software-controlled such that tag storage is enabled explicitly for each super-page block, they should be treated primarily as dynamic PMA bits.
+
+% >>>
+\section{Nestable Capability Levels}
+
+\subsection{Motivation}
+
+The current RV64Y levels proposal, as well as the Morello and ISAv9 architectures introduce a single bit Local/Global mechanism to control the flow of capabilities in a program.
+Furthermore, the RV64Y draft proposes a scheme to extend capability levels to multiple bits, thereby extending the CL and SL fields to N bits, where N is the number of bits required to encode the level.
+The draft also introduces an EL bit (Elevate Level), which is used for transitive-load-global semantics in CherIoT.
+
+All these Capability Flow Control Enforcement models are not nestable meaning that the capability level space is global for the entire system. This means that the number of N chosen by the concrete implementation will limit the possibilities of capability flow control enforcement.
+
+Due to these limitations, we would like to explore possible alternatives that are nestable.
+In particular, we are interested in a mechanism that allows the following:
+\begin{enumerate}
+\item Have different capability levels interpretations within the same privilege level. E.g. A V8 compartment uses \textit{local} for javascript allocations and \textit{global} for non-javascript objects vs a third party library that uses \textit{local} for the stack and \textit{global} for the heap.
+\item Have different capability levels interpretations across privilege levels. This means that the supervisor can use Local/Global for its own purposes and the userspace can do the same, without having necessarily the same semantic. Crucially, this should also enable the ability of propagating user capabilities to the supervisor and back.
+\item This scheme should be scalable to all privilege levels (e.g. machine mode, hypervisor mode, supervisor mode, and user mode) and allow further nesting within any of the privilege levels.
+\end{enumerate}
+
+\subsection{Requirements}
+
+\begin{itemize}
+\item The capability levels shall be nestable, meaning that we want each protection level to be able to have its own capability levels scheme.
+\item Within a protection level, the CL levels have a total order such that given $C_{1}$ with CL=$L_{1}$ and $C_{2}$ with CL=$L_{2}$, if $L_{1}$ < $L_{2}$ $\rightarrow$ $C_{1}$ is more sensitive than $C_{2}$.
+\item Different protection levels can have a different interpretation of what a capability level means.
+\item The capabilities of a less privileged protection level shall be able to freely float around in a more privileged level (e.g., a user capability that was passed to the kernel). These capabilities can be referred to as “super global”.
+\item Super global capabilities need to be able to load other capabilities transitively leading to these capabilities floating freely around.
+\item Super global capabilities must be able to store back other super global capabilities it has created.
+\item Super global capabilities must not be able to store current capabilities (e.g., a super global capability from user space must not store a kernel capability).
+\item The approach needs to still work if the less privileged protection domain does not know about capability levels.
+\item This scheme should be scalable to all privilege levels (e.g. machine mode, hypervisor mode, supervisor mode, and user mode) and allow further (arbitrary) nesting within any of the privilege levels. Furthermore, it should be independent of privilege levels, i.e., a system with capability levels, but without privilege levels should be able to exist.
+\end{itemize}
+
+\subsection{Approach}
+
+\begin{itemize}
+\item Definitions:
+\begin{itemize}
+\item Protection level: Some code that sets up its own level scheme. A protection level can have more and less privileged protection levels relative to it. A protection level can be a privilege level (in the common ISA understanding, e.g., supervisor mode), but it can also be more fine-grained.
+\item Current capability: A capability with CL and SL fields that follow the capability level semantic defined by the protection level in execution.
+\item Foreign capability: A capability with CL and SL fields that may follow an arbitrary capability level semantic, defined by a protection level from which the current protection level borrowed the capability.
+\end{itemize}
+\item Architectural state:
+\begin{itemize}
+\item 1 foreign authorisation (FA) bit: This bit determines whether a capability can set or clear (also known as “toggle”) the F bit. The FA bit is a hardware permission bit, which means that it follows monotonicity rules. The FA bit can be cleared, but it can never be set.
+\item 1 foreign (F) bit: This bit determines whether the capability is foreign. Foreign capabilities are “super global” and can be stored by every non-foreign -- also known as “current” -- capability. The setting and clearing of this bit is a privileged operation.
+\item X bits for the capability level (CL) field. The capability level of a capability determines through which other capabilities it can be stored.
+\begin{itemize}
+\item The bits are ordered where “-1” is the most global value and “0” is the most local value
+\item The value of X is determined by the instantiation of the ISA
+\end{itemize}
+\item X bits for the store level (SL) field. The store level determines which other capabilities this capability can store
+\begin{itemize}
+\item The bits are ordered where “-1” is the most permissive value and “0” is the least permissive value
+\item The value of X must be the same as for the capability level
+\end{itemize}
+\item 1 elevate level (EL) bit. The elevation level permission bit determines whether the capability level a capability loaded is reduced to that of the authorising capability.
+\item If this extension is not implemented, the bits taken by this extension have to be all “1”s for the FA, CL, SL, and EL fields. For the F bit the value is “0”. This leads to software producing global capabilities (can be stored everywhere) and fully-permissive capabilities (can store all capabilities). Therefore, software that is oblivious to capability levels runs without any limitation to the flow of capabilities.
+\item The default value for the infinite capability is all “1”s for all fields, but the F field, which holds a “0”.
+\item The default value for the NULL capability is all “0s” for all fields.
+\item Overview: the number of bits needed for this approach is 2*X + 3.
+\item TODO
+\end{itemize}
+\item Instructions:
+\begin{itemize}
+\item New rederive instruction: \texttt{crederivef cd, cs1, cs2, mode}
+\begin{itemize}
+\item cs1: authorising capability.
+\item cs2: capability to be modified.
+\item Mode: \{SET\_F, CLEAR\_F\}
+\item Functionality: Checks that the capability in cs2 is a subset of the capability in cs1 ignoring the FA and F bit.
+\begin{itemize}
+\item If mode=SET\_F, set the F bit.
+\item If mode=CLEAR\_F, clear the F bit.
+\end{itemize}
+\end{itemize}
+\item Change to the following instructions:
+\begin{itemize}
+\item ACPERM and GCPERM:
+\begin{itemize}
+\item Operate on additional FA and F bits
+\item Apply additional legalisation
+\end{itemize}
+\item CBLD and SCSS: Include FA and F in subset checks
+\end{itemize}
+\end{itemize}
+\item Rules/Invariants:
+\begin{itemize}
+\item Monotonicity applies to the FA, CL, SL, and EL fields, but not to the F bit field.
+\item In the case of the CL and SL fields monotonicity means that the value can only ever be arithmetically decreased, but never increased.
+\item A capability has its tag cleared on a store if \{F, CL\} < \{F, neg(SL)\}; this leads to the property that foreign capabilities can always be stored by current capabilities.
+\item The F bit can only be changed in the following scenarios:
+\begin{itemize}
+\item \textbf{Rederivation} -- If an authorising capability has the FA bit set, it can toggle the F bit.
+\item \textbf{Transitive load} -- If a capability load is authorised by a capability with the F bit set the loaded capability will have the F bit also set (This the forward transitivity rule).
+\item \textbf{Transitive store} -- If a capability store is authorised by a capability with the F bit set and the capability to be stored has the F bit, the stored capability will have the F bit cleared (This is the backwards transitivity rule).
+\item \textbf{Extended SL rule} -- If a capability store is authorised by a capability with the F bit set and the capability to be stored has the F bit cleared, the stored capability will have the valid tag cleared (This disallows valid current capabilities to be stored via foreign capabilities). This is specifically lined out in this document, but already be disallowed by the {F, CL} < {F, neg(SL)} rule stated above.
+\end{itemize}
+\item Elevation level: if the EL bit is cleared on an authorising capability, then any capability loaded through this authorising capability has its EL bit cleared and its CL field restricted to the CL field of the authorising capability. The FA and F bits are unaffected by EL.
+\item Legalisation: the FA bit can only be set if the R, W, X, and C bits are set.
+\end{itemize}
+Properties:
+\begin{itemize}
+\item The capability authorising the F bit setting on a protection level boundary does not need the F bit set. This fact means that the authorising capability cannot be copied out via a foreign capability.
+\item The level ordering of capabilities is maintained in the current and in the foreign case, e.g., if current CL(A) < current CL(B), then also foreign CL(A) < foreign CL(B) where A and B are capabilities.
+\item The relationship of a capability can authorise the store of another capability is also maintained in the foreign case, e.g., if current A can authorise the store of current B, then foreign A can authorise the store of foreign B.
+\end{itemize}
+\end{itemize}
+
+\subsection{Rationale}
+
+\subsubsection{Why we need F}
+
+In an abstract model, consider a system with N protection levels and X bits of CL per level. We would like to be able to:
+\begin{enumerate}
+\item Maintain an arbitrary semantic for the CL levels in each protection level.
+\item Permit the controlled interchange of capabilities across protection levels.
+\end{enumerate}
+We can model this scenario with an N * X vector that describes the capability level CL within each protection level, as follows:
+
+TODO
+
+Similarly, an N * X vector represents the global SL state.
+
+This abstract view of the capability flow relationship can only be implemented directly for very small values of N and X.
+At minimum, we would like to be able to have an independent level interpretation for the four RISC-V rings (machine mode, hypervisor mode, supervisor mode, and user mode), which would already result in 8 bits for CL and SL (4 * 1 bits for CL, 4 * 1 bits for SL).
+An implementation for an orthogonal level model does not scale well.
+
+If we introduce the assumption that this global view of CL is not orthogonal but has a total order, it is possible to arbitrarily allocate chunks of the CL-space to different protection levels.
+This is slightly more efficient and would consume log2(N) * X bits for each of the CL and SL vectors as follows:
+
+TODO
+
+As previously noted, we make the assumption that capabilities in Protection Level Pi are always more sensitive than capabilities in $P_{i+1}$.
+This seems to be a sensible assumption if we associate architectural privilege levels (rings) to the protection level.
+If the relationship between protection levels is more complex, it is less clear how much it is possible to rely on this assumption.
+It should again be stressed that this approach does not scale and imposes a maximum number of protection levels in the system. At minimum, we would like 4 protection levels (M, H, S and U modes), each with at least X=1 bits.
+This results in 6 bits for the combined CL and SL vectors.
+
+The F bit is introduced as a result of the following observations:
+\begin{enumerate}
+\item Instead of imposing a global order on the levels, we opt to only model the relationship between two adjacent protection levels $P_{0}$ and $P_{1}$, where $P_{0}>P_{1}$ (reads $P_{0}$ more privileged than $P_{1}$).
+\item Given the fact that $P_{0}>P_{1}$, the semantic of $CL_{1}$ and $SL_{1}$ within $P_{1}$ is (almost) irrelevant within $P_{0}$. $P_{0}$ needs only to be able to distinguish between capabilities from the current level (i.e. $P_{0}$ itself) and capabilities from less privileged levels (i.e. $P_{1}$).
+\end{enumerate}
+
+In this model, the F bit encodes the “provenance” of a capability from a less privileged level, which may have an arbitrary interpretation of the CL and SL values.
+By only modeling the relationship between adjacently ordered privilege levels, the F bit removes the need to enumerate the protection levels as part of the CL and SL vectors, instead it shifts to model the relative relationship between two privilege levels.
+
+It must be noted that this does not impose a constraint on the topology of privilege levels that can be represented. The requirement of this model is that we have a pair of privilege levels that satisfy the $P_{0}>P_{1}$ ordering; however it is always possible to transfer capabilities between mutually distrusting $P_{1}$ and $P_{2}$ with different CL interpretations.
+This can be done by introducing P0 such that $P_{0}>P_{1}$ and $P_{0}>P_{2}$ where P0 performs a translation of the CL semantic between $P_{1}$ and $P_{2}$.
+In this case, foreign capabilities from $P_{1}$ never reach $P_{2}$, instead $P_{0}$ translates the levels according to some software-defined rule.
+Care must be taken in this situation to ensure that the levels are correctly translated; however this should be possible given the role of TCB of $P_{0}$ with respect to $P_{1}$ and $P_{2}$.
+
+\subsubsection{Why setting and clearing F is a privileged operation}
+
+The F bit affects the propagation semantics of capabilities by modifying the  store-side rule is modified such that the tag is cleared under the following condition, where Fdata and CLdata are the respective bit fields of the data capability to be stored, and $F_{auth}$ and $S_{Lauth}$ are the respective bit fields of the capability authorising the capability store:
+
+$\{F_{data}, CL_{data}\} < \{F_{auth}, neg(S_{Lauth})\} \Rightarrow  t := 0$
+
+As a result, consider the following two observations:
+\begin{enumerate}
+\item When $F_{data}$ = 1 and $F_{auth}$ = 0 the condition above is always false, therefore $F_{data}$ = 1 capabilities can always be stored via $F_{auth}$ = 0 capabilities.
+\item Setting F = 1 makes a capability “super global” (i.e. as shareable as an F = 0 CL=-1 capability) regardless of its CL.
+\end{enumerate}
+
+Because setting F makes a capability “effectively global” regardless of CL, this operation violates monotonicity. Therefore, similarly to other monotonicity-violating operations in CHERI, it needs to be guarded by a TCB. In alignment with the existing design choices, setting F can be guarded by a capability re-derivation operation.
+
+Clearing the F bit is also not straightforward, because we do not control the values of CL and SL fields of a foreign capability. In particular, consider the following example:
+\begin{itemize}
+\item Assume a system with X=1 bits for CL and SL.
+\item Let A, B capabilities belonging respectively to protection levels $P_{0}$ and $P_{1}$, where $P_{0} > P_{1}$.
+\item Let A have $F_{A}$ = 0, $CL_{A}$ = 0, $SL_{A}$ = 1, as a current capability within $P_{0}$.
+\item Let B have $F_{B}$ = 1, $CL_{B}$ = 1, $SL_{A}$ = 1, as a current capability within $P_{0}$.
+\end{itemize}
+
+Now, if we allow unprivileged clearing of F, any principal within $P_{0}$ may set $F_{B}$ = 0, and by doing so allow A to be stored through B, where previously it could not. This is undesirable because here $P_{0}$ does not refer to a CHERI compartment, but rather to a group of CHERI compartments that share a common semantic for CHERI levels. Within $P_{0}$ it is possible (and likely desirable) to have components with different degrees of trustworthiness which may intentionally or accidentally leak current capabilities to $P_{1}$.
+
+Therefore, clearing F should also be guarded by a TCB component that can be audited in this regard.
+
+\subsubsection{Why do we need FA}
+
+The FA bit addresses the requirement that setting and clearing F is a privileged operation.
+Using a permission bit orthogonal to F is desirable for the following reasons:
+\begin{enumerate}
+\item We envision setting and clearing F to be done with a rederivation-like operation, where a root capability is used to authorise the operation. The authorising capability should also be subject to capability propagation enforcement via CL/SL within its own protection level, which is independent of its ability to set and clear F on a specific subset of capabilities.
+\item Clearing FA does not affect in any way the propagation of the authorising capability.
+\end{enumerate}
+
+Consider the following example, using $P_{0}$ = S-mode and $P_{1}$ = U-mode. The trampoline that handles calls from U-mode to S-mode (i.e. the system call handler) can hold a root userspace capability with FA = 1 that authorises the trampoline to flip F = 1 on all U-mode capabilities. In this situation, it may be desirable to ensure that the root capability never escapes the trampoline protection domain, therefore the root capability may be marked as CL=0.
+
+An alternative approach to FA would involve using the F bit in the root capability to authorize the re-derivation operation. This is undesirable, because having the F bit set in the root authorizing capability would mean that it is also “super global” and can escape to the lower privilege level.
