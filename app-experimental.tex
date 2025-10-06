@@ -3204,11 +3204,11 @@ As a note, these PMAT bits are logically a software-controlled third layer of ta
 
 \subsection{Motivation}
 
-The current RV64Y levels proposal, as well as the Morello and ISAv9 architectures introduce a single bit Local/Global mechanism to control the flow of capabilities in a program.
-Furthermore, the RV64Y draft proposes a scheme to extend capability levels to multiple bits, thereby extending the CL and SL fields to N bits, where N is the number of bits required to encode the level.
+The capability levels presented in the RV64Y architecture, as well as the Morello and ISAv9 architectures introduce a single bit Local/Global mechanism to control the flow of capabilities in a program.
+Furthermore, the RV64Y architecture proposes a scheme to extend capability levels to multiple bits, thereby extending the CL and SL fields to N bits, where N is the number of bits required to encode the level.
 The draft also introduces an EL bit (Elevate Level), which is used for transitive-load-global semantics in CherIoT.
 
-All these Capability Flow Control Enforcement models are not nestable meaning that the capability level space is global for the entire system. This means that the number of N chosen by the concrete implementation will limit the possibilities of capability flow control enforcement.
+All these capability flow control enforcement models are not nestable meaning that the capability level space is global for the entire system. This means that the number of N chosen by the concrete implementation will limit the possibilities of capability flow control enforcement.
 
 Due to these limitations, we would like to explore possible alternatives that are nestable.
 In particular, we are interested in a mechanism that allows the following:
@@ -3256,7 +3256,7 @@ In particular, we are interested in a mechanism that allows the following:
 \item The value of X must be the same as for the capability level
 \end{itemize}
 \item 1 elevate level (EL) bit. The elevation level permission bit determines whether the capability level a capability loaded is reduced to that of the authorising capability.
-\item If this extension is not implemented, the bits taken by this extension have to be all “1”s for the FA, CL, SL, and EL fields. For the F bit the value is “0”. This leads to software producing global capabilities (can be stored everywhere) and fully-permissive capabilities (can store all capabilities). Therefore, software that is oblivious to capability levels runs without any limitation to the flow of capabilities.
+\item If this extension is not implemented, the bits taken by this extension have to be all “0”s for the FA, F, SL, and EL fields. For the CL bit the value is “-1”. This leads to software producing global capabilities, but the capabilities cannot be used to store other capabilities. Therefore, software that is oblivious to capability levels runs without any limitation to the flow of capabilities and does not pose any security risks.
 \item The default value for the infinite capability is all “1”s for all fields, but the F field, which holds a “0”.
 \item The default value for the NULL capability is all “0s” for all fields.
 \item Overview: the number of bits needed for this approach is 2*X + 3.
@@ -3297,13 +3297,13 @@ In particular, we are interested in a mechanism that allows the following:
 \begin{itemize}
 \item Monotonicity applies to the FA, CL, SL, and EL fields, but not to the F bit field.
 \item In the case of the CL and SL fields monotonicity means that the value can only ever be arithmetically decreased, but never increased.
-\item A capability has its tag cleared on a store if \{F, CL\} < \{F, neg(SL)\}; this leads to the property that foreign capabilities can always be stored by current capabilities.
+\item A capability has its tag cleared on a store if $\{F, CL\} < \{F, neg(SL)\}$; this leads to the property that foreign capabilities can always be stored by current capabilities.
 \item The F bit can only be changed in the following scenarios:
 \begin{itemize}
 \item \textbf{Rederivation} -- If an authorising capability has the FA bit set, it can toggle the F bit.
 \item \textbf{Transitive load} -- If a capability load is authorised by a capability with the F bit set the loaded capability will have the F bit also set (This the forward transitivity rule).
 \item \textbf{Transitive store} -- If a capability store is authorised by a capability with the F bit set and the capability to be stored has the F bit, the stored capability will have the F bit cleared (This is the backwards transitivity rule).
-\item \textbf{Extended SL rule} -- If a capability store is authorised by a capability with the F bit set and the capability to be stored has the F bit cleared, the stored capability will have the valid tag cleared (This disallows valid current capabilities to be stored via foreign capabilities). This is specifically lined out in this document, but already be disallowed by the {F, CL} < {F, neg(SL)} rule stated above.
+\item \textbf{Extended SL rule} -- If a capability store is authorised by a capability with the F bit set and the capability to be stored has the F bit cleared, the stored capability will have the valid tag cleared (This disallows valid current capabilities to be stored via foreign capabilities). This is specifically lined out in this document, but already be disallowed by the $\{F, CL\} < \{F, neg(SL)\}$ rule stated above.
 \end{itemize}
 \item Elevation level: if the EL bit is cleared on an authorising capability, then any capability loaded through this authorising capability has its EL bit cleared and its CL field restricted to the CL field of the authorising capability. The FA and F bits are unaffected by EL.
 \item Legalisation: the FA bit can only be set if the R, W, X, and C bits are set.
