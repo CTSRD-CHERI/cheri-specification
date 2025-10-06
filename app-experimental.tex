@@ -3283,7 +3283,7 @@ In particular, we are interested in a mechanism that allows the following:
 \item If mode=CLEAR\_F, clear the F bit.
 \end{itemize}
 \end{itemize}
-\item Change to the following instructions:
+\item Change to the following RISC-V CHERI instructions:
 \begin{itemize}
 \item ACPERM and GCPERM:
 \begin{itemize}
@@ -3296,14 +3296,14 @@ In particular, we are interested in a mechanism that allows the following:
 \item Rules/Invariants:
 \begin{itemize}
 \item Monotonicity applies to the FA, CL, SL, and EL fields, but not to the F bit field.
-\item In the case of the CL and SL fields monotonicity means that the value can only ever be arithmetically decreased, but never increased.
-\item A capability has its tag cleared on a store if $\{F, CL\} < \{F, neg(SL)\}$; this leads to the property that foreign capabilities can always be stored by current capabilities.
+\item In the case of the CL and SL fields (which are multi-bit fields) monotonicity means that the value can only ever be arithmetically decreased, but never increased.
+\item A capability has its tag cleared on a store if $\{F, CL\} < \{F, neg(SL)\}$\footnote{$\{A, B\}$ means the bit concadenation of two bit fields A and B, where B's bits are the lower significant bits.}; this leads to the property that foreign capabilities can always be stored by current capabilities.
 \item The F bit can only be changed in the following scenarios:
 \begin{itemize}
 \item \textbf{Rederivation} -- If an authorising capability has the FA bit set, it can toggle the F bit.
-\item \textbf{Transitive load} -- If a capability load is authorised by a capability with the F bit set the loaded capability will have the F bit also set (This the forward transitivity rule).
+\item \textbf{Transitive load} -- If a capability load is authorised by a capability with the F bit set the loaded capability will have the F bit also set (This is the forward transitivity rule).
 \item \textbf{Transitive store} -- If a capability store is authorised by a capability with the F bit set and the capability to be stored has the F bit, the stored capability will have the F bit cleared (This is the backwards transitivity rule).
-\item \textbf{Extended SL rule} -- If a capability store is authorised by a capability with the F bit set and the capability to be stored has the F bit cleared, the stored capability will have the valid tag cleared (This disallows valid current capabilities to be stored via foreign capabilities). This is specifically lined out in this document, but already be disallowed by the $\{F, CL\} < \{F, neg(SL)\}$ rule stated above.
+\item \textbf{Extended SL rule} -- If a capability store is authorised by a capability with the F bit set and the capability to be stored has the F bit cleared, the stored capability will have the valid tag cleared (This disallows valid current capabilities to be stored via foreign capabilities). This is specifically lined out in this document, but is already disallowed by the $\{F, CL\} < \{F, neg(SL)\}$ rule stated above.
 \end{itemize}
 \item Elevation level: if the EL bit is cleared on an authorising capability, then any capability loaded through this authorising capability has its EL bit cleared and its CL field restricted to the CL field of the authorising capability. The FA and F bits are unaffected by EL.
 \item Legalisation: the FA bit can only be set if the R, W, X, and C bits are set.
@@ -3339,6 +3339,7 @@ We can model this scenario with an N * X vector that describes the capability le
 
 Similarly, an N * X vector represents the global SL state.
 
+\vspace{0.4cm}
 This abstract view of the capability flow relationship can only be implemented directly for very small values of N and X.
 At minimum, we would like to be able to have an independent level interpretation for the four RISC-V rings (machine mode, hypervisor mode, supervisor mode, and user mode), which would already result in 8 bits for CL and SL (4 * 1 bits for CL, 4 * 1 bits for SL).
 An implementation for an orthogonal level model does not scale well.
