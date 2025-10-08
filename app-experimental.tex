@@ -3341,7 +3341,7 @@ Similarly, an N * X vector represents the global SL state.
 
 \vspace{0.4cm}
 This abstract view of the capability flow relationship can only be implemented directly for very small values of N and X.
-At minimum, we would like to be able to have an independent level interpretation for the four RISC-V rings (machine mode, hypervisor mode, supervisor mode, and user mode), which would already result in 8 bits for CL and SL (4 * 1 bits for CL, 4 * 1 bits for SL).
+At minimum, we would like to be able to have an independent level interpretation for the four RISC-V privilege levels (machine mode, hypervisor mode, supervisor mode, and user mode), which would already result in 8 bits for CL and SL (4 * 1 bits for CL, 4 * 1 bits for SL).
 An implementation for an orthogonal level model does not scale well.
 
 If we introduce the assumption that this global view of CL is not orthogonal but has a total order, it is possible to arbitrarily allocate chunks of the CL-space to different protection levels.
@@ -3354,8 +3354,8 @@ This is slightly more efficient and would consume log2(N) * X bits for each of t
   \end{bytefield}%
 \end{center}
 
-As previously noted, we make the assumption that capabilities in Protection Level Pi are always more sensitive than capabilities in $P_{i+1}$.
-This seems to be a sensible assumption if we associate architectural privilege levels (rings) to the protection level.
+As previously noted, we make the assumption that capabilities in Protection Level $P_{i}$ are always more sensitive than capabilities in $P_{i+1}$.
+This seems to be a sensible assumption if we associate architectural privilege levels to the protection level.
 If the relationship between protection levels is more complex, it is less clear how much it is possible to rely on this assumption.
 It should again be stressed that this approach does not scale and imposes a maximum number of protection levels in the system. At minimum, we would like 4 protection levels (M, H, S and U modes), each with at least X=1 bits.
 This results in 6 bits for the combined CL and SL vectors.
@@ -3376,14 +3376,14 @@ Care must be taken in this situation to ensure that the levels are correctly tra
 
 \subsubsection{Why setting and clearing F is a privileged operation}
 
-The F bit affects the propagation semantics of capabilities by modifying the  store-side rule is modified such that the tag is cleared under the following condition, where Fdata and CLdata are the respective bit fields of the data capability to be stored, and $F_{auth}$ and $S_{Lauth}$ are the respective bit fields of the capability authorising the capability store:
+The F bit affects the propagation semantics of capabilities. The store-side rule is modified such that the tag is cleared under the following condition, where $F_{data}$ and $CL_{data}$ are the respective bit fields of the data capability to be stored, and $F_{auth}$ and $SL_{auth}$ are the respective bit fields of the capability authorising the capability store:
 
-$\{F_{data}, CL_{data}\} < \{F_{auth}, neg(S_{Lauth})\} \Rightarrow  t := 0$
+$\{F_{data}, CL_{data}\} < \{F_{auth}, neg(SL_{auth})\} \Rightarrow  t := 0$
 
 As a result, consider the following two observations:
 \begin{enumerate}
 \item When $F_{data}$ = 1 and $F_{auth}$ = 0 the condition above is always false, therefore $F_{data}$ = 1 capabilities can always be stored via $F_{auth}$ = 0 capabilities.
-\item Setting F = 1 makes a capability “super global” (i.e. as shareable as an F = 0 CL=-1 capability) regardless of its CL.
+\item Setting F = 1 makes a capability “super global” (i.e. even more shareable than an F = 0 CL=-1 capability) regardless of its CL.
 \end{enumerate}
 
 Because setting F makes a capability “effectively global” regardless of CL, this operation violates monotonicity. Therefore, similarly to other monotonicity-violating operations in CHERI, it needs to be guarded by a TCB. In alignment with the existing design choices, setting F can be guarded by a capability re-derivation operation.
@@ -3393,10 +3393,10 @@ Clearing the F bit is also not straightforward, because we do not control the va
 \item Assume a system with X=1 bits for CL and SL.
 \item Let A, B capabilities belonging respectively to protection levels $P_{0}$ and $P_{1}$, where $P_{0} > P_{1}$.
 \item Let A have $F_{A}$ = 0, $CL_{A}$ = 0, $SL_{A}$ = 1, as a current capability within $P_{0}$.
-\item Let B have $F_{B}$ = 1, $CL_{B}$ = 1, $SL_{A}$ = 1, as a current capability within $P_{0}$.
+\item Let B have $F_{B}$ = 1, $CL_{B}$ = 1, $SL_{A}$ = 1, as a foreign capability within $P_{0}$.
 \end{itemize}
 
-Now, if we allow unprivileged clearing of F, any principal within $P_{0}$ may set $F_{B}$ = 0, and by doing so allow A to be stored through B, where previously it could not. This is undesirable because here $P_{0}$ does not refer to a CHERI compartment, but rather to a group of CHERI compartments that share a common semantic for CHERI levels. Within $P_{0}$ it is possible (and likely desirable) to have components with different degrees of trustworthiness which may intentionally or accidentally leak current capabilities to $P_{1}$.
+Now, if we allow unprivileged clearing of F, any code within $P_{0}$ may set $F_{B}$ = 0, and by doing so allow A to be stored through B, where previously it could not. This is undesirable because here $P_{0}$ does not refer to a CHERI compartment, but rather to a group of CHERI compartments that share a common semantic for CHERI levels. Within $P_{0}$ it is possible (and likely desirable) to have components with different degrees of trustworthiness which may intentionally or accidentally leak current capabilities to $P_{1}$.
 
 Therefore, clearing F should also be guarded by a TCB component that can be audited in this regard.
 
