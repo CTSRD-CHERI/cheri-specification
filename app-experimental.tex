@@ -3282,6 +3282,16 @@ In particular, we are interested in a mechanism that allows the following:
 \item If mode=SET\_F, set the F bit.
 \item If mode=CLEAR\_F, clear the F bit.
 \end{itemize}
+\begin{center}
+  \begin{bytefield}{36}
+      \bitbox{6}{0001011}
+      \bitbox{6}{rs2}
+      \bitbox{6}{rs1}
+      \bitbox{6}{000/001}
+      \bitbox{6}{rd}
+      \bitbox{6}{0110011}
+  \end{bytefield}%
+\end{center}
 \end{itemize}
 \item Change to the following RISC-V CHERI instructions:
 \begin{itemize}
