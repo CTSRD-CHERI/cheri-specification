@@ -3422,3 +3422,49 @@ Using a permission bit orthogonal to F is desirable for the following reasons:
 Consider the following example, using $P_{0}$ = S-mode and $P_{1}$ = U-mode. The trampoline that handles calls from U-mode to S-mode (i.e. the system call handler) can hold a root userspace capability with FA = 1 that authorises the trampoline to flip F = 1 on all U-mode capabilities. In this situation, it may be desirable to ensure that the root capability never escapes the trampoline protection domain, therefore the root capability may be marked as CL=0.
 
 An alternative approach to FA would involve using the F bit in the root capability to authorize the re-derivation operation. This is undesirable, because having the F bit set in the root authorizing capability would mean that it is also “super global” and can escape to the lower privilege level.
+
+
+\subsection{Implementation on RV64Y}
+
+In RV64Y, the format used by \texttt{YPERMC} is as follows:
+
+\hspace{1cm}
+
+\begin{bytefield}[bitwidth=1.6em]{26}
+  \bitheader[endianness=big]{0,1,2,4,5,6,9,10,15,16,17,18,19,23,24,25}\\
+  \bitbox{2}{Res 0}
+  \bitbox{5}{Res 1}
+  \bitbox{1}{R}
+  \bitbox{1}{X}
+  \bitbox{1}{ASR}
+  \bitbox{6}{Res 1}
+  \bitbox{4}{SDP}
+  \bitbox{1}{C}
+  \bitbox{3}{Res 1}
+  \bitbox{1}{LM}
+  \bitbox{1}{W}
+\end{bytefield}%
+
+
+With choosing two bits for CL and SL each, the capability format looks as follows:
+
+\hspace{1cm}
+
+\begin{bytefield}[bitwidth=1.6em]{26}
+  \bitheader[endianness=big]{0,1,2,3,4,5,6,7,8,9,10,13,14,15,16,17,18,19,23,24,25}\\
+  \bitbox{2}{Res 0}
+  \bitbox{5}{Res 1}
+  \bitbox{1}{R}
+  \bitbox{1}{X}
+  \bitbox{1}{ASR}
+  \bitbox{2}{Res 1}
+  \bitbox{4}{SDP}
+  \bitbox{1}{C}
+  \bitbox{1}{FA}
+  \bitbox{1}{F}
+  \bitbox{2}{CL}
+  \bitbox{2}{SL}
+  \bitbox{1}{EL}
+  \bitbox{1}{LM}
+  \bitbox{1}{W}
+\end{bytefield}%
