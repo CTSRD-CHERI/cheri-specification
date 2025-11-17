@@ -3426,7 +3426,9 @@ An alternative approach to FA would involve using the F bit in the root capabili
 
 \subsection{Implementation on RV64Y}
 
-In RV64Y, the format used by \texttt{YPERMC} is as follows:
+\subsubsection{YPERMC Format}
+
+In RV64Y, format used by \texttt{YPERMC} is as follows:
 
 \hspace{1cm}
 
@@ -3468,3 +3470,35 @@ With choosing two bits for CL and SL each, the capability format looks as follow
   \bitbox{1}{LM}
   \bitbox{1}{W}
 \end{bytefield}%
+
+\subsubsection{Instructions}
+
+This is the preliminary specification of the \texttt{ClearF} and \texttt{SetF} instructions.
+
+\textbf{ClearF}
+
+\begin{center}
+  \begin{bytefield}{32}
+    \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+    \bitbox{7}{0001011}
+    \bitbox{5}{cs2}
+    \bitbox{5}{cs1}
+    \bitbox{3}{000}
+    \bitbox{5}{cd}
+    \bitbox{7}{0110011}
+  \end{bytefield}
+  \end{center}
+
+\textbf{SetF}
+
+  \begin{center}
+    \begin{bytefield}{32}
+      \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,24,25,31}\\
+      \bitbox{7}{0001011}
+      \bitbox{5}{cs2}
+      \bitbox{5}{cs1}
+      \bitbox{3}{001}
+      \bitbox{5}{cd}
+      \bitbox{7}{0110011}
+    \end{bytefield}
+    \end{center}
