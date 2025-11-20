@@ -3426,6 +3426,51 @@ An alternative approach to FA would involve using the F bit in the root capabili
 
 \subsection{Implementation on RV64Y}
 
+\subsubsection{Capability Format}
+
+In RV64Y, the capability format is defined as follows:
+
+\begin{center}
+  \begin{bytefield}[endianness=big, bitwidth=1.6em]{21}
+  \bitheader[lsb=43]{43,51,52,53,56,57,63}\\
+  \bitbox{7}{Reserved}
+  \bitbox{4}{SDP}
+  \bitbox{1}{M}
+  \bitbox{9}{AP}
+  \end{bytefield}
+\end{center}
+
+We propose to adapt it as follows:
+
+\begin{center}
+  \begin{bytefield}[endianness=big, bitwidth=1.6em]{21}
+  \bitheader[lsb=43]{43,55,56,57,60,61,63}\\
+  \bitbox{3}{Reserved}
+  \bitbox{4}{SDP}
+  \bitbox{1}{M}
+  \bitbox{13}{AP}
+  \end{bytefield}
+\end{center}
+
+With \texttt{AP} field being specified as:
+
+\begin{center}
+  \begin{bytefield}[endianness=big, bitwidth=2.6em]{13}
+  \bitheader[lsb=43]{43,44,45,46,47,48,49,50,51,52,53,54,55}\\
+  \bitbox{1}{FA}
+  \bitbox{1}{F}
+  \bitbox{2}{SL}
+  \bitbox{1}{EL}
+  \bitbox{1}{LM}
+  \bitbox{1}{ASR}
+  \bitbox{1}{X}
+  \bitbox{1}{R}
+  \bitbox{1}{W}
+  \bitbox{1}{C}
+  \bitbox{2}{CL}
+  \end{bytefield}
+\end{center}
+
 \subsubsection{YPERMC Format}
 
 In RV64Y, format used by \texttt{YPERMC} is as follows:
