@@ -3205,7 +3205,7 @@ As a note, these PMAT bits are logically a software-controlled third layer of ta
 \subsection{Motivation}
 
 The capability levels presented in the RV64Y architecture, as well as the Morello and ISAv9 architectures introduce a single bit Local/Global mechanism to control the flow of capabilities in a program.
-Furthermore, the RV64Y architecture proposes a scheme to extend capability levels to multiple bits, thereby extending the CL and SL fields to N bits, where N is the number of bits required to encode the level.
+Furthermore, the RV64Y architecture proposes a scheme to extend capability levels to multiple bits, thereby extending the CL and SL fields from a single bit to N bits, where N is the number of bits required to encode the level.
 The draft also introduces an EL bit (Elevate Level), which is used for transitive-load-global semantics in CherIoT.
 
 All these capability flow control enforcement models are not nestable meaning that the capability level space is global for the entire system. This means that the number of N chosen by the concrete implementation will limit the possibilities of capability flow control enforcement.
@@ -3213,7 +3213,7 @@ All these capability flow control enforcement models are not nestable meaning th
 Due to these limitations, we would like to explore possible alternatives that are nestable.
 In particular, we are interested in a mechanism that allows the following:
 \begin{enumerate}
-\item Have different capability levels interpretations within the same privilege level. E.g. A V8 compartment uses \textit{local} for javascript allocations and \textit{global} for non-javascript objects vs a third party library that uses \textit{local} for the stack and \textit{global} for the heap.
+\item Have different capability levels interpretations within the same privilege level. E.g. A \textit{V8} compartment uses \textit{local} for javascript allocations and \textit{global} for non-javascript objects vs a third party library that uses \textit{local} for the stack and \textit{global} for the heap.
 \item Have different capability levels interpretations across privilege levels. This means that the supervisor can use Local/Global for its own purposes and the userspace can do the same, without having necessarily the same semantic. Crucially, this should also enable the ability of propagating user capabilities to the supervisor and back.
 \item This scheme should be scalable to all privilege levels (e.g. machine mode, hypervisor mode, supervisor mode, and user mode) and allow further nesting within any of the privilege levels.
 \end{enumerate}
@@ -3360,7 +3360,7 @@ This is slightly more efficient and would consume log2(N) * X bits for each of t
 \begin{center}
   \begin{bytefield}{40}
       \bitbox{24}{Protection level: $log_{2}(N)$ bits}
-      \bitbox{16}{CL: X bits}
+      \bitbox{16}{CL: $X$ bits}
   \end{bytefield}%
 \end{center}
 
