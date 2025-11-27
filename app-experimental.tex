@@ -3432,11 +3432,12 @@ In RV64Y, the capability format is defined as follows:
 
 \begin{center}
   \begin{bytefield}[endianness=big, bitwidth=1.6em]{21}
-  \bitheader[lsb=43]{43,51,52,53,56,57,63}\\
+  \bitheader[lsb=43]{43,44,51,52,53,56,57,63}\\
   \bitbox{7}{Reserved}
   \bitbox{4}{SDP}
   \bitbox{1}{M}
-  \bitbox{9}{AP}
+  \bitbox{8}{AP}
+  \bitbox{1}{CL}
   \end{bytefield}
 \end{center}
 
@@ -3444,11 +3445,12 @@ We propose to adapt it as follows:
 
 \begin{center}
   \begin{bytefield}[endianness=big, bitwidth=1.6em]{21}
-  \bitheader[lsb=43]{43,55,56,57,60,61,63}\\
+  \bitheader[lsb=43]{43,44,55,56,57,60,61,63}\\
   \bitbox{3}{Reserved}
   \bitbox{4}{SDP}
   \bitbox{1}{M}
-  \bitbox{13}{AP}
+  \bitbox{12}{AP}
+  \bitbox{1}{CL}
   \end{bytefield}
 \end{center}
 
