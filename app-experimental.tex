@@ -3426,7 +3426,7 @@ An alternative approach to FA would involve using the F bit in the root capabili
 
 \subsection{Implementation on RV64Y}
 
-\subsubsection{Capability Format}
+\subsubsection{Original Capability Format}
 
 In RV64Y, the capability format is defined as follows:
 
@@ -3441,24 +3441,42 @@ In RV64Y, the capability format is defined as follows:
   \end{bytefield}
 \end{center}
 
-We propose to adapt it as follows:
+With the \texttt{AP} field being specified as:
 
 \begin{center}
-  \begin{bytefield}[endianness=big, bitwidth=1.6em]{21}
-  \bitheader[lsb=43]{43,44,55,56,57,60,61,63}\\
-  \bitbox{3}{Reserved}
-  \bitbox{4}{SDP}
-  \bitbox{1}{M}
-  \bitbox{12}{AP}
-  \bitbox{1}{CL}
+  \begin{bytefield}[endianness=big, bitwidth=2.6em]{8}
+  \bitheader[lsb=44]{44,45,46,47,48,49,50,51}\\
+  \bitbox{1}{SL}
+  \bitbox{1}{EL}
+  \bitbox{1}{LM}
+  \bitbox{1}{ASR}
+  \bitbox{1}{X}
+  \bitbox{1}{R}
+  \bitbox{1}{W}
+  \bitbox{1}{C}
   \end{bytefield}
 \end{center}
 
-With \texttt{AP} field being specified as:
+\subsubsection{Adapted Capability Format}
+
+We propose the following capability format:
 
 \begin{center}
-  \begin{bytefield}[endianness=big, bitwidth=2.6em]{13}
-  \bitheader[lsb=43]{43,44,45,46,47,48,49,50,51,52,53,54,55}\\
+  \begin{bytefield}[endianness=big, bitwidth=1.6em]{21}
+  \bitheader[lsb=43]{43,44,45,55,56,57,60,61,63}\\
+  \bitbox{3}{Reserved}
+  \bitbox{4}{SDP}
+  \bitbox{1}{M}
+  \bitbox{11}{AP}
+  \bitbox{2}{CL}
+  \end{bytefield}
+\end{center}
+
+With the \texttt{AP} field being specified as:
+
+\begin{center}
+  \begin{bytefield}[endianness=big, bitwidth=2.6em]{11}
+  \bitheader[lsb=45]{45,46,47,48,49,50,51,52,53,54,55}\\
   \bitbox{1}{FA}
   \bitbox{1}{F}
   \bitbox{2}{SL}
@@ -3469,7 +3487,6 @@ With \texttt{AP} field being specified as:
   \bitbox{1}{R}
   \bitbox{1}{W}
   \bitbox{1}{C}
-  \bitbox{2}{CL}
   \end{bytefield}
 \end{center}
 
