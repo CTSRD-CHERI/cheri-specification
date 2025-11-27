@@ -3087,7 +3087,7 @@ The TDC register is sealed and it can only be written with an authorising capabi
 In order to facilitate that we add an additional \texttt{funct3} value for CSR instructions:
 
 \begin{center}
-  \begin{bytefield}{32}
+  \begin{bytefield}[bitwidth=1.22em]{32}
       \bitheader[endianness=big]{0,6,7,11,12,14,15,19,20,31}\\
       \bitbox{12}{csr}
       \bitbox{5}{rs1}
