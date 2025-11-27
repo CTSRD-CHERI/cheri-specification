@@ -3044,21 +3044,23 @@ as well as its internal operation, are left to future work.
 Compartmentalisation models often rely on trusted code performing the switch from one compartment to another.
 This trusted code needs a mechanism to retrieve a data capability, e.g., for a stack.
 When using sentries (sealed entry capabilities) to call into trusted code, the same piece of trusted code can be called from multiple threads and each thread must be able to access its trusted data.
-The pre-thread root capability for trusted data is defined to be the trusted data capability of this thread.
+The per-thread root capability for trusted data is defined to be the trusted data capability of this thread.
 Thus, we have the need for reliable thread identification.
 This can be solved by calling into the entity that provides threading support.
 In the conventional case, this would mean a call to kernel space at every time trusted code is entered.
+For systems with fine-grained compartments, the performance implications would be immense.
 Thus, we need to have a way of both fast and reliably determining the current thread ID (TID).
 
-The TID is not the same as Thread-Local Storage (TLS).
+It is important to note that the TID is not the same as Thread-Local Storage (TLS).
 When jumping from one compartment to another, the TLS should change per compartment, but the TID should remain the same over all calls.
 The commonly used RISC-V calling convention defines \texttt{x4} as the thread pointer register.
 We cannot use \texttt{x4} as the TID register because it is not a reliable source.
-Any compartment can manipulate it.
+It is a general-purpose register, and any compartment can manipulate it.
 
 \subsection{Design}
 
-We currently envision multiple layers to this design.
+On RISC-V currently envision multiple layers to this design.
+Similar designs would also be possible on Arm architectures.
 
 \begin{enumerate}
 \item The most simple design is to have one register per hardware thread holding the software thread id.
@@ -3097,8 +3099,16 @@ In order to facilitate that we add an additional \texttt{funct3} value for CSR i
   \end{bytefield}%
 \end{center}
 
+
 This instruction checks whether the value currently in the CSR is sealed with a subset of what the authorising capability grants.
 Otherwise, the instruction raises an exception.
+Note that this instruction does not have a destination register due to constraints of the instruction encoding format.
+The place of the destination register is taken by the authorising capability.
+
+\texttt{csrw csr, rs1, auth}
+
+There is no need for an authorised read instruction because any code can read a sealed capability.
+Only code with sufficent privileges will have an authorising capability that allows to unseal the capability.
 
 At boot, the TDC register is set to the almighty capability, tag set, and sealed with OTYPE\_MAX.
 The most privileged code in the system setting up compartmentalisation is expected to have an almighty authorising capability.
