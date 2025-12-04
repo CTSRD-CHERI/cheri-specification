@@ -1,0 +1,66 @@
+CHERI can be composed with DMA controllers in a number of ways.
+
+\subsection{DMA categorization}
+We can survey existing DMA controllers and discover a number of design patterns, which are helpful in understanding how CHERI can be applied to DMA subsystems.
+We outline them briefly here and refer to Markettos et al.~\cite{FIXME} for further background.
+
+\subsubsection{Transaction types}
+A DMA controller's job is to generate memory transactions based on data sources and sinks.
+These come in various forms.
+
+\emph{Memory transactions} involve the DMA controller generating a memory cycle such as a read or a write.
+
+\emph{Streaming transactions} have unidirectional data with an ordering but do not of themselves have a memory address, for example network packets received on the wire.
+These are reflected on-chip via interfaces such as AXI streaming~\cite{FIXME}, and historically off-chip via ISA-bus DMA~\cite{FIXME}  (which is still relevant for legacy PC peripherals).
+
+A DMA operation is a combination of a source and a sink, ie we can define memory-to-memory (M2M), a memory read feeds a memory write (a memory copy);
+memory-to-stream (M2S), a memory read is sent to an outgoing stream; or
+stream-to-memory (S2M), an incoming transaction on a stream generates a memory write.
+The final case (stream-to-stream, S2S) is associated with on-chip interconnect and does not concern memory access.
+
+Each case may generate a series of transactions based on data sizes and interconnect widths
+For example, a read of a 4KiB disk block from a storage controller with a 64-bit datapath might generate a stream of 512 input transactions to the DMA, which could be expanded to 1024 transactions to a 32-bit DRAM chip.
+
+Additionally between the source and sink some processing may be carried out on the data, for example RGB to YUV conversion of a video stream, making it not strictly a copy.
+
+\subsubsection{DMAs with control information in MMIO}
+DMA controllers such as the Raspberry Pi RP2350 microcontroller~\cite{FIXME, section 12.6} have all of their DMA controller state in memory-mapped I/O registers.
+There are 16 DMA channels, each one consisting of length, a Read and a Write address, which can be memory or peripheral FIFO registers.
+Once a DMA is completed an interrupt can be generated or another DMA channel can be triggered, forming basic DMA chains.
+Hence the RP2350 is M2M-only and all the control state is held in the MMIO registers, rather than memory.
+The Atmel XMEGA DMA~\cite{FIXME} operates in a similar M2M-only fashion using MMIO registers for control.
+
+%On the RP2350 specifically, four TrustZone-like security levels are provided and a memory protection unit (MPU) holds up to 8 regions to check against them.
+
+\subsubsection{DMAs with control information streamed externally}
+The AMD (Xilinx) LogiCORE IP AXI DMA~\cite{FIXME} is an example of an M2S/S2M DMA, comprising a memory access port plus streaming sources and sinks for both data and control transactions.
+In its most basic mode it can operate with transaction information in MMIO registers, as the previous category.
+However for greated performance transaction information (addresses, lengths) can alternatively be streamed into a control port.
+This enables custom logic to control and steer memory traffic.
+
+\subsubsection{Descriptor-based DMA}
+\emph{Descriptors} are small data structures typically comprising the address of a data buffer, the size of the transaction (eg number of bytes outstanding to send) and other metadata.
+For example, how to increment addresses (allowing 2D/3D-style accesses) and what to do next after this buffer is completed.
+Descriptors can be used in roughly two ways.
+First is the fetching of descriptors from memory, either main memory or a more local memory.
+Second is the streaming of descriptors on another port, for example from a separate descriptor fetching unit (as in the LogiCORE AXI DMA above, and also the Altera Modular Scatter-Gather DMA~\cite{FIXME}).
+In-memory descriptors can often be chained or used in arrays in order to form \emph{scatter-gather lists} or \emph{ring buffers} to give a higher order structure to groups of transactions.
+
+\subsection{Composing CHERI and DMA}
+DMA controllers operate outside the world of CPU-derived capabilities.
+The question arises how to compose them.
+
+\subsubsection{Level 0: DMA clears tags}
+The simplest yet safe scenario is that DMA operates outside of the world of a CHERI-enabled CPU.
+The DMA hardware is unchanged, using integer address rather than capabilities.
+Any data written by the DMA clears tags, so the DMA is unable to forge or unsafely modify valid capabilities.
+Any pre-existing peripheral device can safely operate in this manner, although this also means they will not follow the capability protection model; an IOMMU may be required to safely constrain their memory access.
+
+\subsubsection{Level 1: addresses replaced by capabiities}
+A `CHERI-aware DMA controller' may choose to replace integer addresses in descriptors or MMIO registers with capabilities.
+Memory accesses are checked against the bounds and permissions of the capability during transactions, and invalid transactions are aborted.
+Address calculation is based on the address from the capability and is otherwise unchanged.
+
+This avoides any difficulties where the DMA controller's use of addresses and the capability model's use of bounds diverge.
+For example, a DMA controller may have separate `offset' and `length' fields to deal with restarting partially-completed transactions (for example, a receive transaction where there was insufficient data received to fill the buffer);
+these would not map directly to the bounds of a capability.
