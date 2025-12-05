@@ -3158,6 +3158,24 @@ csrr ct1, tdc // everyone can read TDC
 CUnseal ct0, ct0, ct1 // unseal TID
 \end{lstlisting}
 
+\subsection{Experimental SCR Assignments}
+
+For our experiments, we have used the following SCR indexes for the xTIDC registers.
+
+\begin{table}
+  \begin{center}
+  \begin{tabular}{ l | l | l | l }
+   \toprule
+          & SCR Index & Writeable by          & Readable by \\ \midrule
+   MTIDC  & 0x1b      & \{M\} + ASR           & \{M\} \\
+   STIDC  & 0xb       & \{M, S\} + ASR        & \{M, S\} \\
+   UTIDC  & 0x3       & \{M, S, U\} + ASR     & \{M, S, U\} \\ \bottomrule
+  \end{tabular}
+  \end{center}
+  \caption{Experimental xTIDC registers.}
+  \label{tab:xtidc-registers}
+\end{table}
+
 \subsection{Implementation Notes}
 
 Access to CSR registers is usually slow in microarchitectures because many CSRs take effect on the system and thus need to stall the pipeline or even need to redirect.
