@@ -49,6 +49,7 @@ In-memory descriptors can often be chained or used in arrays in order to form \e
 \subsection{Composing CHERI and DMA}
 DMA controllers operate outside the world of CPU-derived capabilities.
 The question arises how to compose them.
+Below we describe some different levels of utilizing capabilities with DMA.
 
 \subsubsection{Level 0: DMA clears tags}
 The simplest yet safe scenario is that DMA operates outside of the world of a CHERI-enabled CPU.
@@ -79,8 +80,8 @@ Consider a 1~MiB-sized buffer send in which one byte has been successfully trans
 We would wish to increment the address by one and set the bounds to 1~MiB-1 but that size may be unrepresentable.
 
 Secondly, this assumes monotonic address incrementation.
-For example, a DMA controller performing a 2D memory copy may perform the address calculation \texttt{&(int a[i][j]) := a + (i*cols(a) + j)*sizeof(int)}.
-If the copy were to use $i$ as the inner loop instead of $j$ we may experience the case where $&a[i][0] < &a[i-1][max_j]$ and the address does not monotonically increase.
+For example, a DMA controller performing a 2D memory copy may perform the address calculation \texttt{\&(int a[i][j]) := a + (i*cols(a) + j)*sizeof(int)}.
+If the copy were to use $i$ as the inner loop instead of $j$ we may experience the case where $\&a[i][0] < \&a[i-1][max_j]$ and the address does not monotonically increase.
 This would be impossible to achieve while ever shrinking the bounds of the capability.
 
 That said, depending on the requirements of the DMA controller, perhaps these limitations can be accepted in order to simplify the protection model.
@@ -101,9 +102,9 @@ There exist a number of potential solutions in this space.
 For a successful safe capability check, we need to also know within which address space a capability exists.
 This leads to roughly three design points.  Either we:
 \begin{itemize}
-\item we carry around the address space stored as bits inside the capability, or
-\item we maintain the color as external metadata that is supplied to wherever a capability needs to be checked, or
-\item we arrange such that structurally there is no ambiguity at the point of check as to which address space a capability refers.
+	\item we carry around the address space stored as bits inside the capability, or
+	\item we maintain the color as external metadata that is supplied to wherever a capability needs to be checked, or
+	\item we arrange such that structurally there is no ambiguity at the point of check as to which address space a capability refers.
 \end{itemize}
 
 In the first case, bits that travel within the in-memory capability are used to identify its address-space identifier (ASID), such as a 'color' (see section~\ref{FIXME}).
@@ -115,3 +116,8 @@ When checking an access against the capability we must both check the operation 
 For example, deriving a new capability must retain the ASID of the original one (no implicit type conversion);
 any operation using two capabilities of different ASIDs is not permitted (no type mixing);
 and capabilities are not allowed to be stored in locations associated with another ASID (no leakage).
+
+A solution at level 3 would consider how software can use virtually addressed capabilities safely within a physically-addressed I/O subsystem.
+This implies some level of translation, be it IOMMU-based or otherwise.
+Translation may be decoupled from protection (i.e. using capabilities for protection) which may allow an alternative translation mechanism.
+Ideas on this topic are developed further in section \ref{FIXME}.
