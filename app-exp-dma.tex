@@ -84,3 +84,34 @@ If the copy were to use $i$ as the inner loop instead of $j$ we may experience t
 This would be impossible to achieve while ever shrinking the bounds of the capability.
 
 That said, depending on the requirements of the DMA controller, perhaps these limitations can be accepted in order to simplify the protection model.
+The value of a single representation shared between software driver and DMA controller may outweigh the limitations.
+
+\subsubsection{Level 3: virtual addressing}
+In systems with MMUs, capabilities are virtually addressed.
+This means it is important to ensure that capabilities referring to one virtual address space do not cross over to another.
+In application software the OS and MMU restrict capabilities to their own address space, with carefully-controlled exceptions.
+For DMA, this brings several challenges.
+
+First, capabilities in software are generated in relation to a virtual address space of an application.
+This does not directly correspond to any address space visible to an I/O device.
+Second, I/O devices such as DMA controllers may be in their own I/O virtual address spaces as translated by an IOMMU.
+This means that not only are the capabilities with respect to different address spaces, but they represent two different \emph{kinds} of address spaces, potentially whose sources of truth do not overlap.
+
+There exist a number of potential solutions in this space.
+For a successful safe capability check, we need to also know within which address space a capability exists.
+This leads to roughly three design points.  Either we:
+\begin{itemize}
+\item we carry around the address space stored as bits inside the capability, or
+\item we maintain the color as external metadata that is supplied to wherever a capability needs to be checked, or
+\item we arrange such that structurally there is no ambiguity at the point of check as to which address space a capability refers.
+\end{itemize}
+
+In the first case, bits that travel within the in-memory capability are used to identify its address-space identifier (ASID), such as a 'color' (see section~\ref{FIXME}).
+In the second, the in-memory format is not changed but bits are supplied alongside, 'out of band' (e.g. as additional tag bits).
+In the third, we may use explicit or implicit information to infer the address space.
+For example, we know a particular interconnect endpoint always generates capabilities within a single address-space, allowing us to attach an ASID at the point of check.
+
+When checking an access against the capability we must both check the operation is permitted by the capability (i.e. the usual access check), and that also that the access is permitted by rules associated with the ASID.
+For example, deriving a new capability must retain the ASID of the original one (no implicit type conversion);
+any operation using two capabilities of different ASIDs is not permitted (no type mixing);
+and capabilities are not allowed to be stored in locations associated with another ASID (no leakage).
