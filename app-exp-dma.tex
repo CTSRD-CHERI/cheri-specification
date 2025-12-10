@@ -64,3 +64,23 @@ Address calculation is based on the address from the capability and is otherwise
 This avoides any difficulties where the DMA controller's use of addresses and the capability model's use of bounds diverge.
 For example, a DMA controller may have separate `offset' and `length' fields to deal with restarting partially-completed transactions (for example, a receive transaction where there was insufficient data received to fill the buffer);
 these would not map directly to the bounds of a capability.
+
+\subsubsection{Level 2: unifying length and bounds}
+It is desirable to use the same field for both the length of the transaction as well as its bounds.
+In this way capability manipulation operations in software directly mirror the protection model in hardware, and notably operations loading and storing base and bounds become atomic.
+This causes some difficulties, however.
+
+First of all, compressed bounds are imprecise.
+This may not be an issue for small buffers, but may become one for larger buffers.
+Additionally alignment may depend on external factors outside our control.
+For example, it may be necessary to restart partial transactions.
+Conceptually it would be possible to increment the address and reduce the bounds, but this could runs into precision difficulties.
+Consider a 1~MiB-sized buffer send in which one byte has been successfully transferred so far.
+We would wish to increment the address by one and set the bounds to 1~MiB-1 but that size may be unrepresentable.
+
+Secondly, this assumes monotonic address incrementation.
+For example, a DMA controller performing a 2D memory copy may perform the address calculation \texttt{&(int a[i][j]) := a + (i*cols(a) + j)*sizeof(int)}.
+If the copy were to use $i$ as the inner loop instead of $j$ we may experience the case where $&a[i][0] < &a[i-1][max_j]$ and the address does not monotonically increase.
+This would be impossible to achieve while ever shrinking the bounds of the capability.
+
+That said, depending on the requirements of the DMA controller, perhaps these limitations can be accepted in order to simplify the protection model.
