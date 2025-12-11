@@ -115,10 +115,11 @@ This leads to roughly three design points.  Either we:
 	\item we arrange such that structurally there is no ambiguity at the point of check as to which address space a capability refers.
 \end{itemize}
 
-In the first case, bits that travel within the in-memory capability are used to identify its address-space identifier (ASID), such as a 'color' (see section~\ref{app:exp:peripherals}).
-In the second, the in-memory format is not changed but bits are supplied alongside, 'out of band' (e.g. as additional tag bits).
+In the first case, bits that travel within the in-memory capability are used to identify its address-space identifier (ASID), such as a `color' (see section~\ref{app:exp:peripherals}).
+In the second, the in-memory format is not changed but bits are supplied alongside, `out of band' (e.g. as additional tag bits).
 In the third, we may use explicit or implicit information to infer the address space.
 For example, we know a particular interconnect endpoint always generates capabilities within a single address-space, allowing us to attach an ASID at the point of check.
+An example of this inference (with respect to an object ID rather than an ASID) is described in Cheng et. al.~\cite{cheng2025-capchecker}.
 
 When checking an access against the capability we must both check the operation is permitted by the capability (i.e. the usual access check), and that also that the access is permitted by rules associated with the ASID.
 For example, deriving a new capability must retain the ASID of the original one (no implicit type conversion);

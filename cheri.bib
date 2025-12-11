@@ -16910,3 +16910,25 @@ year=1981
     month=oct,
     url={https://www.intel.com/content/www/us/en/docs/programmable/683130/25-3/introduction.html}
 }
+
+@inproceedings{cheng2025-capchecker,
+author = {Cheng, Jianyi and Markettos, A. Theodore and Joannou, Alexandre and Metzger, Paul and Naylor, Matthew and Rugg, Peter and Jones, Timothy M.},
+title = {Adaptive CHERI Compartmentalization for Heterogeneous Accelerators},
+year = {2025},
+isbn = {9798400712616},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3695053.3731062},
+doi = {10.1145/3695053.3731062},
+abstract = {Hardware accelerators offer high performance and energy efficiency for specific tasks compared to general-purpose processors. However, current hardware accelerator designs focus primarily on performance, overlooking security. This poses significant security risks due to potential memory safety violations that can affect the entire hardware system. Existing methods either rely on Input-Output Memory Management Units (IOMMUs) for memory isolation between memory pages, leading to vulnerabilities in intra-page memory accesses, or modify an accelerator architecture for specialized memory protection, which requires significant effort and cannot scale across multiple diverse applications.In this paper, we propose a general method for fine-grained memory protection in heterogeneous systems without modifying accelerator architectures. We extend the Capability Hardware Enhanced RISC Instructions (CHERI) from CPUs to an adaptive hardware interface named CapChecker. The CapChecker imports capabilities from the CPU and guards memory accesses at the pointer level from CHERI-unaware accelerators as if they were CHERI-aware natively. Over a set of benchmarks on hardware accelerators in a heterogeneous system, our approach achieves fine-grained memory protection, with a 1.4\% performance overhead compared to CHERI-unaware accelerators on average.},
+booktitle = {Proceedings of the 52nd Annual International Symposium on Computer Architecture},
+pages = {2002–2016},
+numpages = {15},
+keywords = {Hardware Security, Memory Safety, Heterogeneous Systems},
+location = {
+},
+series = {ISCA '25}
+}
+
+  
+
