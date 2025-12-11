@@ -16930,5 +16930,50 @@ location = {
 series = {ISCA '25}
 }
 
-  
+@TechReport{UCAM-CL-TR-997,
+  author =	 {Naylor, Matthew and Joannou, Alexandre and Markettos, A.
+          	  Theodore and Metzger, Paul and Moore, Simon W. and Jones,
+          	  Timothy M.},
+  title = 	 {{CHERI-SIMT report: implementing capability memory
+         	   protection in GPGPUs}},
+  year = 	 2025,
+  month = 	 mar,
+  url = 	 {https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-997.pdf},
+  institution =  {University of Cambridge, Computer Laboratory},
+  doi = 	 {10.48456/tr-997},
+  issn = 	 {1476-2986},
+  abstract = 	 {Governments are increasingly advising software
+            	  manufacturers to employ memory-safe languages and
+            	  technologies to combat adversarial attacks on modern
+            	  computing infrastructure. This introduces pressures
+            	  across the entire computing industry, including GPGPU
+            	  vendors who provide implementations of unsafe C/C++-based
+            	  languages, such as CUDA and OpenCL, for programming the
+            	  devices they produce. One of the memory-safety
+            	  technologies being recommended is Capability Hardware
+            	  Enhanced RISC Instructions (CHERI). CHERI builds strong
+            	  and efficient memory safety into underlying
+            	  instruction-set architectures allowing continued, but
+            	  memory-safe, use of C/C++-based languages on top. Another
+            	  option being recommended is Rust, a memory-safe systems
+            	  programming language that can viably replace C/C++ in
+            	  some cases.
+            	  
+            	  In this report, we evaluate the feasibility of
+            	  incorporating CHERI into GPGPU architectures by extending
+            	  a prototype, open-source, synthesisable, SIMT core and
+            	  CUDA-like programming environment with support for CHERI.
+            	  We present techniques to considerably ameliorate the
+            	  costs of CHERI in SIMT designs, reducing register-file
+            	  storage overheads from 103\% to 7\%, logic-area overheads
+            	  by 44\% to a cost comparable to one additional multiplier
+            	  per vector lane, and execution-time overheads to 1.6\%.
+            	  By comparison, an experimental Rust port of the same
+            	  GPGPU benchmark suite shows a 34\% increase in execution
+            	  time due to software bounds checking. With the proposed
+            	  techniques, CHERI offers a viable path to strong and
+            	  efficient GPGPU memory safety, while avoiding the need to
+            	  replace established programming practices.},
+  number = 	 {UCAM-CL-TR-997}
+}
 

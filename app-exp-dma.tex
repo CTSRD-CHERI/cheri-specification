@@ -1,4 +1,7 @@
-CHERI can be composed with DMA controllers in a number of ways.
+\emph{Direct Memory Access (DMA)} is a means by which devices other than the CPU can access memory.
+Such accesses bypass the instruction-set capability model and need additional care to make them safe.
+In this section we describe some approaches which can be utilized to safely compose a CHERI system with DMA, be it integral to devices (`bus mastering') or third-party DMA using a system DMA controller.
+Subsequent sections consider how CHERI might be used with physical addresses and across a wider system.
 
 \subsection{DMA categorization}
 We can survey existing DMA controllers and discover a number of design patterns, which are helpful in understanding how CHERI can be applied to DMA subsystems.
@@ -45,6 +48,23 @@ Descriptors can be used in roughly two ways.
 First is the fetching of descriptors from memory, either main memory or a more local memory.
 Second is the streaming of descriptors on another port, for example from a separate descriptor fetching unit (as in the LogiCORE AXI DMA above, and also the Altera Modular Scatter-Gather DMA~\cite{altera-embeddedperipheralsug}).
 In-memory descriptors can often be chained or used in arrays in order to form \emph{scatter-gather lists} or \emph{ring buffers} to give a higher order structure to groups of transactions.
+
+\subsubsection{Bus-mastering DMA}
+In this case a device is able to make its own memory read and write transactions, independent of any system DMA controller.
+This is common for application-class devices such as PCI Express (PCIe) endpoints, including network cards, NVMe and AHCI storage, GPUs, NPUs and so on.
+In many cases a CHERI system cannot introspect into the device in order to modify its address behavior or to add CHERI support to its internal DMA infrastructure. 
+Additionally, such devices may not be known at design-time any may change dynamically, thanks to hotpluggable PCIe cards and Thunderbolt devices.
+
+In order to safely constrain such a device, we must interpose something between the device and the memory subsystem.
+This is necessary in order to both limit the damage the device can do, and to protect the integrity of a CHERI system.
+Current systems use an IOMMU (also called a System MMU) to apply a page-based protection and translation model.
+This has significant performance implications due to the highly dynamic behavior of complex devices.
+It may be desirable to augment or replace the IOMMU with some other structure which instead uses the capability model, along the same lines of using CHERI for protection and the MMU for translation.
+Examples of such schemes are given in Cheng and Markettos~\cite{DBLP:conf/micro/MarkettosBBNMW20, cheng2025-capchecker}.
+
+Where possible, a preferable design point is to integrated CHERI support into a bus-mastering device such that the hardware can be trusted to manipulate capabilities correctly.
+In this instance we are able to run untrusted I/O software stack safely on trustworthy CHERI-enabled hardware.
+An example of this is a CHERI-enabled GPU~\cite{UCAM-CL-TR-997}, which trustworthily shares capabilities with a CHERI-enabled CPU core.
 
 \subsection{Composing CHERI and DMA}
 DMA controllers operate outside the world of CPU-derived capabilities.
@@ -123,7 +143,7 @@ In the first case, bits that travel within the in-memory capability are used to 
 In the second, the in-memory format is not changed but bits are supplied alongside, `out of band' (e.g. as additional tag bits).
 In the third, we may use explicit or implicit information to infer the address space.
 For example, we know a particular interconnect endpoint always generates capabilities within a single address-space, allowing us to attach an ASID at the point of check.
-An example of this inference (with respect to an object ID rather than an ASID) is described in Cheng et. al.~\cite{cheng2025-capchecker}.
+An example of this inference (with respect to an object ID rather than an ASID) is described in Cheng~\cite{cheng2025-capchecker}.
 In each case we would need to ensure any manipulation of capabilities preserves these additional properties.
 
 When checking an access against the capability we must both check the operation is permitted by the capability (i.e. the usual access check), and that also that the access is permitted by rules associated with the ASID.
