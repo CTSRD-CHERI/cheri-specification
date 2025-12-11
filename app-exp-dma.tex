@@ -109,11 +109,11 @@ This means that not only are the capabilities with respect to different address 
 There exist a number of potential solutions in this space.
 For a successful safe capability check, we need to also know within which address space a capability exists.
 This leads to roughly three design points.  Either we:
-\begin{itemize}
-	\item we carry around the address space stored as bits inside the capability, or
-	\item we maintain the color as external metadata that is supplied to wherever a capability needs to be checked, or
-	\item we arrange such that structurally there is no ambiguity at the point of check as to which address space a capability refers.
-\end{itemize}
+\begin{enumerate}
+	\item carry around the address space stored as bits inside the capability, or
+	\item maintain the color as external metadata that is supplied to wherever a capability needs to be checked, or
+	\item arrange such that structurally there is no ambiguity at the point of check as to which address space a capability refers.
+\end{enumerate}
 
 In the first case, bits that travel within the in-memory capability are used to identify its address-space identifier (ASID), such as a `color' (see section~\ref{app:exp:peripherals}).
 In the second, the in-memory format is not changed but bits are supplied alongside, `out of band' (e.g. as additional tag bits).
