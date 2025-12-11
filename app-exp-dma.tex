@@ -21,7 +21,7 @@ The final case (stream-to-stream, S2S) is associated with on-chip interconnect a
 Each case may generate a series of transactions based on data sizes and interconnect widths
 For example, a read of a 4KiB disk block from a storage controller with a 64-bit datapath might generate a stream of 512 input transactions to the DMA, which could be expanded to 1024 transactions to a 32-bit DRAM chip.
 
-Additionally between the source and sink some processing may be carried out on the data, for example RGB to YUV conversion of a video stream, making it not strictly a copy.
+Additionally, between the source and sink some processing may be carried out on the data, for example RGB to YUV conversion of a video stream, making it not strictly a copy.
 
 \subsubsection{DMAs with control information in MMIO}
 DMA controllers such as the Raspberry Pi RP2350 microcontroller~\cite{rp2350} have all of their DMA controller state in memory-mapped I/O registers.
@@ -66,9 +66,13 @@ This avoides any difficulties where the DMA controller's use of addresses and th
 For example, a DMA controller may have separate `offset' and `length' fields to deal with restarting partially-completed transactions (for example, a receive transaction where there was insufficient data received to fill the buffer);
 these would not map directly to the bounds of a capability.
 
+An implementation using DMA using MMIO registers would extend address registers to capabilities, while one using descriptors would need to change the descriptor format to include a capability.
+This may cause downstream effects, such as requiring descriptors to be padded and aligned to multiples of the capability size, which are specific to the DMA controller being modified.
+
 \subsubsection{Level 2: unifying length and bounds}
 It is desirable to use the same field for both the length of the transaction as well as its bounds.
 In this way capability manipulation operations in software directly mirror the protection model in hardware, and notably operations loading and storing base and bounds become atomic.
+It can also reduce descriptor size and limit the need for padding.
 This causes some difficulties, however.
 
 First of all, compressed bounds are imprecise.
@@ -77,7 +81,7 @@ Additionally alignment may depend on external factors outside our control.
 For example, it may be necessary to restart partial transactions.
 Conceptually it would be possible to increment the address and reduce the bounds, but this could runs into precision difficulties.
 Consider a 1~MiB-sized buffer send in which one byte has been successfully transferred so far.
-We would wish to increment the address by one and set the bounds to 1~MiB-1 but that size may be unrepresentable.
+We would wish to increment the address by one and set the bounds to 1~MiB minus 1 but that size may be unrepresentable under the capability compression scheme.
 
 Secondly, this assumes monotonic address incrementation.
 For example, a DMA controller performing a 2D memory copy which updates the capability at each step may perform the address calculation:
@@ -120,6 +124,7 @@ In the second, the in-memory format is not changed but bits are supplied alongsi
 In the third, we may use explicit or implicit information to infer the address space.
 For example, we know a particular interconnect endpoint always generates capabilities within a single address-space, allowing us to attach an ASID at the point of check.
 An example of this inference (with respect to an object ID rather than an ASID) is described in Cheng et. al.~\cite{cheng2025-capchecker}.
+In each case we would need to ensure any manipulation of capabilities preserves these additional properties.
 
 When checking an access against the capability we must both check the operation is permitted by the capability (i.e. the usual access check), and that also that the access is permitted by rules associated with the ASID.
 For example, deriving a new capability must retain the ASID of the original one (no implicit type conversion);
