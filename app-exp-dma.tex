@@ -2,7 +2,7 @@ CHERI can be composed with DMA controllers in a number of ways.
 
 \subsection{DMA categorization}
 We can survey existing DMA controllers and discover a number of design patterns, which are helpful in understanding how CHERI can be applied to DMA subsystems.
-We outline them briefly here and refer to Markettos et al.~\cite{FIXME} for further background.
+We outline them briefly here and refer to Markettos et al.~\cite{DBLP:conf/micro/MarkettosBBNMW20} for further background.
 
 \subsubsection{Transaction types}
 A DMA controller's job is to generate memory transactions based on data sources and sinks.
@@ -11,7 +11,7 @@ These come in various forms.
 \emph{Memory transactions} involve the DMA controller generating a memory cycle such as a read or a write.
 
 \emph{Streaming transactions} have unidirectional data with an ordering but do not of themselves have a memory address, for example network packets received on the wire.
-These are reflected on-chip via interfaces such as AXI streaming~\cite{FIXME}, and historically off-chip via ISA-bus DMA~\cite{FIXME}  (which is still relevant for legacy PC peripherals).
+These are reflected on-chip via interfaces such as AXI streaming~\cite{arm-axistream}, and historically off-chip via ISA-bus DMA~\cite{ibmpctrm} (which is still relevant for legacy PC peripherals).
 
 A DMA operation is a combination of a source and a sink, ie we can define memory-to-memory (M2M), a memory read feeds a memory write (a memory copy);
 memory-to-stream (M2S), a memory read is sent to an outgoing stream; or
@@ -24,16 +24,16 @@ For example, a read of a 4KiB disk block from a storage controller with a 64-bit
 Additionally between the source and sink some processing may be carried out on the data, for example RGB to YUV conversion of a video stream, making it not strictly a copy.
 
 \subsubsection{DMAs with control information in MMIO}
-DMA controllers such as the Raspberry Pi RP2350 microcontroller~\cite{FIXME, section 12.6} have all of their DMA controller state in memory-mapped I/O registers.
+DMA controllers such as the Raspberry Pi RP2350 microcontroller~\cite{rp2350} have all of their DMA controller state in memory-mapped I/O registers.
 There are 16 DMA channels, each one consisting of length, a Read and a Write address, which can be memory or peripheral FIFO registers.
 Once a DMA is completed an interrupt can be generated or another DMA channel can be triggered, forming basic DMA chains.
 Hence the RP2350 is M2M-only and all the control state is held in the MMIO registers, rather than memory.
-The Atmel XMEGA DMA~\cite{FIXME} operates in a similar M2M-only fashion using MMIO registers for control.
+The Atmel XMEGA DMA~\cite{atmel-xmegadma} operates in a similar M2M-only fashion using MMIO registers for control.
 
 %On the RP2350 specifically, four TrustZone-like security levels are provided and a memory protection unit (MPU) holds up to 8 regions to check against them.
 
 \subsubsection{DMAs with control information streamed externally}
-The AMD (Xilinx) LogiCORE IP AXI DMA~\cite{FIXME} is an example of an M2S/S2M DMA, comprising a memory access port plus streaming sources and sinks for both data and control transactions.
+The AMD (Xilinx) LogiCORE IP AXI DMA~\cite{amd-logicoredma} is an example of an M2S/S2M DMA, comprising a memory access port plus streaming sources and sinks for both data and control transactions.
 In its most basic mode it can operate with transaction information in MMIO registers, as the previous category.
 However for greated performance transaction information (addresses, lengths) can alternatively be streamed into a control port.
 This enables custom logic to control and steer memory traffic.
@@ -43,7 +43,7 @@ This enables custom logic to control and steer memory traffic.
 For example, how to increment addresses (allowing 2D/3D-style accesses) and what to do next after this buffer is completed.
 Descriptors can be used in roughly two ways.
 First is the fetching of descriptors from memory, either main memory or a more local memory.
-Second is the streaming of descriptors on another port, for example from a separate descriptor fetching unit (as in the LogiCORE AXI DMA above, and also the Altera Modular Scatter-Gather DMA~\cite{FIXME}).
+Second is the streaming of descriptors on another port, for example from a separate descriptor fetching unit (as in the LogiCORE AXI DMA above, and also the Altera Modular Scatter-Gather DMA~\cite{altera-embeddedperipheralsug}).
 In-memory descriptors can often be chained or used in arrays in order to form \emph{scatter-gather lists} or \emph{ring buffers} to give a higher order structure to groups of transactions.
 
 \subsection{Composing CHERI and DMA}
@@ -80,8 +80,16 @@ Consider a 1~MiB-sized buffer send in which one byte has been successfully trans
 We would wish to increment the address by one and set the bounds to 1~MiB-1 but that size may be unrepresentable.
 
 Secondly, this assumes monotonic address incrementation.
-For example, a DMA controller performing a 2D memory copy may perform the address calculation \texttt{\&(int a[i][j]) := a + (i*cols(a) + j)*sizeof(int)}.
-If the copy were to use $i$ as the inner loop instead of $j$ we may experience the case where $\&a[i][0] < \&a[i-1][max_j]$ and the address does not monotonically increase.
+For example, a DMA controller performing a 2D memory copy which updates the capability at each step may perform the address calculation:
+\begin{equation}
+\mathtt{\&(int\;a[i][j]) := a + (i*cols(a) + j)*sizeof(int)}
+\end{equation}
+
+If the copy were to use $i$ as the inner loop instead of $j$ we may experience the case where:
+\begin{equation}
+\mathtt{\&a[i][0] < \&a[i-1][j_{max}]}
+\end{equation}
+and the address does not monotonically increase.
 This would be impossible to achieve while ever shrinking the bounds of the capability.
 
 That said, depending on the requirements of the DMA controller, perhaps these limitations can be accepted in order to simplify the protection model.
@@ -107,7 +115,7 @@ This leads to roughly three design points.  Either we:
 	\item we arrange such that structurally there is no ambiguity at the point of check as to which address space a capability refers.
 \end{itemize}
 
-In the first case, bits that travel within the in-memory capability are used to identify its address-space identifier (ASID), such as a 'color' (see section~\ref{FIXME}).
+In the first case, bits that travel within the in-memory capability are used to identify its address-space identifier (ASID), such as a 'color' (see section~\ref{app:exp:peripherals}).
 In the second, the in-memory format is not changed but bits are supplied alongside, 'out of band' (e.g. as additional tag bits).
 In the third, we may use explicit or implicit information to infer the address space.
 For example, we know a particular interconnect endpoint always generates capabilities within a single address-space, allowing us to attach an ASID at the point of check.
@@ -120,4 +128,4 @@ and capabilities are not allowed to be stored in locations associated with anoth
 A solution at level 3 would consider how software can use virtually addressed capabilities safely within a physically-addressed I/O subsystem.
 This implies some level of translation, be it IOMMU-based or otherwise.
 Translation may be decoupled from protection (i.e. using capabilities for protection) which may allow an alternative translation mechanism.
-Ideas on this topic are developed further in section \ref{FIXME}.
+Ideas on this topic are developed further in sections \ref{app:exp:physcap} and \ref{app:exp:peripherals}.
