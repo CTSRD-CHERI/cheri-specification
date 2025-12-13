@@ -52,7 +52,7 @@ In-memory descriptors can often be chained or used in arrays in order to form \e
 \subsubsection{Bus-mastering DMA}
 In this case a device is able to make its own memory read and write transactions, independent of any system DMA controller.
 This is common for application-class devices such as PCI Express (PCIe) endpoints, including network cards, NVMe and AHCI storage, GPUs, NPUs and so on.
-In many cases a CHERI system cannot introspect into the device in order to modify its address behavior or to add CHERI support to its internal DMA infrastructure. 
+In many cases a CHERI system cannot introspect into the device in order to modify its address behavior or to add CHERI support to its internal DMA infrastructure.
 Additionally, such devices may not be known at design-time any may change dynamically, thanks to hotpluggable PCIe cards and Thunderbolt devices.
 
 In order to safely constrain such a device, we must interpose something between the device and the memory subsystem.
