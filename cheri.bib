@@ -16865,3 +16865,132 @@ Cornucopia is a lightweight capability revocation system for CHERI that implemen
   location = {<conf-loc>, <city>Toronto</city>, <state>ON</state>, <country>Canada</country>, </conf-loc>},
   series = {MICRO '23}
 }
+
+@manual{arm-axistream,
+    title={{AMBA} {AXI-Stream} Protocol Specification},
+    author={{Arm Limited}},
+    year=2021,
+    url={https://developer.arm.com/documentation/ihi0051/latest/}
+}
+
+@manual{ibmpctrm,
+title={{IBM Personal Computer} Technical Reference Manual},
+author={{IBM Corporation}},
+month=aug,
+year=1981
+}
+
+@manual{rp2350,
+    title={RP2350 Datasheet},
+    author={{Raspberry Pi Ltd}},
+    year=2025,
+    url={https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf}
+}
+
+@manual{amd-logicoredma,
+    title={{AXI DMA LogiCORE IP Product Guide (PG021)}},
+    author={{AMD}},
+    year=2025,
+    month=jun,
+    url={https://docs.amd.com/r/en-US/pg021_axi_dma}
+}
+
+@manual{atmel-xmegadma,
+    title={{Atmel AVR1304: Using the XMEGA DMA Controller}},
+    author={Atmel},
+    year=2013,
+    month=may,
+    url={http://ww1.microchip.com/downloads/en/appnotes/atmel-8046-using-the-xmega-dma-controller_application-note_avr1304.pdf}
+}
+
+@manual{altera-embeddedperipheralsug,
+    title={Embedded Peripherals {IP} User Guide},
+    author={{Altera Corporation}},
+    year=2025,
+    month=oct,
+    url={https://www.intel.com/content/www/us/en/docs/programmable/683130/25-3/introduction.html}
+}
+
+@inproceedings{cheng2025-capchecker,
+author = {Cheng, Jianyi and Markettos, A. Theodore and Joannou, Alexandre and Metzger, Paul and Naylor, Matthew and Rugg, Peter and Jones, Timothy M.},
+title = {Adaptive CHERI Compartmentalization for Heterogeneous Accelerators},
+year = {2025},
+isbn = {9798400712616},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3695053.3731062},
+doi = {10.1145/3695053.3731062},
+abstract = {Hardware accelerators offer high performance and energy efficiency for specific tasks compared to general-purpose processors. However, current hardware accelerator designs focus primarily on performance, overlooking security. This poses significant security risks due to potential memory safety violations that can affect the entire hardware system. Existing methods either rely on Input-Output Memory Management Units (IOMMUs) for memory isolation between memory pages, leading to vulnerabilities in intra-page memory accesses, or modify an accelerator architecture for specialized memory protection, which requires significant effort and cannot scale across multiple diverse applications.In this paper, we propose a general method for fine-grained memory protection in heterogeneous systems without modifying accelerator architectures. We extend the Capability Hardware Enhanced RISC Instructions (CHERI) from CPUs to an adaptive hardware interface named CapChecker. The CapChecker imports capabilities from the CPU and guards memory accesses at the pointer level from CHERI-unaware accelerators as if they were CHERI-aware natively. Over a set of benchmarks on hardware accelerators in a heterogeneous system, our approach achieves fine-grained memory protection, with a 1.4\% performance overhead compared to CHERI-unaware accelerators on average.},
+booktitle = {Proceedings of the 52nd Annual International Symposium on Computer Architecture},
+pages = {2002–2016},
+numpages = {15},
+keywords = {Hardware Security, Memory Safety, Heterogeneous Systems},
+location = {
+},
+series = {ISCA '25}
+}
+
+@TechReport{UCAM-CL-TR-997,
+  author =	 {Naylor, Matthew and Joannou, Alexandre and Markettos, A.
+          	  Theodore and Metzger, Paul and Moore, Simon W. and Jones,
+          	  Timothy M.},
+  title = 	 {{CHERI-SIMT report: implementing capability memory
+         	   protection in GPGPUs}},
+  year = 	 2025,
+  month = 	 mar,
+  url = 	 {https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-997.pdf},
+  institution =  {University of Cambridge, Computer Laboratory},
+  doi = 	 {10.48456/tr-997},
+  issn = 	 {1476-2986},
+  abstract = 	 {Governments are increasingly advising software
+            	  manufacturers to employ memory-safe languages and
+            	  technologies to combat adversarial attacks on modern
+            	  computing infrastructure. This introduces pressures
+            	  across the entire computing industry, including GPGPU
+            	  vendors who provide implementations of unsafe C/C++-based
+            	  languages, such as CUDA and OpenCL, for programming the
+            	  devices they produce. One of the memory-safety
+            	  technologies being recommended is Capability Hardware
+            	  Enhanced RISC Instructions (CHERI). CHERI builds strong
+            	  and efficient memory safety into underlying
+            	  instruction-set architectures allowing continued, but
+            	  memory-safe, use of C/C++-based languages on top. Another
+            	  option being recommended is Rust, a memory-safe systems
+            	  programming language that can viably replace C/C++ in
+            	  some cases.
+
+            	  In this report, we evaluate the feasibility of
+            	  incorporating CHERI into GPGPU architectures by extending
+            	  a prototype, open-source, synthesisable, SIMT core and
+            	  CUDA-like programming environment with support for CHERI.
+            	  We present techniques to considerably ameliorate the
+            	  costs of CHERI in SIMT designs, reducing register-file
+            	  storage overheads from 103\% to 7\%, logic-area overheads
+            	  by 44\% to a cost comparable to one additional multiplier
+            	  per vector lane, and execution-time overheads to 1.6\%.
+            	  By comparison, an experimental Rust port of the same
+            	  GPGPU benchmark suite shows a 34\% increase in execution
+            	  time due to software bounds checking. With the proposed
+            	  techniques, CHERI offers a viable path to strong and
+            	  efficient GPGPU memory safety, while avoiding the need to
+            	  replace established programming practices.},
+  number = 	 {UCAM-CL-TR-997}
+}
+
+@inproceedings{naylor26-simtight,
+author = {Naylor, Matthew and Joannou, Alexandre and Markettos, A. Theodore and Metzger, Paul and Moore, Simon W. and Jones, Timothy M.},
+title = {{CHERI-SIMT}: Implementing Capability Memory Protection in {GPUs}},
+year = {2025},
+isbn = {9798400721656},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3760250.3762234},
+doi = {10.1145/3760250.3762234},
+abstract = {Governments are increasingly advising software manufacturers to employ memory-safe languages and technologies to combat adversarial attacks on modern computing infrastructure. This introduces pressures across the entire computing industry, including GPU vendors who provide implementations of unsafe C/C++-based languages, such as CUDA and OpenCL, for programming the devices they produce. One of the memory-safety technologies being recommended is Capability Hardware Enhanced RISC Instructions (CHERI). CHERI builds strong and efficient memory safety into underlying instruction-set architectures allowing continued, but memory-safe, use of C/C++-based languages on top. In this paper, we evaluate the feasibility of incorporating CHERI into GPU architectures by extending a prototype, open-source, synthesisable, SIMT core and CUDA-like programming environment with support for CHERI. We present techniques to considerably ameliorate the costs of CHERI in SIMT designs, reducing register-file storage overheads from 103\% to 7\%, logic-area overheads by 44\% to a cost comparable to one additional multiplier per vector lane, and execution-time overheads to 1.6\%. With the proposed techniques, CHERI offers a viable path to strong and efficient GPU memory safety, while avoiding the need to replace established programming practices.},
+booktitle = {Proceedings of the 31st ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 1},
+pages = {50–66},
+numpages = {17},
+keywords = {memory safety, cheri, gpu, simt},
+location = {USA},
+series = {ASPLOS '26}
+}

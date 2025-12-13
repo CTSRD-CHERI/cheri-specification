@@ -1,0 +1,157 @@
+\emph{Direct Memory Access (DMA)} is a means by which devices other than the CPU can access memory.
+Such accesses bypass the instruction-set capability model and need additional care to make them safe.
+In this section we describe some approaches which can be utilized to safely compose a CHERI system with DMA, be it integral to devices (`bus mastering') or third-party DMA using a system DMA controller.
+Subsequent sections consider how CHERI might be used with physical addresses and across a wider system.
+
+\subsection{DMA categorization}
+We can survey existing DMA controllers and discover a number of design patterns, which are helpful in understanding how CHERI can be applied to DMA subsystems.
+We outline them briefly here and refer to Markettos et al.~\cite{DBLP:conf/micro/MarkettosBBNMW20} for further background.
+
+\subsubsection{Transaction types}
+A DMA controller's job is to generate memory transactions based on data sources and sinks.
+These come in various forms.
+
+\emph{Memory transactions} involve the DMA controller generating a memory cycle such as a read or a write.
+
+\emph{Streaming transactions} have unidirectional data with an ordering but do not of themselves have a memory address, for example network packets received on the wire.
+These are reflected on-chip via interfaces such as AXI streaming~\cite{arm-axistream}, and historically off-chip via ISA-bus DMA~\cite{ibmpctrm} (which is still relevant for legacy PC peripherals).
+
+A DMA operation is a combination of a source and a sink, ie we can define memory-to-memory (M2M), a memory read feeds a memory write (a memory copy);
+memory-to-stream (M2S), a memory read is sent to an outgoing stream; or
+stream-to-memory (S2M), an incoming transaction on a stream generates a memory write.
+The final case (stream-to-stream, S2S) is associated with on-chip interconnect and does not concern memory access.
+
+Each case may generate a series of transactions based on data sizes and interconnect widths
+For example, a read of a 4KiB disk block from a storage controller with a 64-bit datapath might generate a stream of 512 input transactions to the DMA, which could be expanded to 1024 transactions to a 32-bit DRAM chip.
+
+Additionally, between the source and sink some processing may be carried out on the data, for example RGB to YUV conversion of a video stream, making it not strictly a copy.
+
+\subsubsection{DMAs with control information in MMIO}
+DMA controllers such as the Raspberry Pi RP2350 microcontroller~\cite{rp2350} have all of their DMA controller state in memory-mapped I/O registers.
+There are 16 DMA channels, each one consisting of length, a Read and a Write address, which can be memory or peripheral FIFO registers.
+Once a DMA is completed an interrupt can be generated or another DMA channel can be triggered, forming basic DMA chains.
+Hence the RP2350 is M2M-only and all the control state is held in the MMIO registers, rather than memory.
+The Atmel XMEGA DMA~\cite{atmel-xmegadma} operates in a similar M2M-only fashion using MMIO registers for control.
+
+%On the RP2350 specifically, four TrustZone-like security levels are provided and a memory protection unit (MPU) holds up to 8 regions to check against them.
+
+\subsubsection{DMAs with control information streamed externally}
+The AMD (Xilinx) LogiCORE IP AXI DMA~\cite{amd-logicoredma} is an example of an M2S/S2M DMA, comprising a memory access port plus streaming sources and sinks for both data and control transactions.
+In its most basic mode it can operate with transaction information in MMIO registers, as the previous category.
+However for greated performance transaction information (addresses, lengths) can alternatively be streamed into a control port.
+This enables custom logic to control and steer memory traffic.
+
+\subsubsection{Descriptor-based DMA}
+\emph{Descriptors} are small data structures typically comprising the address of a data buffer, the size of the transaction (eg number of bytes outstanding to send) and other metadata.
+For example, how to increment addresses (allowing 2D/3D-style accesses) and what to do next after this buffer is completed.
+Descriptors can be used in roughly two ways.
+First is the fetching of descriptors from memory, either main memory or a more local memory.
+Second is the streaming of descriptors on another port, for example from a separate descriptor fetching unit (as in the LogiCORE AXI DMA above, and also the Altera Modular Scatter-Gather DMA~\cite{altera-embeddedperipheralsug}).
+In-memory descriptors can often be chained or used in arrays in order to form \emph{scatter-gather lists} or \emph{ring buffers} to give a higher order structure to groups of transactions.
+
+\subsubsection{Bus-mastering DMA}
+In this case a device is able to make its own memory read and write transactions, independent of any system DMA controller.
+This is common for application-class devices such as PCI Express (PCIe) endpoints, including network cards, NVMe and AHCI storage, GPUs, NPUs and so on.
+In many cases a CHERI system cannot introspect into the device in order to modify its address behavior or to add CHERI support to its internal DMA infrastructure.
+Additionally, such devices may not be known at design-time any may change dynamically, thanks to hotpluggable PCIe cards and Thunderbolt devices.
+
+In order to safely constrain such a device, we must interpose something between the device and the memory subsystem.
+This is necessary in order to both limit the damage the device can do, and to protect the integrity of a CHERI system.
+Current systems use an IOMMU (also called a System MMU) to apply a page-based protection and translation model.
+This has significant performance implications due to the highly dynamic behavior of complex devices.
+It may be desirable to augment or replace the IOMMU with some other structure which instead uses the capability model, along the same lines of using CHERI for protection and the MMU for translation.
+Examples of such schemes are given in Cheng and Markettos~\cite{DBLP:conf/micro/MarkettosBBNMW20, cheng2025-capchecker}.
+
+Where possible, a preferable design point is to integrated CHERI support into a bus-mastering device such that the hardware can be trusted to manipulate capabilities correctly.
+In this instance we are able to run untrusted I/O software stack safely on trustworthy CHERI-enabled hardware.
+An example of this is a CHERI-enabled GPU~\cite{UCAM-CL-TR-997,naylor26-simtight}, which trustworthily shares capabilities with a CHERI-enabled CPU core.
+
+\subsection{Composing CHERI and DMA}
+DMA controllers operate outside the world of CPU-derived capabilities.
+The question arises how to compose them.
+Below we describe some different levels of utilizing capabilities with DMA.
+
+\subsubsection{Level 0: DMA clears tags}
+The simplest yet safe scenario is that DMA operates outside of the world of a CHERI-enabled CPU.
+The DMA hardware is unchanged, using integer address rather than capabilities.
+Any data written by the DMA clears tags, so the DMA is unable to forge or unsafely modify valid capabilities.
+Any pre-existing peripheral device can safely operate in this manner, although this also means they will not follow the capability protection model; an IOMMU may be required to safely constrain their memory access.
+
+\subsubsection{Level 1: addresses replaced by capabiities}
+A `CHERI-aware DMA controller' may choose to replace integer addresses in descriptors or MMIO registers with capabilities.
+Memory accesses are checked against the bounds and permissions of the capability during transactions, and invalid transactions are aborted.
+Address calculation is based on the address from the capability and is otherwise unchanged.
+
+This avoides any difficulties where the DMA controller's use of addresses and the capability model's use of bounds diverge.
+For example, a DMA controller may have separate `offset' and `length' fields to deal with restarting partially-completed transactions (for example, a receive transaction where there was insufficient data received to fill the buffer);
+these would not map directly to the bounds of a capability.
+
+An implementation using DMA using MMIO registers would extend address registers to capabilities, while one using descriptors would need to change the descriptor format to include a capability.
+This may cause downstream effects, such as requiring descriptors to be padded and aligned to multiples of the capability size, which are specific to the DMA controller being modified.
+
+\subsubsection{Level 2: unifying length and bounds}
+It is desirable to use the same field for both the length of the transaction as well as its bounds.
+In this way capability manipulation operations in software directly mirror the protection model in hardware, and notably operations loading and storing base and bounds become atomic.
+It can also reduce descriptor size and limit the need for padding.
+This causes some difficulties, however.
+
+First of all, compressed bounds are imprecise.
+This may not be an issue for small buffers, but may become one for larger buffers.
+Additionally alignment may depend on external factors outside our control.
+For example, it may be necessary to restart partial transactions.
+Conceptually it would be possible to increment the address and reduce the bounds, but this could runs into precision difficulties.
+Consider a 1~MiB-sized buffer send in which one byte has been successfully transferred so far.
+We would wish to increment the address by one and set the bounds to 1~MiB minus 1 but that size may be unrepresentable under the capability compression scheme.
+
+Secondly, this assumes monotonic address incrementation.
+For example, a DMA controller performing a 2D memory copy which updates the capability at each step may perform the address calculation:
+\begin{equation}
+\mathtt{\&(int\;a[i][j]) := a + (i*cols(a) + j)*sizeof(int)}
+\end{equation}
+
+If the copy were to use $i$ as the inner loop instead of $j$ we may experience the case where:
+\begin{equation}
+\mathtt{\&a[i][0] < \&a[i-1][j_{max}]}
+\end{equation}
+and the address does not monotonically increase.
+This would be impossible to achieve while ever shrinking the bounds of the capability.
+
+That said, depending on the requirements of the DMA controller, perhaps these limitations can be accepted in order to simplify the protection model.
+The value of a single representation shared between software driver and DMA controller may outweigh the limitations.
+
+\subsubsection{Level 3: virtual addressing}
+In systems with MMUs, capabilities are virtually addressed.
+This means it is important to ensure that capabilities referring to one virtual address space do not cross over to another.
+In application software the OS and MMU restrict capabilities to their own address space, with carefully-controlled exceptions.
+For DMA, this brings several challenges.
+
+First, capabilities in software are generated in relation to a virtual address space of an application.
+This does not directly correspond to any address space visible to an I/O device.
+Second, I/O devices such as DMA controllers may be in their own I/O virtual address spaces as translated by an IOMMU.
+This means that not only are the capabilities with respect to different address spaces, but they represent two different \emph{kinds} of address spaces, potentially whose sources of truth do not overlap.
+
+There exist a number of potential solutions in this space.
+For a successful safe capability check, we need to also know within which address space a capability exists.
+This leads to roughly three design points.  Either we:
+\begin{enumerate}
+	\item carry around the address space stored as bits inside the capability, or
+	\item maintain the color as external metadata that is supplied to wherever a capability needs to be checked, or
+	\item arrange such that structurally there is no ambiguity at the point of check as to which address space a capability refers.
+\end{enumerate}
+
+In the first case, bits that travel within the in-memory capability are used to identify its address-space identifier (ASID), such as a `color' (see section~\ref{app:exp:peripherals}).
+In the second, the in-memory format is not changed but bits are supplied alongside, `out of band' (e.g. as additional tag bits).
+In the third, we may use explicit or implicit information to infer the address space.
+For example, we know a particular interconnect endpoint always generates capabilities within a single address-space, allowing us to attach an ASID at the point of check.
+An example of this inference (with respect to an object ID rather than an ASID) is described in Cheng~\cite{cheng2025-capchecker}.
+In each case we would need to ensure any manipulation of capabilities preserves these additional properties.
+
+When checking an access against the capability we must both check the operation is permitted by the capability (i.e. the usual access check), and that also that the access is permitted by rules associated with the ASID.
+For example, deriving a new capability must retain the ASID of the original one (no implicit type conversion);
+any operation using two capabilities of different ASIDs is not permitted (no type mixing);
+and capabilities are not allowed to be stored in locations associated with another ASID (no leakage).
+
+A solution at level 3 would consider how software can use virtually addressed capabilities safely within a physically-addressed I/O subsystem.
+This implies some level of translation, be it IOMMU-based or otherwise.
+Translation may be decoupled from protection (i.e. using capabilities for protection) which may allow an alternative translation mechanism.
+Ideas on this topic are developed further in sections \ref{app:exp:physcap} and \ref{app:exp:peripherals}.
