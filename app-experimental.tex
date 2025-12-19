@@ -3423,6 +3423,16 @@ Consider the following example, using $P_{0}$ = S-mode and $P_{1}$ = U-mode. The
 
 An alternative approach to FA would involve using the F bit in the root capability to authorize the re-derivation operation. This is undesirable, because having the F bit set in the root authorizing capability would mean that it is also “super global” and can escape to the lower privilege level.
 
+\subsection{Limitations}
+
+The approach has the currently known limitations:
+
+\begin{itemize}
+\item The proposed approach requires rederivation when going back from a more privileged level to a less privileged level. This requires trusted code.
+\item The code code conducting rederivation requires a root\footnote{The term ``root capability'' here means a capability that privileged enough to construct any capability the less privileged level could ask for. Therefore, the ``root capability'' in this case might not necessarily be the almighty capability, but a less privileged capability.} capability in order to be able to rederive any possible capability for the less privileged level. The consequences of needing a root capability in the code conducting rederivation are ongoing research.
+\item When a capability needs to pass through a privilege level, e.g., going from U mode \textit{through} S mode to be in H mode, the capability would need to be made more global than ``super global''. This likely requires a translation stage in the pass-through level (the S mode in this example). This is because on the way back, privileged software cannot clear the foreign bit because it still needs to be foreign in the pass-through level.
+\item 
+\end{itemize}
 
 \subsection{Implementation on RV64Y}
 
