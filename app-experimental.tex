@@ -3256,7 +3256,7 @@ In particular, we are interested in a mechanism that allows the following:
 \item The value of X must be the same as for the capability level
 \end{itemize}
 \item 1 elevate level (EL) bit. The elevation level permission bit determines whether the capability level a capability loaded is reduced to that of the authorising capability.
-\item If this extension is not implemented, the bits taken by this extension have to be all “0”s for the FA, F, SL, and EL fields. For the CL bit the value is “-1”. This leads to software producing global capabilities, but the capabilities cannot be used to store other capabilities. Therefore, software that is oblivious to capability levels runs without any limitation to the flow of capabilities and does not pose any security risks.
+\item If this extension is not implemented, the bits taken by this extension have to be all ``1''s. This way, software that is oblivious to capability levels runs without any limitation to the flow of capabilities and does not pose any security risks.
 \item The default value for the infinite capability is all “1”s for all fields, but the F field, which holds a “0”.
 \item The default value for the NULL capability is all “0s” for all fields.
 \item Overview: the number of bits needed for this approach is 2*X + 3.
