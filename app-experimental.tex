@@ -3222,7 +3222,7 @@ In particular, we are interested in a mechanism that allows the following:
 
 \begin{itemize}
 \item The capability levels shall be nestable, meaning that we want each protection level to be able to have its own capability levels scheme.
-\item Within a protection level, the CL levels have a total order such that given $C_{1}$ with CL=$L_{1}$ and $C_{2}$ with CL=$L_{2}$, if $L_{1}$ < $L_{2}$ $\rightarrow$ $C_{1}$ is more sensitive than $C_{2}$.
+\item Within a protection level, the CL levels have a total order such that given a capability $C_{1}$ with CL=$L_{1}$ and a capability $C_{2}$ with CL=$L_{2}$, if $L_{1}$ < $L_{2}$ $\rightarrow$ $C_{1}$ is more sensitive than $C_{2}$.
 \item Different protection levels can have a different interpretation of what a capability level means.
 \item The capabilities of a less privileged protection level shall be able to freely float around in a more privileged level (e.g., a user capability that was passed to the kernel). These capabilities can be referred to as “super global”.
 \item Super global capabilities need to be able to load other capabilities transitively leading to these capabilities floating freely around.
