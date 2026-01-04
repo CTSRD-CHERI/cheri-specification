@@ -99,7 +99,7 @@ First of all, compressed bounds are imprecise.
 This may not be an issue for small buffers, but may become one for larger buffers.
 Additionally alignment may depend on external factors outside our control.
 For example, it may be necessary to restart partial transactions.
-Conceptually it would be possible to increment the address and reduce the bounds, but this could runs into precision difficulties.
+Conceptually it would be possible to increment the address and reduce the bounds, but this could run into precision difficulties.
 Consider a 1~MiB-sized buffer send in which one byte has been successfully transferred so far.
 We would wish to increment the address by one and set the bounds to 1~MiB minus 1 but that size may be unrepresentable under the capability compression scheme.
 
