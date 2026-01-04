@@ -62,7 +62,7 @@ This has significant performance implications due to the highly dynamic behavior
 It may be desirable to augment or replace the IOMMU with some other structure which instead uses the capability model, along the same lines of using CHERI for protection and the MMU for translation.
 Examples of such schemes are given in Cheng and Markettos~\cite{DBLP:conf/micro/MarkettosBBNMW20, cheng2025-capchecker}.
 
-Where possible, a preferable design point is to integrated CHERI support into a bus-mastering device such that the hardware can be trusted to manipulate capabilities correctly.
+Where possible, a preferable design point is to integrate CHERI support into a bus-mastering device such that the hardware can be trusted to manipulate capabilities correctly.
 In this instance we are able to run untrusted I/O software stack safely on trustworthy CHERI-enabled hardware.
 An example of this is a CHERI-enabled GPU~\cite{UCAM-CL-TR-997,naylor26-simtight}, which trustworthily shares capabilities with a CHERI-enabled CPU core.
 
