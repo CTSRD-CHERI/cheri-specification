@@ -32,24 +32,32 @@ There are 16 DMA channels, each one consisting of length, a Read and a Write add
 Once a DMA is completed an interrupt can be generated or another DMA channel can be triggered, forming basic DMA chains.
 Hence the RP2350 is M2M-only and all the control state is held in the MMIO registers, rather than memory.
 The Atmel XMEGA DMA~\cite{atmel-xmegadma} operates in a similar M2M-only fashion using MMIO registers for control.
+DMA control information may be scattered across numerous bits in MMIO registers, ie not comprising a coherent data structure in MMIO space.
 
 %On the RP2350 specifically, four TrustZone-like security levels are provided and a memory protection unit (MPU) holds up to 8 regions to check against them.
-
-\subsubsection{DMAs with control information streamed externally}
-The AMD (Xilinx) LogiCORE IP AXI DMA~\cite{amd-logicoredma} is an example of an M2S/S2M DMA, comprising a memory access port plus streaming sources and sinks for both data and control transactions.
-In its most basic mode it can operate with transaction information in MMIO registers, as the previous category.
-However for greater performance transaction information (addresses, lengths) can alternatively be streamed into a control port.
-This enables custom logic to control and steer memory traffic.
 
 \subsubsection{Descriptor-based DMA}
 \emph{Descriptors} are small data structures typically comprising the address of a data buffer, the size of the transaction (eg number of bytes outstanding to send) and other metadata.
 For example, how to increment addresses (allowing 2D/3D-style accesses) and what to do next after this buffer is completed.
 Descriptors can be used in roughly two ways.
-First is the fetching of descriptors from memory, either main memory or a more local memory.
-Second is the streaming of descriptors on another port, for example from a separate descriptor fetching unit (as in the LogiCORE AXI DMA above, and also the Altera Modular Scatter-Gather DMA~\cite{altera-embeddedperipheralsug}).
+
+\paragraph{DMA fetching of descriptors from memory.}
+In this case an additional DMA transaction is made to fetch descriptors which are stored in a memory, either main memory or a more local memory.
 In-memory descriptors can often be chained or used in arrays in order to form \emph{scatter-gather lists} or \emph{ring buffers} to give a higher order structure to groups of transactions.
+Ideally this DMA transaction should also be protected in the same way the DMA transactions are pointed to are protected.
+
+\paragraph{DMA transaction streaming.}
+An alternative is the streaming of descriptors on another port, for example from a separate descriptor fetching unit.
+In this case the fetching unit is responsible for imposing the security model on how it handles descriptors, and the DMA unit is responsible for the security model of the data being referred by descriptors.
+
+The AMD (Xilinx) LogiCORE AXI DMA~\cite{amd-logicoredma} is an example of an M2S/S2M DMA, comprising a memory access port plus streaming sources and sinks for both data and control transactions.
+In its most basic mode it can operate with transaction information in MMIO registers.
+However for greater performance transaction information (addresses, lengths) can alternatively be streamed into a control port.
+This enables custom logic to control and steer memory traffic.
+The Altera Modular Scatter-Gather DMA~\cite{altera-embeddedperipheralsug}) includes similar functionality, which can be used to build M2S/S2M as well as M2M functionality, with descriptors either written into MMIO registers or streamed into a control port.
 
 \subsubsection{Bus-mastering DMA}
+
 In this case a device is able to make its own memory read and write transactions, independent of any system DMA controller.
 This is common for application-class devices such as PCI Express (PCIe) endpoints, including network cards, NVMe and AHCI storage, GPUs, NPUs and so on.
 In many cases a CHERI system cannot introspect into the device in order to modify its address behavior or to add CHERI support to its internal DMA infrastructure.
@@ -65,6 +73,7 @@ Examples of such schemes are given in Cheng and Markettos~\cite{DBLP:conf/micro/
 Where possible, a preferable design point is to integrate CHERI support into a bus-mastering device such that the hardware can be trusted to manipulate capabilities correctly.
 In this instance we are able to run untrusted I/O software stack safely on trustworthy CHERI-enabled hardware.
 An example of this is a CHERI-enabled GPU~\cite{UCAM-CL-TR-997,naylor26-simtight}, which trustworthily shares capabilities with a CHERI-enabled CPU core.
+In this situation we need some external assurance of hardware trustworthiness, either by construction (e.g. purchase of silicon IP from a trusted vendor) or at composition time (e.g. a hotplugged device can cryptographically attest it is from a trusted vendor or of a trustworthy design).
 
 \subsection{Composing CHERI and DMA}
 DMA controllers operate outside the world of CPU-derived capabilities.
@@ -76,11 +85,13 @@ The simplest yet safe scenario is that DMA operates outside of the world of a CH
 The DMA hardware is unchanged, using integer address rather than capabilities.
 Any data written by the DMA clears tags, so the DMA is unable to forge or unsafely modify valid capabilities.
 Any pre-existing peripheral device can safely operate in this manner, although this also means they will not follow the capability protection model; an IOMMU may be required to safely constrain their memory access.
+Without additional protection, access to such devices must be constrained to within the TCB.
 
 \subsubsection{Level 1: addresses replaced by capabiities}
 A `CHERI-aware DMA controller' may choose to replace integer addresses in descriptors or MMIO registers with capabilities.
 Memory accesses are checked against the bounds and permissions of the capability during transactions, and invalid transactions are aborted.
 Address calculation is based on the address from the capability and is otherwise unchanged.
+Such a design also serves as an example of a simple CHERI-aware bus-mastering peripheral, in that it understands capabilities and imposes their protection model on its transactions.
 
 This avoides any difficulties where the DMA controller's use of addresses and the capability model's use of bounds diverge.
 For example, a DMA controller may have separate `offset' and `length' fields to deal with restarting partially-completed transactions (for example, a receive transaction where there was insufficient data received to fill the buffer);
@@ -88,6 +99,7 @@ these would not map directly to the bounds of a capability.
 
 An implementation using DMA using MMIO registers would extend address registers to capabilities, while one using descriptors would need to change the descriptor format to include a capability.
 This may cause downstream effects, such as requiring descriptors to be padded and aligned to multiples of the capability size, which are specific to the DMA controller being modified.
+Ideally such a design would start with descriptors also being protected by capabilities, eg the root of the descriptor tree is a capability and all the leaves are capabilities.
 
 \subsubsection{Level 2: unifying length and bounds}
 It is desirable to use the same field for both the length of the transaction as well as its bounds.
