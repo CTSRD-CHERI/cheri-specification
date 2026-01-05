@@ -164,6 +164,7 @@ any operation using two capabilities of different ASIDs is not permitted (no typ
 and capabilities are not allowed to be stored in locations associated with another ASID (no leakage).
 
 A solution at level 3 would consider how software can use virtually addressed capabilities safely within a physically-addressed I/O subsystem.
-This implies some level of translation, be it IOMMU-based or otherwise.
+It is likely these virtual addresses will become flattened out to physical address space(s) via some level of translation, be it IOMMU-based or otherwise.
+The color allows a specific virtual address space to be identified (and e.g. in the case of an IOMMU, a particular page table selected).
 Translation may be decoupled from protection (i.e. using capabilities for protection) which may allow an alternative translation mechanism.
 Ideas on this topic are developed further in sections \ref{app:exp:physcap} and \ref{app:exp:peripherals}.
