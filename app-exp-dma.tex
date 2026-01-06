@@ -167,6 +167,11 @@ For example, deriving a new capability must retain the ASID of the original one 
 any operation using two capabilities of different ASIDs is not permitted (no type mixing);
 and capabilities are not allowed to be stored in locations associated with another ASID (no leakage).
 
+Existing systems using `coloring' in various ways, primarily to enforce isolation between coexisting subsystems.
+For example Arm's TrustZone\cite{trustzone-cortexa} applies a one-bit color to memory transactions to divide them into `secure' and `insecure' worlds, where communication between worlds is limited.
+PCIe SR-IOV\cite{pcie-sriov} allows devices to present as multiple virtual endpoints in order to assign them to different VMs via the IOMMU, in effect segregating transactions by color internal to the device.
+PCIe MR-IOV\cite{pcie-mriov} takes this further by allowing overlaying multiple virtual PCIe networks from separate CPUs over the same PCIe physical interconnect, either to the same endpoints (in which case the 'color' identifies which host generated the request) or to entirely separate endpoints (MR-IOV plus SR-IOV, akin to VLAN switching where the transactions are isolated from each other).
+
 A solution at level 3 would consider how software can use virtually addressed capabilities safely within a physically-addressed I/O subsystem.
 It is likely these virtual addresses will become flattened out to physical address space(s) via some level of translation, be it IOMMU-based or otherwise.
 The color allows a specific virtual address space to be identified (and e.g. in the case of an IOMMU, a particular page table selected).
