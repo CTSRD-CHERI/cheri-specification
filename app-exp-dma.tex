@@ -109,13 +109,17 @@ This causes some difficulties, however.
 
 First of all, compressed bounds are imprecise.
 This may not be an issue for small buffers, but may become one for larger buffers.
-Additionally alignment may depend on external factors outside our control.
-For example, it may be necessary to restart partial transactions.
+Alignment may depend on external factors outside our control.
+
+Additionary, DMA transactions commonly update descriptors during their course of operation.
+For example, a request for data from an input device such as a UART may not return a full buffer if only a limited amount of data has been received.
+We may wish to update the bounds on the descriptor to reflect that a buffer is partially filled, and then re-queue the descriptor to restart when more data is available.
+Such re-bounding must both reflect both the behavior of the device, and also fit within the capability representability rules.
 Conceptually it would be possible to increment the address and reduce the bounds, but this could run into precision difficulties.
 Consider a 1~MiB-sized buffer send in which one byte has been successfully transferred so far.
 We would wish to increment the address by one and set the bounds to 1~MiB minus 1 but that size may be unrepresentable under the capability compression scheme.
 
-Secondly, this assumes monotonic address incrementation.
+Secondly, such updates assume monotonic address incrementation.
 For example, a DMA controller performing a 2D memory copy which updates the capability at each step may perform the address calculation:
 \begin{equation}
 \mathtt{\&(int\;a[i][j]) := a + (i*cols(a) + j)*sizeof(int)}
