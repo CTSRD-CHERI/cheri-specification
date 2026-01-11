@@ -93,7 +93,11 @@ Memory accesses are checked against the bounds and permissions of the capability
 Address calculation is based on the address from the capability and is otherwise unchanged.
 Such a design also serves as an example of a simple CHERI-aware bus-mastering peripheral, in that it understands capabilities and imposes their protection model on its transactions.
 
-This avoids any difficulties where the DMA controller's use of addresses and the capability model's use of bounds diverge.
+In this case the peripheral is using capabilities containing physical addresses (which are discussed further in Section~\ref{app:exp:physcap}), for example on a microcontroller system where there is no MMU, on an I/O device that does not sit behind an IOMMU or other translation device, or to a private memory.
+An example might be a Wi-Fi card that contains a microcontroller, a private memory with DMA controller, and some wireless hardware: transactions from the card to main memory might pass through an IOMMU, but transactions using the DMA controller to private memory may not.
+The microcontroller may support the use of CHERI to the private memory even if the card is plugged into a non-CHERI system.
+
+CHERI-aware DMA avoids any difficulties where the DMA controller's use of addresses and the capability model's use of bounds diverge.
 For example, a DMA controller may have separate `offset' and `length' fields to deal with restarting partially-completed transactions (for example, a receive transaction where there was insufficient data received to fill the buffer);
 these would not map directly to the bounds of a capability.
 
