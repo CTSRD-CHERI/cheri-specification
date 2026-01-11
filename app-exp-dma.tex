@@ -93,7 +93,7 @@ Memory accesses are checked against the bounds and permissions of the capability
 Address calculation is based on the address from the capability and is otherwise unchanged.
 Such a design also serves as an example of a simple CHERI-aware bus-mastering peripheral, in that it understands capabilities and imposes their protection model on its transactions.
 
-This avoides any difficulties where the DMA controller's use of addresses and the capability model's use of bounds diverge.
+This avoids any difficulties where the DMA controller's use of addresses and the capability model's use of bounds diverge.
 For example, a DMA controller may have separate `offset' and `length' fields to deal with restarting partially-completed transactions (for example, a receive transaction where there was insufficient data received to fill the buffer);
 these would not map directly to the bounds of a capability.
 
