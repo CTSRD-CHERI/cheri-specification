@@ -1225,6 +1225,21 @@ tentative version bits until they can be checked against the authoritative versi
 table.
 
 % >>>
+\subsection{Dynamic Versioned Memory}
+
+The version of each granule is stored to memory in a manner similar to the capability
+validity tag. The width of the capability version field and the granule size
+determines the memory overhead incurred due to version storage.
+
+Current CHERI systems already allow to disable tag storage for certain memory
+ranges using appropriate Physical Memory Attributes (PMA).
+A similar technique can be used to limit version storage to a subset of the physical
+memory. The system software can then prefer the use of versioned memory for objects
+that require fast reuse, while unversioned memory can be used for allocations that
+are allocated infrequently.
+
+
+% >>>
 % >>>
 \section{Linear Capabilities} % <<<
 \label{section:linear-capabilities}
